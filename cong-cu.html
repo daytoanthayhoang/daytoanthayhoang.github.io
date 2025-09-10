@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Công Cụ Số Học Toán - Dạy Toán Thầy Hoàng</title>
     <!-- Tích hợp Tailwind CSS và Google Fonts để đồng bộ giao diện -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,6 +23,16 @@
             background-color: #1d4ed8; /* Màu xanh đậm hơn */
             color: white;
             transform: scale(1.05);
+        }
+        /* --- HIỆU ỨNG HIỆN RA KHI CUỘN CHUỘT --- */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .scroll-animate.is-visible {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -46,7 +56,7 @@
 
     <!-- NỘI DUNG CHÍNH CỦA TRANG CÔNG CỤ -->
     <main class="container mx-auto px-6 py-12">
-        <section id="cong-cu">
+        <section id="cong-cu" class="scroll-animate">
             <h1 class="text-3xl md:text-4xl font-bold text-center mb-4">Trình Giả Lập Công Cụ Toán Học</h1>
             <p class="text-center text-gray-600 mb-10">Chọn một công cụ bên dưới để bắt đầu trải nghiệm mô hình 3D tương tác.</p>
 
@@ -107,6 +117,24 @@
                 this.classList.add('active');
             });
         });
+
+        // --- SCRIPT CHO HIỆU ỨNG CUỘN CHUỘT ---
+        const animatedElements = document.querySelectorAll('.scroll-animate');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, {
+            threshold: 0.1 // Kích hoạt khi 10% phần tử hiện ra
+        });
+
+        animatedElements.forEach(element => {
+            observer.observe(element);
+        });
     </script>
 </body>
 </html>
+
