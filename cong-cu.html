@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <title>Công Cụ Số Học Toán - Dạy Toán Thầy Hoàng</title>
+    <!-- Tích hợp Tailwind CSS và Google Fonts để đồng bộ giao diện -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Be 'Vietnam Pro', sans-serif;
+        }
+        /* Đảm bảo iframe chiếm toàn bộ không gian được cấp */
+        #tool-frame {
+            width: 100%;
+            height: 70vh; /* Chiều cao chiếm 70% khung nhìn */
+            border: 1px solid #e2e8f0; /* Thêm đường viền cho đẹp */
+        }
+        .tool-button.active {
+            background-color: #1d4ed8; /* Màu xanh đậm hơn */
+            color: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- PHẦN ĐẦU TRANG (HEADER) - Giữ nguyên để đồng bộ -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="./index.html" class="text-2xl font-bold text-blue-600">Dạy Toán Thầy Hoàng</a>
+            <nav class="hidden md:flex space-x-8">
+                <a href="./index.html#trangchu" class="text-gray-600 hover:text-blue-600 font-medium">Trang Chủ</a>
+                <a href="./index.html#thongbao" class="text-gray-600 hover:text-blue-600 font-medium">Thông Báo</a>
+                <a href="./index.html#hoclieu" class="text-gray-600 hover:text-blue-600 font-medium">Góc Học Tập</a>
+                <a href="./index.html#lienhe" class="text-gray-600 hover:text-blue-600 font-medium">Liên Hệ</a>
+            </nav>
+            <a href="https://1drv.ms/f/c/67c40ff835c61dde/EqhPL5Ta8HtLgHKKUIEi0E4BWriHfyHpW-ckge4QSYkj7w" target="_blank" rel="noopener noreferrer" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-full text-sm hover:bg-blue-700 transition-colors duration-300">
+                Kho Học Liệu
+            </a>
+        </div>
+    </header>
+
+    <!-- NỘI DUNG CHÍNH CỦA TRANG CÔNG CỤ -->
+    <main class="container mx-auto px-6 py-12">
+        <section id="cong-cu">
+            <h1 class="text-3xl md:text-4xl font-bold text-center mb-4">Trình Giả Lập Công Cụ Toán Học</h1>
+            <p class="text-center text-gray-600 mb-10">Chọn một công cụ bên dưới để bắt đầu trải nghiệm mô hình 3D tương tác.</p>
+
+            <!-- CÁC NÚT CHỌN CÔNG CỤ -->
+            <div id="tool-selector" class="flex flex-wrap justify-center gap-4 mb-8">
+                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-cube/index.html">
+                    Gấp Hình Lập Phương
+                </button>
+                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-rectangular-prism/index.html">
+                    Gấp Hình Hộp Chữ Nhật
+                </button>
+                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-triangular-prism/index.html">
+                    Gấp Lăng Trụ Tam Giác
+                </button>
+                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-quadrilateral-prism/index.html">
+                    Gấp Lăng Trụ Tứ Giác
+                </button>
+            </div>
+
+            <!-- KHUNG HIỂN THỊ CÔNG CỤ (IFRAME) -->
+            <div id="frame-container" class="bg-white rounded-lg shadow-lg p-4">
+                <div id="placeholder" class="text-center py-20 text-gray-500">
+                    <h3 class="text-2xl font-semibold">Vui lòng chọn một công cụ để hiển thị</h3>
+                    <p>Mô hình tương tác sẽ xuất hiện ở đây.</p>
+                </div>
+                <iframe id="tool-frame" class="hidden" title="Trình giả lập công cụ toán học"></iframe>
+            </div>
+        </section>
+    </main>
+    
+    <!-- PHẦN CUỐI TRANG (FOOTER) - Giữ nguyên để đồng bộ -->
+    <footer id="lienhe" class="bg-gray-800 text-white py-10 mt-12">
+        <div class="container mx-auto px-6 text-center">
+             <p class="text-sm italic text-gray-400">"Cách duy nhất để giỏi là tự làm thật nhiều toán!"</p>
+             <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng.</p>
+        </div>
+    </footer>
+
+    <script>
+        const toolButtons = document.querySelectorAll('.tool-button');
+        const toolFrame = document.getElementById('tool-frame');
+        const placeholder = document.getElementById('placeholder');
+
+        toolButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Lấy link từ thuộc tính data-src của nút được bấm
+                const toolSrc = this.dataset.src;
+                
+                // Hiển thị khung và ẩn thông báo chờ
+                placeholder.classList.add('hidden');
+                toolFrame.classList.remove('hidden');
+                
+                // Gán link vào iframe để tải công cụ
+                toolFrame.src = toolSrc;
+
+                // Cập nhật trạng thái "active" cho nút
+                toolButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
