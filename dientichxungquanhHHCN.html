@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mô phỏng Diện tích Xung quanh</title>
+<style>
+    /* Kiểu dáng chung cho trang */
+    body { 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        min-height: 100vh; 
+        margin: 0; 
+        background-color: #f4f7fa;
+        color: #333;
+    }
+    /* Vùng chứa chính cho mô phỏng và bảng điều khiển */
+    .container { 
+        display: flex; 
+        flex-wrap: wrap;
+        gap: 40px; 
+        align-items: flex-start; 
+        background: #ffffff; 
+        padding: 30px; 
+        border-radius: 12px; 
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+        max-width: 900px;
+    }
+    /* Vùng chứa cho cảnh 3D và thanh trượt */
+    .simulation { 
+        display: flex; 
+        align-items: center; 
+        gap: 30px; 
+    }
+    /* Không gian 3D */
+    .scene { 
+        width: 250px; 
+        height: 350px; 
+        perspective: 1000px;
+        cursor: grab; /* Con trỏ hình bàn tay */
+    }
+    .scene:active {
+        cursor: grabbing; /* Con trỏ khi đang kéo */
+    }
+    /* Hình hộp 3D */
+    .box { 
+        width: 100%; 
+        height: 100%; 
+        position: relative; 
+        transform-style: preserve-3d; 
+        transform: rotateX(-15deg) rotateY(-30deg); 
+    }
+    /* Kiểu dáng cho các mặt xanh trong suốt của hình hộp (đã bỏ border) */
+    .face { 
+        position: absolute; 
+        background-color: rgba(0, 119, 190, 0.25); 
+        box-sizing: border-box;
+    }
+    /* Kiểu dáng cho các mặt "được tô" màu đỏ */
+    .painted-face { 
+        position: absolute; 
+        background-color: rgba(220, 53, 69, 0.6); 
+        bottom: 0; /* HOÀN LẠI: Bắt đầu tô từ dưới lên */
+        box-sizing: border-box;
+    }
+    /* Lát cắt màu đỏ di chuyển */
+    .perimeter-slice { 
+        position: absolute; 
+        height: 3px; 
+        transform-style: preserve-3d; 
+    }
+    /* Các phần của lát cắt đỏ */
+    .slice-part { 
+        position: absolute; 
+        height: 100%; 
+        background-color: #dc3545; 
+        box-shadow: 0 0 10px #ff0000; 
+    }
+    /* Bảng điều khiển và thông tin */
+    .controls { 
+        width: 280px;
+        padding-top: 10px;
+    }
+    h2 {
+        margin-top: 0;
+        color: #0077be;
+    }
+    /* Kiểu dáng hiển thị công thức */
+    .formula { 
+        font-size: 1.2em; 
+        font-weight: bold; 
+        margin: 15px 0; 
+        text-align: center; 
+        padding: 10px;
+        background-color: #e9f5ff;
+        border-radius: 8px;
+    }
+    .formula .term { 
+        color: #dc3545; 
+    }
+    /* Thanh trượt dọc */
+    #height-slider { 
+        -webkit-appearance: slider-vertical; 
+        width: 20px; 
+        height: 300px; 
+        cursor: ns-resize; 
+    }
+    /* Nút đặt lại */
+    #clear-button { 
+        width: 100%; 
+        padding: 12px; 
+        margin-top: 20px; 
+        background-color: #ffc107; 
+        border: none; 
+        border-radius: 5px; 
+        cursor: pointer; 
+        font-size: 1em;
+        font-weight: bold;
+        transition: background-color 0.2s;
+    }
+    #clear-button:hover { 
+        background-color: #e0a800; 
+    }
+    .output p {
+        margin: 8px 0;
+    }
+    .slider-group {
+        margin-bottom: 10px;
+    }
+    .slider-group label {
+        display: block;
+        margin-bottom: 4px;
+    }
+    .slider-group input {
+        width: 100%;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="simulation">
+        <!-- Thanh trượt dọc để điều khiển chiều cao -->
+        <input type="range" id="height-slider" min="0" max="100" value="0" title="Kéo để quét chiều cao">
+        
+        <!-- Cảnh 3D nơi hình hộp được hiển thị -->
+        <div class="scene" id="scene-sxq">
+            <div class="box" id="sxq-box">
+                <!-- 6 mặt trong suốt của hình hộp -->
+                <div class="face front"></div> <div class="face back"></div> 
+                <div class="face right"></div> <div class="face left"></div> 
+                <div class="face top"></div> <div class="face bottom"></div>
+                
+                <!-- 4 mặt được "tô" màu đỏ -->
+                <div class="painted-face p-front"></div> <div class="painted-face p-back"></div> 
+                <div class="painted-face p-right"></div> <div class="painted-face p-left"></div>
+                
+                <!-- Lát cắt chu vi màu đỏ di động -->
+                <div class="perimeter-slice" id="slice">
+                    <div class="slice-part s-front"></div> <div class="slice-part s-back"></div> 
+                    <div class="slice-part s-right"></div> <div class="slice-part s-left"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="controls">
+        <h2>Tùy chỉnh hình hộp</h2>
+        <div class="slider-group">
+            <label for="length-slider">a - Chiều dài: <span id="length-val"></span></label>
+            <input type="range" id="length-slider" min="50" max="250" value="200">
+        </div>
+        <div class="slider-group">
+            <label for="width-slider">b - Chiều rộng: <span id="width-val"></span></label>
+            <input type="range" id="width-slider" min="50" max="200" value="150">
+        </div>
+        <div class="slider-group">
+            <label for="max-height-slider">c - Chiều cao: <span id="max-height-val"></span></label>
+            <input type="range" id="max-height-slider" min="50" max="350" value="300">
+        </div>
+        
+        <div class="formula">Sxq = <span class="term">Cvi đáy</span> × <span class="term">Cao</span></div>
+        <div class="output">
+            <p><strong>Chu vi đáy:</strong> <span id="perimeter-val"></span></p>
+            <p><strong>Chiều cao đã quét:</strong> <span id="height-val">0</span></p>
+            <p><strong>Diện tích đã tô:</strong> <span id="area-val">0</span></p>
+        </div>
+        <button id="clear-button">Xóa vết & Đặt lại</button>
+    </div>
+</div>
+
+<script>
+    // --- CHỌN CÁC PHẦN TỬ DOM ---
+    const box = document.getElementById('sxq-box');
+    const scene = document.getElementById('scene-sxq');
+    const slice = document.getElementById('slice');
+    
+    // Sliders
+    const heightSlider = document.getElementById('height-slider');
+    const lengthSlider = document.getElementById('length-slider');
+    const widthSlider = document.getElementById('width-slider');
+    const maxHeightSlider = document.getElementById('max-height-slider');
+    const allSliders = [heightSlider, lengthSlider, widthSlider, maxHeightSlider];
+
+    // Value displays
+    const lengthVal = document.getElementById('length-val');
+    const widthVal = document.getElementById('width-val');
+    const maxHeightVal = document.getElementById('max-height-val');
+    const perimeterVal = document.getElementById('perimeter-val');
+    const heightVal = document.getElementById('height-val');
+    const areaVal = document.getElementById('area-val');
+
+    // 3D elements
+    const [front, back, right, left, topFace, bottomFace] = box.querySelectorAll('.face');
+    const [pFront, pBack, pRight, pLeft] = box.querySelectorAll('.painted-face');
+    const [sFront, sBack, sRight, sLeft] = slice.children;
+
+    // --- HÀM CẬP NHẬT CHÍNH ---
+    function updateAll() {
+        // 1. Lấy giá trị từ các thanh trượt
+        const length = parseInt(lengthSlider.value);
+        const width = parseInt(widthSlider.value);
+        const height = parseInt(maxHeightSlider.value);
+        const percentage = parseInt(heightSlider.value) / 100;
+
+        // 2. Cập nhật các giá trị hiển thị
+        lengthVal.textContent = length;
+        widthVal.textContent = width;
+        maxHeightVal.textContent = height;
+        
+        // 3. Tính toán các đại lượng
+        const perimeter = 2 * (length + width);
+        const currentHeight = height * percentage;
+        const currentArea = perimeter * currentHeight;
+
+        perimeterVal.textContent = perimeter;
+        heightVal.textContent = Math.round(currentHeight);
+        areaVal.textContent = Math.round(currentArea).toLocaleString();
+
+        // 4. Cập nhật mô hình 3D
+        // Hàm trợ giúp
+        function setFaceProperties(element, w, h, transform) {
+            element.style.width = `${w}px`;
+            element.style.height = `${h}px`;
+            element.style.transform = transform;
+        }
+
+        // Cập nhật 6 mặt chính - TĂNG KÍCH THƯỚC ĐỂ LIỀN MẠCH
+        const overlap = 2; // Số pixel để các mặt chồng lên nhau
+        setFaceProperties(front, length + overlap, height + overlap, `translateZ(${width/2}px)`);
+        setFaceProperties(back, length + overlap, height + overlap, `rotateY(180deg) translateZ(${width/2}px)`);
+        setFaceProperties(right, width + overlap, height + overlap, `rotateY(90deg) translateZ(${length/2}px)`);
+        setFaceProperties(left, width + overlap, height + overlap, `rotateY(-90deg) translateZ(${length/2}px)`);
+        setFaceProperties(topFace, length + overlap, width + overlap, `rotateX(90deg) translateZ(${height/2}px)`);
+        setFaceProperties(bottomFace, length + overlap, width + overlap, `rotateX(-90deg) translateZ(${height/2}px)`);
+
+        // Cập nhật 4 mặt được tô - CHỈ TĂNG CHIỀU RỘNG
+        setFaceProperties(pFront, length + overlap, currentHeight, `translateZ(${width/2}px)`);
+        setFaceProperties(pBack, length + overlap, currentHeight, `rotateY(180deg) translateZ(${width/2}px)`);
+        setFaceProperties(pRight, width + overlap, currentHeight, `rotateY(90deg) translateZ(${length/2}px)`);
+        setFaceProperties(pLeft, width + overlap, currentHeight, `rotateY(-90deg) translateZ(${length/2}px)`);
+
+        // Cập nhật 4 phần của lát cắt chu vi
+        setFaceProperties(sFront, length, '100%', `translateZ(${width/2}px)`);
+        setFaceProperties(sBack, length, '100%', `rotateY(180deg) translateZ(${width/2}px)`);
+        setFaceProperties(sRight, width, '100%', `rotateY(90deg) translateZ(${length/2}px)`);
+        setFaceProperties(sLeft, width, '100%', `rotateY(-90deg) translateZ(${length/2}px)`);
+
+        // HOÀN LẠI LOGIC CŨ: Di chuyển lát cắt theo chiều dọc
+        // Bắt đầu từ đáy (-height/2) và đi lên theo currentHeight
+        const sliceYPos = -(height / 2) + currentHeight;
+        slice.style.transform = `translateY(${sliceYPos}px)`;
+    }
+    
+    // --- XỬ LÝ SỰ KIỆN ---
+    function resetSimulation() {
+        heightSlider.value = 0;
+        updateAll();
+    }
+
+    // Gán sự kiện cho tất cả các thanh trượt
+    allSliders.forEach(slider => slider.addEventListener('input', updateAll));
+    document.getElementById('clear-button').addEventListener('click', resetSimulation);
+
+    // --- LOGIC XOAY 3D ---
+    let isDragging = false, prevX, prevY;
+    let currentRotX = -15, currentRotY = -30;
+
+    scene.addEventListener('mousedown', e => { 
+        isDragging = true; 
+        prevX = e.clientX; 
+        prevY = e.clientY; 
+    });
+    document.addEventListener('mouseup', () => { isDragging = false; });
+    document.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        const dX = e.clientX - prevX;
+        const dY = e.clientY - prevY;
+        currentRotY += dX * 0.5;
+        currentRotX -= dY * 0.5;
+        box.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
+        prevX = e.clientX; 
+        prevY = e.clientY;
+    });
+
+    // --- KHỞI TẠO ---
+    updateAll(); 
+</script>
+</body>
+</html>
+
