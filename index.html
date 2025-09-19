@@ -138,20 +138,21 @@
                 <h2 class="text-3xl font-bold text-center mb-10">Góc Học Tập</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     
-                    <!-- Thay thế khối div này cho "Góc Học Tập 1" -->
+                    <!-- Góc Học Tập 1 -->
                     <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
                         <h3 class="text-2xl font-bold mb-4">Công cụ số học toán</h3>
                         <p class="text-gray-600 mb-6">Trải nghiệm các mô hình 3D tương tác để hiểu rõ hơn về hình học không gian.</p>
-                        <!-- Liên kết đến trang công cụ mới -->
                         <a href="./cong-cu.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
                     </div>
                     
+                    <!-- Góc Học Tập 2 ĐÃ SỬA -->
                     <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
-                        <h3 class="text-2xl font-bold mb-4">Góc Học Tập 2</h3>
-                        <p class="text-gray-600 mb-6">Mô tả ngắn gọn cho góc học tập 2. Thầy sẽ chỉnh sửa nội dung sau.</p>
-                        <a href="#" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
+                        <h3 class="text-2xl font-bold mb-4">Nhóm hỗ trợ tham gia các cuộc thi</h3>
+                        <p class="text-gray-600 mb-6">Tham gia nhóm Zalo để nhận hỗ trợ và trao đổi về các cuộc thi Violympic.</p>
+                        <a href="./nhomhotro.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
                     </div>
 
+                    <!-- Góc Học Tập 3 -->
                     <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
                         <h3 class="text-2xl font-bold mb-4">Góc Học Tập 3</h3>
                         <p class="text-gray-600 mb-6">Mô tả ngắn gọn cho góc học tập 3. Thầy sẽ chỉnh sửa nội dung sau.</p>
@@ -195,93 +196,95 @@
 
         // --- SCRIPT CHO HIỆU ỨNG NỀN HẠT LIÊN KẾT ---
         const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        let particlesArray;
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let particlesArray;
 
-        function setCanvasSize() {
-            const section = document.getElementById('trangchu');
-            canvas.width = section.offsetWidth;
-            canvas.height = section.offsetHeight;
-        }
-        setCanvasSize();
+            function setCanvasSize() {
+                const section = document.getElementById('trangchu');
+                canvas.width = section.offsetWidth;
+                canvas.height = section.offsetHeight;
+            }
+            setCanvasSize();
 
-        class Particle {
-            constructor(x, y, directionX, directionY, size, color) {
-                this.x = x;
-                this.y = y;
-                this.directionX = directionX;
-                this.directionY = directionY;
-                this.size = size;
-                this.color = color;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.fill();
-            }
-            update() {
-                if (this.x > canvas.width || this.x < 0) {
-                    this.directionX = -this.directionX;
+            class Particle {
+                constructor(x, y, directionX, directionY, size, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.directionX = directionX;
+                    this.directionY = directionY;
+                    this.size = size;
+                    this.color = color;
                 }
-                if (this.y > canvas.height || this.y < 0) {
-                    this.directionY = -this.directionY;
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fill();
                 }
-                this.x += this.directionX;
-                this.y += this.directionY;
-                this.draw();
+                update() {
+                    if (this.x > canvas.width || this.x < 0) {
+                        this.directionX = -this.directionX;
+                    }
+                    if (this.y > canvas.height || this.y < 0) {
+                        this.directionY = -this.directionY;
+                    }
+                    this.x += this.directionX;
+                    this.y += this.directionY;
+                    this.draw();
+                }
             }
-        }
 
-        function init() {
-            particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 8000;
-            for (let i = 0; i < numberOfParticles; i++) {
-                let size = (Math.random() * 2.5) + 1;
-                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                let directionX = (Math.random() * .4) - .2;
-                let directionY = (Math.random() * .4) - .2;
-                let color = 'white';
-                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            function init() {
+                particlesArray = [];
+                let numberOfParticles = (canvas.height * canvas.width) / 8000;
+                for (let i = 0; i < numberOfParticles; i++) {
+                    let size = (Math.random() * 2.5) + 1;
+                    let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                    let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                    let directionX = (Math.random() * .4) - .2;
+                    let directionY = (Math.random() * .4) - .2;
+                    let color = 'white';
+                    particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+                }
             }
-        }
 
-        function connect() {
-            let opacityValue = 1;
-            for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
-                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
-                        ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                    if (distance < (canvas.width / 5) * (canvas.height / 5)) {
-                        opacityValue = 1 - (distance / 20000);
-                        ctx.strokeStyle = 'rgba(255,255,255,' + opacityValue + ')';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                        ctx.stroke();
+            function connect() {
+                let opacityValue = 1;
+                for (let a = 0; a < particlesArray.length; a++) {
+                    for (let b = a; b < particlesArray.length; b++) {
+                        let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
+                            ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                        if (distance < (canvas.width / 5) * (canvas.height / 5)) {
+                            opacityValue = 1 - (distance / 20000);
+                            ctx.strokeStyle = 'rgba(255,255,255,' + opacityValue + ')';
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                            ctx.stroke();
+                        }
                     }
                 }
             }
-        }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            ctx.clearRect(0, 0, innerWidth, innerHeight);
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, innerWidth, innerHeight);
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                }
+                connect();
             }
-            connect();
-        }
-        
-        window.addEventListener('resize', () => {
-            setCanvasSize();
+            
+            window.addEventListener('resize', () => {
+                setCanvasSize();
+                init();
+            });
+            
             init();
-        });
-        
-        init();
-        animate();
+            animate();
+        }
 
         // --- SCRIPT CHO HIỆU ỨNG CUỘN CHUỘT ---
         const animatedElements = document.querySelectorAll('.scroll-animate');
@@ -301,6 +304,3 @@
     </script>
 </body>
 </html>
-
-
-
