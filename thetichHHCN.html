@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mô phỏng Thể tích</title>
+<title>Mô phỏng Thể Tích Hình Hộp Chữ Nhật (Three.js)</title>
 <style>
     /* Kiểu dáng chung cho trang */
     body { 
@@ -13,278 +13,304 @@
         align-items: center; 
         min-height: 100vh; 
         margin: 0; 
-        background-color: #f4f7fa;
+        background-color: #f0f4f8;
         color: #333;
+        /* overflow: hidden; /* Tránh thanh cuộn không cần thiết */
     }
     /* Vùng chứa chính */
     .container { 
         display: flex; 
         flex-wrap: wrap;
-        gap: 40px; 
+        gap: 30px; 
         align-items: flex-start; 
         background: #ffffff; 
-        padding: 30px; 
-        border-radius: 12px; 
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
-        max-width: 900px;
+        padding: 25px; 
+        border-radius: 15px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+        max-width: 95%;
+        width: 950px; /* Tăng chiều rộng để có không gian cho 2 khối */
     }
-    /* Vùng mô phỏng */
-    .simulation { 
-        display: flex; 
-        align-items: center; 
-        gap: 30px; 
+    /* Vùng chứa mô phỏng 3D */
+    .simulation-container {
+        flex: 1;
+        min-width: 500px; /* Tăng chiều rộng tối thiểu */
+        height: 450px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
-    /* Không gian 3D */
-    .scene { 
-        width: 250px; 
-        height: 350px; 
-        perspective: 1000px;
-        cursor: grab;
-    }
-    .scene:active {
-        cursor: grabbing;
-    }
-    /* Hình hộp 3D bên ngoài (trong suốt) */
-    .box-container { 
-        width: 100%; 
-        height: 100%; 
-        position: relative; 
-        transform-style: preserve-3d; 
-        transform: rotateX(-15deg) rotateY(-30deg); 
-    }
-    .face { 
-        position: absolute; 
-        background-color: rgba(0, 119, 190, 0.1); 
-        border: 1px solid rgba(0, 119, 190, 0.2);
-        box-sizing: border-box;
-    }
-    /* Khối thể tích màu đỏ bên trong */
-    .volume-block {
+    #canvas-container {
         width: 100%;
         height: 100%;
-        position: absolute;
-        transform-style: preserve-3d;
-        bottom: 0;
+        cursor: grab;
+        border-radius: 8px;
+        background-color: #e9ecef;
     }
-    /* CẬP NHẬT HIỆU ỨNG ĐỔ ĐẦY */
-    .volume-face {
-        position: absolute;
-        background-color: rgba(204, 43, 54, 0.85); /* Màu đỏ sẫm, đặc hơn cho các mặt bên */
-        box-sizing: border-box;
-    }
-    .volume-face.v-top {
-        background-color: rgba(255, 82, 82, 0.95); /* Màu đỏ tươi, phát sáng cho mặt trên */
-        box-shadow: 0 0 15px rgba(255, 82, 82, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.7);
+    #canvas-container:active {
+        cursor: grabbing;
     }
     /* Bảng điều khiển */
     .controls { 
-        width: 280px;
+        width: 300px;
         padding-top: 10px;
     }
     h2 {
         margin-top: 0;
-        color: #0077be;
+        color: #0056b3;
+        text-align: center;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
     }
+    /* Công thức */
     .formula { 
-        font-size: 1.2em; 
-        font-weight: bold; 
-        margin: 15px 0; 
+        font-size: 1.25em; 
+        font-weight: 500; 
+        margin: 20px 0; 
         text-align: center; 
-        padding: 10px;
-        background-color: #e9f5ff;
+        padding: 12px;
+        background-color: #e7f5ff;
+        border-left: 5px solid #007bff;
         border-radius: 8px;
     }
     .formula .term { 
-        color: #dc3545; 
-    }
-    /* Thanh trượt dọc */
-    #height-slider { 
-        -webkit-appearance: slider-vertical; 
-        width: 20px; 
-        height: 300px; 
-        cursor: ns-resize; 
-    }
-    #clear-button { 
-        width: 100%; 
-        padding: 12px; 
-        margin-top: 20px; 
-        background-color: #ffc107; 
-        border: none; 
-        border-radius: 5px; 
-        cursor: pointer; 
-        font-size: 1em;
+        color: #d9534f;
         font-weight: bold;
-        transition: background-color 0.2s;
     }
-    #clear-button:hover { 
-        background-color: #e0a800; 
+    /* Thanh trượt */
+    .slider-group {
+        margin-bottom: 15px;
     }
-    .output p { margin: 8px 0; }
-    .slider-group { margin-bottom: 10px; }
-    .slider-group label { display: block; margin-bottom: 4px; }
-    .slider-group input { width: 100%; }
+    .slider-group label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    .slider-group input[type="range"] {
+        width: 100%;
+        cursor: pointer;
+    }
+    /* Kết quả */
+    .output p {
+        margin: 10px 0;
+        padding: 8px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .output span {
+        font-weight: bold;
+        color: #0056b3;
+    }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="simulation">
-        <!-- Thanh trượt dọc -->
-        <input type="range" id="height-slider" min="0" max="100" value="0" title="Kéo để lấp đầy thể tích">
-        
-        <div class="scene" id="scene-v">
-            <div class="box-container" id="volume-box">
-                <!-- Vỏ ngoài trong suốt -->
-                <div class="face front"></div> <div class="face back"></div> 
-                <div class="face right"></div> <div class="face left"></div> 
-                <div class="face top"></div> <div class="face bottom"></div>
-                
-                <!-- Khối thể tích màu đỏ -->
-                <div class="volume-block" id="volume-fill">
-                    <div class="volume-face v-front"></div> <div class="volume-face v-back"></div>
-                    <div class="volume-face v-right"></div> <div class="volume-face v-left"></div>
-                    <div class="volume-face v-top"></div> <div class="volume-face v-bottom"></div>
-                </div>
-            </div>
-        </div>
+    <div class="simulation-container">
+        <!-- Vùng canvas cho Three.js -->
+        <div id="canvas-container"></div>
     </div>
     <div class="controls">
-        <h2>Tùy chỉnh hình hộp</h2>
-        <div class="slider-group">
-            <label for="length-slider">a - Chiều dài: <span id="length-val"></span></label>
-            <input type="range" id="length-slider" min="50" max="250" value="200">
-        </div>
-        <div class="slider-group">
-            <label for="width-slider">b - Chiều rộng: <span id="width-val"></span></label>
-            <input type="range" id="width-slider" min="50" max="200" value="150">
-        </div>
-        <div class="slider-group">
-            <label for="max-height-slider">c - Chiều cao: <span id="max-height-val"></span></label>
-            <input type="range" id="max-height-slider" min="50" max="350" value="300">
-        </div>
+        <h2>Thể Tích</h2>
         
-        <div class="formula">V = <span class="term">Diện tích đáy</span> × <span class="term">Cao</span></div>
-        <div class="output">
-            <p><strong>Diện tích đáy:</strong> <span id="base-area-val"></span></p>
-            <p><strong>Chiều cao đã lấp đầy:</strong> <span id="height-val">0</span></p>
-            <p><strong>Thể tích:</strong> <span id="volume-val">0</span></p>
+        <div class="slider-group">
+            <label for="length-slider">Dài (a): <span id="length-val">2</span></label>
+            <input type="range" id="length-slider" min="0.5" max="4" value="2" step="0.1">
         </div>
-        <button id="clear-button">Đổ đầy lại</button>
+        <div class="slider-group">
+            <label for="width-slider">Rộng (b): <span id="width-val">1.5</span></label>
+            <input type="range" id="width-slider" min="0.5" max="3" value="1.5" step="0.1">
+        </div>
+        <div class="slider-group">
+            <label for="max-height-slider">Cao (c): <span id="max-height-val">3</span></label>
+            <input type="range" id="max-height-slider" min="0.5" max="5" value="3" step="0.1">
+        </div>
+        <div class="slider-group">
+            <label for="height-slider">Quét chiều cao: <span id="scan-percentage">0%</span></label>
+            <input type="range" id="height-slider" min="0" max="100" value="0" step="1">
+        </div>
+
+        <div class="formula">V = <span class="term">Sđáy</span> × <span class="term">Cao</span> = (<span class="term">a</span> × <span class="term">b</span>) × <span class="term">c</span></div>
+        
+        <div class="output">
+            <p>Diện tích đáy: <span id="base-area-val">0</span></p>
+            <p>Chiều cao quét: <span id="height-val">0</span></p>
+            <p>Thể tích đã tạo: <span id="volume-val">0</span></p>
+        </div>
     </div>
 </div>
 
-<script>
-    // --- CHỌN CÁC PHẦN TỬ DOM ---
-    const box = document.getElementById('volume-box');
-    const scene = document.getElementById('scene-v');
-    const volumeFill = document.getElementById('volume-fill');
-    
-    // Sliders
-    const heightSlider = document.getElementById('height-slider');
+<!-- Tải thư viện Three.js và OrbitControls -->
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // --- CÁC BIẾN TOÀN CỤC ---
+    let scene, camera, renderer, controls;
+    let mainBox, baseSlice, volumeBlock;
+
+    // --- DOM ELEMENTS ---
+    const canvasContainer = document.getElementById('canvas-container');
     const lengthSlider = document.getElementById('length-slider');
     const widthSlider = document.getElementById('width-slider');
     const maxHeightSlider = document.getElementById('max-height-slider');
-    const allSliders = [heightSlider, lengthSlider, widthSlider, maxHeightSlider];
-
-    // Value displays
+    const heightSlider = document.getElementById('height-slider');
+    
     const lengthVal = document.getElementById('length-val');
     const widthVal = document.getElementById('width-val');
     const maxHeightVal = document.getElementById('max-height-val');
+    const scanPercentage = document.getElementById('scan-percentage');
     const baseAreaVal = document.getElementById('base-area-val');
     const heightVal = document.getElementById('height-val');
     const volumeVal = document.getElementById('volume-val');
 
-    // 3D elements
-    const [front, back, right, left, topFace, bottomFace] = box.querySelectorAll('.face');
-    const [vFront, vBack, vRight, vLeft, vTop, vBottom] = volumeFill.querySelectorAll('.volume-face');
+    // --- KHỞI TẠO CẢNH 3D ---
+    function init() {
+        // 1. Scene
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xe9ecef);
 
-    // --- HÀM CẬP NHẬT CHÍNH ---
+        // 2. Camera
+        camera = new THREE.PerspectiveCamera(60, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+        camera.position.set(0, 4, 8); // Điều chỉnh vị trí camera để thấy rõ 2 khối
+
+        // 3. Renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        canvasContainer.appendChild(renderer.domElement);
+
+        // 4. Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // 5. Controls
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        
+        // 6. Grid Helper
+        const gridHelper = new THREE.GridHelper(20, 20, 0xadb5bd, 0xced4da);
+        scene.add(gridHelper);
+
+        // --- TẠO CÁC ĐỐI TƯỢNG HÌNH HỌC ---
+        const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+
+        // Hộp chính (trong suốt với đường viền)
+        const mainMaterial = new THREE.MeshStandardMaterial({
+            color: 0x007bff,
+            transparent: true,
+            opacity: 0.1,
+        });
+        mainBox = new THREE.Mesh(boxGeometry, mainMaterial);
+        const edges = new THREE.EdgesGeometry(boxGeometry);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0056b3 });
+        const wireframe = new THREE.LineSegments(edges, lineMaterial);
+        mainBox.add(wireframe);
+
+        // Lát cắt diện tích đáy
+        const sliceGeometry = new THREE.PlaneGeometry(1, 1);
+        const sliceMaterial = new THREE.MeshStandardMaterial({
+            color: 0x17a2b8,
+            side: THREE.DoubleSide,
+        });
+        baseSlice = new THREE.Mesh(sliceGeometry, sliceMaterial);
+        baseSlice.rotation.x = -Math.PI / 2; // Xoay mặt phẳng nằm ngang
+
+        // Khối thể tích được tạo ra
+        const volumeMaterial = new THREE.MeshStandardMaterial({
+            color: 0xd9534f,
+        });
+        volumeBlock = new THREE.Mesh(boxGeometry, volumeMaterial);
+        
+        scene.add(mainBox, baseSlice, volumeBlock);
+
+        // --- GÁN SỰ KIỆN ---
+        [lengthSlider, widthSlider, maxHeightSlider, heightSlider].forEach(slider => {
+            slider.addEventListener('input', updateAll);
+        });
+        window.addEventListener('resize', onWindowResize);
+        
+        updateAll();
+        animate();
+    }
+
+    // --- CẬP NHẬT TRẠNG THÁI MÔ PHỎNG ---
     function updateAll() {
-        // 1. Lấy giá trị từ các thanh trượt
-        const length = parseInt(lengthSlider.value);
-        const width = parseInt(widthSlider.value);
-        const height = parseInt(maxHeightSlider.value);
+        // 1. Lấy giá trị từ sliders
+        const a = parseFloat(lengthSlider.value);
+        const b = parseFloat(widthSlider.value);
+        const c = parseFloat(maxHeightSlider.value);
         const percentage = parseInt(heightSlider.value) / 100;
 
-        // 2. Cập nhật các giá trị hiển thị
-        lengthVal.textContent = length;
-        widthVal.textContent = width;
-        maxHeightVal.textContent = height;
-        
-        // 3. Tính toán các đại lượng
-        const baseArea = length * width;
-        const currentHeight = height * percentage;
+        // 2. Cập nhật hiển thị text
+        lengthVal.textContent = a.toFixed(1);
+        widthVal.textContent = b.toFixed(1);
+        maxHeightVal.textContent = c.toFixed(1);
+        scanPercentage.textContent = `${Math.round(percentage * 100)}%`;
+
+        // 3. Tính toán các giá trị
+        const baseArea = a * b;
+        const currentHeight = c * percentage;
         const currentVolume = baseArea * currentHeight;
 
-        baseAreaVal.textContent = baseArea.toLocaleString();
-        heightVal.textContent = Math.round(currentHeight);
-        volumeVal.textContent = Math.round(currentVolume).toLocaleString();
+        baseAreaVal.textContent = baseArea.toFixed(2);
+        heightVal.textContent = currentHeight.toFixed(2);
+        volumeVal.textContent = currentVolume.toFixed(2);
 
-        // 4. Cập nhật mô hình 3D
-        function setProperties(element, w, h, transform) {
-            element.style.width = `${w}px`;
-            element.style.height = `${h}px`;
-            element.style.transform = transform;
-        }
+        // 4. Cập nhật các đối tượng 3D
+        const gap = 1.5;
+        const mainBoxX = -(a / 2 + gap / 2);
+        const volumeBlockX = (a / 2 + gap / 2);
 
-        // Cập nhật vỏ ngoài trong suốt
-        setProperties(front, length, height, `translateZ(${width/2}px)`);
-        setProperties(back, length, height, `rotateY(180deg) translateZ(${width/2}px)`);
-        setProperties(right, width, height, `rotateY(90deg) translateZ(${length/2}px)`);
-        setProperties(left, width, height, `rotateY(-90deg) translateZ(${length/2}px)`);
-        setProperties(topFace, length, width, `rotateX(90deg) translateZ(${height/2}px)`);
-        setProperties(bottomFace, length, width, `rotateX(-90deg) translateZ(${height/2}px)`);
+        // Cập nhật hộp chính
+        mainBox.scale.set(a, c, b);
+        mainBox.position.set(mainBoxX, c / 2, 0);
 
-        // Cập nhật khối thể tích màu đỏ - LÀM LIỀN MẠCH
-        const overlap = 2; // Pixel để chồng mí
-        const filledHeight = currentHeight > 0 ? currentHeight + overlap : 0;
-        volumeFill.style.height = `${currentHeight}px`;
+        // Cập nhật lát cắt
+        baseSlice.scale.set(a, b, 1);
+        baseSlice.position.set(mainBoxX, currentHeight, 0);
 
-        setProperties(vFront, length + overlap, filledHeight, `translateZ(${width/2}px)`);
-        setProperties(vBack, length + overlap, filledHeight, `rotateY(180deg) translateZ(${width/2}px)`);
-        setProperties(vRight, width + overlap, filledHeight, `rotateY(90deg) translateZ(${length/2}px)`);
-        setProperties(vLeft, width + overlap, filledHeight, `rotateY(-90deg) translateZ(${length/2}px)`);
-        setProperties(vTop, length + overlap, width + overlap, `rotateX(90deg) translateZ(${currentHeight/2}px)`);
-        setProperties(vBottom, length + overlap, width + overlap, `rotateX(-90deg) translateZ(${currentHeight/2}px)`);
+        // Cập nhật khối thể tích
+        const generatedHeight = Math.max(0.001, currentHeight); // Tránh chiều cao bằng 0
+        volumeBlock.scale.set(a, generatedHeight, b);
+        volumeBlock.position.set(volumeBlockX, generatedHeight / 2, 0);
         
-        // Dịch chuyển khối đỏ để nó luôn nằm ở đáy
-        const yOffset = (height - currentHeight) / 2;
-        volumeFill.style.transform = `translateY(${yOffset}px)`;
+        // Ẩn/Hiện các đối tượng nếu cần
+        volumeBlock.visible = percentage > 0;
+    }
+
+    // --- XỬ LÝ THAY ĐỔI KÍCH THƯỚC CỬA SỔ ---
+    function onWindowResize() {
+        camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    }
+
+    // --- VÒNG LẶP ANIMATION ---
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
     }
     
-    // --- XỬ LÝ SỰ KIỆN ---
-    function resetSimulation() {
-        heightSlider.value = 0;
-        updateAll();
-    }
+    // --- BẮT ĐẦU ---
+    init();
 
-    allSliders.forEach(slider => slider.addEventListener('input', updateAll));
-    document.getElementById('clear-button').addEventListener('click', resetSimulation);
-
-    // --- LOGIC XOAY 3D ---
-    let isDragging = false, prevX, prevY;
-    let currentRotX = -15, currentRotY = -30;
-
-    scene.addEventListener('mousedown', e => { 
-        isDragging = true; 
-        prevX = e.clientX; 
-        prevY = e.clientY; 
-    });
-    document.addEventListener('mouseup', () => { isDragging = false; });
-    document.addEventListener('mousemove', e => {
-        if (!isDragging) return;
-        const dX = e.clientX - prevX;
-        const dY = e.clientY - prevY;
-        currentRotY += dX * 0.5;
-        currentRotX -= dY * 0.5;
-        box.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
-        prevX = e.clientX; 
-        prevY = e.clientY;
-    });
-
-    // --- KHỞI TẠO ---
-    updateAll(); 
 </script>
 </body>
 </html>

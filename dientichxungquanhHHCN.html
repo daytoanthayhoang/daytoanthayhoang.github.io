@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mô phỏng Diện tích Xung quanh</title>
+<title>Mô phỏng Diện tích Xung quanh HHCN (Three.js)</title>
 <style>
     /* Kiểu dáng chung cho trang */
     body { 
@@ -13,299 +13,324 @@
         align-items: center; 
         min-height: 100vh; 
         margin: 0; 
-        background-color: #f4f7fa;
+        background-color: #f0f4f8;
         color: #333;
+        /* overflow: hidden; /* Tránh thanh cuộn không cần thiết */
     }
-    /* Vùng chứa chính cho mô phỏng và bảng điều khiển */
+    /* Vùng chứa chính */
     .container { 
         display: flex; 
         flex-wrap: wrap;
-        gap: 40px; 
+        gap: 30px; 
         align-items: flex-start; 
         background: #ffffff; 
-        padding: 30px; 
-        border-radius: 12px; 
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
-        max-width: 900px;
+        padding: 25px; 
+        border-radius: 15px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+        max-width: 95%;
+        width: 950px; /* Tăng chiều rộng để có không gian cho 2 khối */
     }
-    /* Vùng chứa cho cảnh 3D và thanh trượt */
-    .simulation { 
-        display: flex; 
-        align-items: center; 
-        gap: 30px; 
+    /* Vùng chứa mô phỏng 3D */
+    .simulation-container {
+        flex: 1;
+        min-width: 500px; /* Tăng chiều rộng tối thiểu */
+        height: 450px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
-    /* Không gian 3D */
-    .scene { 
-        width: 250px; 
-        height: 350px; 
-        perspective: 1000px;
-        cursor: grab; /* Con trỏ hình bàn tay */
+    #canvas-container {
+        width: 100%;
+        height: 100%;
+        cursor: grab;
+        border-radius: 8px;
+        background-color: #e9ecef;
     }
-    .scene:active {
-        cursor: grabbing; /* Con trỏ khi đang kéo */
+    #canvas-container:active {
+        cursor: grabbing;
     }
-    /* Hình hộp 3D */
-    .box { 
-        width: 100%; 
-        height: 100%; 
-        position: relative; 
-        transform-style: preserve-3d; 
-        transform: rotateX(-15deg) rotateY(-30deg); 
-    }
-    /* Kiểu dáng cho các mặt xanh trong suốt của hình hộp (đã bỏ border) */
-    .face { 
-        position: absolute; 
-        background-color: rgba(0, 119, 190, 0.25); 
-        box-sizing: border-box;
-    }
-    /* Kiểu dáng cho các mặt "được tô" màu đỏ */
-    .painted-face { 
-        position: absolute; 
-        background-color: rgba(220, 53, 69, 0.6); 
-        bottom: 0; /* HOÀN LẠI: Bắt đầu tô từ dưới lên */
-        box-sizing: border-box;
-    }
-    /* Lát cắt màu đỏ di chuyển */
-    .perimeter-slice { 
-        position: absolute; 
-        height: 3px; 
-        transform-style: preserve-3d; 
-    }
-    /* Các phần của lát cắt đỏ */
-    .slice-part { 
-        position: absolute; 
-        height: 100%; 
-        background-color: #dc3545; 
-        box-shadow: 0 0 10px #ff0000; 
-    }
-    /* Bảng điều khiển và thông tin */
+    /* Bảng điều khiển */
     .controls { 
-        width: 280px;
+        width: 300px;
         padding-top: 10px;
     }
     h2 {
         margin-top: 0;
-        color: #0077be;
+        color: #0056b3;
+        text-align: center;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
     }
-    /* Kiểu dáng hiển thị công thức */
+    /* Công thức */
     .formula { 
-        font-size: 1.2em; 
-        font-weight: bold; 
-        margin: 15px 0; 
+        font-size: 1.25em; 
+        font-weight: 500; 
+        margin: 20px 0; 
         text-align: center; 
-        padding: 10px;
-        background-color: #e9f5ff;
+        padding: 12px;
+        background-color: #e7f5ff;
+        border-left: 5px solid #007bff;
         border-radius: 8px;
     }
     .formula .term { 
-        color: #dc3545; 
-    }
-    /* Thanh trượt dọc */
-    #height-slider { 
-        -webkit-appearance: slider-vertical; 
-        width: 20px; 
-        height: 300px; 
-        cursor: ns-resize; 
-    }
-    /* Nút đặt lại */
-    #clear-button { 
-        width: 100%; 
-        padding: 12px; 
-        margin-top: 20px; 
-        background-color: #ffc107; 
-        border: none; 
-        border-radius: 5px; 
-        cursor: pointer; 
-        font-size: 1em;
+        color: #d9534f;
         font-weight: bold;
-        transition: background-color 0.2s;
     }
-    #clear-button:hover { 
-        background-color: #e0a800; 
-    }
-    .output p {
-        margin: 8px 0;
-    }
+    /* Thanh trượt */
     .slider-group {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
     }
     .slider-group label {
-        display: block;
-        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-weight: 500;
     }
-    .slider-group input {
+    .slider-group input[type="range"] {
         width: 100%;
+        cursor: pointer;
+    }
+    /* Kết quả */
+    .output p {
+        margin: 10px 0;
+        padding: 8px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .output span {
+        font-weight: bold;
+        color: #0056b3;
     }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="simulation">
-        <!-- Thanh trượt dọc để điều khiển chiều cao -->
-        <input type="range" id="height-slider" min="0" max="100" value="0" title="Kéo để quét chiều cao">
-        
-        <!-- Cảnh 3D nơi hình hộp được hiển thị -->
-        <div class="scene" id="scene-sxq">
-            <div class="box" id="sxq-box">
-                <!-- 6 mặt trong suốt của hình hộp -->
-                <div class="face front"></div> <div class="face back"></div> 
-                <div class="face right"></div> <div class="face left"></div> 
-                <div class="face top"></div> <div class="face bottom"></div>
-                
-                <!-- 4 mặt được "tô" màu đỏ -->
-                <div class="painted-face p-front"></div> <div class="painted-face p-back"></div> 
-                <div class="painted-face p-right"></div> <div class="painted-face p-left"></div>
-                
-                <!-- Lát cắt chu vi màu đỏ di động -->
-                <div class="perimeter-slice" id="slice">
-                    <div class="slice-part s-front"></div> <div class="slice-part s-back"></div> 
-                    <div class="slice-part s-right"></div> <div class="slice-part s-left"></div>
-                </div>
-            </div>
-        </div>
+    <div class="simulation-container">
+        <!-- Vùng canvas cho Three.js -->
+        <div id="canvas-container"></div>
     </div>
     <div class="controls">
-        <h2>Tùy chỉnh hình hộp</h2>
-        <div class="slider-group">
-            <label for="length-slider">a - Chiều dài: <span id="length-val"></span></label>
-            <input type="range" id="length-slider" min="50" max="250" value="200">
-        </div>
-        <div class="slider-group">
-            <label for="width-slider">b - Chiều rộng: <span id="width-val"></span></label>
-            <input type="range" id="width-slider" min="50" max="200" value="150">
-        </div>
-        <div class="slider-group">
-            <label for="max-height-slider">c - Chiều cao: <span id="max-height-val"></span></label>
-            <input type="range" id="max-height-slider" min="50" max="350" value="300">
-        </div>
+        <h2>Diện tích Xung quanh</h2>
         
-        <div class="formula">Sxq = <span class="term">Cvi đáy</span> × <span class="term">Cao</span></div>
-        <div class="output">
-            <p><strong>Chu vi đáy:</strong> <span id="perimeter-val"></span></p>
-            <p><strong>Chiều cao đã quét:</strong> <span id="height-val">0</span></p>
-            <p><strong>Diện tích đã tô:</strong> <span id="area-val">0</span></p>
+        <div class="slider-group">
+            <label for="length-slider">Dài (a): <span id="length-val">2</span></label>
+            <input type="range" id="length-slider" min="0.5" max="4" value="2" step="0.1">
         </div>
-        <button id="clear-button">Xóa vết & Đặt lại</button>
+        <div class="slider-group">
+            <label for="width-slider">Rộng (b): <span id="width-val">1.5</span></label>
+            <input type="range" id="width-slider" min="0.5" max="3" value="1.5" step="0.1">
+        </div>
+        <div class="slider-group">
+            <label for="max-height-slider">Cao (c): <span id="max-height-val">3</span></label>
+            <input type="range" id="max-height-slider" min="0.5" max="5" value="3" step="0.1">
+        </div>
+        <div class="slider-group">
+            <label for="height-slider">Quét chiều cao: <span id="scan-percentage">0%</span></label>
+            <input type="range" id="height-slider" min="0" max="100" value="0" step="1">
+        </div>
+
+        <div class="formula">Sxq = <span class="term">Cđáy</span> × <span class="term">Cao</span> = 2(<span class="term">a</span> + <span class="term">b</span>)× <span class="term">c</span></div>
+        
+        <div class="output">
+            <p>Chu vi đáy: <span id="perimeter-val">0</span></p>
+            <p>Chiều cao quét: <span id="height-val">0</span></p>
+            <p>Diện tích đã tạo: <span id="area-val">0</span></p>
+        </div>
     </div>
 </div>
 
-<script>
-    // --- CHỌN CÁC PHẦN TỬ DOM ---
-    const box = document.getElementById('sxq-box');
-    const scene = document.getElementById('scene-sxq');
-    const slice = document.getElementById('slice');
-    
-    // Sliders
-    const heightSlider = document.getElementById('height-slider');
+<!-- Tải thư viện Three.js và OrbitControls -->
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { Line2 } from 'three/addons/lines/Line2.js';
+    import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+    import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+
+    // --- CÁC BIẾN TOÀN CỤC ---
+    let scene, camera, renderer, controls;
+    let mainBox, perimeterSlice, lateralAreaBlock;
+
+    // --- DOM ELEMENTS ---
+    const canvasContainer = document.getElementById('canvas-container');
     const lengthSlider = document.getElementById('length-slider');
     const widthSlider = document.getElementById('width-slider');
     const maxHeightSlider = document.getElementById('max-height-slider');
-    const allSliders = [heightSlider, lengthSlider, widthSlider, maxHeightSlider];
-
-    // Value displays
+    const heightSlider = document.getElementById('height-slider');
+    
     const lengthVal = document.getElementById('length-val');
     const widthVal = document.getElementById('width-val');
     const maxHeightVal = document.getElementById('max-height-val');
+    const scanPercentage = document.getElementById('scan-percentage');
     const perimeterVal = document.getElementById('perimeter-val');
     const heightVal = document.getElementById('height-val');
     const areaVal = document.getElementById('area-val');
 
-    // 3D elements
-    const [front, back, right, left, topFace, bottomFace] = box.querySelectorAll('.face');
-    const [pFront, pBack, pRight, pLeft] = box.querySelectorAll('.painted-face');
-    const [sFront, sBack, sRight, sLeft] = slice.children;
+    // --- KHỞI TẠO CẢNH 3D ---
+    function init() {
+        // 1. Scene
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xe9ecef);
 
-    // --- HÀM CẬP NHẬT CHÍNH ---
+        // 2. Camera
+        camera = new THREE.PerspectiveCamera(60, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+        camera.position.set(0, 4, 8); 
+
+        // 3. Renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        canvasContainer.appendChild(renderer.domElement);
+
+        // 4. Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // 5. Controls
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        
+        // 6. Grid Helper
+        const gridHelper = new THREE.GridHelper(20, 20, 0xadb5bd, 0xced4da);
+        scene.add(gridHelper);
+
+        // --- TẠO CÁC ĐỐI TƯỢNG HÌNH HỌC ---
+        const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+
+        // Hộp chính (trong suốt với đường viền)
+        const mainMaterial = new THREE.MeshStandardMaterial({
+            color: 0x007bff,
+            transparent: true,
+            opacity: 0.1,
+        });
+        mainBox = new THREE.Mesh(boxGeometry, mainMaterial);
+        const edges = new THREE.EdgesGeometry(boxGeometry);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0056b3 });
+        const wireframe = new THREE.LineSegments(edges, lineMaterial);
+        mainBox.add(wireframe);
+
+        // Lát cắt chu vi (rỗng, dùng Line2 cho viền đậm)
+        const points = [
+            -0.5, 0, -0.5,   0.5, 0, -0.5,
+             0.5, 0,  0.5,  -0.5, 0,  0.5,
+            -0.5, 0, -0.5
+        ];
+        const lineGeometry = new LineGeometry();
+        lineGeometry.setPositions(points.map(p => p));
+
+        const sliceLineMaterial = new LineMaterial({
+            color: 0x00ffff, // Màu cyan sáng
+            linewidth: 5, // Độ dày tính bằng pixel
+            resolution: new THREE.Vector2(canvasContainer.clientWidth, canvasContainer.clientHeight)
+        });
+        
+        perimeterSlice = new Line2(lineGeometry, sliceLineMaterial);
+        
+        // Khối diện tích xung quanh (rỗng)
+        const sideMaterial = new THREE.MeshStandardMaterial({ color: 0xd9534f, side: THREE.DoubleSide });
+        const transparentMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+        const lateralAreaMaterials = [
+            sideMaterial,        // right
+            sideMaterial,        // left
+            transparentMaterial, // top
+            transparentMaterial, // bottom
+            sideMaterial,        // front
+            sideMaterial,        // back
+        ];
+        lateralAreaBlock = new THREE.Mesh(boxGeometry, lateralAreaMaterials);
+        
+        scene.add(mainBox, perimeterSlice, lateralAreaBlock);
+
+        // --- GÁN SỰ KIỆN ---
+        [lengthSlider, widthSlider, maxHeightSlider, heightSlider].forEach(slider => {
+            slider.addEventListener('input', updateAll);
+        });
+        window.addEventListener('resize', onWindowResize);
+        
+        updateAll();
+        animate();
+    }
+
+    // --- CẬP NHẬT TRẠNG THÁI MÔ PHỎNG ---
     function updateAll() {
-        // 1. Lấy giá trị từ các thanh trượt
-        const length = parseInt(lengthSlider.value);
-        const width = parseInt(widthSlider.value);
-        const height = parseInt(maxHeightSlider.value);
+        // 1. Lấy giá trị từ sliders
+        const a = parseFloat(lengthSlider.value);
+        const b = parseFloat(widthSlider.value);
+        const c = parseFloat(maxHeightSlider.value);
         const percentage = parseInt(heightSlider.value) / 100;
 
-        // 2. Cập nhật các giá trị hiển thị
-        lengthVal.textContent = length;
-        widthVal.textContent = width;
-        maxHeightVal.textContent = height;
-        
-        // 3. Tính toán các đại lượng
-        const perimeter = 2 * (length + width);
-        const currentHeight = height * percentage;
+        // 2. Cập nhật hiển thị text
+        lengthVal.textContent = a.toFixed(1);
+        widthVal.textContent = b.toFixed(1);
+        maxHeightVal.textContent = c.toFixed(1);
+        scanPercentage.textContent = `${Math.round(percentage * 100)}%`;
+
+        // 3. Tính toán các giá trị
+        const perimeter = 2 * (a + b);
+        const currentHeight = c * percentage;
         const currentArea = perimeter * currentHeight;
 
-        perimeterVal.textContent = perimeter;
-        heightVal.textContent = Math.round(currentHeight);
-        areaVal.textContent = Math.round(currentArea).toLocaleString();
+        perimeterVal.textContent = perimeter.toFixed(2);
+        heightVal.textContent = currentHeight.toFixed(2);
+        areaVal.textContent = currentArea.toFixed(2);
 
-        // 4. Cập nhật mô hình 3D
-        // Hàm trợ giúp
-        function setFaceProperties(element, w, h, transform) {
-            element.style.width = `${w}px`;
-            element.style.height = `${h}px`;
-            element.style.transform = transform;
-        }
+        // 4. Cập nhật các đối tượng 3D
+        const gap = 1.5;
+        const mainBoxX = -(a / 2 + gap / 2);
+        const generatedBlockX = (a / 2 + gap / 2);
 
-        // Cập nhật 6 mặt chính - TĂNG KÍCH THƯỚC ĐỂ LIỀN MẠCH
-        const overlap = 2; // Số pixel để các mặt chồng lên nhau
-        setFaceProperties(front, length + overlap, height + overlap, `translateZ(${width/2}px)`);
-        setFaceProperties(back, length + overlap, height + overlap, `rotateY(180deg) translateZ(${width/2}px)`);
-        setFaceProperties(right, width + overlap, height + overlap, `rotateY(90deg) translateZ(${length/2}px)`);
-        setFaceProperties(left, width + overlap, height + overlap, `rotateY(-90deg) translateZ(${length/2}px)`);
-        setFaceProperties(topFace, length + overlap, width + overlap, `rotateX(90deg) translateZ(${height/2}px)`);
-        setFaceProperties(bottomFace, length + overlap, width + overlap, `rotateX(-90deg) translateZ(${height/2}px)`);
+        // Cập nhật hộp chính
+        mainBox.scale.set(a, c, b);
+        mainBox.position.set(mainBoxX, c / 2, 0);
 
-        // Cập nhật 4 mặt được tô - CHỈ TĂNG CHIỀU RỘNG
-        setFaceProperties(pFront, length + overlap, currentHeight, `translateZ(${width/2}px)`);
-        setFaceProperties(pBack, length + overlap, currentHeight, `rotateY(180deg) translateZ(${width/2}px)`);
-        setFaceProperties(pRight, width + overlap, currentHeight, `rotateY(90deg) translateZ(${length/2}px)`);
-        setFaceProperties(pLeft, width + overlap, currentHeight, `rotateY(-90deg) translateZ(${length/2}px)`);
+        // Cập nhật lát cắt chu vi
+        perimeterSlice.scale.set(a, 1, b);
+        perimeterSlice.position.set(mainBoxX, currentHeight, 0);
 
-        // Cập nhật 4 phần của lát cắt chu vi
-        setFaceProperties(sFront, length, '100%', `translateZ(${width/2}px)`);
-        setFaceProperties(sBack, length, '100%', `rotateY(180deg) translateZ(${width/2}px)`);
-        setFaceProperties(sRight, width, '100%', `rotateY(90deg) translateZ(${length/2}px)`);
-        setFaceProperties(sLeft, width, '100%', `rotateY(-90deg) translateZ(${length/2}px)`);
+        // Cập nhật khối diện tích xung quanh
+        const generatedHeight = Math.max(0.001, currentHeight);
+        lateralAreaBlock.scale.set(a, generatedHeight, b);
+        lateralAreaBlock.position.set(generatedBlockX, generatedHeight / 2, 0);
+        
+        // Ẩn/Hiện các đối tượng nếu cần
+        lateralAreaBlock.visible = percentage > 0;
+    }
 
-        // HOÀN LẠI LOGIC CŨ: Di chuyển lát cắt theo chiều dọc
-        // Bắt đầu từ đáy (-height/2) và đi lên theo currentHeight
-        const sliceYPos = -(height / 2) + currentHeight;
-        slice.style.transform = `translateY(${sliceYPos}px)`;
+    // --- XỬ LÝ THAY ĐỔI KÍCH THƯỚC CỬA SỔ ---
+    function onWindowResize() {
+        camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        // Cập nhật resolution cho LineMaterial khi thay đổi kích thước
+        perimeterSlice.material.resolution.set(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    }
+
+    // --- VÒNG LẶP ANIMATION ---
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
     }
     
-    // --- XỬ LÝ SỰ KIỆN ---
-    function resetSimulation() {
-        heightSlider.value = 0;
-        updateAll();
-    }
+    // --- BẮT ĐẦU ---
+    init();
 
-    // Gán sự kiện cho tất cả các thanh trượt
-    allSliders.forEach(slider => slider.addEventListener('input', updateAll));
-    document.getElementById('clear-button').addEventListener('click', resetSimulation);
-
-    // --- LOGIC XOAY 3D ---
-    let isDragging = false, prevX, prevY;
-    let currentRotX = -15, currentRotY = -30;
-
-    scene.addEventListener('mousedown', e => { 
-        isDragging = true; 
-        prevX = e.clientX; 
-        prevY = e.clientY; 
-    });
-    document.addEventListener('mouseup', () => { isDragging = false; });
-    document.addEventListener('mousemove', e => {
-        if (!isDragging) return;
-        const dX = e.clientX - prevX;
-        const dY = e.clientY - prevY;
-        currentRotY += dX * 0.5;
-        currentRotX -= dY * 0.5;
-        box.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
-        prevX = e.clientX; 
-        prevY = e.clientY;
-    });
-
-    // --- KHỞI TẠO ---
-    updateAll(); 
 </script>
 </body>
 </html>
