@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đồng Hồ Đếm Ngược</title>
+    <!-- Tích hợp Tailwind CSS và Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Thư viện âm thanh Tone.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        #digital-clock-display { 
+            font-family: 'Courier New', Courier, monospace; 
+            text-shadow: 0 0 10px rgba(0,0,0,0.1); 
+            transition: border-color 0.3s ease;
+        }
+        .keypad-btn { transition: all 0.1s ease-in-out; }
+        .keypad-btn:active { transform: scale(0.95); background-color: #3b82f6; color: white; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); }
+        }
+        .times-up-pulse { animation: pulse-red 1.5s infinite; }
+        .time-set {
+            border-color: #22c55e !important; /* Green-500 */
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4">
+    <div class="w-full max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8 text-center">
+
+        <!-- VÙNG HIỂN THỊ CHÍNH -->
+        <div id="display-area" class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-6">
+            
+            <!-- CỘT BÊN TRÁI: ĐỒNG HỒ KIM -->
+            <div id="analog-clock-container" class="hidden md:flex justify-center items-center">
+                <svg id="analog-clock" class="w-72 h-72 lg:w-96 lg:h-96" viewBox="0 0 100 100">
+                    <!-- Nền vàng (thời gian còn lại) -->
+                    <circle cx="50" cy="50" r="48" fill="#facc15"/> 
+                    <!-- Vùng xám (thời gian đã trôi qua) -->
+                    <path id="progress-arc" fill="#4b5563"/>
+                </svg>
+            </div>
+
+            <!-- CỘT BÊN PHẢI: ĐIỀU KHIỂN -->
+            <div id="control-area" class="w-full flex flex-col justify-center items-center gap-6">
+                <!-- Đồng hồ số -->
+                <div id="digital-clock-display" class="relative w-full text-6xl sm:text-7xl lg:text-8xl font-bold text-gray-800 py-6 bg-gray-100 rounded-lg border-2 border-transparent">
+                    <span id="digital-time">00:00:00</span>
+                    <span id="milliseconds" class="absolute bottom-2 right-4 text-xl md:text-2xl text-gray-500">00</span>
+                </div>
+
+                <!-- Bàn phím số (khi cài đặt) -->
+                <div id="keypad" class="grid grid-cols-3 gap-2 w-full max-w-xs mx-auto">
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="1">1</button>
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="2">2</button>
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="3">3</button>
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="4">4</button>
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="5">5</button>
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="6">6</button>
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="7">7</button>
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="8">8</button>
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="9">9</button>
+                    <button id="clear-btn" class="keypad-btn text-lg font-bold py-3 rounded-lg bg-yellow-400">Xóa</button>
+                    <button class="keypad-btn text-lg font-bold py-3 rounded-lg bg-gray-200" data-key="0">0</button>
+                    <button id="set-btn" class="keypad-btn text-lg font-bold py-3 rounded-lg bg-green-500 text-white">Đặt</button>
+                </div>
+
+                <!-- Nút điều khiển (khi chạy) -->
+                <div id="run-controls" class="hidden flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                    <button id="pause-btn" class="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform transform hover:scale-105">Tạm dừng</button>
+                    <button id="reset-btn" class="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform transform hover:scale-105">Dừng & Đặt lại</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NÚT BẮT ĐẦU (Ở GIỮA KHI CÀI ĐẶT) -->
+        <div id="start-btn-container" class="flex justify-center">
+            <button id="start-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform transform hover:scale-105" disabled>Bắt đầu</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const digitalTimeEl = document.getElementById('digital-time');
+        const millisecondsEl = document.getElementById('milliseconds');
+        const digitalClockDisplay = document.getElementById('digital-clock-display');
+        const keypad = document.getElementById('keypad');
+        const startBtn = document.getElementById('start-btn');
+        const startBtnContainer = document.getElementById('start-btn-container');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const runControls = document.getElementById('run-controls');
+        const clearBtn = document.getElementById('clear-btn');
+        const setBtn = document.getElementById('set-btn');
+        const displayArea = document.getElementById('display-area');
+        const analogContainer = document.getElementById('analog-clock-container');
+        const controlArea = document.getElementById('control-area');
+        const progressArc = document.getElementById('progress-arc');
+
+        // State variables
+        let timerInterval = null;
+        let countdownEndTime = 0;
+        let remainingOnPause = 0;
+        let initialTotalMs = 0;
+        let isPaused = false;
+        let inputString = "";
+
+        // --- Âm thanh ---
+        let alarm;
+        const synth = new Tone.Synth({ oscillator: { type: 'sine' } }).toDestination();
+        function setupAlarm() {
+            alarm = new Tone.Loop(time => {
+                synth.triggerAttackRelease("G5", "8n", time);
+                synth.triggerAttackRelease("G5", "8n", time + 0.3);
+                synth.triggerAttackRelease("G5", "8n", time + 0.6);
+            }, "6s");
+        }
+
+        // --- Logic cập nhật giao diện ---
+        function updateDisplay(remainingMs) {
+            if (remainingMs < 0) remainingMs = 0;
+            const h = String(Math.floor(remainingMs / 3600000)).padStart(2, '0');
+            const m = String(Math.floor((remainingMs % 3600000) / 60000)).padStart(2, '0');
+            const s = String(Math.floor((remainingMs % 60000) / 1000)).padStart(2, '0');
+            const ms = String(Math.floor((remainingMs % 1000) / 10)).padStart(2, '0');
+            
+            digitalTimeEl.textContent = `${h}:${m}:${s}`;
+            millisecondsEl.textContent = ms;
+
+            const elapsedPercentage = 1 - (remainingMs / initialTotalMs);
+            const elapsedAngle = 360 * elapsedPercentage;
+
+            progressArc.setAttribute("d", describeArc(50, 50, 48, 0, elapsedAngle));
+        }
+
+        function updateInputDisplay() {
+            const paddedInput = inputString.padStart(6, '0');
+            const h = paddedInput.substring(0, 2);
+            const m = paddedInput.substring(2, 4);
+            const s = paddedInput.substring(4, 6);
+            digitalTimeEl.textContent = `${h}:${m}:${s}`;
+            millisecondsEl.textContent = '00';
+            digitalClockDisplay.classList.remove('time-set');
+        }
+        
+        function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+            const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+            return {
+                x: centerX + (radius * Math.cos(angleInRadians)),
+                y: centerY + (radius * Math.sin(angleInRadians))
+            };
+        }
+
+        function describeArc(x, y, radius, startAngle, endAngle) {
+            if (endAngle >= 359.99) {
+                return `M ${x} ${y} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 -${radius * 2},0`;
+            }
+            if (endAngle <= 0.01) return "";
+
+            const startPoint = polarToCartesian(x, y, radius, endAngle);
+            const endPoint = polarToCartesian(x, y, radius, startAngle);
+            const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+            return [
+                "M", x, y,
+                "L", endPoint.x, endPoint.y,
+                "A", radius, radius, 0, largeArcFlag, 1, startPoint.x, startPoint.y,
+                "Z"
+            ].join(" ");
+        }
+        
+        function switchMode(mode) { // 'setup' or 'run'
+            if (mode === 'run') {
+                keypad.classList.add('hidden');
+                runControls.classList.remove('hidden');
+                runControls.classList.add('flex');
+                startBtnContainer.classList.add('hidden');
+                analogContainer.classList.remove('hidden');
+                analogContainer.classList.add('fade-in');
+                displayArea.classList.add('md:grid-cols-2');
+                displayArea.classList.remove('grid-cols-1');
+            } else { // 'setup'
+                keypad.classList.remove('hidden');
+                runControls.classList.add('hidden');
+                runControls.classList.remove('flex');
+                startBtnContainer.classList.remove('hidden');
+                analogContainer.classList.add('hidden');
+                displayArea.classList.remove('md:grid-cols-2');
+                displayArea.classList.add('grid-cols-1');
+                digitalClockDisplay.classList.remove('times-up-pulse');
+            }
+        }
+        
+        function mainLoop() {
+            const remainingMs = countdownEndTime - Date.now();
+            updateDisplay(remainingMs);
+            if (remainingMs <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                digitalClockDisplay.classList.add('times-up-pulse');
+                Tone.Transport.start();
+                alarm.start(0);
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            Tone.start();
+            if (!alarm) setupAlarm();
+            isPaused = false;
+            pauseBtn.textContent = 'Tạm dừng';
+            countdownEndTime = Date.now() + remainingOnPause;
+            switchMode('run');
+            mainLoop();
+            timerInterval = setInterval(mainLoop, 100);
+        }
+
+        function pauseTimer() {
+            if (isPaused) {
+                isPaused = false;
+                pauseBtn.textContent = 'Tạm dừng';
+                startTimer();
+            } else {
+                isPaused = true;
+                pauseBtn.textContent = 'Tiếp tục';
+                remainingOnPause = countdownEndTime - Date.now();
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isPaused = false;
+            inputString = "";
+            if (alarm) {
+                alarm.stop();
+                Tone.Transport.stop();
+                Tone.Transport.cancel();
+            }
+            updateInputDisplay();
+            switchMode('setup');
+            startBtn.disabled = true;
+        }
+
+        // --- Event Listeners ---
+        keypad.addEventListener('click', (e) => {
+            if (e.target.matches('[data-key]')) {
+                if (inputString.length < 6) {
+                    inputString += e.target.dataset.key;
+                    updateInputDisplay();
+                }
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            inputString = "";
+            updateInputDisplay();
+            startBtn.disabled = true;
+        });
+
+        setBtn.addEventListener('click', () => {
+            if (inputString.length > 0) {
+                const padded = inputString.padStart(6, '0');
+                const h = parseInt(padded.substring(0, 2), 10);
+                const m = parseInt(padded.substring(2, 4), 10);
+                const s = parseInt(padded.substring(4, 6), 10);
+                const totalMs = (h * 3600 + m * 60 + s) * 1000;
+                
+                if (totalMs > 0) {
+                    initialTotalMs = totalMs;
+                    remainingOnPause = totalMs;
+                    startBtn.disabled = false;
+                    digitalClockDisplay.classList.add('time-set');
+                }
+            }
+        });
+        
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        resetTimer();
+    </script>
+</body>
+</html>
+

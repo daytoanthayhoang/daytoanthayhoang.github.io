@@ -1,34 +1,63 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R8KEQ361BV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R8KEQ361BV');
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Công Cụ Số Học Toán - Dạy Toán Thầy Hoàng</title>
-    <!-- Tích hợp Tailwind CSS và Google Fonts để đồng bộ giao diện -->
+    <!-- Tích hợp Tailwind CSS và Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Be 'Vietnam Pro', sans-serif;
+        /* CSS tùy chỉnh để trang đẹp và chuyên nghiệp hơn */
+        html {
+            scroll-behavior: smooth; /* Cho phép cuộn mượt */
         }
-        /* Đảm bảo iframe chiếm toàn bộ không gian được cấp */
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
         #tool-frame {
             width: 100%;
-            height: 80vh; /* Chiều cao chiếm 80% khung nhìn */
-            border: 1px solid #e2e8f0; /* Thêm đường viền cho đẹp */
+            height: 80vh;
+            border: 1px solid #e2e8f0;
+        }
+        /* --- Kiểu cho nút công cụ --- */
+        .tool-button {
+            transition: all 0.3s ease;
         }
         .tool-button.active {
-            background-color: #1d4ed8; /* Màu xanh đậm hơn */
+            background-color: #1d4ed8;
             color: white;
-            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(30, 64, 175, 0.5);
+            transform: translateY(-5px) scale(1.05);
         }
-        /* --- HIỆU ỨNG HIỆN RA KHI CUỘN CHUỘT --- */
+        /* --- Kiểu cho thanh điều hướng nhanh --- */
+        #quick-nav {
+            top: 80px; /* Vị trí dính lại sau header */
+        }
+        #quick-nav a {
+            transition: all 0.2s ease-in-out;
+        }
+        #quick-nav a.active {
+            color: #2563eb; /* Màu xanh dương */
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+        /* --- Hiệu ứng hiện ra khi cuộn --- */
         .scroll-animate {
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            transform: translateY(40px);
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
         }
         .scroll-animate.is-visible {
             opacity: 1;
@@ -38,9 +67,9 @@
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <!-- PHẦN ĐẦU TRANG (HEADER) - Giữ nguyên để đồng bộ -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+    <!-- PHẦN ĐẦU TRANG (HEADER) -->
+    <header class="bg-white shadow-md sticky top-0 z-50 h-[80px] flex items-center">
+        <div class="container mx-auto px-6 flex justify-between items-center">
             <a href="./index.html" class="text-2xl font-bold text-blue-600">Dạy Toán Thầy Hoàng</a>
             <nav class="hidden md:flex space-x-8">
                 <a href="./index.html#trangchu" class="text-gray-600 hover:text-blue-600 font-medium">Trang Chủ</a>
@@ -48,42 +77,113 @@
                 <a href="./index.html#hoclieu" class="text-gray-600 hover:text-blue-600 font-medium">Góc Học Tập</a>
                 <a href="./index.html#lienhe" class="text-gray-600 hover:text-blue-600 font-medium">Liên Hệ</a>
             </nav>
-            <a href="https://1drv.ms/f/c/67c40ff835c61dde/EqhPL5Ta8HtLgHKKUIEi0E4BWriHfyHpW-ckge4QSYkj7w" target="_blank" rel="noopener noreferrer" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-full text-sm hover:bg-blue-700 transition-colors duration-300">
+            <a href="https://1drv.ms/f/c/67c40ff835c61dde/EqhPL5Ta8HtLgHKKUIEi0E4BWh8s5ReL0Khy4Hcmm_dXWQ?e=GXzVyP" target="_blank" rel="noopener noreferrer" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-full text-sm hover:bg-blue-700 transition-colors duration-300">
                 Kho Học Liệu
             </a>
         </div>
     </header>
 
-    <!-- NỘI DUNG CHÍNH CỦA TRANG CÔNG CỤ -->
-    <main class="container mx-auto px-6 py-12">
-        <section id="cong-cu" class="scroll-animate">
-            <h1 class="text-3xl md:text-4xl font-bold text-center mb-4">Trình Giả Lập Công Cụ Toán Học</h1>
-            <p class="text-center text-gray-600 mb-10">Chọn một công cụ bên dưới để bắt đầu trải nghiệm mô hình 3D tương tác.</p>
-
-            <!-- CÁC NÚT CHỌN CÔNG CỤ -->
-            <div id="tool-selector" class="flex flex-wrap justify-center gap-4 mb-8">
-                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-cube/index.html">
-                    Gấp Hình Lập Phương
-                </button>
-                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-rectangular-prism/index.html">
-                    Gấp Hình Hộp Chữ Nhật
-                </button>
-                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-triangular-prism/index.html">
-                    Gấp Lăng Trụ Tam Giác
-                </button>
-                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-quadrilateral-prism/index.html">
-                    Gấp Lăng Trụ Tứ Giác
-                </button>
-                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="./dientichxungquanhHHCN.html">
-                    Mô Phỏng Diện Tích Xung Quanh
-                </button>		
-                <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="./thetichHHCN.html">
-                    Mô Phỏng Thể Tích
-                </button>					
+    <!-- THANH ĐIỀU HƯỚNG NHANH -->
+    <nav id="quick-nav" class="sticky bg-white/80 backdrop-blur-sm shadow-sm z-40">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-center items-center border-b">
+                <a href="#toan-6" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Toán 6</a>
+                <a href="#toan-7" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Toán 7</a>
+                <a href="#toan-8" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Toán 8</a>
+                <a href="#toan-9" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Toán 9</a>
             </div>
+        </div>
+    </nav>
 
-            <!-- KHUNG HIỂN THỊ CÔNG CỤ (IFRAME) -->
-            <div id="frame-container" class="bg-white rounded-lg shadow-lg p-4">
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900">Thư Viện Công Cụ Toán Học</h1>
+            <p class="mt-4 text-lg text-gray-600">Khám phá các công cụ trực quan cho từng khối lớp.</p>
+        </div>
+
+        <!-- CÁC KHỐI LỚP -->
+        <div class="space-y-16">
+            <!-- Công cụ Toán 6 -->
+            <section id="toan-6" class="scroll-animate bg-white p-8 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-blue-700 border-b-2 border-blue-200 pb-4 mb-6">Công Cụ Số Hóa Toán 6</h2>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700">Số và Đại số</h3>
+                        <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg min-h-[60px]">
+                             <button class="tool-button bg-green-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-green-600" data-src="./hocthuocluythua.html">Học Thuộc Lòng Lũy Thừa</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700">Hình học</h3>
+                        <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg min-h-[60px]">
+                            <p class="text-gray-500 italic">Chưa có công cụ nào.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700">Thống kê và Xác suất</h3>
+                         <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg min-h-[60px]">
+                            <p class="text-gray-500 italic">Chưa có công cụ nào.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Công cụ Toán 7 -->
+            <section id="toan-7" class="scroll-animate bg-white p-8 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-blue-700 border-b-2 border-blue-200 pb-4 mb-6">Công Cụ Số Hóa Toán 7</h2>
+                 <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700">Số và Đại số</h3>
+                        <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg min-h-[60px]">
+                            <p class="text-gray-500 italic">Chưa có công cụ nào.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700">Hình học</h3>
+                        <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
+                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-cube/index.html">Gấp Hình Lập Phương</button>
+                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-rectangular-prism/index.html">Gấp Hình Hộp Chữ Nhật</button>
+                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-triangular-prism/index.html">Gấp Lăng Trụ Tam Giác</button>
+                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-quadrilateral-prism/index.html">Gấp Lăng Trụ Tứ Giác</button>
+                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./dientichxungquanhHHCN.html">Mô Phỏng Diện Tích Xung Quanh</button>		
+                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./thetichHHCN.html">Mô Phỏng Thể Tích</button>	
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-700">Thống kê và Xác suất</h3>
+                         <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg min-h-[60px]">
+                            <p class="text-gray-500 italic">Chưa có công cụ nào.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Công cụ Toán 8 -->
+            <section id="toan-8" class="scroll-animate bg-white p-8 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-blue-700 border-b-2 border-blue-200 pb-4 mb-6">Công Cụ Số Hóa Toán 8</h2>
+                <div class="space-y-6">
+                    <div><h3 class="text-xl font-semibold text-gray-700">Số và Đại số</h3><div class="mt-4 p-4 bg-gray-50 rounded-lg min-h-[60px]"><p class="text-gray-500 italic">Chưa có công cụ nào.</p></div></div>
+                    <div><h3 class="text-xl font-semibold text-gray-700">Hình học</h3><div class="mt-4 p-4 bg-gray-50 rounded-lg min-h-[60px]"><p class="text-gray-500 italic">Chưa có công cụ nào.</p></div></div>
+                    <div><h3 class="text-xl font-semibold text-gray-700">Thống kê và Xác suất</h3><div class="mt-4 p-4 bg-gray-50 rounded-lg min-h-[60px]"><p class="text-gray-500 italic">Chưa có công cụ nào.</p></div></div>
+                </div>
+            </section>
+
+            <!-- Công cụ Toán 9 -->
+            <section id="toan-9" class="scroll-animate bg-white p-8 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-blue-700 border-b-2 border-blue-200 pb-4 mb-6">Công Cụ Số Hóa Toán 9</h2>
+                 <div class="space-y-6">
+                    <div><h3 class="text-xl font-semibold text-gray-700">Số và Đại số</h3><div class="mt-4 p-4 bg-gray-50 rounded-lg min-h-[60px]"><p class="text-gray-500 italic">Chưa có công cụ nào.</p></div></div>
+                    <div><h3 class="text-xl font-semibold text-gray-700">Hình học</h3><div class="mt-4 p-4 bg-gray-50 rounded-lg min-h-[60px]"><p class="text-gray-500 italic">Chưa có công cụ nào.</p></div></div>
+                    <div><h3 class="text-xl font-semibold text-gray-700">Thống kê và Xác suất</h3><div class="mt-4 p-4 bg-gray-50 rounded-lg min-h-[60px]"><p class="text-gray-500 italic">Chưa có công cụ nào.</p></div></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- KHUNG HIỂN THỊ CÔNG CỤ (IFRAME) -->
+        <section id="iframe-section" class="mt-16 scroll-animate">
+            <div id="frame-container" class="bg-white rounded-lg shadow-xl p-4 transition-all duration-500">
                 <div id="placeholder" class="text-center py-20 text-gray-500">
                     <h3 class="text-2xl font-semibold">Vui lòng chọn một công cụ để hiển thị</h3>
                     <p>Mô hình tương tác sẽ xuất hiện ở đây.</p>
@@ -93,8 +193,8 @@
         </section>
     </main>
     
-    <!-- PHẦN CUỐI TRANG (FOOTER) - Giữ nguyên để đồng bộ -->
-    <footer id="lienhe" class="bg-gray-800 text-white py-10 mt-12">
+    <!-- PHẦN CUỐI TRANG (FOOTER) -->
+    <footer id="lienhe" class="bg-gray-800 text-white py-10 mt-16">
         <div class="container mx-auto px-6 text-center">
              <p class="text-sm italic text-gray-400">"Cách duy nhất để giỏi là tự làm thật nhiều toán!"</p>
              <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng.</p>
@@ -102,43 +202,66 @@
     </footer>
 
     <script>
-        const toolButtons = document.querySelectorAll('.tool-button');
-        const toolFrame = document.getElementById('tool-frame');
-        const placeholder = document.getElementById('placeholder');
+        document.addEventListener('DOMContentLoaded', function() {
+            const toolButtons = document.querySelectorAll('.tool-button');
+            const toolFrame = document.getElementById('tool-frame');
+            const placeholder = document.getElementById('placeholder');
+            const iframeSection = document.getElementById('iframe-section');
+            let currentActiveButton = null;
 
-        toolButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // Lấy link từ thuộc tính data-src của nút được bấm
-                const toolSrc = this.dataset.src;
-                
-                // Hiển thị khung và ẩn thông báo chờ
-                placeholder.classList.add('hidden');
-                toolFrame.classList.remove('hidden');
-                
-                // Gán link vào iframe để tải công cụ
-                toolFrame.src = toolSrc;
+            // --- Xử lý bấm nút công cụ ---
+            toolButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const toolSrc = this.dataset.src;
+                    
+                    // Bỏ active nút cũ nếu có
+                    if(currentActiveButton) {
+                        currentActiveButton.classList.remove('active');
+                    }
+                    
+                    // Active nút mới và hiển thị iframe
+                    this.classList.add('active');
+                    currentActiveButton = this;
+                    
+                    placeholder.classList.add('hidden');
+                    toolFrame.classList.remove('hidden');
+                    toolFrame.src = toolSrc;
 
-                // Cập nhật trạng thái "active" cho nút
-                toolButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
+                    // Cuộn tới khung hiển thị
+                    iframeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
             });
-        });
 
-        // --- SCRIPT CHO HIỆU ỨNG CUỘN CHUỘT ---
-        const animatedElements = document.querySelectorAll('.scroll-animate');
+            // --- Xử lý điều hướng nhanh và hiệu ứng cuộn trang ---
+            const sections = document.querySelectorAll('section[id^="toan-"]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const scrollAnimateElements = document.querySelectorAll('.scroll-animate');
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                }
-            });
-        }, {
-            threshold: 0.1 // Kích hoạt khi 10% phần tử hiện ra
-        });
+            const observerOptions = { root: null, threshold: 0.1 };
+            
+            // Observer cho hiệu ứng hiện ra
+            const animateObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        animateObserver.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            scrollAnimateElements.forEach(el => animateObserver.observe(el));
 
-        animatedElements.forEach(element => {
-            observer.observe(element);
+            // Observer cho thanh điều hướng
+            const navObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                        });
+                    }
+                });
+            }, { root: null, rootMargin: "-50% 0px -50% 0px", threshold: 0 });
+            sections.forEach(section => navObserver.observe(section));
         });
     </script>
 </body>

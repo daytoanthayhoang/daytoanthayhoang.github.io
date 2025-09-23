@@ -26,10 +26,11 @@
         }
         /* Hiệu ứng mượt mà cho các thành phần */
         .smooth-transform {
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
         }
         .smooth-transform:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         /* --- HIỆU ỨNG NỀN HẠT LIÊN KẾT --- */
         #particle-canvas {
@@ -132,30 +133,37 @@
             </div>
         </section>
 
-        <!-- 3. PHẦN GÓC HỌC TẬP (CÓ THỂ MỞ RỘNG SAU NÀY) -->
+        <!-- 3. PHẦN GÓC HỌC TẬP -->
         <section id="hoclieu" class="bg-gray-200 py-16 scroll-animate">
             <div class="container mx-auto px-6">
                 <h2 class="text-3xl font-bold text-center mb-10">Góc Học Tập</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     
-                    <!-- Góc Học Tập 1 -->
+                    <!-- 1. Công cụ số hóa Toán học (ĐÃ CẬP NHẬT) -->
                     <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
-                        <h3 class="text-2xl font-bold mb-4">Công cụ số học toán</h3>
-                        <p class="text-gray-600 mb-6">Trải nghiệm các mô hình 3D tương tác để hiểu rõ hơn về hình học không gian.</p>
+                        <h3 class="text-2xl font-bold mb-4">Công cụ số hóa Toán</h3>
+                        <p class="text-gray-600 mb-6">Khám phá thư viện công cụ trực quan, phân loại theo từng khối lớp từ 6 đến 9.</p>
                         <a href="./cong-cu.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
                     </div>
                     
-                    <!-- Góc Học Tập 2 ĐÃ SỬA -->
+                    <!-- 2. Nhóm hỗ trợ -->
                     <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
-                        <h3 class="text-2xl font-bold mb-4">Nhóm hỗ trợ tham gia các cuộc thi</h3>
+                        <h3 class="text-2xl font-bold mb-4">Nhóm hỗ trợ thi Violympic</h3>
                         <p class="text-gray-600 mb-6">Tham gia nhóm Zalo để nhận hỗ trợ và trao đổi về các cuộc thi Violympic.</p>
                         <a href="./nhomhotro.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
                     </div>
 
-                    <!-- Góc Học Tập 3 -->
+                    <!-- 3. Các công cụ hỗ trợ lớp học (ĐÃ NÂNG CẤP) -->
                     <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
-                        <h3 class="text-2xl font-bold mb-4">Góc Học Tập 3</h3>
-                        <p class="text-gray-600 mb-6">Mô tả ngắn gọn cho góc học tập 3. Thầy sẽ chỉnh sửa nội dung sau.</p>
+                        <h3 class="text-2xl font-bold mb-4">Công cụ hỗ trợ lớp học</h3>
+                        <p class="text-gray-600 mb-6">Sử dụng các tiện ích như đồng hồ đếm ngược để quản lý lớp học hiệu quả.</p>
+                        <a href="./hotro-class.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
+                    </div>
+
+                    <!-- 4. Góc Học Tập 4 (MỚI) -->
+                    <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
+                        <h3 class="text-2xl font-bold mb-4">Góc Học Tập 4</h3>
+                        <p class="text-gray-600 mb-6">Mô tả ngắn gọn cho góc học tập 4. Thầy sẽ chỉnh sửa nội dung sau.</p>
                         <a href="#" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
                     </div>
                     
@@ -181,7 +189,7 @@
                 </a>
             </div>
             <p class="mt-8 text-sm italic text-gray-400">"Cách duy nhất để giỏi là tự làm thật nhiều toán!"</p>
-            <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng.</p>
+            <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng. HNT Education</p>
         </div>
     </footer>
 

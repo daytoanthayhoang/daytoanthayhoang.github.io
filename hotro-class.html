@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Hỗ Trợ Lớp Học - Dạy Toán Thầy Hoàng</title>
+    <!-- Tích hợp Tailwind CSS và Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        #tool-frame {
+            width: 100%;
+            height: 85vh; /* Tăng chiều cao iframe */
+            border: none;
+        }
+        .tool-button.active {
+            background-color: #1d4ed8;
+            color: white;
+            box-shadow: 0 0 15px rgba(30, 64, 175, 0.5);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- PHẦN ĐẦU TRANG (HEADER) -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+             <a href="./index.html#hoclieu" class="text-blue-600 font-semibold hover:underline">&larr; Quay lại Góc Học Tập</a>
+            <h1 class="text-2xl font-bold text-blue-600 text-center">Công Cụ Hỗ Trợ Lớp Học</h1>
+            <div></div> <!-- Spacer -->
+        </div>
+    </header>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="container mx-auto px-6 py-12">
+        <section id="cong-cu">
+            <p class="text-center text-gray-600 mb-8">Chọn một công cụ bên dưới để bắt đầu.</p>
+
+            <!-- CÁC NÚT CHỌN CÔNG CỤ -->
+            <div id="tool-selector" class="flex flex-wrap justify-center gap-4 mb-8">
+                <button class="tool-button active bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300" data-src="./clockcountdown.html">
+                    Đồng Hồ Đếm Ngược
+                </button>
+                <!-- Thêm các nút công cụ khác ở đây trong tương lai -->
+                <!-- 
+                <button class="tool-button bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-600" data-src="./tool-2.html">
+                    Công Cụ 2
+                </button> 
+                -->
+            </div>
+
+            <!-- KHUNG HIỂN THỊ CÔNG CỤ (IFRAME) -->
+            <div id="frame-container" class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <iframe id="tool-frame" src="./clockcountdown.html" title="Trình giả lập công cụ toán học"></iframe>
+            </div>
+        </section>
+    </main>
+    
+    <!-- PHẦN CUỐI TRANG (FOOTER) -->
+    <footer class="bg-gray-800 text-white py-10 mt-12">
+        <div class="container mx-auto px-6 text-center">
+             <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng.</p>
+        </div>
+    </footer>
+
+    <script>
+        const toolButtons = document.querySelectorAll('.tool-button');
+        const toolFrame = document.getElementById('tool-frame');
+
+        toolButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const toolSrc = this.dataset.src;
+                
+                // Gán link vào iframe để tải công cụ
+                toolFrame.src = toolSrc;
+
+                // Cập nhật trạng thái "active" cho nút
+                toolButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
+

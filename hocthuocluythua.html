@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Thuộc Lòng Lũy Thừa</title>
+    <!-- Tích hợp Tailwind CSS và Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f9fafb; /* Một màu nền sáng, sạch sẽ */
+        }
+        .power-tab-button.active {
+            border-color: #2563eb;
+            background-color: #2563eb;
+            color: white;
+        }
+        /* --- CSS cho hiệu ứng lật thẻ Flashcard --- */
+        .scene {
+            perspective: 800px;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-front {
+            background-color: white;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+        }
+        .card-back {
+            background-color: #3b82f6;
+            color: white;
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <main class="container mx-auto px-4 py-8">
+        <section id="hoc-luy-thua">
+            <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">Học Thuộc Lòng Lũy Thừa</h1>
+            <p class="text-center text-gray-600 mb-10">Chọn một phương pháp học bên dưới.</p>
+            
+            <div class="flex justify-center border-b mb-6">
+                <button id="tab-nhom" class="power-tab-button active text-lg font-semibold py-2 px-6 border-b-4 transition-colors duration-300">Học theo nhóm</button>
+                <button id="tab-flashcard" class="power-tab-button text-lg font-semibold py-2 px-6 border-b-4 border-transparent transition-colors duration-300">Luyện tập với Flashcard</button>
+            </div>
+
+            <!-- Nội dung Học theo nhóm -->
+            <div id="content-nhom" class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-bold mb-4">Lũy thừa có giá trị nhỏ hơn 200</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <h4 class="font-bold text-lg mb-2 text-blue-600">Lũy thừa của 2</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>2<sup>1</sup> = 2</li>
+                            <li>2<sup>2</sup> = 4</li>
+                            <li>2<sup>3</sup> = 8</li>
+                            <li>2<sup>4</sup> = 16</li>
+                            <li>2<sup>5</sup> = 32</li>
+                            <li>2<sup>6</sup> = 64</li>
+                            <li>2<sup>7</sup> = 128</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2 text-blue-600">Lũy thừa của 3</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                           <li>3<sup>1</sup> = 3</li>
+                           <li>3<sup>2</sup> = 9</li>
+                           <li>3<sup>3</sup> = 27</li>
+                           <li>3<sup>4</sup> = 81</li>
+                        </ul>
+                    </div>
+                     <div>
+                        <h4 class="font-bold text-lg mb-2 text-blue-600">Lũy thừa của 5</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                           <li>5<sup>1</sup> = 5</li>
+                           <li>5<sup>2</sup> = 25</li>
+                           <li>5<sup>3</sup> = 125</li>
+                        </ul>
+                    </div>
+                </div>
+                 <h4 class="font-bold text-lg mt-6 mb-2 text-blue-600">Các số chính phương (Bình phương)</h4>
+                 <div class="columns-2 md:columns-4 lg:columns-5">
+                     <ul class="list-disc list-inside space-y-1">
+                        <li>1<sup>2</sup> = 1</li><li>2<sup>2</sup> = 4</li><li>3<sup>2</sup> = 9</li><li>4<sup>2</sup> = 16</li><li>5<sup>2</sup> = 25</li>
+                        <li>6<sup>2</sup> = 36</li><li>7<sup>2</sup> = 49</li><li>8<sup>2</sup> = 64</li><li>9<sup>2</sup> = 81</li><li>10<sup>2</sup> = 100</li>
+                        <li>11<sup>2</sup> = 121</li><li>12<sup>2</sup> = 144</li><li>13<sup>2</sup> = 169</li><li>14<sup>2</sup> = 196</li>
+                    </ul>
+                 </div>
+                 <hr class="my-6">
+                 <h3 class="text-2xl font-bold mb-4">Các lũy thừa đặc biệt trong phạm vi 1000</h3>
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     <div>
+                        <h4 class="font-bold text-lg mb-2 text-blue-600">Lũy thừa cơ số nhỏ</h4>
+                         <ul class="list-disc list-inside space-y-1">
+                            <li>2<sup>8</sup> = 256</li><li>2<sup>9</sup> = 512</li><li>2<sup>10</sup> = 1024</li>
+                            <li>3<sup>5</sup> = 243</li><li>3<sup>6</sup> = 729</li><li>4<sup>4</sup> = 256</li>
+                            <li>5<sup>4</sup> = 625</li><li>6<sup>3</sup> = 216</li><li>7<sup>3</sup> = 343</li>
+                            <li>8<sup>3</sup> = 512</li><li>9<sup>3</sup> = 729</li><li>10<sup>3</sup> = 1000</li>
+                        </ul>
+                     </div>
+                     <div>
+                        <h4 class="font-bold text-lg mb-2 text-blue-600">Số chính phương (tiếp)</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>15<sup>2</sup> = 225</li><li>16<sup>2</sup> = 256</li><li>17<sup>2</sup> = 289</li>
+                            <li>18<sup>2</sup> = 324</li><li>19<sup>2</sup> = 361</li><li>20<sup>2</sup> = 400</li>
+                            <li>21<sup>2</sup> = 441</li><li>22<sup>2</sup> = 484</li><li>23<sup>2</sup> = 529</li>
+                            <li>24<sup>2</sup> = 576</li><li>25<sup>2</sup> = 625</li>
+                        </ul>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- Nội dung Flashcard -->
+            <div id="content-flashcard" class="hidden">
+                 <div class="w-full max-w-md mx-auto p-4">
+                    <p class="text-center text-gray-500 mb-6">Nhấn vào thẻ để xem đáp án</p>
+                    
+                    <div class="scene w-full h-64 md:h-72">
+                        <div id="flashcard" class="card">
+                            <div id="card-front" class="card-face card-front"></div>
+                            <div id="card-back" class="card-face card-back"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex flex-col items-center">
+                        <p id="progress-text" class="text-gray-600 mb-4 font-semibold"></p>
+                        <button id="next-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                            Tiếp theo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- SCRIPT CHO PHẦN HỌC LŨY THỪA ---
+        const tabNhom = document.getElementById('tab-nhom');
+        const tabFlashcard = document.getElementById('tab-flashcard');
+        const contentNhom = document.getElementById('content-nhom');
+        const contentFlashcard = document.getElementById('content-flashcard');
+
+        tabNhom.addEventListener('click', () => {
+            contentNhom.classList.remove('hidden');
+            contentFlashcard.classList.add('hidden');
+            tabNhom.classList.add('active');
+            tabFlashcard.classList.remove('active');
+        });
+        
+        tabFlashcard.addEventListener('click', () => {
+            contentNhom.classList.add('hidden');
+            contentFlashcard.classList.remove('hidden');
+            tabNhom.classList.remove('active');
+            tabFlashcard.classList.add('active');
+        });
+
+        // --- SCRIPT CHO FLASHCARD ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashcardData = [
+                { front: "2<sup>1</sup>", back: "2" }, { front: "2<sup>2</sup>", back: "4" }, { front: "2<sup>3</sup>", back: "8" }, { front: "2<sup>4</sup>", back: "16" }, { front: "2<sup>5</sup>", back: "32" }, { front: "2<sup>6</sup>", back: "64" }, { front: "2<sup>7</sup>", back: "128" },
+                { front: "3<sup>1</sup>", back: "3" }, { front: "3<sup>2</sup>", back: "9" }, { front: "3<sup>3</sup>", back: "27" }, { front: "3<sup>4</sup>", back: "81" },
+                { front: "4<sup>1</sup>", back: "4" }, { front: "4<sup>2</sup>", back: "16" }, { front: "4<sup>3</sup>", back: "64" },
+                { front: "5<sup>1</sup>", back: "5" }, { front: "5<sup>2</sup>", back: "25" }, { front: "5<sup>3</sup>", back: "125" },
+                { front: "6<sup>2</sup>", back: "36" }, { front: "7<sup>2</sup>", back: "49" }, { front: "8<sup>2</sup>", back: "64" }, { front: "9<sup>2</sup>", back: "81" }, { front: "10<sup>2</sup>", back: "100" }, { front: "11<sup>2</sup>", back: "121" }, { front: "12<sup>2</sup>", back: "144" }, { front: "13<sup>2</sup>", back: "169" }, { front: "14<sup>2</sup>", back: "196" },
+                { front: "2<sup>8</sup>", back: "256" }, { front: "2<sup>9</sup>", back: "512" }, { front: "2<sup>10</sup>", back: "1024" },
+                { front: "3<sup>5</sup>", back: "243" }, { front: "3<sup>6</sup>", back: "729" }, { front: "4<sup>4</sup>", back: "256" },
+                { front: "5<sup>4</sup>", back: "625" }, { front: "6<sup>3</sup>", back: "216" }, { front: "7<sup>3</sup>", back: "343" }, { front: "8<sup>3</sup>", back: "512" }, { front: "9<sup>3</sup>", back: "729" }, { front: "10<sup>3</sup>", back: "1000" },
+                { front: "15<sup>2</sup>", back: "225" }, { front: "16<sup>2</sup>", back: "256" }, { front: "17<sup>2</sup>", back: "289" }, { front: "18<sup>2</sup>", back: "324" }, { front: "19<sup>2</sup>", back: "361" }, { front: "20<sup>2</sup>", back: "400" }, { front: "21<sup>2</sup>", back: "441" }, { front: "22<sup>2</sup>", back: "484" }, { front: "23<sup>2</sup>", back: "529" }, { front: "24<sup>2</sup>", back: "576" }, { front: "25<sup>2</sup>", back: "625" },
+            ];
+
+            const flashcardEl = document.getElementById('flashcard');
+            const cardFrontEl = document.getElementById('card-front');
+            const cardBackEl = document.getElementById('card-back');
+            const nextButton = document.getElementById('next-button');
+            const progressText = document.getElementById('progress-text');
+            
+            let shuffledCards = [];
+            let currentIndex = 0;
+
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            function loadCard() {
+                if (shuffledCards.length === 0) return;
+                if (currentIndex >= shuffledCards.length) {
+                    currentIndex = 0;
+                    shuffle(shuffledCards);
+                }
+                
+                const cardData = shuffledCards[currentIndex];
+                cardFrontEl.innerHTML = cardData.front;
+                cardBackEl.innerHTML = cardData.back;
+                flashcardEl.classList.remove('is-flipped');
+                progressText.textContent = `Thẻ ${currentIndex + 1} / ${shuffledCards.length}`;
+            }
+
+            function startFlashcard() {
+                shuffledCards = [...flashcardData];
+                shuffle(shuffledCards);
+                currentIndex = 0;
+                loadCard();
+            }
+
+            flashcardEl.addEventListener('click', () => flashcardEl.classList.toggle('is-flipped'));
+            nextButton.addEventListener('click', () => {
+                currentIndex++;
+                loadCard();
+            });
+            
+            startFlashcard();
+        });
+    </script>
+
+</body>
+</html>
