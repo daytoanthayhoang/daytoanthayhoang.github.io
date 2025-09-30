@@ -24,6 +24,9 @@
         body {
             font-family: 'Be Vietnam Pro', sans-serif;
         }
+        html {
+            scroll-behavior: smooth;
+        }
         /* Hiệu ứng mượt mà cho các thành phần */
         .smooth-transform {
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
@@ -100,31 +103,44 @@
             </div>
         </section>
 
-        <!-- 2. PHẦN THÔNG BÁO MỚI NHẤT -->
+        <!-- 2. PHẦN THÔNG BÁO MỚI NHẤT (ĐÃ CẬP NHẬT) -->
         <section id="thongbao" class="py-16 scroll-animate">
             <div class="container mx-auto px-6">
                 <h2 class="text-3xl font-bold text-center mb-10">Thông Báo Mới Nhất</h2>
                 <div class="max-w-4xl mx-auto space-y-6">
                     
-                    <!-- Thông báo demo 1 -->
+                    <!-- Thông báo KTTX Lần 1 -->
                     <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500">
                        <div class="flex justify-between items-start">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">Thông báo Lịch kiểm tra giữa học kỳ II</h3>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Kiểm Tra Thường Xuyên Lần 1 - Tuần 5 (06/10/2025 - 10/10/2025)</h3>
                             <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">MỚI</span>
                         </div>
-                        <p class="text-sm text-gray-500 mb-4">Ngày đăng: XX/XX/XXXX</p>
-                        <p class="text-gray-700">
-                        Nội dung cho thông báo demo 1. Thầy sẽ chỉnh sửa nội dung chi tiết tại đây.<br>
-                        Các em học sinh chú ý, lịch kiểm tra giữa kỳ I môn Toán sẽ diễn ra vào tuần sau. Nội dung ôn tập bao gồm các chương đã học từ đầu kỳ. Thầy đã cập nhật đề cương chi tiết trong Kho Học Liệu.
+                        <p class="text-sm text-gray-500 mb-4">Ngày đăng: 01/10/2025</p>
+                        <p class="text-gray-700 mb-4">
+                            Các em học sinh khối 6 và khối 7 chú ý, lịch Kiểm Tra Thường Xuyên Lần 1 sẽ diễn ra vào Tuần 5.
+                            <br>
+                            Để chuẩn bị tốt nhất cho bài kiểm tra, các em hãy nhấn vào nút bên dưới để xem lại nội dung ôn tập chi tiết.
                         </p>
+                        <div class="flex flex-wrap gap-4">
+                            <button onclick="showReview('https://1drv.ms/p/c/67c40ff835c61dde/IQR1eLArNf_1SIS5nUuzgMhnAUfhnAd7nz1v9MLij2ta4bU')" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300">
+                                Ôn tập KTTX Lần 1 - Lớp 6
+                            </button>
+                            <button onclick="showReview('https://1drv.ms/p/c/67c40ff835c61dde/IQSlSXL4ahmwSZe-Sz1c3QH7ASvM1G18cxDEZslrSQg8Q38')" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300">
+                                Ôn tập KTTX Lần 1 - Lớp 7
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Thông báo demo 2 -->
+                    <!-- Khung hiển thị nội dung ôn tập -->
+                    <div id="review-container" class="hidden bg-white rounded-lg shadow-lg p-2 sm:p-4 mt-6">
+                        <iframe id="review-frame" class="w-full h-96 md:h-[600px]" frameborder="0"></iframe>
+                    </div>
+
+                    <!-- Thông báo cũ -->
                     <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-gray-300">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Thông báo demo 2</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Thông báo cũ</h3>
                         <p class="text-sm text-gray-500 mb-4">Ngày đăng: XX/XX/XXXX</p>
                         <p class="text-gray-700">
-                            Nội dung cho thông báo demo 2. Thầy sẽ chỉnh sửa nội dung chi tiết tại đây.
                             Thầy vừa bổ sung thêm các dạng bài tập nâng cao và bài giải chi tiết cho chuyên đề .... Các em có thể truy cập Kho Học Liệu để tải về và luyện tập thêm.
                         </p>
                     </div>
@@ -193,14 +209,25 @@
         </div>
     </footer>
 
-    <!-- SCRIPT ĐỂ XỬ LÝ MENU TRÊN ĐIỆN THOẠI -->
+    <!-- SCRIPT ĐỂ XỬ LÝ -->
     <script>
+        // SCRIPT CHO MENU TRÊN ĐIỆN THOẠI
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
 
         mobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
+
+        // SCRIPT HIỂN THỊ IFRAME ÔN TẬP
+        const reviewContainer = document.getElementById('review-container');
+        const reviewFrame = document.getElementById('review-frame');
+
+        function showReview(url) {
+            reviewFrame.src = url;
+            reviewContainer.classList.remove('hidden');
+            reviewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
         // --- SCRIPT CHO HIỆU ỨNG NỀN HẠT LIÊN KẾT ---
         const canvas = document.getElementById('particle-canvas');
