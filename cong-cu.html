@@ -23,10 +23,10 @@
             border: 1px solid #e2e8f0;
         }
         /* --- Kiểu cho nút công cụ --- */
-        .tool-button {
+        .tool-trigger {
             transition: all 0.3s ease;
         }
-        .tool-button.active {
+        .tool-trigger.active {
             background-color: #1d4ed8;
             color: white;
             box-shadow: 0 0 15px rgba(30, 64, 175, 0.5);
@@ -36,13 +36,17 @@
         #quick-nav {
             top: 80px; /* Vị trí dính lại sau header */
         }
-        #quick-nav a {
+        #quick-nav a.nav-link {
             transition: all 0.2s ease-in-out;
         }
-        #quick-nav a.active {
+        #quick-nav a.nav-link.active {
             color: #2563eb; /* Màu xanh dương */
             border-color: #2563eb;
             background-color: #eff6ff;
+        }
+        /* --- Kiểu cho menu thả xuống --- */
+        .dropdown-menu {
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
         /* --- Hiệu ứng hiện ra khi cuộn --- */
         .scroll-animate {
@@ -77,11 +81,12 @@
     <!-- THANH ĐIỀU HƯỚNG NHANH -->
     <nav id="quick-nav" class="sticky bg-white/80 backdrop-blur-sm shadow-sm z-40">
         <div class="container mx-auto px-6">
-            <div class="flex justify-center items-center border-b">
+            <div id="nav-container" class="flex justify-center items-center border-b flex-wrap">
                 <a href="#toan-6" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Toán 6</a>
                 <a href="#toan-7" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Toán 7</a>
                 <a href="#toan-8" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Toán 8</a>
                 <a href="#toan-9" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Toán 9</a>
+                <a href="#iframe-section" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Khu Vực Mô Phỏng</a>
             </div>
         </div>
     </nav>
@@ -103,7 +108,7 @@
                     <div>
                         <h3 class="text-xl font-semibold text-gray-700">Số và Đại số</h3>
                         <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg min-h-[60px]">
-                             <button class="tool-button bg-green-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-green-600" data-src="./hocthuocluythua.html">Học Thuộc Lòng Lũy Thừa</button>
+                             <button class="tool-trigger bg-green-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-green-600" data-src="./hocthuocluythua.html">Học Thuộc Lòng Lũy Thừa</button>
                         </div>
                     </div>
                     <div>
@@ -134,12 +139,16 @@
                     <div>
                         <h3 class="text-xl font-semibold text-gray-700">Hình học</h3>
                         <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
-                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-cube/index.html">Gấp Hình Lập Phương</button>
-                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./gaphinhhopchunhat.html">Gấp Hình Hộp Chữ Nhật</button>
-                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-triangular-prism/index.html">Gấp Lăng Trụ Tam Giác</button>
-                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-quadrilateral-prism/index.html">Gấp Lăng Trụ Tứ Giác</button>
-                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./dientichxungquanhHHCN.html">Mô Phỏng Diện Tích Xung Quanh</button>		
-                             <button class="tool-button bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./thetichHHCN.html">Mô Phỏng Thể Tích</button>	
+                             <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-cube/index.html">Gấp Hình Lập Phương</button>
+                             <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./gaphinhhopchunhat.html">Gấp Hình Hộp Chữ Nhật</button>
+                             <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-triangular-prism/index.html">Gấp Lăng Trụ Tam Giác</button>
+                             <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="https://chuongtrinhmoi.com/compos/interaction-3d-quadrilateral-prism/index.html">Gấp Lăng Trụ Tứ Giác</button>
+                             <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./dientichxungquanhHHCN.html">Diện Tích Xung Quanh HHCN</button>		
+                             <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./thetichHHCN.html">Thể Tích HHCN</button>	
+							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./dientichxungquanhHLTTamG.html">DTXQ Lăng Trụ Tam Giác</button>	
+							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./dientichxungquanhHLTTuG.html">DTXQ Lăng Trụ Tứ Giác</button>	
+							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./thetichHLTTamG.html">Thể Tích Lăng Trụ Tam Giác</button>	
+							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./thetichHLTTuG.html">Thể Tích Lăng Trụ Tứ Giác</button>	
                         </div>
                     </div>
                     <div>
@@ -158,7 +167,7 @@
                     <div>
                         <h3 class="text-xl font-semibold text-gray-700">Số và Đại số</h3>
                         <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg min-h-[60px]">
-                            <button class="tool-button bg-green-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-green-600" data-src="./hoc-hang-dang-thuc.html">Học 7 Hằng Đẳng Thức Đáng Nhớ</button>
+                            <button class="tool-trigger bg-green-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-green-600" data-src="./hoc-hang-dang-thuc.html">Học 7 Hằng Đẳng Thức Đáng Nhớ</button>
                         </div>
                     </div>
                     <div>
@@ -189,6 +198,7 @@
 
         <!-- KHUNG HIỂN THỊ CÔNG CỤ (IFRAME) -->
         <section id="iframe-section" class="mt-16 scroll-animate">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">Khu Vực Mô Phỏng</h2>
             <div id="frame-container" class="bg-white rounded-lg shadow-xl p-4 transition-all duration-500">
                 <div id="placeholder" class="text-center py-20 text-gray-500">
                     <h3 class="text-2xl font-semibold">Vui lòng chọn một công cụ để hiển thị</h3>
@@ -203,43 +213,97 @@
     <footer id="lienhe" class="bg-gray-800 text-white py-10 mt-16">
         <div class="container mx-auto px-6 text-center">
              <p class="text-sm italic text-gray-400">"Cách duy nhất để giỏi là tự làm thật nhiều toán!"</p>
-             <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng.</p>
+             <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng. HNT Education</p>
         </div>
     </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const toolButtons = document.querySelectorAll('.tool-button');
             const toolFrame = document.getElementById('tool-frame');
             const placeholder = document.getElementById('placeholder');
             const iframeSection = document.getElementById('iframe-section');
             let currentActiveButton = null;
 
-            // --- Xử lý bấm nút công cụ ---
-            toolButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const toolSrc = this.dataset.src;
-                    
-                    // Bỏ active nút cũ nếu có
-                    if(currentActiveButton) {
-                        currentActiveButton.classList.remove('active');
+            // --- TẠO MENU THẢ XUỐNG TỰ ĐỘNG ---
+            function createNavDropdowns() {
+                const sectionsWithTools = document.querySelectorAll('section[id^="toan-"]');
+                const navContainer = document.getElementById('nav-container');
+
+                sectionsWithTools.forEach(section => {
+                    const sectionId = section.getAttribute('id');
+                    const navLink = navContainer.querySelector(`a.nav-link[href="#${sectionId}"]`);
+                    const tools = section.querySelectorAll('.tool-trigger');
+
+                    if (navLink && tools.length > 0) {
+                        // Tạo một div bao bọc để xử lý hover
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'relative group';
+                        
+                        // Thay thế link gốc bằng wrapper trong nav
+                        navLink.parentNode.replaceChild(wrapper, navLink);
+                        wrapper.appendChild(navLink);
+
+                        // Tạo menu thả xuống
+                        const dropdown = document.createElement('div');
+                        dropdown.className = 'dropdown-menu absolute left-1/2 -translate-x-1/2 top-full mt-1 bg-white rounded-md shadow-lg z-50 hidden group-hover:block p-4 w-max max-w-lg';
+                        
+                        // Tạo container dạng lưới bên trong menu
+                        const gridContainer = document.createElement('div');
+                        gridContainer.className = 'grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2';
+
+                        tools.forEach(tool => {
+                            const menuItem = document.createElement('a');
+                            menuItem.href = '#iframe-section'; // Trỏ đến khu vực iframe
+                            menuItem.textContent = tool.textContent;
+                            menuItem.dataset.src = tool.dataset.src;
+                            menuItem.className = 'tool-trigger text-center px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors';
+                            gridContainer.appendChild(menuItem);
+                        });
+
+                        dropdown.appendChild(gridContainer);
+                        wrapper.appendChild(dropdown);
                     }
-                    
-                    // Active nút mới và hiển thị iframe
-                    this.classList.add('active');
-                    currentActiveButton = this;
-                    
-                    placeholder.classList.add('hidden');
-                    toolFrame.classList.remove('hidden');
-                    toolFrame.src = toolSrc;
-
-                    // Cuộn tới khung hiển thị
-                    iframeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 });
-            });
+            }
+            
+            createNavDropdowns();
 
-            // --- Xử lý điều hướng nhanh và hiệu ứng cuộn trang ---
-            const sections = document.querySelectorAll('section[id^="toan-"]');
+
+            // --- XỬ LÝ SỰ KIỆN CLICK CHO TẤT CẢ CÔNG CỤ ---
+            function handleToolClick(event) {
+                // Chỉ xử lý cho các element có class 'tool-trigger'
+                if (!event.target.matches('.tool-trigger')) return;
+                
+                event.preventDefault(); // Ngăn hành vi mặc định của thẻ a
+                
+                const toolSrc = event.target.dataset.src;
+                
+                if (currentActiveButton) {
+                    currentActiveButton.classList.remove('active');
+                }
+                
+                // Thêm class 'active' cho nút vừa bấm, nếu nó là button gốc
+                if (event.target.tagName === 'BUTTON') {
+                     event.target.classList.add('active');
+                     currentActiveButton = event.target;
+                } else {
+                    currentActiveButton = null; // Không cần highlight item trong menu
+                }
+                
+                placeholder.classList.add('hidden');
+                toolFrame.classList.remove('hidden');
+                toolFrame.src = toolSrc;
+
+                // Cuộn đến khu vực hiển thị một cách mượt mà
+                iframeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Gán sự kiện click cho toàn bộ document để bắt được các nút được tạo động
+            document.addEventListener('click', handleToolClick);
+
+
+            // --- XỬ LÝ ĐIỀU HƯỚNG NHANH VÀ HIỆU ỨNG CUỘN TRANG ---
+            const sections = document.querySelectorAll('#toan-6, #toan-7, #toan-8, #toan-9, #iframe-section');
             const navLinks = document.querySelectorAll('.nav-link');
             const scrollAnimateElements = document.querySelectorAll('.scroll-animate');
 
@@ -272,3 +336,4 @@
     </script>
 </body>
 </html>
+

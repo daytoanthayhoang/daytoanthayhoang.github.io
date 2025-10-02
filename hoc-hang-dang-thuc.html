@@ -43,6 +43,39 @@
             color: white !important;
             border-color: #dc2626 !important;
         }
+        /* --- CSS cho Flashcard --- */
+        .flashcard-container {
+            perspective: 1000px;
+        }
+        .flashcard-inner {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        .flashcard-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            color: white;
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .flashcard-back {
+            background: linear-gradient(135deg, #764ba2 0%, #48c6ef 100%);
+            transform: rotateY(180deg);
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -52,8 +85,9 @@
             <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">Học Thuộc 7 Hằng Đẳng Thức Đáng Nhớ</h1>
             <p class="text-center text-gray-600 mb-10">Chọn một phương pháp học bên dưới.</p>
             
-            <div class="flex justify-center border-b mb-6">
+            <div class="flex flex-wrap justify-center border-b mb-6">
                 <button id="tab-hoc-thuoc" class="tab-button active text-lg font-semibold py-2 px-6 border-b-4 transition-colors duration-300">Học thuộc</button>
+                <button id="tab-flashcard" class="tab-button text-lg font-semibold py-2 px-6 border-b-4 border-transparent transition-colors duration-300">Học với Flashcard</button>
                 <button id="tab-luyen-tap" class="tab-button text-lg font-semibold py-2 px-6 border-b-4 border-transparent transition-colors duration-300">Luyện tập & Nhận biết lỗi sai</button>
             </div>
 
@@ -61,6 +95,34 @@
             <div id="content-hoc-thuoc">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Hằng đẳng thức sẽ được chèn vào đây bằng JS -->
+                </div>
+            </div>
+
+            <!-- Nội dung Flashcard -->
+            <div id="content-flashcard" class="hidden">
+                <div class="w-full max-w-lg mx-auto flex flex-col items-center">
+                    <!-- Flashcard Component -->
+                    <div class="flashcard-container w-full h-64 mb-6">
+                        <div id="flashcard" class="flashcard-inner w-full h-full cursor-pointer">
+                            <div id="flashcard-front" class="flashcard-face flashcard-front">
+                                <!-- Nội dung mặt trước được chèn bằng JS -->
+                            </div>
+                            <div id="flashcard-back" class="flashcard-face flashcard-back">
+                                <!-- Nội dung mặt sau được chèn bằng JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Controls -->
+                    <p id="flashcard-progress" class="text-lg font-semibold text-gray-700 mb-4"></p>
+                    <div class="flex items-center space-x-4">
+                        <button id="prev-flashcard-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                            &larr; Trước
+                        </button>
+                        <p class="text-gray-600 hidden sm:block">Nhấn vào thẻ để lật</p>
+                        <button id="next-flashcard-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                            Tiếp &rarr;
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -100,6 +162,37 @@
                 { name: "5. Lập phương của một hiệu", formula: "(A - B)<sup>3</sup> = A<sup>3</sup> - 3A<sup>2</sup>B + 3AB<sup>2</sup> - B<sup>3</sup>" },
                 { name: "6. Tổng hai lập phương", formula: "A<sup>3</sup> + B<sup>3</sup> = (A + B)(A<sup>2</sup> - AB + B<sup>2</sup>)" },
                 { name: "7. Hiệu hai lập phương", formula: "A<sup>3</sup> - B<sup>3</sup> = (A - B)(A<sup>2</sup> + AB + B<sup>2</sup>)" }
+            ];
+
+            const flashcardData = [
+                // HĐT 1
+                { front: "1. Bình phương của một tổng", back: "(A + B)<sup>2</sup> = A<sup>2</sup> + 2AB + B<sup>2</sup>" },
+                { front: "(A + B)<sup>2</sup>", back: "A<sup>2</sup> + 2AB + B<sup>2</sup>" },
+                { front: "A<sup>2</sup> + 2AB + B<sup>2</sup>", back: "(A + B)<sup>2</sup>" },
+                // HĐT 2
+                { front: "2. Bình phương của một hiệu", back: "(A - B)<sup>2</sup> = A<sup>2</sup> - 2AB + B<sup>2</sup>" },
+                { front: "(A - B)<sup>2</sup>", back: "A<sup>2</sup> - 2AB + B<sup>2</sup>" },
+                { front: "A<sup>2</sup> - 2AB + B<sup>2</sup>", back: "(A - B)<sup>2</sup>" },
+                // HĐT 3
+                { front: "3. Hiệu hai bình phương", back: "A<sup>2</sup> - B<sup>2</sup> = (A - B)(A + B)" },
+                { front: "A<sup>2</sup> - B<sup>2</sup>", back: "(A - B)(A + B)" },
+                { front: "(A - B)(A + B)", back: "A<sup>2</sup> - B<sup>2</sup>" },
+                // HĐT 4
+                { front: "4. Lập phương của một tổng", back: "(A + B)<sup>3</sup> = A<sup>3</sup> + 3A<sup>2</sup>B + 3AB<sup>2</sup> + B<sup>3</sup>" },
+                { front: "(A + B)<sup>3</sup>", back: "A<sup>3</sup> + 3A<sup>2</sup>B + 3AB<sup>2</sup> + B<sup>3</sup>" },
+                { front: "A<sup>3</sup> + 3A<sup>2</sup>B + 3AB<sup>2</sup> + B<sup>3</sup>", back: "(A + B)<sup>3</sup>" },
+                // HĐT 5
+                { front: "5. Lập phương của một hiệu", back: "(A - B)<sup>3</sup> = A<sup>3</sup> - 3A<sup>2</sup>B + 3AB<sup>2</sup> - B<sup>3</sup>" },
+                { front: "(A - B)<sup>3</sup>", back: "A<sup>3</sup> - 3A<sup>2</sup>B + 3AB<sup>2</sup> - B<sup>3</sup>" },
+                { front: "A<sup>3</sup> - 3A<sup>2</sup>B + 3AB<sup>2</sup> - B<sup>3</sup>", back: "(A - B)<sup>3</sup>" },
+                // HĐT 6
+                { front: "6. Tổng hai lập phương", back: "A<sup>3</sup> + B<sup>3</sup> = (A + B)(A<sup>2</sup> - AB + B<sup>2</sup>)" },
+                { front: "A<sup>3</sup> + B<sup>3</sup>", back: "(A + B)(A<sup>2</sup> - AB + B<sup>2</sup>)" },
+                { front: "(A + B)(A<sup>2</sup> - AB + B<sup>2</sup>)", back: "A<sup>3</sup> + B<sup>3</sup>" },
+                // HĐT 7
+                { front: "7. Hiệu hai lập phương", back: "A<sup>3</sup> - B<sup>3</sup> = (A - B)(A<sup>2</sup> + AB + B<sup>2</sup>)" },
+                { front: "A<sup>3</sup> - B<sup>3</sup>", back: "(A - B)(A<sup>2</sup> + AB + B<sup>2</sup>)" },
+                { front: "(A - B)(A<sup>2</sup> + AB + B<sup>2</sup>)", back: "A<sup>3</sup> - B<sup>3</sup>" }
             ];
 
             const practiceQuestions = [
@@ -246,8 +339,10 @@
 
             // --- DOM ELEMENTS ---
             const tabHocThuoc = document.getElementById('tab-hoc-thuoc');
+            const tabFlashcard = document.getElementById('tab-flashcard');
             const tabLuyenTap = document.getElementById('tab-luyen-tap');
             const contentHocThuoc = document.getElementById('content-hoc-thuoc');
+            const contentFlashcard = document.getElementById('content-flashcard');
             const contentLuyenTap = document.getElementById('content-luyen-tap');
             const hocThuocContainer = contentHocThuoc.querySelector('.grid');
             const questionText = document.getElementById('question-text');
@@ -256,23 +351,53 @@
             const progressText = document.getElementById('progress-text');
             const explanationContainer = document.getElementById('explanation-container');
             const explanationText = document.getElementById('explanation-text');
+            const flashcard = document.getElementById('flashcard');
+            const flashcardFront = document.getElementById('flashcard-front');
+            const flashcardBack = document.getElementById('flashcard-back');
+            const prevFlashcardBtn = document.getElementById('prev-flashcard-btn');
+            const nextFlashcardBtn = document.getElementById('next-flashcard-btn');
+            const flashcardProgress = document.getElementById('flashcard-progress');
             
             let currentQuestionIndex = 0;
+            let currentFlashcardIndex = 0;
             let shuffledQuestions = [];
+            let shuffledFlashcards = [];
+
+            // --- CHỨC NĂNG CHUNG ---
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
 
             // --- CHỨC NĂNG CHUYỂN TAB ---
-            tabHocThuoc.addEventListener('click', () => {
-                contentHocThuoc.classList.remove('hidden');
-                contentLuyenTap.classList.add('hidden');
-                tabHocThuoc.classList.add('active');
-                tabLuyenTap.classList.remove('active');
-            });
+            function setActiveTab(activeTab) {
+                const tabs = [tabHocThuoc, tabFlashcard, tabLuyenTap];
+                const contents = [contentHocThuoc, contentFlashcard, contentLuyenTap];
+
+                tabs.forEach(tab => tab.classList.remove('active'));
+                activeTab.classList.add('active');
+
+                contents.forEach(content => content.classList.add('hidden'));
+
+                if (activeTab === tabHocThuoc) contentHocThuoc.classList.remove('hidden');
+                if (activeTab === tabFlashcard) contentFlashcard.classList.remove('hidden');
+                if (activeTab === tabLuyenTap) contentLuyenTap.classList.remove('hidden');
+            }
+
+            tabHocThuoc.addEventListener('click', () => setActiveTab(tabHocThuoc));
             
+            tabFlashcard.addEventListener('click', () => {
+                setActiveTab(tabFlashcard);
+                shuffledFlashcards = [...flashcardData];
+                shuffle(shuffledFlashcards);
+                currentFlashcardIndex = 0;
+                renderFlashcard();
+            });
+
             tabLuyenTap.addEventListener('click', () => {
-                contentHocThuoc.classList.add('hidden');
-                contentLuyenTap.classList.remove('hidden');
-                tabHocThuoc.classList.remove('active');
-                tabLuyenTap.classList.add('active');
+                setActiveTab(tabLuyenTap);
                 startPractice();
             });
 
@@ -290,14 +415,39 @@
                 });
             }
 
-            // --- CHỨC NĂNG LUYỆN TẬP ---
-            function shuffle(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
+            // --- CHỨC NĂNG FLASHCARD ---
+            function renderFlashcard() {
+                flashcard.classList.remove('is-flipped');
+                
+                const cardData = shuffledFlashcards[currentFlashcardIndex];
+                
+                const isFrontName = /^\d+\./.test(cardData.front);
+                const isBackName = /^\d+\./.test(cardData.back);
+
+                const frontClass = isFrontName ? 'text-3xl font-bold text-center' : 'font-mono text-2xl md:text-3xl text-center';
+                const backClass = isBackName ? 'text-3xl font-bold text-center' : 'font-mono text-2xl md:text-3xl text-center';
+
+                flashcardFront.innerHTML = `<p class="${frontClass}">${cardData.front}</p>`;
+                flashcardBack.innerHTML = `<p class="${backClass}">${cardData.back}</p>`;
+                
+                flashcardProgress.textContent = `Thẻ ${currentFlashcardIndex + 1} / ${shuffledFlashcards.length}`;
             }
 
+            flashcard.addEventListener('click', () => {
+                flashcard.classList.toggle('is-flipped');
+            });
+
+            nextFlashcardBtn.addEventListener('click', () => {
+                currentFlashcardIndex = (currentFlashcardIndex + 1) % shuffledFlashcards.length;
+                renderFlashcard();
+            });
+
+            prevFlashcardBtn.addEventListener('click', () => {
+                currentFlashcardIndex = (currentFlashcardIndex - 1 + shuffledFlashcards.length) % shuffledFlashcards.length;
+                renderFlashcard();
+            });
+
+            // --- CHỨC NĂNG LUYỆN TẬP ---
             function startPractice() {
                 shuffledQuestions = [...practiceQuestions];
                 shuffle(shuffledQuestions);
@@ -336,7 +486,7 @@
 
                 const allButtons = optionsContainer.querySelectorAll('.option-btn');
                 allButtons.forEach(btn => {
-                    btn.disabled = true; // Vô hiệu hóa các nút sau khi chọn
+                    btn.disabled = true;
                     btn.removeEventListener('click', handleOptionClick);
                 });
 
@@ -344,15 +494,12 @@
                     selectedButton.classList.add('correct');
                 } else {
                     selectedButton.classList.add('incorrect');
-                    // Hiển thị đáp án đúng
                     optionsContainer.querySelector(`[data-index='${q.correct}']`).classList.add('correct');
                 }
 
-                // Hiển thị giải thích
                 explanationText.textContent = q.explanation;
                 explanationContainer.classList.remove('hidden');
 
-                // Hiển thị nút "Câu tiếp theo"
                 nextQuestionBtn.classList.remove('hidden');
             }
 

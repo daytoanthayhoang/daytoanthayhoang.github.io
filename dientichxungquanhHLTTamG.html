@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mô phỏng Diện tích Xung quanh Lăng trụ Tam giác (Three.js)</title>
+<style>
+    /* Kiểu dáng chung cho trang */
+    body { 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        min-height: 100vh; 
+        margin: 0; 
+        background-color: #f0f4f8;
+        color: #333;
+    }
+    /* Vùng chứa chính */
+    .container { 
+        display: flex; 
+        flex-wrap: wrap;
+        gap: 30px; 
+        align-items: flex-start; 
+        background: #ffffff; 
+        padding: 25px; 
+        border-radius: 15px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+        max-width: 95%;
+        width: 1000px; 
+    }
+    /* Vùng chứa mô phỏng 3D */
+    .simulation-container {
+        flex: 1;
+        min-width: 550px; 
+        height: 500px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #canvas-container {
+        width: 100%;
+        height: 100%;
+        cursor: grab;
+        border-radius: 8px;
+        background-color: #e9ecef;
+    }
+    #canvas-container:active {
+        cursor: grabbing;
+    }
+    /* Bảng điều khiển */
+    .controls { 
+        width: 320px;
+        padding-top: 10px;
+    }
+    h2 {
+        margin-top: 0;
+        color: #0056b3;
+        text-align: center;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    /* Công thức */
+    .formula { 
+        font-size: 1.25em; 
+        font-weight: 500; 
+        margin: 20px 0; 
+        text-align: center; 
+        padding: 12px;
+        background-color: #e7f5ff;
+        border-left: 5px solid #007bff;
+        border-radius: 8px;
+    }
+    .formula .term { 
+        color: #d9534f;
+        font-weight: bold;
+    }
+    /* Thanh trượt */
+    .slider-group {
+        margin-bottom: 15px;
+    }
+    .slider-group label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    .slider-group input[type="range"] {
+        width: 100%;
+        cursor: pointer;
+    }
+    /* Kết quả */
+    .output p {
+        margin: 10px 0;
+        padding: 8px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .output span {
+        font-weight: bold;
+        color: #0056b3;
+    }
+    #error-message {
+        color: #c9302c;
+        text-align: center;
+        font-weight: bold;
+        margin-top: 15px;
+        display: none; /* Ẩn mặc định */
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="simulation-container">
+        <!-- Vùng canvas cho Three.js -->
+        <div id="canvas-container"></div>
+    </div>
+    <div class="controls">
+        <h2>Diện tích Xung quanh Hình Lăng Trụ Đứng Tam Giác</h2>
+		<div class="slider-group">
+            <label for="height-slider">Quét chiều cao: <span id="scan-percentage">0%</span></label>
+            <input type="range" id="height-slider" min="0" max="100" value="0" step="1">
+        </div>
+        <div class="slider-group">
+            <label for="side-a-slider">Cạnh a: <span id="side-a-val">3</span></label>
+            <input type="range" id="side-a-slider" min="0.5" max="5" value="3" step="0.1">
+        </div>
+        <div class="slider-group">
+            <label for="side-b-slider">Cạnh b: <span id="side-b-val">4</span></label>
+            <input type="range" id="side-b-slider" min="0.5" max="5" value="4" step="0.1">
+        </div>
+        <div class="slider-group">
+            <label for="side-c-slider">Cạnh c: <span id="side-c-val">5</span></label>
+            <input type="range" id="side-c-slider" min="0.5" max="5" value="5" step="0.1">
+        </div>
+        <div class="slider-group">
+            <label for="max-height-slider">Cao (h): <span id="max-height-val">4</span></label>
+            <input type="range" id="max-height-slider" min="0.5" max="6" value="4" step="0.1">
+        </div>
+
+        <div class="formula">Sxq = <span class="term">Cđáy</span> × <span class="term">h</span> = (<span class="term">a</span>+<span class="term">b</span>+<span class="term">c</span>)×<span class="term">h</span></div>
+        
+        <div class="output">
+            <p>Chu vi đáy: <span id="perimeter-val">0</span></p>
+            <p>Chiều cao quét: <span id="height-val">0</span></p>
+            <p>Diện tích đã tạo: <span id="area-val">0</span></p>
+        </div>
+        <p id="error-message">Các cạnh không tạo thành tam giác!</p>
+    </div>
+</div>
+
+<!-- Tải thư viện Three.js và các module cần thiết -->
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { Line2 } from 'three/addons/lines/Line2.js';
+    import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+    import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+
+    // --- CÁC BIẾN TOÀN CỤC ---
+    let scene, camera, renderer, controls;
+    let mainPrism, perimeterSlice, lateralAreaPrism;
+    let vertices2D = []; // Lưu trữ đỉnh tam giác để tái sử dụng
+
+    // --- DOM ELEMENTS ---
+    const canvasContainer = document.getElementById('canvas-container');
+    const sideASlider = document.getElementById('side-a-slider');
+    const sideBSlider = document.getElementById('side-b-slider');
+    const sideCSlider = document.getElementById('side-c-slider');
+    const maxHeightSlider = document.getElementById('max-height-slider');
+    const heightSlider = document.getElementById('height-slider');
+    
+    const sideAVal = document.getElementById('side-a-val');
+    const sideBVal = document.getElementById('side-b-val');
+    const sideCVal = document.getElementById('side-c-val');
+    const maxHeightVal = document.getElementById('max-height-val');
+    const scanPercentage = document.getElementById('scan-percentage');
+    const perimeterVal = document.getElementById('perimeter-val');
+    const heightVal = document.getElementById('height-val');
+    const areaVal = document.getElementById('area-val');
+    const errorMessage = document.getElementById('error-message');
+
+    // --- KHỞI TẠO CẢNH 3D ---
+    function init() {
+        // Scene
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xe9ecef);
+
+        // Camera
+        camera = new THREE.PerspectiveCamera(50, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+        camera.position.set(0, 4, 12); 
+
+        // Renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        canvasContainer.appendChild(renderer.domElement);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // Controls
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        
+        // Grid Helper
+        const gridHelper = new THREE.GridHelper(20, 20, 0xadb5bd, 0xced4da);
+        scene.add(gridHelper);
+
+        // --- TẠO CÁC ĐỐI TƯỢNG GIỮ CHỖ ---
+        // Lăng trụ chính (trong suốt với đường viền)
+        mainPrism = new THREE.Group();
+        scene.add(mainPrism);
+
+        // Lát cắt chu vi (dùng Line2 cho viền đậm)
+        const sliceLineMaterial = new LineMaterial({
+            color: 0x00ffff,
+            linewidth: 5,
+            resolution: new THREE.Vector2(canvasContainer.clientWidth, canvasContainer.clientHeight)
+        });
+        perimeterSlice = new Line2(new LineGeometry(), sliceLineMaterial);
+        mainPrism.add(perimeterSlice); // Thêm lát cắt làm con của lăng trụ chính
+        
+        // Khối diện tích xung quanh (rỗng, không có 2 đáy)
+        const sideMaterial = new THREE.MeshStandardMaterial({ color: 0xd9534f, side: THREE.DoubleSide });
+        const transparentMaterial = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+        // NOTE: Material index 0 is for caps, index 1 is for sides.
+        lateralAreaPrism = new THREE.Mesh(new THREE.BufferGeometry(), [transparentMaterial, sideMaterial]);
+        scene.add(lateralAreaPrism);
+
+
+        // --- GÁN SỰ KIỆN ---
+        [sideASlider, sideBSlider, sideCSlider, maxHeightSlider, heightSlider].forEach(slider => {
+            slider.addEventListener('input', updateAll);
+        });
+        window.addEventListener('resize', onWindowResize);
+        
+        updateAll();
+        animate();
+    }
+
+    /** Kiểm tra xem 3 cạnh có tạo thành tam giác hợp lệ không */
+    function isTriangle(a, b, c) {
+        return a + b > c && a + c > b && b + c > a;
+    }
+
+    /** Tính toán tọa độ các đỉnh của tam giác từ độ dài 3 cạnh */
+    function getTriangleVertices(a, b, c) {
+        // Đỉnh 1 ở gốc tọa độ
+        const v1 = new THREE.Vector2(0, 0);
+        // Đỉnh 2 trên trục x
+        const v2 = new THREE.Vector2(c, 0);
+        // Tính tọa độ đỉnh 3
+        const x3 = (c*c + b*b - a*a) / (2 * c);
+        const y3 = Math.sqrt(Math.max(0, b*b - x3*x3)); // Dùng max(0,...) để tránh lỗi số âm nhỏ
+        const v3 = new THREE.Vector2(x3, y3);
+        
+        // Dịch chuyển các đỉnh để trọng tâm tam giác về gốc tọa độ
+        const centroidX = (v1.x + v2.x + v3.x) / 3;
+        const centroidY = (v1.y + v2.y + v3.y) / 3;
+
+        return [
+            v1.sub(new THREE.Vector2(centroidX, centroidY)),
+            v2.sub(new THREE.Vector2(centroidX, centroidY)),
+            v3.sub(new THREE.Vector2(centroidX, centroidY))
+        ];
+    }
+    
+    // Hàm tạo hình học lăng trụ
+    function createPrismGeometry(shape, height) {
+        const extrudeSettings = { depth: height, bevelEnabled: false };
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        // Xoay để lăng trụ đứng dọc theo trục Y, đáy ở y=0
+        geometry.rotateX(-Math.PI / 2);
+        return geometry;
+    }
+
+
+    // --- CẬP NHẬT TRẠNG THÁI MÔ PHỎNG ---
+    function updateAll() {
+        // 1. Lấy giá trị từ sliders
+        const a = parseFloat(sideASlider.value);
+        const b = parseFloat(sideBSlider.value);
+        const c = parseFloat(sideCSlider.value);
+        const h = parseFloat(maxHeightSlider.value);
+        const percentage = parseInt(heightSlider.value) / 100;
+
+        // 2. Cập nhật hiển thị text
+        sideAVal.textContent = a.toFixed(1);
+        sideBVal.textContent = b.toFixed(1);
+        sideCVal.textContent = c.toFixed(1);
+        maxHeightVal.textContent = h.toFixed(1);
+        scanPercentage.textContent = `${Math.round(percentage * 100)}%`;
+
+        // 3. Kiểm tra tam giác và tính toán
+        const validTriangle = isTriangle(a, b, c);
+        errorMessage.style.display = validTriangle ? 'none' : 'block';
+        
+        mainPrism.visible = validTriangle;
+        lateralAreaPrism.visible = validTriangle && percentage > 0;
+        
+        if (!validTriangle) {
+            perimeterVal.textContent = 'N/A';
+            heightVal.textContent = 'N/A';
+            areaVal.textContent = 'N/A';
+            return;
+        }
+
+        const perimeter = a + b + c;
+        const currentHeight = h * percentage;
+        const currentArea = perimeter * currentHeight;
+
+        perimeterVal.textContent = perimeter.toFixed(2);
+        heightVal.textContent = currentHeight.toFixed(2);
+        areaVal.textContent = currentArea.toFixed(2);
+
+        // 4. Cập nhật các đối tượng 3D
+        vertices2D = getTriangleVertices(a, b, c);
+        const triangleShape = new THREE.Shape(vertices2D);
+        
+        const gap = 2.0;
+        const maxDim = Math.max(a, b, c);
+        const prismX = -(maxDim / 2 + gap);
+        const generatedPrismX = maxDim / 2 + gap;
+        
+        // Cập nhật lăng trụ chính
+        while(mainPrism.children.length > 1){ // Giữ lại lát cắt (là phần tử đầu tiên)
+            mainPrism.remove(mainPrism.children[mainPrism.children.length - 1]); 
+        }
+
+        const prismGeometry = createPrismGeometry(triangleShape, h);
+        const mainMaterial = new THREE.MeshStandardMaterial({ color: 0x007bff, transparent: true, opacity: 0.15 });
+        const prismMesh = new THREE.Mesh(prismGeometry, mainMaterial);
+        
+        const edges = new THREE.EdgesGeometry(prismGeometry);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0056b3 });
+        const wireframe = new THREE.LineSegments(edges, lineMaterial);
+        
+        mainPrism.add(prismMesh, wireframe);
+        mainPrism.position.set(prismX, 0, 0); // Đặt đáy của lăng trụ tại y=0
+
+        // Cập nhật lát cắt chu vi
+        const points3D = [];
+        vertices2D.forEach(v => {
+            // Chuyển đổi từ đỉnh 2D (x, y) sang điểm 3D (x, 0, -y) để khớp với phép quay của lăng trụ
+            points3D.push(v.x, 0, -v.y); 
+        });
+        // Nối điểm cuối về điểm đầu để khép kín
+        points3D.push(vertices2D[0].x, 0, -vertices2D[0].y);
+
+        perimeterSlice.geometry.setPositions(points3D);
+        perimeterSlice.position.y = currentHeight; // Di chuyển lát cắt dọc theo trục Y
+
+        // Cập nhật khối diện tích xung quanh (rỗng)
+        const generatedHeight = Math.max(0.001, currentHeight);
+        
+        // Hủy geometry cũ để tránh rò rỉ bộ nhớ
+        lateralAreaPrism.geometry.dispose(); 
+        
+        // Tạo geometry mới với chiều cao hiện tại
+        const generatedPrismGeometry = createPrismGeometry(triangleShape, generatedHeight);
+        lateralAreaPrism.geometry = generatedPrismGeometry;
+        
+        lateralAreaPrism.position.set(generatedPrismX, 0, 0);
+    }
+
+    // --- XỬ LÝ THAY ĐỔI KÍCH THƯỚC CỬA SỔ ---
+    function onWindowResize() {
+        camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        perimeterSlice.material.resolution.set(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    }
+
+    // --- VÒNG LẶP ANIMATION ---
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    
+    // --- BẮT ĐẦU ---
+    init();
+
+</script>
+</body>
+</html>
+

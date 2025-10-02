@@ -114,8 +114,11 @@
         <div id="canvas-container"></div>
     </div>
     <div class="controls">
-        <h2>Thể Tích</h2>
-        
+        <h2>Thể Tích Hình Hộp Chữ Nhật</h2>
+        <div class="slider-group">
+            <label for="height-slider">Quét chiều cao: <span id="scan-percentage">0%</span></label>
+            <input type="range" id="height-slider" min="0" max="100" value="0" step="1">
+        </div>
         <div class="slider-group">
             <label for="length-slider">Dài (a): <span id="length-val">2</span></label>
             <input type="range" id="length-slider" min="0.5" max="4" value="2" step="0.1">
@@ -128,10 +131,7 @@
             <label for="max-height-slider">Cao (c): <span id="max-height-val">3</span></label>
             <input type="range" id="max-height-slider" min="0.5" max="5" value="3" step="0.1">
         </div>
-        <div class="slider-group">
-            <label for="height-slider">Quét chiều cao: <span id="scan-percentage">0%</span></label>
-            <input type="range" id="height-slider" min="0" max="100" value="0" step="1">
-        </div>
+
 
         <div class="formula">V = <span class="term">Sđáy</span> × <span class="term">Cao</span> = (<span class="term">a</span> × <span class="term">b</span>) × <span class="term">c</span></div>
         
