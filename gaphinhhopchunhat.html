@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mô phỏng Gấp Hình Hộp Chữ Nhật (Tổng hợp)</title>
+<style>
+    /* Kiểu dáng chung cho trang */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f0f4f8;
+        color: #333;
+    }
+    /* Vùng chứa chính */
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        align-items: flex-start;
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        max-width: 95%;
+        width: 900px;
+    }
+    /* Vùng chứa mô phỏng 3D */
+    .simulation-container {
+        flex: 1;
+        min-width: 450px;
+        height: 500px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #canvas-container {
+        width: 100%;
+        height: 100%;
+        cursor: grab;
+        border-radius: 8px;
+        background-color: #e9ecef;
+    }
+    #canvas-container:active {
+        cursor: grabbing;
+    }
+    /* Bảng điều khiển */
+    .controls {
+        width: 300px;
+        padding-top: 10px;
+    }
+    h2 {
+        margin-top: 0;
+        color: #0056b3;
+        text-align: center;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    /* Nhóm điều khiển chung */
+    .control-group {
+        margin-bottom: 20px;
+    }
+    .control-group > label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+    }
+    /* Thanh trượt */
+    .slider-group label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    .slider-group input[type="range"] {
+        width: 100%;
+        cursor: pointer;
+    }
+    /* Nút radio */
+    .radio-group div {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+     .radio-group input[type="radio"] {
+        margin-right: 8px;
+        cursor: pointer;
+     }
+      .radio-group label {
+        font-weight: normal;
+        margin-bottom: 0;
+        cursor: pointer;
+      }
+    /* Chú thích màu sắc */
+    .legend {
+        margin-top: 25px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+    }
+    .legend-color {
+        width: 15px;
+        height: 15px;
+        border-radius: 3px;
+        margin-right: 10px;
+        border: 1px solid rgba(0,0,0,0.2);
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="simulation-container">
+        <!-- Vùng canvas cho Three.js -->
+        <div id="canvas-container"></div>
+    </div>
+    <div class="controls">
+        <h2>Gấp Hộp Chữ Nhật</h2>
+
+        <!-- Thanh trượt "Gấp / Mở" đã được chuyển lên đầu -->
+        <div class="control-group slider-group">
+            <label for="fold-slider">Gấp / Mở: <span id="fold-val">0%</span></label>
+            <input type="range" id="fold-slider" min="0" max="100" value="0" step="1">
+        </div>
+
+        <!-- Các thanh trượt còn lại -->
+        <div class="control-group slider-group">
+            <label for="length-slider">Dài (a): <span id="length-val">4</span></label>
+            <input type="range" id="length-slider" min="1" max="6" value="4" step="0.1">
+        </div>
+        <div class="control-group slider-group">
+            <label for="width-slider">Rộng (b): <span id="width-val">3</span></label>
+            <input type="range" id="width-slider" min="1" max="5" value="3" step="0.1">
+        </div>
+        <div class="control-group slider-group">
+            <label for="height-slider">Cao (c): <span id="height-val">2</span></label>
+            <input type="range" id="height-slider" min="1" max="4" value="2" step="0.1">
+        </div>
+        
+        <!-- Lựa chọn chế độ chính -->
+        <div class="control-group radio-group">
+            <label>Kiểu mô phỏng:</label>
+             <div>
+                <input type="radio" id="mode-closed" name="sim-mode" value="closed" checked>
+                <label for="mode-closed">Nắp đóng</label>
+            </div>
+            <div>
+                <input type="radio" id="mode-open" name="sim-mode" value="open">
+                <label for="mode-open">Nắp mở</label>
+            </div>
+        </div>
+
+        <!-- Bảng điều khiển cho chế độ "Nắp đóng" -->
+        <div class="control-group radio-group" id="controls-closed">
+            <label>Gắn mặt trên vào:</label>
+            <div>
+                <input type="radio" id="attach-front" name="attach-point" value="front" checked>
+                <label for="attach-front">Mặt trước</label>
+            </div>
+            <div>
+                <input type="radio" id="attach-back" name="attach-point" value="back">
+                <label for="attach-back">Mặt sau</label>
+            </div>
+            <div>
+                <input type="radio" id="attach-left" name="attach-point" value="left">
+                <label for="attach-left">Mặt trái</label>
+            </div>
+            <div>
+                <input type="radio" id="attach-right" name="attach-point" value="right">
+                <label for="attach-right">Mặt phải</label>
+            </div>
+        </div>
+
+        <!-- Bảng điều khiển cho chế độ "Nắp mở" (ẩn ban đầu) -->
+        <div class="control-group radio-group" id="controls-open" style="display: none;">
+            <label>Kiểu mở hộp:</label>
+            <div>
+                 <input type="radio" id="unfold-front-back" name="unfold-type" value="front-back" checked>
+                 <label for="unfold-front-back">Theo Trước/Sau (Xanh)</label>
+            </div>
+            <div>
+                <input type="radio" id="unfold-left-right" name="unfold-type" value="left-right">
+                <label for="unfold-left-right">Theo Trái/Phải (Đỏ)</label>
+            </div>
+        </div>
+
+        <!-- Chú thích màu sắc -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ffc107;"></div>
+                <span>Mặt đáy</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #28a745;"></div>
+                <span>Mặt trên</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #007bff;"></div>
+                <span>Mặt trước / sau</span>
+            </div>
+             <div class="legend-item">
+                <div class="legend-color" style="background-color: #dc3545;"></div>
+                <span>Mặt trái / phải</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tải thư viện Three.js và OrbitControls -->
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // --- CÁC BIẾN TOÀN CỤC ---
+    let scene, camera, renderer, controls;
+    let boxNet; 
+    let faces = {}; 
+
+    const COLORS = {
+        BOTTOM: 0xffc107, TOP: 0x28a745, FRONT_BACK: 0x007bff,
+        LEFT_RIGHT: 0xdc3545, OUTLINE: 0x343a40,
+    };
+
+    // --- DOM ELEMENTS ---
+    const canvasContainer = document.getElementById('canvas-container');
+    const lengthSlider = document.getElementById('length-slider');
+    const widthSlider = document.getElementById('width-slider');
+    const heightSlider = document.getElementById('height-slider');
+    const foldSlider = document.getElementById('fold-slider');
+    
+    // DOM elements cho việc lựa chọn chế độ
+    const simModeRadios = document.querySelectorAll('input[name="sim-mode"]');
+    const controlsClosed = document.getElementById('controls-closed');
+    const controlsOpen = document.getElementById('controls-open');
+
+    // DOM elements cho các giá trị
+    const lengthVal = document.getElementById('length-val');
+    const widthVal = document.getElementById('width-val');
+    const heightVal = document.getElementById('height-val');
+    const foldVal = document.getElementById('fold-val');
+
+    // --- HÀM HỖ TRỢ TẠO MẶT PHẲNG VỚI VIỀN ---
+    function createFace(width, height, color) {
+        const faceGroup = new THREE.Group();
+        const geometry = new THREE.PlaneGeometry(width, height);
+        const material = new THREE.MeshLambertMaterial({ color: color, side: THREE.DoubleSide });
+        const plane = new THREE.Mesh(geometry, material);
+
+        const edges = new THREE.EdgesGeometry(geometry);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: COLORS.OUTLINE, linewidth: 2 });
+        const outline = new THREE.LineSegments(edges, lineMaterial);
+
+        faceGroup.add(plane);
+        faceGroup.add(outline);
+        return faceGroup;
+    }
+
+    // --- KHỞI TẠO CẢNH 3D ---
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xe9ecef);
+
+        camera = new THREE.PerspectiveCamera(50, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+        camera.position.set(5, 6, 12);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        canvasContainer.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        const gridHelper = new THREE.GridHelper(30, 30, 0xadb5bd, 0xced4da);
+        scene.add(gridHelper);
+
+        // --- TẠO CÁC MẶT VÀ KHỚP XOAY ---
+        boxNet = new THREE.Group();
+        faces.bottom = createFace(1, 1, COLORS.BOTTOM);
+        faces.top = createFace(1, 1, COLORS.TOP);
+        faces.front = createFace(1, 1, COLORS.FRONT_BACK);
+        faces.back = createFace(1, 1, COLORS.FRONT_BACK);
+        faces.left = createFace(1, 1, COLORS.LEFT_RIGHT);
+        faces.right = createFace(1, 1, COLORS.LEFT_RIGHT);
+
+        faces.frontPivot = new THREE.Group();
+        faces.backPivot = new THREE.Group();
+        faces.leftPivot = new THREE.Group();
+        faces.rightPivot = new THREE.Group();
+        faces.topPivot = new THREE.Group();
+
+        // Cấu trúc phân cấp
+        faces.frontPivot.add(faces.front);
+        faces.backPivot.add(faces.back);
+        faces.leftPivot.add(faces.left);
+        faces.rightPivot.add(faces.right);
+        faces.topPivot.add(faces.top);
+
+        // Ban đầu thêm tất cả các khớp vào boxNet, logic sẽ gắn lại khớp trên sau
+        boxNet.add(faces.bottom, faces.frontPivot, faces.backPivot, faces.leftPivot, faces.rightPivot);
+        scene.add(boxNet);
+        
+        // --- GÁN SỰ KIỆN ---
+        // Sự kiện cho các thanh trượt
+        [lengthSlider, widthSlider, heightSlider, foldSlider].forEach(slider => {
+            slider.addEventListener('input', updateBox);
+        });
+        
+        // Sự kiện cho tất cả các nút radio
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', updateBox);
+        });
+
+        // Sự kiện chuyển đổi chế độ chính
+        simModeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const isClosedMode = e.target.value === 'closed';
+                controlsClosed.style.display = isClosedMode ? 'block' : 'none';
+                controlsOpen.style.display = isClosedMode ? 'none' : 'block';
+                updateBox(); // Cập nhật lại hộp khi đổi chế độ
+            });
+        });
+
+        window.addEventListener('resize', onWindowResize);
+
+        // Khởi tạo và vẽ hộp
+        updateBox();
+        animate();
+    }
+
+    // --- HÀM CẬP NHẬT CHÍNH ---
+    function updateBox() {
+        const l = parseFloat(lengthSlider.value);
+        const w = parseFloat(widthSlider.value);
+        const h = parseFloat(heightSlider.value);
+        const foldPercentage = parseInt(foldSlider.value);
+        const foldAngle = (foldPercentage / 100) * (Math.PI / 2);
+        
+        // Lấy chế độ mô phỏng đang được chọn
+        const simMode = document.querySelector('input[name="sim-mode"]:checked').value;
+
+        // Cập nhật text hiển thị
+        lengthVal.textContent = l.toFixed(1);
+        widthVal.textContent = w.toFixed(1);
+        heightVal.textContent = h.toFixed(1);
+        foldVal.textContent = `${foldPercentage}%`;
+
+        // --- Cập nhật kích thước các mặt ---
+        const updateFaceGeometry = (faceObj, newWidth, newHeight) => {
+            faceObj.children.forEach(child => {
+                if (child.geometry) {
+                    child.geometry.dispose();
+                    child.geometry = child instanceof THREE.Mesh ? new THREE.PlaneGeometry(newWidth, newHeight) : new THREE.EdgesGeometry(new THREE.PlaneGeometry(newWidth, newHeight));
+                }
+            });
+        };
+        updateFaceGeometry(faces.bottom, l, w);
+        updateFaceGeometry(faces.top, l, w);
+        updateFaceGeometry(faces.front, l, h);
+        updateFaceGeometry(faces.back, l, h);
+        updateFaceGeometry(faces.left, w, h);
+        updateFaceGeometry(faces.right, w, h);
+
+        // --- Cập nhật vị trí các mặt bên (chung cho cả 2 chế độ) ---
+        faces.bottom.rotation.x = -Math.PI / 2;
+        faces.frontPivot.position.set(0, 0, w / 2);
+        faces.front.position.set(0, h / 2, 0);
+        faces.frontPivot.rotation.x = foldAngle;
+        faces.backPivot.position.set(0, 0, -w / 2);
+        faces.back.position.set(0, h / 2, 0);
+        faces.backPivot.rotation.x = -foldAngle;
+        faces.rightPivot.position.set(l / 2, 0, 0);
+        faces.right.position.set(0, h / 2, 0);
+        faces.right.rotation.y = Math.PI / 2;
+        faces.rightPivot.rotation.z = -foldAngle;
+        faces.leftPivot.position.set(-l / 2, 0, 0);
+        faces.left.position.set(0, h / 2, 0);
+        faces.left.rotation.y = -Math.PI / 2;
+        faces.leftPivot.rotation.z = foldAngle;
+
+        // --- LOGIC RIÊNG CHO TỪNG CHẾ ĐỘ ---
+        if (simMode === 'closed') {
+            // LOGIC CHO "NẮP ĐÓNG"
+            const attachPoint = document.querySelector('input[name="attach-point"]:checked').value;
+            
+            // Tách mặt trên ra khỏi parent cũ
+            if (faces.topPivot.parent) faces.topPivot.parent.remove(faces.topPivot);
+            
+            // Reset local transforms
+            faces.topPivot.position.set(0, 0, 0);
+            faces.topPivot.rotation.set(0, 0, 0);
+            faces.top.position.set(0, 0, 0);
+            faces.top.rotation.set(0, 0, 0);
+
+            switch (attachPoint) {
+                case 'front':
+                    faces.frontPivot.add(faces.topPivot);
+                    faces.topPivot.position.set(0, h, 0);
+                    faces.top.position.set(0, 0, -w / 2);
+                    faces.top.rotation.x = -Math.PI / 2;
+                    faces.topPivot.rotation.x = foldAngle;
+                    break;
+                case 'back':
+                    faces.backPivot.add(faces.topPivot);
+                    faces.topPivot.position.set(0, h, 0);
+                    faces.top.position.set(0, 0, w / 2);
+                    faces.top.rotation.x = -Math.PI / 2;
+                    faces.topPivot.rotation.x = -foldAngle;
+                    break;
+                case 'left':
+                    faces.leftPivot.add(faces.topPivot);
+                    faces.topPivot.position.set(0, h, 0);
+                    faces.top.position.set(l / 2, 0, 0);
+                    faces.top.rotation.x = -Math.PI / 2;
+                    faces.topPivot.rotation.z = foldAngle;
+                    break;
+                case 'right':
+                    faces.rightPivot.add(faces.topPivot);
+                    faces.topPivot.position.set(0, h, 0);
+                    faces.top.position.set(-l / 2, 0, 0);
+                    faces.top.rotation.x = -Math.PI / 2;
+                    faces.topPivot.rotation.z = -foldAngle;
+                    break;
+            }
+        } else {
+            // LOGIC CHO "NẮP MỞ"
+            const unfoldMode = document.querySelector('input[name="unfold-type"]:checked').value;
+
+            // Tách mặt trên ra khỏi parent cũ
+            if (faces.topPivot.parent) faces.topPivot.parent.remove(faces.topPivot);
+
+            if (unfoldMode === 'front-back') {
+                faces.frontPivot.add(faces.topPivot);
+                faces.topPivot.position.set(0, h, 0); 
+                faces.top.position.set(0, 0, w / 2);
+                faces.top.rotation.set(-Math.PI / 2, 0, 0);
+                faces.topPivot.rotation.set(-foldAngle, 0, 0);
+            } else { // unfoldMode === 'left-right'
+                faces.rightPivot.add(faces.topPivot);
+                faces.topPivot.position.set(0, h, 0);
+                faces.top.position.set(l / 2, 0, 0);
+                faces.top.rotation.set(-Math.PI / 2, 0, 0);
+                faces.topPivot.rotation.set(0, 0, foldAngle);
+            }
+        }
+    }
+
+    // --- CÁC HÀM TIỆN ÍCH KHÁC ---
+    function onWindowResize() {
+        camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    // --- BẮT ĐẦU ---
+    init();
+
+</script>
+</body>
+</html>
+
