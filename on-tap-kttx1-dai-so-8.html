@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập KTTX1 - Đại số 8</title>
+    <!-- Tích hợp Tailwind CSS và Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- MathJax for rendering LaTeX -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f0f9ff;
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .option-btn.correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-color: #16a34a !important;
+        }
+        .option-btn.incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+        .progress-bar-inner {
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <main class="container mx-auto px-4 py-8">
+        <div id="quiz-container" class="w-full max-w-3xl mx-auto p-6 md:p-8 bg-white rounded-2xl shadow-lg">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-blue-700 mb-2">Ôn tập trắc nghiệm Đại số 8</h1>
+            <p class="text-center text-gray-500 mb-6">Kiểm tra Thường xuyên Lần 1</p>
+
+            <!-- Progress Bar and Score -->
+            <div id="progress-container" class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <p id="question-counter" class="text-sm font-semibold text-gray-600"></p>
+                    <p id="score-display" class="text-sm font-semibold text-blue-600"></p>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-blue-500 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Question Area -->
+            <div id="question-area">
+                <h2 id="question-text" class="text-xl md:text-2xl font-semibold mb-6 text-center min-h-[60px]"></h2>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Feedback Area -->
+            <div id="feedback-container" class="hidden mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+                <h4 class="font-bold text-blue-800 mb-1">Giải thích:</h4>
+                <p id="explanation-text" class="text-blue-700"></p>
+            </div>
+
+            <!-- Navigation -->
+            <div class="text-center mt-8">
+                <button id="next-btn" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-full shadow-lg transition-transform transform hover:scale-105 focus:outline-none">
+                    Câu tiếp theo
+                </button>
+            </div>
+             <!-- Result Screen -->
+            <div id="result-container" class="hidden text-center">
+                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Hoàn thành!</h2>
+                 <p id="result-text" class="text-lg text-gray-600 mb-2"></p>
+                 <p id="result-message" class="font-semibold mb-8"></p>
+                 <button id="restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-10 rounded-full shadow-lg transition-transform transform hover:scale-105 focus:outline-none">
+                     Làm lại
+                 </button>
+             </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const questions = [
+                // Existing Questions
+                {
+                    question: "Biểu thức nào sau đây là đơn thức?",
+                    options: ["$(1 + x)x^3$", "$x + 2y$", "$(xy + z)t$", "$3xy^2z^5$"],
+                    correct: 3,
+                    explanation: "Đơn thức là biểu thức chỉ gồm một số, một biến, hoặc một tích giữa các số và các biến. $3xy^2z^5$ là một tích như vậy."
+                },
+                {
+                    question: "Trong những biểu thức sau, biểu thức nào không phải là đa thức?",
+                    options: ["$\\frac{1}{2}x + y^2$", "$3x - 2xy + z^2$", "$2x^2 + y$", "$\\frac{1}{x}$"],
+                    correct: 3,
+                    explanation: "Đa thức không chứa phép chia cho biến. Biểu thức $\\frac{1}{x}$ có chứa phép chia cho biến x."
+                },
+                {
+                    question: "Bậc của đơn thức $5xy^2z \\cdot (-\\frac{7}{3})x^6y$ là bao nhiêu?",
+                    options: ["8", "9", "10", "11"],
+                    correct: 3,
+                    explanation: "Thu gọn đơn thức: $5xy^2z \\cdot (-\\frac{7}{3})x^6y = -\\frac{35}{3}x^7y^3z$. Bậc của đơn thức là tổng số mũ của các biến: $7 + 3 + 1 = 11$."
+                },
+                {
+                    question: "Tổng của hai đơn thức $A = -\\frac{1}{4}xy^3$ và $B = 3xy^3$ có hệ số là:",
+                    options: ["$\\frac{11}{4}$", "$\\frac{3}{4}$", "$\\frac{5}{4}$", "$-\\frac{3}{8}$"],
+                    correct: 0,
+                    explanation: "Tổng $A + B = (-\\frac{1}{4} + 3)xy^3 = (-\\frac{1}{4} + \\frac{12}{4})xy^3 = \\frac{11}{4}xy^3$. Vậy hệ số là $\\frac{11}{4}$."
+                },
+                {
+                    question: "Thu gọn đơn thức $5xy^2 \\cdot (-\\frac{6}{5})x^5y^2$ ta được đơn thức:",
+                    options: ["$6x^6y^6$", "$-8x^4y^5$", "$-6x^6y^4$", "$-\\frac{2}{9}x^6y^5$"],
+                    correct: 2,
+                    explanation: "$(5 \\cdot -\\frac{6}{5}) \\cdot (x \\cdot x^5) \\cdot (y^2 \\cdot y^2) = -6x^6y^4$."
+                },
+                {
+                    question: "Hai đơn thức nào sau đây đồng dạng?",
+                    options: ["$4x^3y$ và $4xy$", "$5x^2y$ và $3xy^2$", "$xy$ và $-2xy$", "$x^3$ và $3x$"],
+                    correct: 2,
+                    explanation: "Hai đơn thức đồng dạng là hai đơn thức có hệ số khác 0 và có cùng phần biến."
+                },
+                {
+                    question: "Phần hệ số của đơn thức $12x^2y^2z^4$ là:",
+                    options: ["$12x^2y^2z^4$", "12", "$x^2y^2z^4$", "$12xyz$"],
+                    correct: 1,
+                    explanation: "Hệ số của một đơn thức là phần số (hằng số) trong đơn thức đó."
+                },
+                {
+                    question: "Bậc của đơn thức $3x^2y^3$ là:",
+                    options: ["6", "3", "4", "5"],
+                    correct: 3,
+                    explanation: "Bậc của đơn thức là tổng số mũ của tất cả các biến có trong đơn thức đó: $2 + 3 = 5$."
+                },
+                {
+                    question: "Kết quả phép nhân hai đơn thức $x(2x^2)$ là:",
+                    options: ["$2x^2$", "$3x^3$", "$2x^3$", "$x^3$"],
+                    correct: 2,
+                    explanation: "$x \\cdot 2x^2 = 2x^{1+2} = 2x^3$."
+                },
+                {
+                    question: "Kết quả của phép tính $x(3x^2 + 1)$ là:",
+                    options: ["$3x^2 + x$", "$3x^3 + x$", "$2x^3 + x$", "$3x^3 + 1$"],
+                    correct: 1,
+                    explanation: "Áp dụng tính chất phân phối: $x \\cdot 3x^2 + x \\cdot 1 = 3x^3 + x$."
+                },
+                {
+                    question: "Đẳng thức nào sau đây là hằng đẳng thức?",
+                    options: ["$2a + b = a + 2b$", "$a + 3 = 3a - 1$", "$2(a - 2) = 4a$", "$a(a + 1) = a^2 + a$"],
+                    correct: 3,
+                    explanation: "Hằng đẳng thức là đẳng thức đúng với mọi giá trị của biến. $a(a+1) = a^2 + a$ luôn đúng."
+                },
+                {
+                    question: "Biểu thức $x^2 - 2xy + y^2$ viết gọn là:",
+                    options: ["$x^2 + y^2$", "$x^3 - y^3$", "$(x - y)^2$", "$(x + y)^2$"],
+                    correct: 2,
+                    explanation: "Đây là hằng đẳng thức số 2: Bình phương của một hiệu $(A-B)^2 = A^2 - 2AB + B^2$."
+                },
+                {
+                    question: "Khẳng định nào sau đây là đúng?",
+                    options: ["$(x + 5y)^2 = x^2 + 5x + 25y^2$", "$(x + 5y)^2 = x^2 + 2x + 25y^2$", "$(x + 5y)^2 = x^2 + 10x + 10y^2$", "$(x + 5y)^2 = x^2 + 10xy + 25y^2$"],
+                    correct: 3,
+                    explanation: "Áp dụng hằng đẳng thức $(A+B)^2 = A^2+2AB+B^2$ với $A=x, B=5y$, ta có $x^2 + 2(x)(5y) + (5y)^2 = x^2 + 10xy + 25y^2$."
+                },
+                {
+                    question: "Kết quả của phép tính $(2x + y)(2x - y)$ là:",
+                    options: ["$4x - y$", "$4x + y$", "$4x^2 - y^2$", "$4x^2 + y^2$"],
+                    correct: 2,
+                    explanation: "Đây là hằng đẳng thức số 3 (Hiệu hai bình phương): $(A+B)(A-B) = A^2-B^2$. Với $A=2x, B=y$, ta có $(2x)^2 - y^2 = 4x^2 - y^2$."
+                },
+                {
+                    question: "Khai triển hằng đẳng thức $(x - 3y)^2$ ta được:",
+                    options: ["$x^2 - 6xy + 9y^2$", "$x^2 - 3xy + 9y^2$", "$x^2 - 9y^2$", "$x^2 - 6xy + 3y^2$"],
+                    correct: 0,
+                    explanation: "Áp dụng hằng đẳng thức $(A-B)^2=A^2-2AB+B^2$ với $A=x, B=3y$, ta có $x^2 - 2(x)(3y) + (3y)^2 = x^2 - 6xy + 9y^2$."
+                },
+                {
+                    question: "Viết biểu thức $x^2 - 8x + 16$ dưới dạng bình phương một hiệu là:",
+                    options: ["$(x - 16)^2$", "$(x - 4)^2$", "$(x - 2)^2$", "$(x - 8)^2$"],
+                    correct: 1,
+                    explanation: "$x^2 - 8x + 16 = x^2 - 2(x)(4) + 4^2$. Đây là dạng $A^2 - 2AB + B^2$ với $A=x, B=4$. Vậy kết quả là $(x - 4)^2$."
+                },
+                {
+                    question: "Hằng đẳng thức hiệu hai lập phương là:",
+                    options: ["$(x - 2y)^2 = x^2 - 2xy + y^2$", "$x^2 - y^2 = (x - y)^2$", "$x^3 + y^3 = (x - y)(x^2 + xy + y^2)$", "$x^3 - y^3 = (x - y)(x^2 + xy + y^2)$"],
+                    correct: 3,
+                    explanation: "Hằng đẳng thức hiệu hai lập phương là $A^3 - B^3 = (A - B)(A^2 + AB + B^2)$."
+                },
+                 {
+                    question: "Hằng đẳng thức tổng hai lập phương là:",
+                    options: ["$(x - 2y)^2 = x^2 - 2xy + y^2$", "$x^2 - y^2 = (x-y)^2$", "$x^3 + y^3 = (x + y)(x^2 - xy + y^2)$", "$x^3 - y^3 = (x - y)(x^2 - xy + y^2)$"],
+                    correct: 2,
+                    explanation: "Hằng đẳng thức tổng hai lập phương là $A^3 + B^3 = (A + B)(A^2 - AB + B^2)$."
+                },
+                {
+                    question: "Điền vào chỗ trống: $(A + B)^2 = A^2 + ... + B^2$.",
+                    options: ["$3AB$", "$2AB$", "$AB$", "$4AB$"],
+                    correct: 1,
+                    explanation: "Đây là hằng đẳng thức bình phương của một tổng: $(A+B)^2 = A^2 + 2AB + B^2$."
+                },
+                {
+                    question: "Điền vào chỗ trống sau: $x^2 - \\text{__} = (x - 4)(x + 4)$",
+                    options: ["2", "4", "8", "16"],
+                    correct: 3,
+                    explanation: "Áp dụng hằng đẳng thức hiệu hai bình phương: $(x - 4)(x + 4) = x^2 - 4^2 = x^2 - 16$."
+                },
+                {
+                    question: "Trong những biểu thức sau, biểu thức nào là đơn thức?",
+                    options: ["$5x^2+1$", "$2xy$", "$x+1$", "$3y-2$"],
+                    correct: 1,
+                    explanation: "Đơn thức là biểu thức chỉ gồm một số, một biến, hoặc một tích giữa các số và các biến. $2xy$ là một tích như vậy."
+                },
+                {
+                    question: "Cho các biểu thức: $\\frac{x}{y}$; $x+1$; $2x^2-9$; $3xy+2$; $4y^2-1$. Có bao nhiêu đa thức trong các biểu thức trên?",
+                    options: ["1", "2", "3", "4"],
+                    correct: 3,
+                    explanation: "Đa thức là tổng của các đơn thức. Biểu thức $\\frac{x}{y}$ không phải là đơn thức (vì có phép chia cho biến). Có 4 đa thức là $x+1; 2x^2-9; 3xy+2; 4y^2-1$."
+                },
+                {
+                    question: "Thay $x = -3; y = 5$ vào biểu thức $x - 3xy + 5xy^2 + y^3$ ta nhận được giá trị của biểu thức là:",
+                    options: ["280", "659", "-208", "-500"],
+                    correct: 2,
+                    explanation: "Thay x = -3 và y = 5 vào biểu thức: $(-3) - 3(-3)(5) + 5(-3)(5^2) + 5^3 = -3 + 45 - 375 + 125 = -208$."
+                },
+                {
+                    question: "Cho các biểu thức: $x^2 + y^2$; $2025$; $x^3 + y$; $\\frac{1}{5}x + \\frac{x}{y}$; $x + xyz$; $4 + \\sqrt{yz}$. Có bao nhiêu biểu thức là đa thức?",
+                    options: ["4", "1", "2", "3"],
+                    correct: 0,
+                    explanation: "Các đa thức là $x^2+y^2$, $2025$, $x^3+y$, $x+xyz$. Các biểu thức $\\frac{1}{5}x + \\frac{x}{y}$ và $4 + \\sqrt{yz}$ không phải là đa thức vì có phép chia cho biến và khai căn của biến. Vậy có 4 đa thức."
+                },
+                {
+                    question: "Đa thức $A = 5x^4y + xy^3$ có bậc mấy?",
+                    options: ["5", "4", "3", "2"],
+                    correct: 0,
+                    explanation: "Bậc của đa thức là bậc của hạng tử có bậc cao nhất. Hạng tử $5x^4y$ có bậc là $4+1=5$. Hạng tử $xy^3$ có bậc là $1+3=4$. Vậy bậc của đa thức là 5."
+                },
+                {
+                    question: "Kết quả của phép tính $3x^2yz \\cdot \\frac{2}{9}xy^2z$ là:",
+                    options: ["$\\frac{2}{3}x^3y^3z^2$", "$\\frac{2}{27}x^3y^3z^2$", "$\\frac{2}{3}x^2y^3z^2$", "$\\frac{2}{3}xyz$"],
+                    correct: 0,
+                    explanation: "Nhân hệ số với hệ số, và các phần biến tương ứng với nhau: $(3 \\cdot \\frac{2}{9}) (x^2x) (yy^2) (zz) = \\frac{2}{3}x^3y^3z^2$."
+                },
+                {
+                    question: "Hãy tìm hằng đẳng thức đúng biểu thị bình phương của một tổng.",
+                    options: ["$(x+y)^2=x^2+2xy+y^2$", "$(x-y)^2=x^2-2xy+y^2$", "$(x+y)^3=x^3+3x^2y+3xy^2+y^3$", "$x^2-y^2=(x-y)(x+y)$"],
+                    correct: 0,
+                    explanation: "Hằng đẳng thức bình phương của một tổng có dạng $(A+B)^2=A^2+2AB+B^2$."
+                },
+                {
+                    question: "Đẳng thức nào sau đây là hằng đẳng thức?",
+                    options: ["$x(3x+2)=3x^2-2x$", "$3x+2=x+1$", "$x^2+2x+1=(x+1)^2$", "$3x+1=x+1$"],
+                    correct: 2,
+                    explanation: "$(x+1)^2 = x^2 + 2(x)(1) + 1^2 = x^2+2x+1$. Đẳng thức này đúng với mọi giá trị của x."
+                },
+                {
+                    question: "Hằng đẳng thức biểu thị hiệu hai bình phương là:",
+                    options: ["$a^2-b^2=(a-b)(a^2+ab+b^2)$", "$(a-b)^2=a^2-2ab+b^2$", "$a^2-b^2=(a-b)(a+b)$", "Tất cả đều SAI"],
+                    correct: 2,
+                    explanation: "Hằng đẳng thức hiệu hai bình phương là $A^2 - B^2 = (A - B)(A + B)$."
+                },
+                // 40 New Questions Start Here
+                { question: "Trong các biểu thức sau, đâu là một đơn thức?", options: ["$x+y$", "$5$", "$\\frac{1}{x}$", "$x-1$"], correct: 1, explanation: "Một số là một đơn thức. Các biểu thức khác là đa thức hoặc biểu thức hữu tỉ." },
+                { question: "Biểu thức nào sau đây không phải là đơn thức?", options: ["$-4x^2y$", "$2xy+z$", "$100$", "$z$"], correct: 1, explanation: "$2xy+z$ là tổng của hai đơn thức, nên nó là một đa thức (cụ thể là nhị thức)." },
+                { question: "Bậc của đơn thức $3x^5y^2z$ là bao nhiêu?", options: ["5", "7", "8", "3"], correct: 2, explanation: "Bậc của đơn thức là tổng số mũ của các biến: $5+2+1=8$." },
+                { question: "Hệ số của đơn thức $-\\frac{1}{2}x^3y^4$ là:", options: ["3", "4", "$-\\frac{1}{2}$", "$\\frac{1}{2}$"], correct: 2, explanation: "Hệ số là phần số của đơn thức." },
+                { question: "Trong các biểu thức sau, biểu thức nào là đa thức?", options: ["$\\frac{x+1}{y}$", "$x^2 - 3x + \\sqrt{y}$", "$x^2 - 5x + 1$", "$5xy^{-1}$"], correct: 2, explanation: "Đa thức không chứa phép chia cho biến, căn bậc hai của biến, hoặc số mũ âm của biến." },
+                { question: "Biểu thức nào sau đây không phải là đa thức?", options: ["0", "$x^2 - 4$", "$x + \\frac{2}{x}$", "$xy-z$"], correct: 2, explanation: "Biểu thức $x + \\frac{2}{x}$ chứa phép chia cho biến x, nên nó không phải là đa thức." },
+                { question: "Bậc của đa thức $P(x) = x^5 - 2x^3 + 7x^6 - 9$ là:", options: ["5", "3", "6", "9"], correct: 2, explanation: "Bậc của đa thức là bậc của hạng tử có bậc cao nhất, trong trường hợp này là $7x^6$ có bậc là 6." },
+                { question: "Hạng tử tự do của đa thức $Q(x) = 2x^2 - 5x + 10$ là:", options: ["2", "-5", "10", "1"], correct: 2, explanation: "Hạng tử tự do là hạng tử không chứa biến." },
+                { question: "Hệ số cao nhất của đa thức $H(x) = 3x^2 - 7x^4 + 2x - 1$ là:", options: ["3", "4", "-7", "2"], correct: 2, explanation: "Hệ số cao nhất là hệ số của hạng tử có bậc cao nhất. Hạng tử bậc cao nhất là $-7x^4$, vậy hệ số cao nhất là -7." },
+                { question: "Tích của $2xy$ và $-3x^2y^3$ là một đơn thức có bậc bằng:", options: ["5", "6", "7", "8"], correct: 2, explanation: "Tích là $-6x^3y^4$. Bậc là $3+4=7$." },
+                { question: "Phần biến của đơn thức $-xy^2z^3$ là:", options: ["$x$", "$-1$", "$y^2z^3$", "$xy^2z^3$"], correct: 3, explanation: "Phần biến là tích của các biến và lũy thừa của chúng." },
+                { question: "Đa thức nào sau đây là đa thức một biến?", options: ["$x^2+y$", "$3z-5$", "$xyz$", "$x-y+z$"], correct: 1, explanation: "Đa thức một biến chỉ chứa một loại biến. $3z-5$ chỉ chứa biến z." },
+                { question: "Thu gọn đơn thức $2x^2y \\cdot 5xy^3$ ta được kết quả:", options: ["$7x^3y^4$", "$10x^2y^3$", "$10x^3y^4$", "$25x^3y^4$"], correct: 2, explanation: "$(2 \\cdot 5)(x^2 \\cdot x)(y \\cdot y^3) = 10x^3y^4$." },
+                { question: "Bậc của đa thức $M = 5x^2y^3 - 7x^3y^3 + 2x^2y^3$ sau khi thu gọn là:", options: ["5", "6", "3", "7"], correct: 1, explanation: "Thu gọn: $M = (5x^2y^3 + 2x^2y^3) - 7x^3y^3 = 7x^2y^3 - 7x^3y^3$. Bậc cao nhất là của hạng tử $-7x^3y^3$, bằng $3+3=6$." },
+                { question: "Giá trị của đa thức $P(x) = x^2 - 3x + 5$ tại $x=0$ là:", options: ["0", "-3", "5", "2"], correct: 2, explanation: "$P(0) = 0^2 - 3(0) + 5 = 5$." },
+                { question: "Đâu là đơn thức đồng dạng với đơn thức $-2x^2y$?", options: ["$-2xy^2$", "$5x^2y$", "$-2xy$", "$x^2y^2$"], correct: 1, explanation: "Đơn thức đồng dạng có cùng phần biến. $5x^2y$ có cùng phần biến là $x^2y$." },
+                { question: "Tổng của hai đơn thức $4xy^2$ và $-7xy^2$ là:", options: ["$-3xy^2$", "$3xy^2$", "$11xy^2$", "$-28x^2y^4$"], correct: 0, explanation: "$(4-7)xy^2 = -3xy^2$." },
+                { question: "Phát biểu nào sau đây là đúng?", options: ["Số 0 không phải là đơn thức.", "Mọi số thực đều là đa thức.", "Bậc của đa thức là tổng bậc các hạng tử.", "Đa thức là hiệu của các đơn thức."], correct: 1, explanation: "Mọi số thực là đa thức bậc 0 (trừ số 0 có bậc không xác định). Số 0 là đơn thức đặc biệt. Đa thức là tổng của các đơn thức." },
+                { question: "Kết quả của khai triển $(x+1)^2$ là một:", options: ["Đơn thức", "Tam thức", "Nhị thức", "Hằng số"], correct: 1, explanation: "$(x+1)^2 = x^2+2x+1$, có ba hạng tử nên là một tam thức." },
+                { question: "Bậc của đơn thức $0$ là:", options: ["0", "1", "Bất kỳ số nào", "Không xác định"], correct: 3, explanation: "Theo quy ước, đơn thức 0 không có bậc." },
+                { question: "Khai triển biểu thức $(x+2)^2$ ta được kết quả:", options: ["$x^2 + 2x + 4$", "$x^2 + 4x + 4$", "$x^2 + 4$", "$x^2 - 4x + 4$"], correct: 1, explanation: "Áp dụng hằng đẳng thức $(A+B)^2=A^2+2AB+B^2$: $(x+2)^2 = x^2 + 2(x)(2) + 2^2 = x^2 + 4x + 4$." },
+                { question: "Kết quả của phép tính $(x-5)(x+5)$ là:", options: ["$x^2 + 25$", "$x^2 - 10$", "$x^2 - 25$", "$25 - x^2$"], correct: 2, explanation: "Áp dụng hằng đẳng thức $A^2-B^2=(A-B)(A+B)$: $(x-5)(x+5) = x^2 - 5^2 = x^2 - 25$." },
+                { question: "Biểu thức $x^2 - 6x + 9$ được viết dưới dạng bình phương là:", options: ["$(x+3)^2$", "$(x-3)^2$", "$(x-9)^2$", "$(x+9)^2$"], correct: 1, explanation: "$x^2 - 6x + 9 = x^2 - 2(x)(3) + 3^2 = (x-3)^2$." },
+                { question: "Khai triển hằng đẳng thức $(a-b)^3$ ta được:", options: ["$a^3 - b^3$", "$a^3 - 3a^2b + 3ab^2 - b^3$", "$a^3 + 3a^2b + 3ab^2 + b^3$", "$(a-b)(a^2+ab+b^2)$"], correct: 1, explanation: "Đây là công thức khai triển lập phương của một hiệu." },
+                { question: "Biểu thức $8x^3 + 1$ là dạng khai triển của:", options: ["$(2x-1)(4x^2+2x+1)$", "$(2x+1)^3$", "$(2x+1)(4x^2-2x+1)$", "$(8x+1)(x^2-x+1)$"], correct: 2, explanation: "Áp dụng hằng đẳng thức tổng hai lập phương $A^3+B^3=(A+B)(A^2-AB+B^2)$: $8x^3+1=(2x)^3+1^3=(2x+1)(4x^2-2x+1)$." },
+                { question: "Giá trị của biểu thức $x^2+2x+1$ tại $x=99$ là:", options: ["100", "10000", "9999", "101"], correct: 1, explanation: "$x^2+2x+1 = (x+1)^2$. Thay $x=99$ ta được $(99+1)^2 = 100^2 = 10000$." },
+                { question: "Để biểu thức $x^2 + 10x + \\dots$ trở thành bình phương của một tổng, ta cần điền vào chỗ trống số:", options: ["5", "10", "25", "100"], correct: 2, explanation: "$x^2+10x+\\dots = x^2+2(x)(5)+\\dots$. Ta cần thêm $5^2=25$." },
+                { question: "Kết quả của phép tính $101^2$ sử dụng hằng đẳng thức là:", options: ["10201", "10001", "10101", "10200"], correct: 0, explanation: "$101^2=(100+1)^2=100^2+2(100)(1)+1^2 = 10000+200+1=10201$." },
+                { question: "Biểu thức $(3x-1)^2$ khai triển ra là:", options: ["$3x^2 - 6x + 1$", "$9x^2 - 6x + 1$", "$9x^2 - 3x + 1$", "$9x^2 - 1$"], correct: 1, explanation: "$(3x-1)^2 = (3x)^2 - 2(3x)(1) + 1^2 = 9x^2 - 6x + 1$." },
+                { question: "Rút gọn biểu thức $(x+y)^2 - (x-y)^2$ ta được:", options: ["0", "$2y^2$", "$2x^2$", "$4xy$"], correct: 3, explanation: "$(x^2+2xy+y^2)-(x^2-2xy+y^2) = x^2+2xy+y^2-x^2+2xy-y^2 = 4xy$." },
+                { question: "Biểu thức $x^3 - 27$ được phân tích thành nhân tử là:", options: ["$(x-3)(x^2+3x+9)$", "$(x-3)(x^2-3x+9)$", "$(x-3)^3$", "$(x+3)(x^2-3x+9)$"], correct: 0, explanation: "Áp dụng hiệu hai lập phương: $x^3-3^3=(x-3)(x^2+3x+9)$." },
+                { question: "Đẳng thức nào sau đây là một đồng nhất thức?", options: ["$a(a-1) = a^2 - a$", "$a(a-1) = a^2 - 1$", "$a+1=2$", "$x^2-1=0$"], correct: 0, explanation: "Đồng nhất thức (hằng đẳng thức) đúng với mọi giá trị của biến. $a(a-1)=a^2-a$ là tính chất phân phối, luôn đúng." },
+                { question: "Giá trị của biểu thức $49x^2 - 70x + 25$ tại $x=\\frac{5}{7}$ là:", options: ["1", "0", "25", "49"], correct: 1, explanation: "$49x^2-70x+25=(7x-5)^2$. Thay $x=\\frac{5}{7}$ vào ta được $(7(\\frac{5}{7})-5)^2=(5-5)^2=0$." },
+                { question: "Biểu thức $(x-y)(x^2+xy+y^2)$ bằng:", options: ["$x^3+y^3$", "$(x-y)^3$", "$x^3-y^3$", "$(x+y)^3$"], correct: 2, explanation: "Đây là công thức của hằng đẳng thức hiệu hai lập phương." },
+                { question: "Tính giá trị biểu thức $A = x^2 - 4y^2$ tại $x=10$ và $y=\\frac{1}{2}$.", options: ["101", "99", "96", "100"], correct: 1, explanation: "$A=10^2-4(\\frac{1}{2})^2 = 100 - 4(\\frac{1}{4}) = 100-1=99$." },
+                { question: "Khai triển $(x+2y)^3$ ta được:", options: ["$x^3+8y^3$", "$x^3+6x^2y+12xy^2+8y^3$", "$x^3+3x^2y+3xy^2+8y^3$", "$x^3+2xy+8y^3$"], correct: 1, explanation: "$(x)^3+3(x)^2(2y)+3(x)(2y)^2+(2y)^3 = x^3+6x^2y+12xy^2+8y^3$." },
+                { question: "Viết biểu thức $x^2+x+\\frac{1}{4}$ dưới dạng bình phương của một tổng.", options: ["$(x+\\frac{1}{2})^2$", "$(x+\\frac{1}{4})^2$", "$(x+1)^2$", "$(2x+1)^2$"], correct: 0, explanation: "$x^2+x+\\frac{1}{4} = x^2+2(x)(\\frac{1}{2})+(\\frac{1}{2})^2 = (x+\\frac{1}{2})^2$." },
+                { question: "Biểu thức $(a+b+c)^2$ được khai triển là:", options: ["$a^2+b^2+c^2$", "$a^2+b^2+c^2+2ab+2ac+2bc$", "$a^2+b^2+c^2+ab+ac+bc$", "$(a+b)^2+c^2$"], correct: 1, explanation: "Đây là công thức khai triển bình phương của một tam thức." },
+                { question: "Kết quả của $52 \\cdot 48$ là:", options: ["2504", "2496", "2400", "2500"], correct: 1, explanation: "$52 \\cdot 48 = (50+2)(50-2)=50^2-2^2=2500-4=2496$." },
+                { question: "Đẳng thức nào sau đây sai?", options: ["$(x-y)^2 = (y-x)^2$", "$(x+y)^2 = x^2+2xy+y^2$", "$x^2-y^2 = (x-y)(x+y)$", "$(x-y)^3 = x^3 - y^3$"], correct: 3, explanation: "$(x-y)^3 = x^3-3x^2y+3xy^2-y^3$, không phải $x^3-y^3$." }
+            ];
+
+            // DOM elements
+            const questionCounterEl = document.getElementById('question-counter');
+            const scoreDisplayEl = document.getElementById('score-display');
+            const progressBarEl = document.getElementById('progress-bar');
+            const questionTextEl = document.getElementById('question-text');
+            const optionsContainerEl = document.getElementById('options-container');
+            const feedbackContainerEl = document.getElementById('feedback-container');
+            const explanationTextEl = document.getElementById('explanation-text');
+            const nextBtnEl = document.getElementById('next-btn');
+            const quizContainer = document.getElementById('quiz-container');
+            const resultContainer = document.getElementById('result-container');
+            const resultTextEl = document.getElementById('result-text');
+            const resultMessageEl = document.getElementById('result-message');
+            const restartBtnEl = document.getElementById('restart-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const questionArea = document.getElementById('question-area');
+
+            let shuffledQuestions = [];
+            let currentQuestionIndex = 0;
+            let score = 0;
+
+            function startQuiz() {
+                shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+                currentQuestionIndex = 0;
+                score = 0;
+                
+                resultContainer.classList.add('hidden');
+                progressContainer.classList.remove('hidden');
+                questionArea.classList.remove('hidden');
+                nextBtnEl.classList.add('hidden');
+                
+                updateProgress();
+                showQuestion();
+            }
+
+            function showQuestion() {
+                feedbackContainerEl.classList.add('hidden');
+                nextBtnEl.classList.add('hidden');
+
+                const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                questionTextEl.innerHTML = currentQuestion.question;
+                
+                optionsContainerEl.innerHTML = "";
+                currentQuestion.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.innerHTML = option;
+                    button.className = 'option-btn font-semibold text-left p-4 border-2 border-gray-300 rounded-lg bg-white hover:bg-gray-100';
+                    button.dataset.index = index;
+                    button.addEventListener('click', selectAnswer);
+                    optionsContainerEl.appendChild(button);
+                });
+                MathJax.typesetPromise();
+            }
+
+            function selectAnswer(e) {
+                const selectedButton = e.currentTarget;
+                const selectedIndex = parseInt(selectedButton.dataset.index);
+                const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                const correctIndex = currentQuestion.correct;
+                
+                // Disable all buttons
+                Array.from(optionsContainerEl.children).forEach(btn => {
+                    btn.disabled = true;
+                });
+
+                if (selectedIndex === correctIndex) {
+                    selectedButton.classList.add('correct');
+                    score++;
+                } else {
+                    selectedButton.classList.add('incorrect');
+                    optionsContainerEl.children[correctIndex].classList.add('correct');
+                }
+
+                explanationTextEl.innerHTML = currentQuestion.explanation;
+                feedbackContainerEl.classList.remove('hidden');
+                nextBtnEl.classList.remove('hidden');
+                 MathJax.typesetPromise();
+            }
+            
+            function nextQuestion() {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < shuffledQuestions.length) {
+                    updateProgress();
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }
+            
+            function updateProgress() {
+                questionCounterEl.textContent = `Câu ${currentQuestionIndex + 1} / ${shuffledQuestions.length}`;
+                scoreDisplayEl.textContent = `Điểm: ${score}`;
+                const progressPercentage = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+                progressBarEl.style.width = `${progressPercentage}%`;
+            }
+
+            function showResults() {
+                progressContainer.classList.add('hidden');
+                questionArea.classList.add('hidden');
+                feedbackContainerEl.classList.add('hidden');
+                nextBtnEl.classList.add('hidden');
+                resultContainer.classList.remove('hidden');
+                
+                const finalScorePercentage = (score / shuffledQuestions.length) * 100;
+                resultTextEl.textContent = `Bạn đã trả lời đúng ${score} trên ${shuffledQuestions.length} câu! (${finalScorePercentage.toFixed(0)}%)`;
+
+                let message = "";
+                if (finalScorePercentage === 100) {
+                    message = "Xuất sắc! Em đã nắm vững kiến thức.";
+                    resultMessageEl.className = "font-semibold mb-8 text-green-600";
+                } else if (finalScorePercentage >= 75) {
+                    message = "Rất tốt! Cố gắng ôn lại một vài chỗ chưa chắc nhé.";
+                     resultMessageEl.className = "font-semibold mb-8 text-blue-600";
+                } else if (finalScorePercentage >= 50) {
+                    message = "Khá ổn! Em cần xem lại các lỗi sai để cải thiện nhé.";
+                     resultMessageEl.className = "font-semibold mb-8 text-yellow-600";
+                } else {
+                    message = "Cần cố gắng nhiều hơn! Hãy xem lại kỹ các phần kiến thức này nhé.";
+                     resultMessageEl.className = "font-semibold mb-8 text-red-600";
+                }
+                resultMessageEl.textContent = message;
+                 // Update final progress bar
+                progressBarEl.style.width = '100%';
+            }
+
+            nextBtnEl.addEventListener('click', nextQuestion);
+            restartBtnEl.addEventListener('click', startQuiz);
+            
+            // Initial start
+            startQuiz();
+        });
+    </script>
+</body>
+</html>
+
