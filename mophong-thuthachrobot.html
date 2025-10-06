@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khám phá Lập trình Cánh tay Robot trong Logistics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .btn {
+            transition: background-color 0.3s, transform 0.15s, box-shadow 0.3s;
+        }
+        .btn:hover:not(:disabled) {
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+        .btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        .btn:disabled {
+            cursor: not-allowed;
+            background-color: #334155;
+            color: #64748b;
+        }
+
+        /* Tab Styles */
+        .tab-btn {
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background-color: #0ea5e9;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* Common simulation styles */
+        .angle-arc {
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+        #feedback-message, #explanation-box {
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        
+        /* --- Styles for Challenge 1 (Kề Bù) --- */
+        #ch1-robot-arm-group, #ch1-package-group, #ch1-start-platform, #ch1-platform-text {
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #ch1-package-rect {
+             transition: transform 1.5s linear;
+        }
+
+        /* --- Styles for Challenge 2 (Đối Đỉnh) --- */
+        #ch2-arm1, #ch2-arm2 {
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: 250px 250px;
+        }
+        #ch2-laser-wrapper-1, #ch2-laser-wrapper-2 {
+            transform-origin: 250px 250px;
+        }
+        .laser-beam {
+            stroke: #4ade80;
+            stroke-width: 2.5;
+            stroke-dasharray: 4 4;
+            transition: all 0.5s ease-out;
+            opacity: 0;
+        }
+        .laser-beam.active {
+            opacity: 1;
+        }
+        #ch2-object-to-grab {
+             transition: opacity 0.3s;
+        }
+        
+        @keyframes glow-pulse {
+            0%, 100% { filter: drop-shadow(0 0 4px #fbbf24); }
+            50% { filter: drop-shadow(0 0 12px #fbbf24); }
+        }
+        @keyframes shake-error {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            25% { transform: translateX(-8px) rotate(-5deg); }
+            75% { transform: translateX(8px) rotate(5deg); }
+        }
+        .error-shake { animation: shake-error 0.5s 6}
+        .object-pulse { animation: glow-pulse 4s infinite; }
+
+        @keyframes celebration-shake {
+            0%, 100% { transform: rotate(0); }
+            20% { transform: rotate(-20deg); }
+            40% { transform: rotate(20deg); }
+            60% { transform: rotate(-20deg); }
+            80% { transform: rotate(20deg); }
+        }
+        .success-shake {
+            animation: celebration-shake 0.8s 8 ease-in-out;
+            transform-origin: 250px 250px;
+        }
+        @keyframes control-pulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.7) drop-shadow(0 0 6px #38bdf8); }
+        }
+        .actuator-active {
+            animation: control-pulse 0.8s ease-in-out;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="container mx-auto max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-cyan-400">Khám phá Lập trình Cánh tay Robot trong Logistics</h1>
+            <p class="text-slate-400 mt-2 text-lg">Hoàn thành các thử thách để hiểu rõ hơn về ứng dụng các góc ở vị trí đặc biêt trong lập trình robot tự động hóa.</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex justify-center mb-8 bg-slate-800 p-2 rounded-lg max-w-md mx-auto">
+            <button id="tab1-btn" class="tab-btn flex-1 py-2 px-4 rounded-md text-slate-300">Thử thách 1: Robot Gắp và Đặt Hàng Lên Băng Chuyền</button>
+            <button id="tab2-btn" class="tab-btn flex-1 py-2 px-4 rounded-md text-slate-300">Thử thách 2: Điều Khiển Càng Kẹp hàng Của Robot</button>
+        </div>
+
+        <!-- Challenge Content -->
+        <main>
+            <!-- Challenge 1 Container -->
+            <div id="challenge1-container">
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <!-- Simulation Area -->
+                    <div class="lg:col-span-3 bg-slate-800/50 ring-1 ring-slate-700 rounded-xl shadow-2xl p-4 flex items-center justify-center aspect-w-1 aspect-h-1 overflow-hidden">
+                        <svg id="ch1-simulation-svg" viewBox="0 0 500 500" class="w-full h-full">
+                    <defs>
+                        <pattern id="conveyor-pattern" patternUnits="userSpaceOnUse" width="60" height="10">
+                            <g>
+                                <path d="M 0 5 L 15 5" stroke="#64748b" stroke-width="2"/>
+                                <path d="M 12 2 L 15 5 L 12 8" fill="none" stroke="#64748b" stroke-width="2"/>
+                                <path d="M 30 5 L 45 5" stroke="#64748b" stroke-width="2"/>
+                                <path d="M 42 2 L 45 5 L 42 8" fill="none" stroke="#64748b" stroke-width="2"/>
+                                <path d="M 60 5 L 75 5" stroke="#64748b" stroke-width="2"/>
+                                <path d="M 72 2 L 75 5 L 72 8" fill="none" stroke="#64748b" stroke-width="2"/>
+                                <animateTransform attributeName="transform" type="translate" from="0 0" to="-30 0" dur="0.8s" repeatCount="indefinite" />
+                            </g>
+                        </pattern>
+                    </defs>
+                            <rect width="500" height="500" fill="#1e293b"/>
+                            <rect id="ch1-start-platform" x="350" y="260" width="80" height="150" fill="#334155" rx="5" />
+                            <text id="ch1-platform-text" x="365" y="430" fill="#94a3b8" font-size="12px" class="select-none">Bàn Gắp</text>
+                            <g>
+                                <rect x="0" y="245" width="500" height="10" fill="url(#conveyor-pattern)" />
+                                <text x="5" y="240" fill="#94a3b8" font-size="12px" class="select-none">Băng chuyền</text>
+                                <rect x="150" y="225" width="120" height="50" fill="green" opacity="0.6" rx="5" />
+                                <text x="165" y="218" fill="#a7f3d0" font-size="11px" class="select-none" font-weight="bold">Hệ thống xử lý</text>
+                            </g>
+                            <g id="ch1-robot-arm-group" transform-origin="250 250">
+                                <path d="M 250 250 L 380 250" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round" />
+                                <path d="M 380 240 L 390 240" stroke="#f87171" stroke-width="8" stroke-linecap="round" />
+                                <path d="M 380 260 L 390 260" stroke="#f87171" stroke-width="8" stroke-linecap="round" />
+                                <g id="ch1-package-group">
+                                    <rect id="ch1-package-rect" x="390" y="240" width="20" height="20" fill="#facc15" rx="3" />
+                                </g>
+                            </g>
+                            <circle cx="250" cy="250" r="20" fill="#334155" />
+                            <g id="ch1-angle-indicators">
+                                <path id="ch1-angle-arc-1" class="angle-arc" stroke="#34d399" />
+                                <text id="ch1-angle-text-1" x="0" y="0" fill="#34d399" font-size="16px" font-weight="bold" class="select-none"></text>
+                                <path id="ch1-angle-arc-2" class="angle-arc" stroke="#60a5fa" />
+                                <text id="ch1-angle-text-2" x="0" y="0" fill="#60a5fa" font-size="16px" font-weight="bold" class="select-none"></text>
+                            </g>
+                        </svg>
+                    </div>
+                    <!-- Control Panel -->
+                    <div class="lg:col-span-2 bg-slate-800/50 ring-1 ring-slate-700 rounded-xl shadow-2xl p-6 flex flex-col">
+                         <div class="flex-grow">
+                            <h2 class="text-2xl font-bold text-cyan-400 mb-2">Thử thách 1: Robot Gắp và Đặt Hàng Lên Băng Chuyền</h2>
+                            <p id="ch1-challenge-instruction" class="text-slate-300 mb-4 h-24"></p>
+                            <div class="my-6">
+                                <label for="ch1-angle-input" class="block mb-2 font-medium text-slate-400">Nhập số đo góc xoay cần thiết (độ):</label>
+                                <input type="number" id="ch1-angle-input" min="0" max="180" class="w-full bg-slate-900 border border-slate-600 rounded-md py-3 px-4 text-white text-lg focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Ví dụ: 90">
+                            </div>
+                            <button id="ch1-check-btn" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-3 rounded-md text-lg btn">Thực Thi</button>
+                            <button id="ch1-next-challenge-btn" class="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 rounded-md text-lg btn mt-3">Thử thách mới</button>
+                            <div id="ch1-feedback-message" class="mt-4 p-4 rounded-md text-center font-semibold text-lg opacity-0 transform translate-y-2"></div>
+                        </div>
+                        <div id="ch1-explanation-box" class="mt-6 p-4 bg-slate-900/50 border border-slate-700 rounded-lg opacity-0 transform translate-y-4">
+                            <h3 class="font-bold text-lg text-amber-400">Kiến thức áp dụng: Góc Kề Bù</h3>
+                            <p id="ch1-explanation-text" class="text-slate-300 mt-2"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 2 Container -->
+            <div id="challenge2-container" class="hidden">
+                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+                    <!-- Simulation Area -->
+                    <div class="lg:col-span-3 bg-slate-800/50 ring-1 ring-slate-700 rounded-xl shadow-2xl p-4 flex items-center justify-center aspect-w-1 aspect-h-1 overflow-hidden">
+                        <svg id="ch2-simulation-svg" viewBox="0 0 500 500" class="w-full h-full">
+                            <defs>
+                                <pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse">
+                                    <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#1e293b" stroke-width="1"/>
+                                </pattern>
+                                <filter id="drop-shadow">
+                                    <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+                                </filter>
+                            </defs>
+                            <rect width="500" height="500" fill="#0f172a"/>
+                            <rect width="500" height="500" fill="url(#grid)" />
+                            <g id="ch2-laser-wrapper-1"> <line id="ch2-laser1" class="laser-beam" x1="250" y1="250" x2="250" y2="250" /> </g>
+                            <g id="ch2-laser-wrapper-2"> <line id="ch2-laser2" class="laser-beam" x1="250" y1="250" x2="250" y2="250" /> </g>
+                            <g id="ch2-effects-container"></g>
+                            <g id="ch2-movable-system">
+                                <circle id="ch2-object-to-grab" cx="400" cy="250" r="15" fill="#fbbf24" class="object-pulse"/>
+                                <g id="ch2-robot-arm-group" filter="url(#drop-shadow)">
+                                    <g id="ch2-arm1">
+                                        <g class="actuator"><path d="M 245 246 L 120 246 L 110 242 L 80 242 L 80 258 L 110 258 L 120 254 L 245 254 Z" fill="#38bdf8" /><rect x="80" y="238" width="15" height="24" rx="4" fill="#0ea5e9" /></g>
+                                        <path d="M 255 246 L 400 246 L 430 250 L 400 254 L 255 254 Z" fill="#f472b6"/>
+                                    </g>
+                                    <g id="ch2-arm2">
+                                        <g class="actuator"><path d="M 245 246 L 120 246 L 110 242 L 80 242 L 80 258 L 110 258 L 120 254 L 245 254 Z" fill="#38bdf8" /><rect x="80" y="238" width="15" height="24" rx="4" fill="#0ea5e9" /></g>
+                                        <path d="M 255 246 L 400 246 L 430 250 L 400 254 L 255 254 Z" fill="#f472b6"/>
+                                    </g>
+                                </g>
+                            </g>
+                            <circle cx="250" cy="250" r="25" fill="#334155" stroke="#475569" stroke-width="2" />
+                            <circle cx="250" cy="250" r="8" fill="#0f172a" />
+                            <g id="ch2-angle-indicators">
+                                <path id="ch2-angle-arc-gamma" class="angle-arc" stroke="#4ade80" /><text id="ch2-angle-text-gamma" fill="#4ade80" font-size="18px" font-weight="bold" class="select-none" text-anchor="middle"></text>
+                                <path id="ch2-angle-arc-alpha" class="angle-arc" stroke="#38bdf8" /><text id="ch2-angle-text-alpha" fill="#38bdf8" font-size="18px" font-weight="bold" class="select-none" text-anchor="middle"></text>
+                                <path id="ch2-angle-arc-beta" class="angle-arc" stroke="#f472b6" /><text id="ch2-angle-text-beta" fill="#f472b6" font-size="18px" font-weight="bold" class="select-none" text-anchor="middle"></text>
+                            </g>
+                        </svg>
+                    </div>
+                    <!-- Control Panel -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-slate-800/50 ring-1 ring-slate-700 rounded-xl shadow-2xl p-6">
+                            <h2 class="text-2xl font-bold text-cyan-400 mb-4">Thử thách 2: Điều Khiển Càng Kẹp hàng Của Robot</h2>
+                            <p id="ch2-challenge-instruction" class="text-slate-300 mb-4 min-h-[95px]"></p>
+                            <button id="ch2-scan-btn" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 rounded-md text-lg btn mb-4">Quét Laser</button>
+                            <div class="space-y-2">
+                                <label for="ch2-angle-input" class="block font-medium text-slate-400">Điều khiển góc <span class="font-bold text-sky-400">α</span> của bộ truyền động:</label>
+                                <input type="number" id="ch2-angle-input" min="0" max="180" class="w-full bg-slate-900 border border-slate-600 rounded-md py-3 px-4 text-white text-lg focus:ring-2 focus:ring-cyan-500 focus:outline-none disabled:bg-slate-800 disabled:cursor-not-allowed placeholder:text-slate-500" placeholder="Chờ quét laser..." disabled>
+                            </div>
+                            <div id="ch2-feedback-message" class="mt-4 p-4 rounded-md text-center font-semibold text-lg opacity-0 transform translate-y-2"></div>
+                        </div>
+                        <div class="bg-slate-800/50 ring-1 ring-slate-700 rounded-xl shadow-2xl p-6">
+                             <div class="flex gap-4">
+                                <button id="ch2-check-btn" class="flex-1 bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-3 rounded-md text-lg btn" disabled>Gắp Vật</button>
+                                <button id="ch2-next-challenge-btn" class="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 rounded-md text-lg btn">Thử thách mới</button>
+                            </div>
+                        </div>
+                        <div id="ch2-explanation-box" class="mt-6 p-4 bg-slate-900/50 border border-slate-700 rounded-lg opacity-0 transform translate-y-4">
+                            <h3 class="font-bold text-lg text-amber-400">Kiến thức áp dụng: Cơ Cấu Đối Đỉnh</h3>
+                            <p class="text-slate-300 mt-2">Khi bạn đặt góc <strong class="text-sky-400">α</strong> cho bộ truyền động, cơ cấu khớp nối sẽ khiến góc kẹp <strong class="text-pink-400">β</strong> luôn bằng với góc <strong class="text-sky-400">α</strong>. Để gắp vật thành công (yêu cầu góc kẹp phải bằng <strong class="text-green-400">γ</strong>), chúng ta chỉ cần đặt: <strong class="text-sky-400">α</strong> = <strong class="text-green-400">γ</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Tab Management ---
+        const tab1Btn = document.getElementById('tab1-btn');
+        const tab2Btn = document.getElementById('tab2-btn');
+        const challenge1Container = document.getElementById('challenge1-container');
+        const challenge2Container = document.getElementById('challenge2-container');
+
+        let isChallenge1Initialized = false;
+        let isChallenge2Initialized = false;
+
+        function showTab(tabNumber) {
+            if (tabNumber === 1) {
+                challenge1Container.classList.remove('hidden');
+                challenge2Container.classList.add('hidden');
+                tab1Btn.classList.add('active');
+                tab2Btn.classList.remove('active');
+                if (!isChallenge1Initialized) {
+                    initChallenge1();
+                    isChallenge1Initialized = true;
+                }
+            } else {
+                challenge1Container.classList.add('hidden');
+                challenge2Container.classList.remove('hidden');
+                tab1Btn.classList.remove('active');
+                tab2Btn.classList.add('active');
+                if (!isChallenge2Initialized) {
+                    initChallenge2();
+                    isChallenge2Initialized = true;
+                }
+            }
+        }
+
+        tab1Btn.addEventListener('click', () => showTab(1));
+        tab2Btn.addEventListener('click', () => showTab(2));
+        
+        // --- Utility ---
+        const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+            const angleInRadians = (angleInDegrees) * Math.PI / 180.0;
+            return {
+                x: centerX + (radius * Math.cos(angleInRadians)),
+                y: centerY + (radius * Math.sin(angleInRadians)),
+            };
+        };
+
+        const describeArc = (x, y, radius, startAngle, endAngle) => {
+            const isReversed = startAngle > endAngle;
+            if (isReversed) [startAngle, endAngle] = [endAngle, startAngle];
+            const start = polarToCartesian(x, y, radius, endAngle);
+            const end = polarToCartesian(x, y, radius, startAngle);
+            const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+            const sweepFlag = isReversed ? 0 : 1;
+            return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} ${isReversed ? 1 : 0} ${end.x} ${end.y}`;
+        };
+
+
+        // --- Challenge 1: Kề Bù ---
+        function initChallenge1() {
+            const container = challenge1Container;
+            const DOM = {
+                challengeInstruction: container.querySelector('#ch1-challenge-instruction'),
+                angleInput: container.querySelector('#ch1-angle-input'),
+                checkBtn: container.querySelector('#ch1-check-btn'),
+                nextChallengeBtn: container.querySelector('#ch1-next-challenge-btn'),
+                feedbackMessage: container.querySelector('#ch1-feedback-message'),
+                explanationBox: container.querySelector('#ch1-explanation-box'),
+                explanationText: container.querySelector('#ch1-explanation-text'),
+                robotArmGroup: container.querySelector('#ch1-robot-arm-group'),
+                packageGroup: container.querySelector('#ch1-package-group'),
+                packageRect: container.querySelector('#ch1-package-rect'),
+                startPlatform: container.querySelector('#ch1-start-platform'),
+                platformText: container.querySelector('#ch1-platform-text'),
+                angleArc1: container.querySelector('#ch1-angle-arc-1'),
+                angleText1: container.querySelector('#ch1-angle-text-1'),
+                angleArc2: container.querySelector('#ch1-angle-arc-2'),
+                angleText2: container.querySelector('#ch1-angle-text-2'),
+            };
+
+            const state = { givenAngle: 0, correctAnswer: 0, isAnimating: false };
+
+            const updateFeedback = (message, type) => {
+                DOM.feedbackMessage.textContent = message;
+                const types = { success: 'bg-green-500/20 text-green-400', error: 'bg-red-500/20 text-red-400', info: 'bg-blue-500/20 text-blue-400' };
+                DOM.feedbackMessage.className = `mt-4 p-4 rounded-md text-center font-semibold text-lg opacity-100 transform translate-y-0 ${types[type] || types.info}`;
+            };
+            const hideFeedback = () => { DOM.feedbackMessage.className = `mt-4 p-4 rounded-md text-center font-semibold text-lg opacity-0 transform translate-y-2`; };
+
+            const resetPackageState = () => {
+                DOM.packageGroup.style.transition = 'none';
+                DOM.packageRect.style.transition = 'none';
+                DOM.packageGroup.style.transform = '';
+                DOM.packageRect.style.transform = '';
+                DOM.packageGroup.offsetHeight; 
+                DOM.packageGroup.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                DOM.packageRect.style.transition = 'transform 1.5s linear';
+            };
+
+            const setupNewChallenge = () => {
+                if (state.isAnimating) return;
+                
+                DOM.angleInput.value = '';
+                hideFeedback();
+                DOM.explanationBox.classList.add('opacity-0', 'translate-y-4');
+                DOM.checkBtn.disabled = false;
+                DOM.angleInput.disabled = false;
+                
+                DOM.angleArc1.setAttribute('d', '');
+                DOM.angleText1.textContent = '';
+                DOM.angleArc2.setAttribute('d', '');
+                DOM.angleText2.textContent = '';
+                resetPackageState();
+                
+                DOM.explanationText.innerHTML = "Hai góc vừa <strong>kề</strong> nhau, vừa <strong>bù</strong> nhau gọi là <strong>hai góc kề bù</strong>. Chúng có một cạnh chung và hai cạnh còn lại là hai tia đối nhau, tạo thành một đường thẳng. Tổng số đo của hai góc kề bù luôn bằng <strong>180°</strong>.";
+                
+                const alpha = Math.floor(Math.random() * 121) + 30; // 30 to 150
+                const beta = 180 - alpha;
+                
+                state.givenAngle = alpha;
+                state.correctAnswer = beta;
+
+                DOM.challengeInstruction.innerHTML = `Robot cần gắp vật và đặt lên băng chuyền. Góc tạo bởi vị trí hiện tại và phương ngang bên trái là <strong class="text-emerald-400">α = ${alpha}°</strong>. Để đặt vật thẳng hàng lên băng chuyền phía trước hệ thống xử lý, robot cần xoay một góc <strong class="text-sky-400">β</strong>. Hãy tính số đo góc β!`;
+                
+                const initialArmAngle = beta;
+                DOM.robotArmGroup.style.transform = `rotate(${initialArmAngle}deg)`;
+                
+                const packageRadius = 140; 
+                const packageCenterPos = polarToCartesian(250, 250, packageRadius, initialArmAngle);
+                const platformWidth = parseFloat(DOM.startPlatform.getAttribute('width'));
+                const platformHeight = parseFloat(DOM.startPlatform.getAttribute('height'));
+                DOM.startPlatform.setAttribute('x', packageCenterPos.x - platformWidth / 2);
+                DOM.startPlatform.setAttribute('y', packageCenterPos.y - platformHeight / 2);
+                DOM.platformText.setAttribute('x', (packageCenterPos.x - platformWidth / 2) + 15);
+                DOM.platformText.setAttribute('y', (packageCenterPos.y - platformHeight / 2) + platformHeight + 20);
+
+                DOM.angleArc1.setAttribute('d', describeArc(250, 250, 60, initialArmAngle, 180));
+                const angle1Pos = polarToCartesian(250, 250, 100, (initialArmAngle + 180) / 2);
+                DOM.angleText1.setAttribute('x', angle1Pos.x - 15);
+                DOM.angleText1.setAttribute('y', angle1Pos.y + 5);
+                DOM.angleText1.textContent = `α = ${alpha}°`;
+
+                DOM.angleArc2.setAttribute('d', describeArc(250, 250, 50, 0, initialArmAngle));
+                const angle2Pos = polarToCartesian(250, 250, 70, initialArmAngle / 2);
+                DOM.angleText2.setAttribute('x', angle2Pos.x - 15);
+                DOM.angleText2.setAttribute('y', angle2Pos.y + 5);
+                DOM.angleText2.textContent = `β = ?`;
+            };
+            
+            const checkAnswer = () => {
+                if (state.isAnimating) return;
+                const userAnswer = parseFloat(DOM.angleInput.value);
+                
+                if (isNaN(userAnswer)) {
+                    updateFeedback('Vui lòng nhập một số hợp lệ!', 'info');
+                    return;
+                }
+                
+                state.isAnimating = true;
+                DOM.checkBtn.disabled = true;
+                DOM.angleInput.disabled = true;
+
+                if (userAnswer === state.correctAnswer) {
+                    updateFeedback('Chính xác! Robot đang thực hiện thao tác.', 'success');
+                    DOM.angleText2.textContent = `β = ${state.correctAnswer}°`;
+                    DOM.explanationBox.classList.remove('opacity-0', 'translate-y-4');
+
+                    DOM.robotArmGroup.style.transform = `rotate(0deg)`;
+                    setTimeout(() => {
+                        DOM.packageGroup.style.transform = `translateY(-10px)`;
+                        setTimeout(() => {
+                            const travelDistance = -450; 
+                            const travelDuration = 2500;
+                            DOM.packageRect.style.transition = `transform ${travelDuration / 1000}s linear`;
+                            DOM.packageRect.style.transform = `translateX(${travelDistance}px)`;
+                            setTimeout(() => { state.isAnimating = false; }, travelDuration);
+                        }, 500);
+                    }, 800);
+
+                } else {
+                    updateFeedback(`Sai rồi! Vật thể bị đặt lệch.`, 'error');
+                    const initialArmAngle = 180 - state.givenAngle;
+                    const wrongArmAngle = userAnswer; // Rotate BY the user's wrong answer
+                    DOM.robotArmGroup.style.transform = `rotate(${initialArmAngle - wrongArmAngle}deg)`;
+                    
+                    setTimeout(() => {
+                        DOM.packageGroup.style.transform = `translateY(200px) rotate(30deg)`;
+                        setTimeout(() => {
+                            DOM.robotArmGroup.style.transform = `rotate(${initialArmAngle}deg)`;
+                            resetPackageState();
+                            state.isAnimating = false;
+                            DOM.checkBtn.disabled = false;
+                            DOM.angleInput.disabled = false;
+                            DOM.angleInput.focus();
+                        }, 1000);
+                    }, 800);
+                }
+            };
+
+            DOM.checkBtn.addEventListener('click', checkAnswer);
+            DOM.nextChallengeBtn.addEventListener('click', setupNewChallenge);
+            DOM.angleInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') checkAnswer(); });
+            
+            setupNewChallenge();
+        }
+
+        // --- Challenge 2: Đối Đỉnh ---
+        function initChallenge2() {
+            const container = challenge2Container;
+            const DOM = {
+                scanBtn: container.querySelector('#ch2-scan-btn'),
+                angleInput: container.querySelector('#ch2-angle-input'),
+                checkBtn: container.querySelector('#ch2-check-btn'),
+                nextChallengeBtn: container.querySelector('#ch2-next-challenge-btn'),
+                feedbackMessage: container.querySelector('#ch2-feedback-message'),
+                explanationBox: container.querySelector('#ch2-explanation-box'),
+                robotArmGroup: container.querySelector('#ch2-robot-arm-group'),
+                movableSystem: container.querySelector('#ch2-movable-system'),
+                arm1: container.querySelector('#ch2-arm1'),
+                arm2: container.querySelector('#ch2-arm2'),
+                actuators: container.querySelectorAll('.actuator'),
+                objectToGrab: container.querySelector('#ch2-object-to-grab'),
+                effectsContainer: container.querySelector('#ch2-effects-container'),
+                laser1: container.querySelector('#ch2-laser1'),
+                laser2: container.querySelector('#ch2-laser2'),
+                laserWrapper1: container.querySelector('#ch2-laser-wrapper-1'),
+                laserWrapper2: container.querySelector('#ch2-laser-wrapper-2'),
+                angleArcGamma: container.querySelector('#ch2-angle-arc-gamma'),
+                angleTextGamma: container.querySelector('#ch2-angle-text-gamma'),
+                angleArcAlpha: container.querySelector('#ch2-angle-arc-alpha'),
+                angleTextAlpha: container.querySelector('#ch2-angle-text-alpha'),
+                angleArcBeta: container.querySelector('#ch2-angle-arc-beta'),
+                angleTextBeta: container.querySelector('#ch2-angle-text-beta'),
+                challengeInstruction: container.querySelector('#ch2-challenge-instruction'),
+            };
+
+            const state = { correctAnswer: 0, initialArmAngle: 60, isAnimating: false, objectDistance: 0 };
+            
+            const updateFeedback = (message, type) => {
+                DOM.feedbackMessage.textContent = message;
+                const types = { success: 'bg-green-500/20 text-green-400', error: 'bg-red-500/20 text-red-400', info: 'bg-blue-500/20 text-blue-400' };
+                DOM.feedbackMessage.className = `mt-4 p-4 rounded-md text-center font-semibold text-lg opacity-100 transform translate-y-0 ${types[type] || types.info}`;
+            };
+            const hideFeedback = () => { DOM.feedbackMessage.className = `mt-4 p-4 rounded-md text-center font-semibold text-lg opacity-0 transform translate-y-2`; };
+
+            const createEffect = (isConfetti) => {
+                DOM.effectsContainer.innerHTML = '';
+                const particles = [];
+                const objX = parseFloat(DOM.objectToGrab.getAttribute('cx'));
+                const objY = parseFloat(DOM.objectToGrab.getAttribute('cy'));
+                const colors = ['#f472b6', '#38bdf8', '#4ade80', '#fbbf24', '#f87171'];
+                for (let i = 0; i < (isConfetti ? 40 : 15); i++) {
+                    const angle = Math.random() * 360;
+                    const speed = Math.random() * (isConfetti ? 5 : 3) + 2;
+                    let particle = isConfetti && Math.random() > 0.5 ? document.createElementNS('http://www.w3.org/2000/svg', 'rect') : document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    if (particle.tagName === 'rect') { particle.setAttribute('width', 8); particle.setAttribute('height', 8); } else { particle.setAttribute('d', 'M0,0 L5,2 L0,4 Z'); }
+                    particle.setAttribute('fill', isConfetti ? colors[i % colors.length] : '#fbbf24');
+                    DOM.effectsContainer.appendChild(particle);
+                    particles.push({ el: particle, x: objX, y: objY, vx: Math.cos(angle * Math.PI / 180) * speed, vy: Math.sin(angle * Math.PI / 180) * speed * (isConfetti ? -1 : 1), rot: Math.random() * 360, rotSpeed: (Math.random() - 0.5) * 20, opacity: 1 });
+                }
+                let startTime = null;
+                const duration = isConfetti ? 1500 : 1000;
+                function animate(currentTime) {
+                    if (!startTime) startTime = currentTime;
+                    const elapsed = currentTime - startTime;
+                    particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.rot += p.rotSpeed; p.opacity = 1 - (elapsed / duration); p.el.setAttribute('transform', `translate(${p.x}, ${p.y}) rotate(${p.rot})`); p.el.setAttribute('opacity', p.opacity); });
+                    if (elapsed < duration) requestAnimationFrame(animate);
+                    else DOM.effectsContainer.innerHTML = '';
+                }
+                requestAnimationFrame(animate);
+            };
+
+            const setupChallenge = () => {
+                state.isAnimating = false;
+                DOM.angleInput.value = '';
+                hideFeedback();
+                DOM.robotArmGroup.classList.remove('error-shake');
+                DOM.movableSystem.classList.remove('success-shake');
+                DOM.objectToGrab.style.opacity = '1';
+                DOM.explanationBox.classList.add('opacity-0', 'translate-y-4');
+                DOM.effectsContainer.innerHTML = '';
+                DOM.arm1.style.transform = `rotate(${state.initialArmAngle}deg)`;
+                DOM.arm2.style.transform = `rotate(${-state.initialArmAngle}deg)`;
+                [DOM.laser1, DOM.laser2].forEach(l => l.classList.remove('active'));
+                DOM.angleArcGamma.setAttribute('d', '');
+                DOM.angleTextGamma.textContent = '';
+                DOM.angleArcAlpha.setAttribute('d', '');
+                DOM.angleTextAlpha.textContent = 'α = ?';
+                DOM.angleArcBeta.setAttribute('d', '');
+                DOM.angleTextBeta.textContent = 'β = ?';
+                DOM.scanBtn.disabled = false;
+                DOM.angleInput.disabled = true;
+                DOM.angleInput.placeholder = 'Chờ quét laser...';
+                DOM.checkBtn.disabled = true;
+                DOM.challengeInstruction.textContent = 'Một vật thể đã xuất hiện. Hãy dùng cảm biến laser để xác định góc gắp.';
+                let objectRadius, distance, rawGamma;
+                do {
+                    objectRadius = Math.random() * 25 + 15;
+                    const minDistance = objectRadius + 40;
+                    distance = Math.random() * (190 - minDistance) + minDistance;
+                    rawGamma = 2 * Math.asin(objectRadius / distance) * (180 / Math.PI);
+                } while (rawGamma < 20 || rawGamma > 90);
+                state.correctAnswer = Math.round(rawGamma);
+                state.objectDistance = distance;
+                DOM.objectToGrab.setAttribute('cx', 250 + distance);
+                DOM.objectToGrab.setAttribute('r', objectRadius);
+                const alphaTextPos = polarToCartesian(250, 250, 60 + 20, 180);
+                DOM.angleTextAlpha.setAttribute('x', alphaTextPos.x); DOM.angleTextAlpha.setAttribute('y', alphaTextPos.y + 7);
+                const betaTextPos = polarToCartesian(250, 250, 60 + 20, 0);
+                DOM.angleTextBeta.setAttribute('x', betaTextPos.x); DOM.angleTextBeta.setAttribute('y', betaTextPos.y + 7);
+            };
+            
+            const scanWithLaser = () => {
+                if (state.isAnimating) return;
+                DOM.scanBtn.disabled = true;
+                const gamma = state.correctAnswer;
+                DOM.laserWrapper1.style.transform = `rotate(${gamma / 2}deg)`;
+                DOM.laserWrapper2.style.transform = `rotate(${-gamma / 2}deg)`;
+                [DOM.laser1, DOM.laser2].forEach(l => { l.setAttribute('x2', '250'); l.classList.add('active'); setTimeout(() => l.setAttribute('x2', 500), 50); });
+                DOM.challengeInstruction.innerHTML = `Laser xác định góc gắp cần thiết là <strong class="text-green-400">γ = ${gamma}°</strong>. Hãy đặt góc <strong class="text-sky-400">α</strong> cho bộ truyền động.`;
+                const arcRadius = state.objectDistance * 1.23;
+                DOM.angleArcGamma.setAttribute('d', describeArc(250, 250, arcRadius, -gamma / 2, gamma / 2));
+                const textPos = polarToCartesian(250, 250, arcRadius + 40, 0);
+                DOM.angleTextGamma.setAttribute('x', textPos.x); DOM.angleTextGamma.setAttribute('y', textPos.y + 7);
+                DOM.angleTextGamma.textContent = `γ = ${gamma}°`;
+                DOM.angleInput.disabled = false;
+                DOM.checkBtn.disabled = false;
+                DOM.angleInput.placeholder = `Nhập góc (độ)`;
+                DOM.angleInput.focus();
+            };
+
+            const checkAnswer = () => {
+                if (state.isAnimating) return;
+                const userAnswer = parseFloat(DOM.angleInput.value);
+                if (isNaN(userAnswer)) { updateFeedback('Vui lòng nhập một số hợp lệ!', 'info'); return; }
+                state.isAnimating = true;
+                DOM.checkBtn.disabled = true;
+                DOM.angleInput.disabled = true;
+                DOM.angleArcAlpha.setAttribute('d', describeArc(250, 250, 80, 180 - userAnswer / 2, 180 + userAnswer / 2));
+                DOM.angleTextAlpha.textContent = `α = ${userAnswer}°`;
+                DOM.angleArcBeta.setAttribute('d', describeArc(250, 250, 80, -userAnswer / 2, userAnswer / 2));
+                DOM.angleTextBeta.textContent = `β = ${userAnswer}°`;
+                DOM.actuators.forEach(actuator => actuator.classList.add('actuator-active'));
+                DOM.arm1.style.transform = `rotate(${userAnswer / 2}deg)`;
+                DOM.arm2.style.transform = `rotate(${-userAnswer / 2}deg)`;
+                setTimeout(() => { DOM.actuators.forEach(actuator => actuator.classList.remove('actuator-active')); }, 800);
+                setTimeout(() => {
+                    if (userAnswer === state.correctAnswer) {
+                        updateFeedback('Chính xác! Gắp thành công.', 'success');
+                        DOM.explanationBox.classList.remove('opacity-0', 'translate-y-4');
+                        createEffect(true);
+                        DOM.movableSystem.classList.add('success-shake');
+                        setTimeout(() => { DOM.objectToGrab.style.opacity = '0'; DOM.movableSystem.classList.remove('success-shake'); state.isAnimating = false; }, 6000);
+                    } else {
+                        if (userAnswer < state.correctAnswer) { updateFeedback('Góc kẹp quá nhỏ, gây hư hỏng vật!', 'error'); DOM.objectToGrab.style.opacity = '0'; createEffect(false); } 
+                        else { updateFeedback('Góc quá to, chưa thể gắp vật.', 'error'); DOM.robotArmGroup.classList.add('error-shake'); }
+                        setTimeout(() => {
+                            DOM.arm1.style.transform = `rotate(${state.initialArmAngle}deg)`;
+                            DOM.arm2.style.transform = `rotate(${-state.initialArmAngle}deg)`;
+                            DOM.robotArmGroup.classList.remove('error-shake');
+                            DOM.angleArcAlpha.setAttribute('d', '');
+                            DOM.angleTextAlpha.textContent = 'α = ?';
+                            DOM.angleArcBeta.setAttribute('d', '');
+                            DOM.angleTextBeta.textContent = 'β = ?';
+                            DOM.objectToGrab.style.opacity = '1';
+                            state.isAnimating = false;
+                            DOM.checkBtn.disabled = false;
+                            DOM.angleInput.disabled = false;
+                            DOM.angleInput.focus();
+                        }, 3000);
+                    }
+                }, 800);
+            };
+
+            DOM.scanBtn.addEventListener('click', scanWithLaser);
+            DOM.checkBtn.addEventListener('click', checkAnswer);
+            DOM.nextChallengeBtn.addEventListener('click', setupChallenge);
+            DOM.angleInput.addEventListener('keyup', e => { if (e.key === 'Enter') checkAnswer(); });
+            setupChallenge();
+        }
+
+        // --- Initial Load ---
+        showTab(1);
+    });
+    </script>
+</body>
+</html>

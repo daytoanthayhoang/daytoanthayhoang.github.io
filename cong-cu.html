@@ -20,7 +20,7 @@
         #tool-frame {
             width: 100%;
             height: 80vh;
-            border: 1px solid #e2e8f0;
+            border: none; /* Bỏ border vì đã có nền trắng và shadow */
         }
         /* --- Kiểu cho nút công cụ --- */
         .tool-trigger {
@@ -58,12 +58,51 @@
             opacity: 1;
             transform: translateY(0);
         }
+        /* --- Kiểu cho chế độ toàn màn hình --- */
+        #frame-container.fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100;
+            padding: 0;
+            border-radius: 0;
+            background-color: white;
+        }
+        #frame-container.fullscreen-mode #tool-frame {
+            height: 100%;
+            border: none;
+        }
+        /* --- Kiểu cho nút thoát toàn màn hình (nổi) --- */
+        #exit-fullscreen-btn {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 101;
+            background-color: rgba(17, 24, 39, 0.6); /* bg-gray-900 with opacity */
+            color: white;
+            border-radius: 9999px;
+            width: 50px;
+            height: 50px;
+            display: flex; /* Dùng flex để căn giữa icon */
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease-in-out;
+            opacity: 0.8;
+            cursor: pointer;
+        }
+        #exit-fullscreen-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-sky-50 text-gray-800">
 
     <!-- PHẦN ĐẦU TRANG (HEADER) -->
-    <header class="bg-white shadow-md sticky top-0 z-50 h-[80px] flex items-center">
+    <header class="bg-white shadow-md sticky top-0 z-50 h-[80px] flex items-center transition-transform duration-300">
         <div class="container mx-auto px-6 flex justify-between items-center">
             <a href="./index.html" class="text-2xl font-bold text-blue-600">Dạy Toán Thầy Hoàng</a>
             <nav class="hidden md:flex space-x-8">
@@ -79,7 +118,7 @@
     </header>
 
     <!-- THANH ĐIỀU HƯỚNG NHANH -->
-    <nav id="quick-nav" class="sticky bg-white/80 backdrop-blur-sm shadow-sm z-40">
+    <nav id="quick-nav" class="sticky bg-white/80 backdrop-blur-sm shadow-sm z-40 transition-transform duration-300">
         <div class="container mx-auto px-6">
             <div id="nav-container" class="flex justify-center items-center border-b flex-wrap">
                 <a href="#toan-6" class="nav-link text-gray-600 font-semibold py-4 px-5 border-b-2 border-transparent hover:text-blue-600">Toán 6</a>
@@ -148,7 +187,8 @@
 							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./dientichxungquanhHLTTamG.html">DTXQ Lăng Trụ Tam Giác</button>	
 							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./dientichxungquanhHLTTuG.html">DTXQ Lăng Trụ Tứ Giác</button>	
 							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./thetichHLTTamG.html">Thể Tích Lăng Trụ Tam Giác</button>	
-							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./thetichHLTTuG.html">Thể Tích Lăng Trụ Tứ Giác</button>	
+							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./thetichHLTTuG.html">Thể Tích Lăng Trụ Tứ Giác</button>
+							 <button class="tool-trigger bg-blue-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-600" data-src="./mophong-thuthachrobot.html">Thử Thách Cánh Tay Robot</button>	
                         </div>
                     </div>
                     <div>
@@ -168,8 +208,10 @@
                         <h3 class="text-xl font-semibold text-gray-700">Số và Đại số</h3>
                         <div class="mt-4 flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg min-h-[60px]">
                             <button class="tool-trigger bg-green-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-green-600" data-src="./hoc-hang-dang-thuc.html">Học 7 Hằng Đẳng Thức</button>
-                            <button class="tool-trigger bg-green-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-green-600" data-src="./on-tap-kttx1-dai-so-8.html">Ôn tập KTTX 1 (Trắc nghiệm)</button>
-                        </div>
+                             <!-- 
+							<button class="tool-trigger bg-green-500 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-green-600" data-src="./on-tap-kttx1-dai-so-8.html">Ôn tập KTTX 1 (Trắc nghiệm)</button>
+							-->
+						</div>
                     </div>
                     <div>
                         <h3 class="text-xl font-semibold text-gray-700">Hình học</h3>
@@ -196,19 +238,26 @@
                 </div>
             </section>
         </div>
-
-        <!-- KHUNG HIỂN THỊ CÔNG CỤ (IFRAME) -->
-        <section id="iframe-section" class="mt-16 scroll-animate">
-            <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">Khu Vực Mô Phỏng</h2>
-            <div id="frame-container" class="bg-white rounded-lg shadow-xl p-4 transition-all duration-500">
-                <div id="placeholder" class="text-center py-20 text-gray-500">
-                    <h3 class="text-2xl font-semibold">Vui lòng chọn một công cụ để hiển thị</h3>
-                    <p>Mô hình tương tác sẽ xuất hiện ở đây.</p>
-                </div>
-                <iframe id="tool-frame" class="hidden" title="Trình giả lập công cụ toán học"></iframe>
-            </div>
-        </section>
     </main>
+
+    <!-- KHUNG HIỂN THỊ CÔNG CỤ (IFRAME) -->
+    <section id="iframe-section" class="mt-16 scroll-animate">
+        <div class="container mx-auto px-6">
+            <div class="relative text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">Khu Vực Mô Phỏng</h2>
+                <button id="fullscreen-btn" class="absolute right-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Phóng to toàn màn hình" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6m-6-6v4m0-4h4"/></svg>
+                </button>
+            </div>
+        </div>
+        <div id="frame-container" class="bg-white shadow-xl transition-all duration-500">
+            <div id="placeholder" class="text-center py-20 text-gray-500 container mx-auto px-6">
+                <h3 class="text-2xl font-semibold">Vui lòng chọn một công cụ để hiển thị</h3>
+                <p>Mô hình tương tác sẽ xuất hiện ở đây.</p>
+            </div>
+            <iframe id="tool-frame" class="hidden" title="Trình giả lập công cụ toán học"></iframe>
+        </div>
+    </section>
     
     <!-- PHẦN CUỐI TRANG (FOOTER) -->
     <footer id="lienhe" class="bg-gray-800 text-white py-10 mt-16">
@@ -218,11 +267,18 @@
         </div>
     </footer>
 
+    <!-- NÚT THOÁT TOÀN MÀN HÌNH (NỔI) -->
+    <button id="exit-fullscreen-btn" class="hidden" title="Thoát chế độ toàn màn hình (Esc)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+    </button>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const toolFrame = document.getElementById('tool-frame');
             const placeholder = document.getElementById('placeholder');
             const iframeSection = document.getElementById('iframe-section');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const exitFullscreenBtn = document.getElementById('exit-fullscreen-btn');
             let currentActiveButton = null;
 
             // --- TẠO MENU THẢ XUỐNG TỰ ĐỘNG ---
@@ -236,25 +292,20 @@
                     const tools = section.querySelectorAll('.tool-trigger');
 
                     if (navLink && tools.length > 0) {
-                        // Tạo một div bao bọc để xử lý hover
                         const wrapper = document.createElement('div');
                         wrapper.className = 'relative group';
-                        
-                        // Thay thế link gốc bằng wrapper trong nav
                         navLink.parentNode.replaceChild(wrapper, navLink);
                         wrapper.appendChild(navLink);
 
-                        // Tạo menu thả xuống
                         const dropdown = document.createElement('div');
                         dropdown.className = 'dropdown-menu absolute left-1/2 -translate-x-1/2 top-full mt-1 bg-white rounded-md shadow-lg z-50 hidden group-hover:block p-4 w-max max-w-lg';
                         
-                        // Tạo container dạng lưới bên trong menu
                         const gridContainer = document.createElement('div');
                         gridContainer.className = 'grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2';
 
                         tools.forEach(tool => {
                             const menuItem = document.createElement('a');
-                            menuItem.href = '#iframe-section'; // Trỏ đến khu vực iframe
+                            menuItem.href = '#iframe-section';
                             menuItem.textContent = tool.textContent;
                             menuItem.dataset.src = tool.dataset.src;
                             menuItem.className = 'tool-trigger text-center px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors';
@@ -272,10 +323,9 @@
 
             // --- XỬ LÝ SỰ KIỆN CLICK CHO TẤT CẢ CÔNG CỤ ---
             function handleToolClick(event) {
-                // Chỉ xử lý cho các element có class 'tool-trigger'
                 if (!event.target.matches('.tool-trigger')) return;
                 
-                event.preventDefault(); // Ngăn hành vi mặc định của thẻ a
+                event.preventDefault();
                 
                 const toolSrc = event.target.dataset.src;
                 
@@ -283,23 +333,21 @@
                     currentActiveButton.classList.remove('active');
                 }
                 
-                // Thêm class 'active' cho nút vừa bấm, nếu nó là button gốc
                 if (event.target.tagName === 'BUTTON') {
                      event.target.classList.add('active');
                      currentActiveButton = event.target;
                 } else {
-                    currentActiveButton = null; // Không cần highlight item trong menu
+                    currentActiveButton = null;
                 }
                 
                 placeholder.classList.add('hidden');
                 toolFrame.classList.remove('hidden');
                 toolFrame.src = toolSrc;
+                fullscreenBtn.disabled = false; // Kích hoạt nút phóng to
 
-                // Cuộn đến khu vực hiển thị một cách mượt mà
                 iframeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
-            // Gán sự kiện click cho toàn bộ document để bắt được các nút được tạo động
             document.addEventListener('click', handleToolClick);
 
 
@@ -310,7 +358,6 @@
 
             const observerOptions = { root: null, threshold: 0.1 };
             
-            // Observer cho hiệu ứng hiện ra
             const animateObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -321,7 +368,6 @@
             }, observerOptions);
             scrollAnimateElements.forEach(el => animateObserver.observe(el));
 
-            // Observer cho thanh điều hướng
             const navObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -333,7 +379,57 @@
                 });
             }, { root: null, rootMargin: "-50% 0px -50% 0px", threshold: 0 });
             sections.forEach(section => navObserver.observe(section));
+
+            // --- XỬ LÝ NÚT PHÓNG TO / THU NHỎ ---
+            const frameContainer = document.getElementById('frame-container');
+            const header = document.querySelector('header');
+            const quickNav = document.getElementById('quick-nav');
+            const mainContent = document.querySelector('main');
+            const footer = document.querySelector('footer');
+            const iframeTitleContainer = document.querySelector('#iframe-section .container');
+
+            function toggleFullscreen(forceExit = false) {
+                const isCurrentlyFullscreen = frameContainer.classList.contains('fullscreen-mode');
+                const goFullscreen = forceExit ? false : !isCurrentlyFullscreen;
+
+                frameContainer.classList.toggle('fullscreen-mode', goFullscreen);
+                
+                // Ẩn/hiện các thành phần của trang
+                header.style.transform = goFullscreen ? 'translateY(-100%)' : 'translateY(0)';
+                quickNav.style.transform = goFullscreen ? 'translateY(-100%)' : 'translateY(0)';
+                mainContent.classList.toggle('hidden', goFullscreen);
+                footer.classList.toggle('hidden', goFullscreen);
+                if (iframeTitleContainer) {
+                    iframeTitleContainer.classList.toggle('hidden', goFullscreen);
+                }
+                exitFullscreenBtn.classList.toggle('hidden', !goFullscreen);
+
+
+                // Ngăn cuộn trang khi ở chế độ toàn màn hình
+                document.body.style.overflow = goFullscreen ? 'hidden' : '';
+
+                // Chỉ cuộn khi thoát chế độ toàn màn hình
+                if (!goFullscreen && isCurrentlyFullscreen) {
+                    iframeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            fullscreenBtn.addEventListener('click', () => {
+                toggleFullscreen();
+            });
+
+            exitFullscreenBtn.addEventListener('click', () => {
+                toggleFullscreen(true); // Buộc thoát
+            });
+
+            // Thêm sự kiện lắng nghe phím Escape để thoát chế độ toàn màn hình
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && frameContainer.classList.contains('fullscreen-mode')) {
+                    toggleFullscreen(true); // Buộc thoát
+                }
+            });
         });
     </script>
 </body>
 </html>
+
