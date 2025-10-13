@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Mô Phỏng Số Nguyên Tố</title>
+    <!-- Tích hợp Tailwind CSS và Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            border-color: #3b82f6;
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Styling cho mô hình "Xây Dựng Hình Chữ Nhật" */
+        .rectangle-vis {
+            display: grid;
+            border: 1px solid #9ca3af;
+            background-color: #e5e7eb;
+        }
+        .block {
+            background-color: #60a5fa;
+            border: 1px solid #3b82f6;
+        }
+
+        /* Styling cho Sàng Eratosthenes */
+        #sieve-controls {
+            position: sticky;
+            top: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .sieve-grid {
+            display: grid;
+            grid-template-columns: repeat(10, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+        .sieve-number {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1 / 1;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .sieve-number.eliminated::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -5%;
+            width: 110%;
+            height: 3px;
+            background-color: #ef4444;
+            transform: translateY(-50%) rotate(-10deg);
+            animation: strike-through 0.4s ease-out forwards;
+        }
+        @keyframes strike-through {
+            from { width: 0; }
+            to { width: 110%; }
+        }
+        .sieve-number.prime {
+            background-color: #22c55e;
+            color: white;
+            transform: scale(1.1);
+        }
+        .sieve-number.multiple-highlight {
+            background-color: #f59e0b;
+            color: white;
+        }
+        
+        /* Styling cho Cỗ Máy Phân Tích */
+        #machine-layout-container {
+            position: relative;
+            min-height: 300px;
+        }
+        #machine-animation-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #machine-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+        .factor-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: monospace, monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .factor-column .factor-row {
+            width: 100%;
+            min-height: 2.75rem; /* Ensure rows have height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .factor-column .factor-row.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #factor-tree-container {
+            border-left: 3px solid #6b7280;
+            padding-left: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-blue-600">Công Cụ Khám Phá Số Nguyên Tố</h1>
+            <p class="mt-2 text-lg text-gray-600">Một bộ sưu tập các mô hình tương tác để học về số nguyên tố.</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div id="tab-container" class="mb-8 flex flex-wrap justify-center gap-2 md:gap-4 p-2 bg-gray-200 rounded-lg">
+            <button class="tab-btn active flex-1 md:flex-none py-2 px-5 font-semibold rounded-md border-2 border-transparent" data-tab="rectangles">🧱 Xây Hình Chữ Nhật</button>
+            <button class="tab-btn flex-1 md:flex-none py-2 px-5 font-semibold rounded-md border-2 border-transparent" data-tab="machine">⚙️ Máy Phân Tích</button>
+            <button class="tab-btn flex-1 md:flex-none py-2 px-5 font-semibold rounded-md border-2 border-transparent" data-tab="sieve">❌✔️ Sàng Eratosthenes</button>
+        </div>
+
+        <main class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+            <!-- 1. Mô Hình "Xây Dựng Hình Chữ Nhật" -->
+            <div id="rectangles-content" class="tab-content active">
+                <h2 class="text-2xl font-bold text-gray-700 mb-4">Mô Hình 1: Xây Dựng Hình Chữ Nhật</h2>
+                <p class="mb-6 text-gray-600">Nhập một số để xem có thể xếp thành bao nhiêu hình chữ nhật khác nhau. Số nguyên tố chỉ có thể xếp thành một hàng duy nhất!</p>
+                <div class="flex items-center gap-4 mb-6">
+                    <input type="number" id="rect-number-input" min="1" max="100" value="12" class="w-full md:w-48 text-lg p-3 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    <button id="visualize-rect-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition">Hiển thị</button>
+                </div>
+                <div id="rect-result-container">
+                    <p id="rect-result-text" class="text-xl font-semibold mb-4"></p>
+                    <div id="rect-visualization" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+                </div>
+            </div>
+
+            <!-- 2. Mô Hình "Cỗ Máy Phân Tích Thừa Số" -->
+            <div id="machine-content" class="tab-content">
+                <h2 class="text-2xl font-bold text-gray-700 mb-4">Mô Hình 2: Phân Tích Ra Thừa Số Nguyên Tố</h2>
+                <p class="mb-6 text-gray-600">Nhập một số để xem quá trình phân tích nó thành các thừa số nguyên tố theo sơ đồ cột.</p>
+                
+                <div class="flex flex-wrap items-center gap-4 mb-6 border-b pb-6">
+                    <input type="number" id="machine-number-input" min="2" max="10000" value="280" class="w-full md:w-48 text-lg p-3 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    <div class="flex items-center gap-x-4">
+                        <label class="font-medium"><input type="radio" name="machine-mode" value="auto" checked class="mr-1"> Tự động</label>
+                        <label class="font-medium"><input type="radio" name="machine-mode" value="step" class="mr-1"> Từng bước</label>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                     <button id="start-machine-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-md hover:bg-blue-700 transition">Bắt đầu Phân tích</button>
+                     <div id="step-controls" class="hidden items-center gap-2">
+                         <button id="machine-back-btn" class="bg-gray-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition">&larr; Quay lại</button>
+                         <button id="machine-next-btn" class="bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition">Tiếp theo &rarr;</button>
+                     </div>
+                </div>
+                
+                <div id="machine-layout-container">
+                    <div id="machine-animation-overlay"></div>
+                    <div id="machine-layout">
+                        <div id="number-column" class="factor-column">
+                            <!-- Numbers to be factored will appear here -->
+                        </div>
+                        <div id="factor-tree-container">
+                            <div id="factor-column" class="factor-column">
+                                <!-- Prime factors will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="mt-6 text-center">
+                    <p class="text-2xl font-bold" id="machine-result"></p>
+                    <p id="machine-power-result" class="text-2xl font-bold mt-2 opacity-0 transition-opacity duration-500"></p>
+                </div>
+            </div>
+
+            <!-- 3. Mô Hình Sàng Eratosthenes Tương Tác -->
+            <div id="sieve-content" class="tab-content">
+                 <h2 class="text-2xl font-bold text-gray-700 mb-4">Mô Hình 3: Sàng Eratosthenes Tương Tác</h2>
+                <p class="mb-4 text-gray-600">Xem thuật toán hoạt động từng bước để tìm các số nguyên tố.</p>
+                <div id="sieve-controls">
+                    <div class="flex flex-wrap items-center gap-4">
+                         <input type="number" id="sieve-limit-input" min="10" max="200" value="100" class="w-full md:w-32 text-lg p-2 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" title="Giới hạn (tối đa 200)">
+                        <button id="start-sieve-btn" class="bg-green-600 text-white font-semibold py-2 px-5 rounded-md hover:bg-green-700 transition">Bắt đầu</button>
+                        <button id="next-sieve-step-btn" class="bg-blue-600 text-white font-semibold py-2 px-5 rounded-md hover:bg-blue-700 transition" disabled>Bước tiếp theo</button>
+                        <button id="reset-sieve-btn" class="bg-gray-600 text-white font-semibold py-2 px-5 rounded-md hover:bg-gray-700 transition">Làm lại</button>
+                    </div>
+                    <div id="sieve-explanation" class="mt-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded-r-lg font-medium">Bấm "Bắt đầu" để khởi tạo sàng.</div>
+                </div>
+                <div id="sieve-grid-container" class="sieve-grid mt-6"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- LOGIC CHUNG ---
+        const isPrime = num => {
+            if (num <= 1) return false;
+            for (let i = 2, s = Math.sqrt(num); i <= s; i++)
+                if (num % i === 0) return false;
+            return true;
+        };
+
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        // --- LOGIC CHUYỂN TAB ---
+        const tabContainer = document.getElementById('tab-container');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+
+        tabContainer.addEventListener('click', (e) => {
+            if (!e.target.matches('.tab-btn')) return;
+
+            const tabId = e.target.dataset.tab;
+
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+
+            tabContents.forEach(content => {
+                content.classList.toggle('active', content.id === `${tabId}-content`);
+            });
+        });
+
+        // --- 1. MÔ HÌNH HÌNH CHỮ NHẬT ---
+        const rectNumberInput = document.getElementById('rect-number-input');
+        const visualizeRectBtn = document.getElementById('visualize-rect-btn');
+        const rectResultText = document.getElementById('rect-result-text');
+        const rectVisualization = document.getElementById('rect-visualization');
+
+        const getFactors = num => {
+            const factors = [];
+            for (let i = 1; i <= Math.sqrt(num); i++) {
+                if (num % i === 0) {
+                    factors.push([i, num / i]);
+                }
+            }
+            return factors;
+        };
+
+        const visualizeRectangles = () => {
+            const num = parseInt(rectNumberInput.value);
+            if (isNaN(num) || num < 1 || num > 100) {
+                alert("Vui lòng nhập một số từ 1 đến 100.");
+                return;
+            }
+
+            const factors = getFactors(num);
+            rectVisualization.innerHTML = '';
+
+            if (factors.length === 1 && num > 1) {
+                rectResultText.innerHTML = `Số ${num} là <span class="text-green-600">Số Nguyên Tố</span> vì chỉ có 2 ước (1 và ${num}), tạo được 1 loại hình chữ nhật.`;
+            } else if (num === 1) {
+                 rectResultText.innerHTML = `Số 1 không phải là số nguyên tố hay hợp số, chỉ có 1 ước.`;
+            }
+            else {
+                rectResultText.innerHTML = `Số ${num} là <span class="text-red-600">Hợp Số</span> vì có ${factors.length * 2 - (factors[factors.length-1][0] === factors[factors.length-1][1] ? 1 : 0) } ước, tạo được ${factors.length} loại hình chữ nhật.`;
+            }
+            
+            factors.forEach(([rows, cols]) => {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center';
+                
+                const label = document.createElement('p');
+                label.className = 'font-mono font-semibold mb-2';
+                label.textContent = `${rows} x ${cols}`;
+                
+                const vis = document.createElement('div');
+                vis.className = 'rectangle-vis';
+                vis.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                vis.style.width = `${cols * 12}px`;
+                vis.style.height = `${rows * 12}px`;
+                
+                for (let i = 0; i < num; i++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    vis.appendChild(block);
+                }
+                
+                container.appendChild(label);
+                container.appendChild(vis);
+                rectVisualization.appendChild(container);
+            });
+        };
+
+        visualizeRectBtn.addEventListener('click', visualizeRectangles);
+        rectNumberInput.addEventListener('keyup', (e) => e.key === 'Enter' && visualizeRectangles());
+        visualizeRectangles();
+
+        // --- 2. MÔ HÌNH MÁY PHÂN TÍCH ---
+        const machineNumberInput = document.getElementById('machine-number-input');
+        const startMachineBtn = document.getElementById('start-machine-btn');
+        const machineResultEl = document.getElementById('machine-result');
+        const machinePowerResultEl = document.getElementById('machine-power-result');
+        const numberColumn = document.getElementById('number-column');
+        const factorColumn = document.getElementById('factor-column');
+        const stepControls = document.getElementById('step-controls');
+        const machineNextBtn = document.getElementById('machine-next-btn');
+        const machineBackBtn = document.getElementById('machine-back-btn');
+        const machineAnimationOverlay = document.getElementById('machine-animation-overlay');
+        
+        let machineHistory = [];
+        let currentStep = 0; // Represents number of completed factorization rows
+
+        function getFactorizationSteps(num) {
+            const steps = [];
+            let currentNum = num;
+            if (num <= 1) return steps;
+            while (currentNum > 1) {
+                let smallestFactor = -1;
+                if (currentNum % 2 === 0) {
+                    smallestFactor = 2;
+                } else {
+                    for (let i = 3; i <= Math.sqrt(currentNum); i += 2) {
+                        if (currentNum % i === 0) {
+                            smallestFactor = i;
+                            break;
+                        }
+                    }
+                }
+                if (smallestFactor === -1) smallestFactor = currentNum;
+                const remaining = currentNum / smallestFactor;
+                steps.push({ num: currentNum, factor: smallestFactor, remaining: remaining });
+                currentNum = remaining;
+            }
+            return steps;
+        }
+
+        function formatFactorsAsPower(factors) {
+            if (!factors || factors.length === 0) return '';
+            const counts = factors.reduce((acc, val) => {
+                acc[val] = (acc[val] || 0) + 1;
+                return acc;
+            }, {});
+            
+            return Object.entries(counts).map(([base, exp]) => {
+                return exp > 1 ? `${base}<sup>${exp}</sup>` : base;
+            }).join(' × ');
+        }
+        
+        function showPowerResult() {
+            const primeFactors = machineHistory.map(step => step.factor);
+            const powerString = formatFactorsAsPower(primeFactors);
+            
+            if (powerString !== primeFactors.join(' × ')) {
+                machinePowerResultEl.innerHTML = `= <span class="text-blue-600">${powerString}</span>`;
+                machinePowerResultEl.style.opacity = '1';
+            }
+        }
+
+        function renderMachineState() {
+            numberColumn.innerHTML = '';
+            factorColumn.innerHTML = '';
+            machinePowerResultEl.style.opacity = '0';
+            const primeFactors = [];
+            
+            if (machineHistory.length === 0 && currentStep === 0) {
+                 const initialNumRow = document.createElement('div');
+                 initialNumRow.className = 'factor-row visible';
+                 initialNumRow.textContent = machineNumberInput.value;
+                 numberColumn.appendChild(initialNumRow);
+                 machineResultEl.innerHTML = `${machineNumberInput.value} = ?`;
+                 return;
+            }
+
+            for (let i = 0; i < currentStep; i++) {
+                const step = machineHistory[i];
+                const numRow = document.createElement('div');
+                numRow.className = 'factor-row visible';
+                numRow.textContent = step.num;
+                numberColumn.appendChild(numRow);
+                
+                const factorRow = document.createElement('div');
+                factorRow.className = 'factor-row visible text-green-600';
+                factorRow.textContent = step.factor;
+                factorColumn.appendChild(factorRow);
+                primeFactors.push(step.factor);
+            }
+
+            const lastNum = (currentStep > 0) ? machineHistory[currentStep - 1].remaining : (machineHistory.length > 0 ? machineHistory[0].num : machineNumberInput.value);
+            const lastNumRow = document.createElement('div');
+            lastNumRow.className = 'factor-row visible';
+            lastNumRow.textContent = lastNum;
+            numberColumn.appendChild(lastNumRow);
+
+            while(factorColumn.children.length < numberColumn.children.length) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'factor-row';
+                placeholder.innerHTML = '&nbsp;';
+                factorColumn.appendChild(placeholder);
+            }
+
+            const initialNum = machineHistory.length > 0 ? machineHistory[0].num : machineNumberInput.value;
+            machineResultEl.innerHTML = primeFactors.length > 0 ? `${initialNum} = <span class="text-green-600">${primeFactors.join(' × ')}</span>` : `${initialNum} = ?`;
+        
+            if (currentStep > machineHistory.length) {
+                showPowerResult();
+            }
+        }
+
+        async function animateAndRenderStep(stepIndex) {
+            if (stepIndex < 0 || stepIndex >= machineHistory.length) return;
+            
+            const step = machineHistory[stepIndex];
+            const sourceNumberEl = numberColumn.children[stepIndex];
+            const sourceRect = sourceNumberEl.getBoundingClientRect();
+            const containerRect = machineAnimationOverlay.getBoundingClientRect();
+
+            const factorEl = document.createElement('div');
+            factorEl.textContent = step.factor;
+            factorEl.className = 'absolute bg-green-500 text-white font-bold text-2xl py-2 px-4 rounded-lg shadow-lg';
+            factorEl.style.left = `${sourceRect.left - containerRect.left + sourceRect.width / 2}px`;
+            factorEl.style.top = `${sourceRect.top - containerRect.top}px`;
+            factorEl.style.transform = 'translateX(-50%)';
+            factorEl.style.opacity = '1';
+            factorEl.style.transition = 'top 0.5s ease-in, left 0.5s ease-out, opacity 0.4s ease-in, transform 0.5s ease-out';
+            machineAnimationOverlay.appendChild(factorEl);
+
+            await sleep(50);
+            factorEl.style.top = `${sourceRect.top - containerRect.top + 60}px`;
+            await sleep(500);
+            
+            // Render the next state columns *before* moving the element
+            renderMachineState(stepIndex + 1);
+            
+            await sleep(50); // allow DOM to update
+            const targetFactorEl = factorColumn.children[stepIndex];
+            const targetRect = targetFactorEl.getBoundingClientRect();
+            
+            factorEl.style.left = `${targetRect.left - containerRect.left + targetRect.width / 2}px`;
+            factorEl.style.top = `${targetRect.top - containerRect.top}px`;
+            factorEl.style.transform = 'translateX(-50%) scale(0.8)';
+            factorEl.style.fontSize = '1.5rem';
+
+            await sleep(500);
+            factorEl.remove();
+        }
+
+        async function runMachineAutomatically() {
+            for (let i = 0; i < machineHistory.length; i++) {
+                currentStep = i; // Set state for animation source
+                renderMachineState();
+                await animateAndRenderStep(i);
+            }
+            currentStep = machineHistory.length;
+            renderMachineState();
+            await sleep(500);
+            showPowerResult();
+            startMachineBtn.disabled = false;
+        }
+        
+        function setupMachine() {
+            const num = parseInt(machineNumberInput.value);
+            if (isNaN(num) || num < 2 || num > 10000) {
+                alert("Vui lòng nhập một số từ 2 đến 10000.");
+                return;
+            }
+
+            startMachineBtn.disabled = true;
+            machineAnimationOverlay.innerHTML = '';
+            machineHistory = getFactorizationSteps(num);
+            currentStep = 0;
+            renderMachineState();
+
+            const mode = document.querySelector('input[name="machine-mode"]:checked').value;
+            if (mode === 'auto') {
+                stepControls.classList.add('hidden');
+                runMachineAutomatically();
+            } else {
+                stepControls.classList.remove('hidden');
+                machineBackBtn.disabled = true;
+                machineNextBtn.disabled = currentStep >= machineHistory.length;
+                startMachineBtn.disabled = false; 
+            }
+        }
+        
+        startMachineBtn.addEventListener('click', setupMachine);
+        machineNumberInput.addEventListener('keyup', (e) => e.key === 'Enter' && setupMachine());
+        
+        machineNextBtn.addEventListener('click', async () => {
+            if (currentStep < machineHistory.length) {
+                machineNextBtn.disabled = true;
+                machineBackBtn.disabled = true;
+                startMachineBtn.disabled = true;
+
+                renderMachineState(); // Ensure source state is correct
+                await animateAndRenderStep(currentStep);
+                currentStep++;
+
+                machineBackBtn.disabled = false;
+                startMachineBtn.disabled = false;
+                if (currentStep >= machineHistory.length) {
+                    machineNextBtn.disabled = false; // Allow one more click for power result
+                }
+
+            } else if (currentStep === machineHistory.length) {
+                showPowerResult();
+                currentStep++;
+                machineNextBtn.disabled = true;
+            }
+        });
+
+        machineBackBtn.addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                renderMachineState();
+                machineNextBtn.disabled = false;
+            }
+            machineBackBtn.disabled = currentStep <= 0;
+        });
+
+
+        // --- 3. MÔ HÌNH SÀNG ERATOSTHENES ---
+        const sieveLimitInput = document.getElementById('sieve-limit-input');
+        const startSieveBtn = document.getElementById('start-sieve-btn');
+        const nextSieveStepBtn = document.getElementById('next-sieve-step-btn');
+        const resetSieveBtn = document.getElementById('reset-sieve-btn');
+        const sieveExplanation = document.getElementById('sieve-explanation');
+        const sieveGridContainer = document.getElementById('sieve-grid-container');
+        let sieveState = null;
+
+        function* createSieveGenerator(limit) {
+            let numbers = Array(limit + 1).fill(true);
+            numbers[0] = numbers[1] = false;
+            
+            sieveExplanation.textContent = `Bước 1: Gạch bỏ số 1 vì nó không phải là số nguyên tố.`;
+            sieveGridContainer.querySelector(`[data-number='1']`).classList.add('eliminated');
+            yield;
+
+            for (let p = 2; p * p <= limit; p++) {
+                if (numbers[p]) {
+                    sieveExplanation.innerHTML = `Tìm thấy số nguyên tố tiếp theo là <strong class="text-green-600">${p}</strong>.`;
+                    sieveGridContainer.querySelector(`[data-number='${p}']`).classList.add('prime');
+                    yield;
+
+                    sieveExplanation.innerHTML = `Tô sáng tất cả các bội của <strong class="text-green-600">${p}</strong> (bắt đầu từ ${p*p}).`;
+                    const multiplesToProcess = [];
+                    for (let i = p * p; i <= limit; i += p) {
+                        if (numbers[i]) {
+                             const cell = sieveGridContainer.querySelector(`[data-number='${i}']`);
+                             if(cell) {
+                                cell.classList.add('multiple-highlight');
+                                multiplesToProcess.push(cell);
+                             }
+                        }
+                    }
+                    yield;
+
+                    sieveExplanation.innerHTML = `Bây giờ, gạch bỏ các bội của <strong class="text-green-600">${p}</strong>.`;
+                    multiplesToProcess.forEach(cell => {
+                        cell.classList.remove('multiple-highlight');
+                        cell.classList.add('eliminated');
+                        const num = parseInt(cell.dataset.number);
+                        numbers[num] = false;
+                    });
+                    yield;
+                }
+            }
+            
+            sieveExplanation.innerHTML = `Hoàn thành! Tất cả các số còn lại không bị gạch đều là số nguyên tố.`;
+            for (let p = 2; p <= limit; p++) {
+                if (numbers[p]) {
+                    const cell = sieveGridContainer.querySelector(`[data-number='${p}']`);
+                    if(cell && !cell.classList.contains('prime')) cell.classList.add('prime');
+                }
+            }
+        }
+        
+        function setupSieveGrid() {
+            const limit = parseInt(sieveLimitInput.value);
+            if(isNaN(limit) || limit < 10 || limit > 200) {
+                 alert("Vui lòng nhập giới hạn từ 10 đến 200.");
+                 return;
+            }
+            sieveGridContainer.innerHTML = '';
+            for (let i = 1; i <= limit; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'sieve-number bg-gray-200';
+                cell.textContent = i;
+                cell.dataset.number = i;
+                sieveGridContainer.appendChild(cell);
+            }
+             sieveExplanation.textContent = 'Bấm "Bắt đầu" để khởi tạo sàng.';
+             startSieveBtn.disabled = false;
+             nextSieveStepBtn.disabled = true;
+             sieveLimitInput.disabled = false;
+        }
+
+        startSieveBtn.addEventListener('click', () => {
+            const limit = parseInt(sieveLimitInput.value);
+            sieveState = createSieveGenerator(limit);
+            startSieveBtn.disabled = true;
+            nextSieveStepBtn.disabled = false;
+            sieveLimitInput.disabled = true;
+            sieveExplanation.textContent = `Sàng đã được khởi tạo. Bấm "Bước tiếp theo" để bắt đầu.`;
+        });
+        
+        nextSieveStepBtn.addEventListener('click', () => {
+             const result = sieveState.next();
+             if(result.done) {
+                 nextSieveStepBtn.disabled = true;
+             }
+        });
+
+        resetSieveBtn.addEventListener('click', setupSieveGrid);
+        sieveLimitInput.addEventListener('change', setupSieveGrid);
+        setupSieveGrid();
+    });
+    </script>
+</body>
+</html>
+

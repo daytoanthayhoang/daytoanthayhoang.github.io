@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Mô Phỏng: Ước - Bội - Ước Chung - Bội Chung - ƯCLN - BCNN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .tab-button.active {
+            border-color: #3b82f6;
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Styles for Grid */
+        .grid-number {
+            transition: all 0.3s ease;
+        }
+        .grid-number.divisor {
+            background-color: #60a5fa; /* blue-400 */
+            color: white;
+            transform: scale(1.1);
+        }
+        .grid-number.multiple {
+            background-color: #facc15; /* yellow-400 */
+            color: #422006;
+            transform: scale(1.1);
+        }
+        .grid-number.selected {
+             background-color: #f87171; /* red-400 */
+             color: white;
+             transform: scale(1.15);
+             font-weight: bold;
+        }
+        /* Animation for Frog */
+        .frog {
+            transition: left 0.5s ease-in-out;
+        }
+        /* Animation for Student Lineup */
+        .student-icon {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        /* Animation for Divisor Analysis Path */
+        #analysis-svg path {
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+        .highlight-row {
+            background-color: #e0e7ff;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-700">Công Cụ Mô Phỏng Trực Quan</h1>
+            <p class="text-gray-600 mt-2">Ước - Bội - Ước Chung Lớn Nhất - Bội Chung Nhỏ Nhất</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex flex-wrap justify-center border-b-2 border-gray-200 mb-6">
+            <button class="tab-button active text-sm sm:text-base font-medium py-3 px-4 sm:px-6 border-b-4 transition-colors duration-300" data-tab="1">📊 Phân Tích Ước Số</button>
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-4 sm:px-6 border-b-4 border-transparent transition-colors duration-300" data-tab="2">🐸 Bước Nhảy Bội Số</button>
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-4 sm:px-6 border-b-4 border-transparent transition-colors duration-300" data-tab="3">🌐 Lưới Ước và Bội</button>
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-4 sm:px-6 border-b-4 border-transparent transition-colors duration-300" data-tab="4">👨‍👩‍👧‍👦 Xếp Hàng Lớp Học</button>
+        </div>
+
+        <!-- Tab Content Area -->
+        <main>
+            <!-- Tab 1: Phân Tích Ước Số -->
+            <div id="tab-content-1" class="tab-content active">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 bg-gray-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Phân tích Ước số</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="number-to-analyze" class="block font-medium text-gray-700">Nhập một số nguyên dương:</label>
+                                <input type="number" id="number-to-analyze" min="1" max="1000" value="36" class="w-full mt-1 p-2 border border-gray-300 rounded-md text-lg">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block font-medium text-gray-700">Chế độ phân tích:</label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center"><input type="radio" name="analysis-mode" value="auto" checked class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">Tự động</span></label>
+                                    <label class="flex items-center"><input type="radio" name="analysis-mode" value="step" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"> <span class="ml-2">Từng bước</span></label>
+                                </div>
+                            </div>
+                            <button id="run-analysis" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition-colors">Phân tích</button>
+                            <button id="next-step-analysis" class="w-full bg-indigo-500 text-white font-bold py-3 rounded-lg hover:bg-indigo-600 transition-colors hidden">Bước tiếp theo</button>
+                        </div>
+                        <div id="analysis-summary" class="mt-6 p-2 rounded-md min-h-[80px]"></div>
+                    </div>
+                    <div class="lg:col-span-2 bg-gray-100 p-4 rounded-lg flex items-center justify-center min-h-[400px]">
+                        <div id="analysis-display" class="relative w-full h-full flex justify-center items-start pt-8">
+                            <svg id="analysis-svg" class="absolute top-0 left-0 w-full h-full" style="pointer-events: none;"></svg>
+                            <div id="divisor-columns" class="flex gap-16 text-2xl font-mono text-gray-800">
+                                <!-- Columns will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Bước Nhảy Bội Số -->
+            <div id="tab-content-2" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                     <div class="lg:col-span-1 bg-gray-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Thiết lập</h3>
+                         <div class="space-y-4">
+                            <div>
+                                <label for="frog1-jump" class="block font-medium text-green-700">Bước nhảy Ếch 1: <span id="frog1-val" class="font-bold text-green-600">3</span></label>
+                                <input type="range" id="frog1-jump" min="1" max="15" value="3" class="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                             <div class="flex items-center">
+                                <input id="toggle-frog2" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="toggle-frog2" class="ml-2 block text-sm text-gray-900">Thêm Ếch 2 (Tìm Bội chung)</label>
+                            </div>
+                             <div id="frog2-controls" class="hidden space-y-4 pt-4 border-t">
+                                <label for="frog2-jump" class="block font-medium text-blue-700">Bước nhảy Ếch 2: <span id="frog2-val" class="font-bold text-blue-600">5</span></label>
+                                <input type="range" id="frog2-jump" min="1" max="15" value="5" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                             <div>
+                                <label for="jump-speed" class="block font-medium text-gray-700">Tốc độ nhảy: <span id="jump-speed-val">Trung bình</span></label>
+                                <input type="range" id="jump-speed" min="200" max="1000" value="600" step="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                            <button id="run-jump" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-colors">Bắt đầu nhảy</button>
+                        </div>
+                        <div id="jump-result" class="mt-4 p-2 rounded-md">
+                            <p class="font-semibold text-green-800">Bội của <span id="b1-display">3</span>: <span id="multiples1-list"></span></p>
+                            <p id="multiples2-container" class="font-semibold text-blue-800 hidden">Bội của <span id="b2-display">5</span>: <span id="multiples2-list"></span></p>
+                            <p id="common-multiples-container" class="font-semibold text-red-800 hidden mt-2">Bội chung: <span id="common-multiples-list"></span></p>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-gray-100 p-4 rounded-lg min-h-[250px] overflow-x-auto">
+                        <div id="number-line-container" class="relative h-24 min-w-[1200px]">
+                            <div class="absolute bottom-10 w-full h-1.5 bg-gray-400"></div>
+                             <div id="frog1-start" class="frog absolute bottom-12 text-4xl" style="left: -20px;">🐸</div>
+                             <div id="frog2-start" class="frog absolute bottom-12 text-4xl hidden" style="left: -20px; filter: hue-rotate(180deg);">🐸</div>
+                            <!-- Các số và vạch kẻ sẽ được thêm vào đây -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 3: Lưới Ước và Bội -->
+            <div id="tab-content-3" class="tab-content">
+                <div class="p-4 bg-blue-50 border-l-4 border-blue-500 mb-6 rounded-r-lg">
+                    <p class="text-blue-800"><strong>Hướng dẫn:</strong> Nhấp vào một số bất kỳ trong lưới để xem tất cả các ước và bội của nó.</p>
+                </div>
+                 <div class="flex justify-center items-center space-x-6 mb-4">
+                    <div class="flex items-center"><div class="w-5 h-5 bg-red-400 rounded-md mr-2"></div><span class="font-medium">Số đã chọn</span></div>
+                    <div class="flex items-center"><div class="w-5 h-5 bg-blue-400 rounded-md mr-2"></div><span class="font-medium">Ước số</span></div>
+                    <div class="flex items-center"><div class="w-5 h-5 bg-yellow-400 rounded-md mr-2"></div><span class="font-medium">Bội số</span></div>
+                </div>
+                <div id="number-grid" class="grid grid-cols-10 gap-2 w-full max-w-2xl mx-auto">
+                    <!-- Các số từ 1-100 sẽ được thêm vào đây -->
+                </div>
+            </div>
+
+            <!-- Tab 4: Xếp Hàng Lớp Học -->
+            <div id="tab-content-4" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 bg-gray-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Thiết lập</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="classA-size" class="block font-medium text-gray-700">Sĩ số Lớp A: <span id="classA-val" class="font-bold text-purple-600">24</span></label>
+                                <input type="range" id="classA-size" min="1" max="50" value="24" class="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                            <div class="flex items-center">
+                                <input id="toggle-classB" type="checkbox" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="toggle-classB" class="ml-2 block text-sm text-gray-900">Thêm Lớp B (Tìm Ước chung)</label>
+                            </div>
+                             <div id="classB-controls" class="space-y-4 pt-4 border-t">
+                                <label for="classB-size" class="block font-medium text-gray-700">Sĩ số Lớp B: <span id="classB-val" class="font-bold text-indigo-600">36</span></label>
+                                <input type="range" id="classB-size" min="1" max="50" value="36" class="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                             <div class="space-y-2 pt-4 border-t">
+                                <label class="block font-medium text-gray-700">Chế độ:</label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center"><input type="radio" name="lineup-mode" value="manual" checked class="h-4 w-4 text-teal-600 border-gray-300 focus:ring-teal-500"> <span class="ml-2">Thủ công</span></label>
+                                    <label class="flex items-center"><input type="radio" name="lineup-mode" value="auto" class="h-4 w-4 text-teal-600 border-gray-300 focus:ring-teal-500"> <span class="ml-2">Tự động</span></label>
+                                </div>
+                            </div>
+                            <div id="manual-lineup-controls">
+                                <label for="row-size" class="block font-medium text-gray-700">Số HS mỗi hàng: <span id="row-val" class="font-bold text-teal-600">4</span></label>
+                                <input type="range" id="row-size" min="1" max="20" value="4" class="w-full h-2 bg-teal-200 rounded-lg appearance-none cursor-pointer">
+                                <button id="run-lineup" class="w-full mt-4 bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 transition-colors">Xếp Hàng</button>
+                            </div>
+                            <div id="auto-lineup-controls" class="hidden space-y-4">
+                                <div class="space-y-2">
+                                    <label class="block font-medium text-gray-700 text-sm">Kiểu chạy tự động:</label>
+                                    <div class="flex gap-4 text-sm">
+                                        <label class="flex items-center"><input type="radio" name="auto-lineup-mode" value="full-auto" checked class="h-4 w-4 text-cyan-600 border-gray-300 focus:ring-cyan-500"> <span class="ml-2">Toàn bộ</span></label>
+                                        <label class="flex items-center"><input type="radio" name="auto-lineup-mode" value="step-by-step" class="h-4 w-4 text-cyan-600 border-gray-300 focus:ring-cyan-500"> <span class="ml-2">Từng bước</span></label>
+                                    </div>
+                                </div>
+                                <div id="full-auto-speed-control">
+                                    <label for="auto-lineup-speed" class="block font-medium text-gray-700 text-sm">Tốc độ: <span id="auto-lineup-speed-val">Trung bình</span></label>
+                                    <input type="range" id="auto-lineup-speed" min="200" max="1200" value="800" step="100" class="w-full h-2 bg-cyan-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <button id="run-auto-lineup" class="w-full bg-cyan-600 text-white font-bold py-2 rounded-lg hover:bg-cyan-700 transition-colors">Bắt đầu tìm</button>
+                                <button id="next-step-lineup" class="w-full bg-cyan-500 text-white font-bold py-2 rounded-lg hover:bg-cyan-600 transition-colors hidden">Bước tiếp theo</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-gray-100 p-4 rounded-lg min-h-[400px]">
+                        <div id="auto-lineup-results-container" class="hidden">
+                            <h4 class="font-bold text-lg text-cyan-800 mb-2">Quá trình tự động tìm Ước chung:</h4>
+                            <div id="auto-lineup-steps" class="space-y-1 text-sm h-48 overflow-y-auto p-2 border rounded-md bg-white"></div>
+                             <div id="auto-lineup-visual-container" class="hidden mt-4 pt-4 border-t">
+                                <h4 class="font-bold text-lg text-gray-700 mb-2">Minh họa cho bước: <span id="current-step-display" class="text-cyan-600"></span></h4>
+                                <div id="auto-lineup-resultA-container">
+                                    <h5 class="font-semibold text-purple-800">Lớp A:</h5>
+                                    <div id="auto-lineup-displayA" class="flex flex-wrap gap-1 my-1 min-h-[40px] items-start"></div>
+                                </div>
+                                <div id="auto-lineup-resultB-container" class="hidden mt-2 pt-2 border-t">
+                                    <h5 class="font-semibold text-indigo-800">Lớp B:</h5>
+                                    <div id="auto-lineup-displayB" class="flex flex-wrap gap-1 my-1 min-h-[40px] items-start"></div>
+                                </div>
+                            </div>
+                             <div id="auto-lineup-summary" class="mt-4 text-center font-semibold text-lg p-3 rounded-md"></div>
+                        </div>
+                        <div id="manual-lineup-results-container">
+                            <div id="lineup-resultA-container">
+                                <h4 class="font-bold text-lg text-purple-800">Kết quả Lớp A:</h4>
+                                <div id="lineup-displayA" class="flex flex-wrap gap-2 my-2 min-h-[100px] items-start"></div>
+                                <div id="lineup-resultA" class="text-center font-semibold text-lg p-3 rounded-md"></div>
+                            </div>
+                            <div id="lineup-resultB-container" class="mt-4 pt-4 border-t">
+                                <h4 class="font-bold text-lg text-indigo-800">Kết quả Lớp B:</h4>
+                                <div id="lineup-displayB" class="flex flex-wrap gap-2 my-2 min-h-[100px] items-start"></div>
+                                <div id="lineup-resultB" class="text-center font-semibold text-lg p-3 rounded-md"></div>
+                            </div>
+                            <div id="lineup-common-result" class="mt-4 text-center font-bold text-xl p-4 rounded-md"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Tab Switching Logic ---
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => item.classList.remove('active'));
+                    tab.classList.add('active');
+                    tabContents.forEach(content => {
+                        content.classList.toggle('active', content.id === `tab-content-${tab.dataset.tab}`);
+                    });
+                });
+            });
+            
+            // --- Tab 1: Divisor Analysis ---
+            const numberToAnalyzeInput = document.getElementById('number-to-analyze');
+            const runAnalysisBtn = document.getElementById('run-analysis');
+            const nextStepBtn = document.getElementById('next-step-analysis');
+            const divisorColumnsDiv = document.getElementById('divisor-columns');
+            const analysisSvg = document.getElementById('analysis-svg');
+            const analysisSummary = document.getElementById('analysis-summary');
+            let analysisState = { divisors: [], currentStep: 0, mode: 'auto' };
+
+            function drawUPath(el1, el2, color = '#818cf8', strokeWidth = 3, isFinal = false, lastEl = null) {
+                const svgRect = analysisSvg.getBoundingClientRect();
+                const r1 = el1.getBoundingClientRect();
+                const r2 = el2.getBoundingClientRect();
+                const r_last = isFinal && lastEl ? lastEl.getBoundingClientRect() : r1;
+
+                const startX = r1.right - svgRect.left;
+                const startY = r1.top + r1.height / 2 - svgRect.top;
+                const endX = r2.left - svgRect.left;
+                const endY = r2.top + r2.height / 2 - svgRect.top;
+
+                const midY = isFinal ? (r_last.bottom - svgRect.top + 30) : (Math.max(startY, endY) + 30);
+                const controlX1 = isFinal ? startX - 80 : startX;
+                const controlX2 = isFinal ? endX + 80 : endX;
+
+                const pathD = `M ${startX} ${startY} C ${controlX1} ${midY}, ${controlX2} ${midY}, ${endX} ${endY}`;
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathD);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', color);
+                path.setAttribute('stroke-width', strokeWidth);
+                path.setAttribute('stroke-linecap', 'round');
+                
+                const length = path.getTotalLength();
+                path.style.strokeDasharray = length;
+                path.style.strokeDashoffset = length;
+                
+                analysisSvg.appendChild(path);
+                setTimeout(() => { path.style.strokeDashoffset = 0; }, 50);
+            }
+
+            function finishAnalysis() {
+                const num = parseInt(numberToAnalyzeInput.value);
+                const allDivs = analysisState.divisors.flatMap(p => p).sort((a, b) => a - b);
+                const uniqueDivs = [...new Set(allDivs)];
+                analysisSummary.innerHTML = `<h4 class="font-bold text-gray-800">Hoàn tất!</h4><p>Ư(${num}) = {<strong class="text-indigo-600">${uniqueDivs.join('; ')}</strong>}</p>`;
+                
+                const col1 = divisorColumnsDiv.querySelector('.col1');
+                const col2 = divisorColumnsDiv.querySelector('.col2');
+                if (col1.firstChild && col2.firstChild && col1.lastChild) {
+                   drawUPath(col1.firstChild, col2.firstChild, '#a5b4fc', 5, true, col1.lastChild);
+                }
+
+                runAnalysisBtn.disabled = false;
+                runAnalysisBtn.classList.remove('hidden');
+                nextStepBtn.classList.add('hidden');
+            }
+
+            function performAnalysisStep() {
+                if (analysisState.currentStep >= analysisState.divisors.length) {
+                    finishAnalysis();
+                    return;
+                }
+                const index = analysisState.currentStep;
+                const el1 = document.getElementById(`d1-${index}`);
+                const el2 = document.getElementById(`d2-${index}`);
+                el1.style.transition = 'opacity 0.5s, transform 0.5s';
+                el2.style.transition = 'opacity 0.5s, transform 0.5s';
+                el1.classList.remove('opacity-0', '-translate-x-4');
+                el2.classList.remove('opacity-0', 'translate-x-4');
+                drawUPath(el1, el2);
+                analysisState.currentStep++;
+            }
+            
+            function startAnalysis() {
+                const num = parseInt(numberToAnalyzeInput.value);
+                if (isNaN(num) || num < 1 || num > 1000) {
+                    analysisSummary.innerHTML = `<p class="text-red-600 font-semibold">Vui lòng nhập một số nguyên dương từ 1 đến 1000.</p>`;
+                    return;
+                }
+                analysisState.mode = document.querySelector('input[name="analysis-mode"]:checked').value;
+                divisorColumnsDiv.innerHTML = '';
+                analysisSvg.innerHTML = '';
+                analysisSummary.innerHTML = '';
+                
+                analysisState.divisors = [];
+                for (let i = 1; i <= Math.sqrt(num); i++) {
+                    if (num % i === 0) {
+                        analysisState.divisors.push([i, num / i]);
+                    }
+                }
+                
+                const col1 = document.createElement('div');
+                col1.className = 'col1 space-y-4 text-right';
+                const col2 = document.createElement('div');
+                col2.className = 'col2 space-y-4 text-left';
+                analysisState.divisors.forEach(([d1, d2], index) => {
+                    col1.innerHTML += `<p id="d1-${index}" class="opacity-0 transform -translate-x-4">${d1}</p>`;
+                    col2.innerHTML += `<p id="d2-${index}" class="opacity-0 transform translate-x-4">${d2}</p>`;
+                });
+                divisorColumnsDiv.appendChild(col1);
+                divisorColumnsDiv.appendChild(col2);
+
+                analysisState.currentStep = 0;
+                
+                if (analysisState.mode === 'auto') {
+                    runAnalysisBtn.disabled = true;
+                    const stepInterval = setInterval(() => {
+                        if (analysisState.currentStep < analysisState.divisors.length) {
+                            performAnalysisStep();
+                        } else {
+                            clearInterval(stepInterval);
+                            finishAnalysis();
+                        }
+                    }, 600);
+                } else {
+                    runAnalysisBtn.classList.add('hidden');
+                    nextStepBtn.classList.remove('hidden');
+                    performAnalysisStep();
+                }
+            }
+            
+            runAnalysisBtn.addEventListener('click', startAnalysis);
+            nextStepBtn.addEventListener('click', performAnalysisStep);
+
+            // --- Tab 2: Frog Jump Simulation ---
+            const frog1Slider = document.getElementById('frog1-jump');
+            const frog2Slider = document.getElementById('frog2-jump');
+            const jumpSpeedSlider = document.getElementById('jump-speed');
+            const jumpSpeedVal = document.getElementById('jump-speed-val');
+            const frog1Val = document.getElementById('frog1-val');
+            const frog2Val = document.getElementById('frog2-val');
+            const b1Display = document.getElementById('b1-display');
+            const b2Display = document.getElementById('b2-display');
+            const toggleFrog2 = document.getElementById('toggle-frog2');
+            const frog2Controls = document.getElementById('frog2-controls');
+            const multiples2Container = document.getElementById('multiples2-container');
+            const commonMultiplesContainer = document.getElementById('common-multiples-container');
+            const runJumpBtn = document.getElementById('run-jump');
+            const numberLineContainer = document.getElementById('number-line-container');
+            const multiples1List = document.getElementById('multiples1-list');
+            const multiples2List = document.getElementById('multiples2-list');
+            const commonMultiplesList = document.getElementById('common-multiples-list');
+            const maxNum = 60;
+
+            for (let i = 0; i <= maxNum; i++) {
+                const mark = document.createElement('div');
+                mark.className = 'absolute bottom-10 h-3 w-0.5 bg-gray-400';
+                mark.style.left = `calc(${(i / maxNum) * 100}% - 1px)`;
+                numberLineContainer.appendChild(mark);
+                if (i % 5 === 0) {
+                    const numLabel = document.createElement('span');
+                    numLabel.className = 'absolute bottom-2 text-sm text-gray-600';
+                    numLabel.textContent = i;
+                    numLabel.style.left = `calc(${(i / maxNum) * 100}% - ${i < 10 ? '4px' : '8px'})`;
+                    numberLineContainer.appendChild(numLabel);
+                    mark.classList.add('h-4');
+                }
+            }
+            
+            function updateJumpSetup() {
+                frog1Val.textContent = frog1Slider.value;
+                frog2Val.textContent = frog2Slider.value;
+                b1Display.textContent = frog1Slider.value;
+                b2Display.textContent = frog2Slider.value;
+                const speed = parseInt(jumpSpeedSlider.value);
+                if (speed <= 350) jumpSpeedVal.textContent = "Rất nhanh";
+                else if (speed <= 600) jumpSpeedVal.textContent = "Nhanh";
+                else if (speed <= 850) jumpSpeedVal.textContent = "Trung bình";
+                else jumpSpeedVal.textContent = "Chậm";
+            }
+            [frog1Slider, frog2Slider, jumpSpeedSlider].forEach(s => s.addEventListener('input', updateJumpSetup));
+            
+            toggleFrog2.addEventListener('change', () => {
+                const show = toggleFrog2.checked;
+                ['frog2-controls', 'multiples2-container', 'common-multiples-container'].forEach(id => document.getElementById(id).classList.toggle('hidden', !show));
+                document.getElementById('frog2-start').classList.toggle('hidden', !show);
+            });
+
+            runJumpBtn.addEventListener('click', () => {
+                runJumpBtn.disabled = true;
+                document.querySelectorAll('.jump-mark').forEach(m => m.remove());
+                
+                const frog1 = document.getElementById('frog1-start');
+                const frog2 = document.getElementById('frog2-start');
+                frog1.style.left = '-20px';
+                frog2.style.left = '-20px';
+
+                const jump1 = parseInt(frog1Slider.value);
+                const jump2 = parseInt(frog2Slider.value);
+                const delay = parseInt(jumpSpeedSlider.value);
+                const doFrog2 = toggleFrog2.checked;
+                const multiples1 = [0], multiples2 = doFrog2 ? [0] : [];
+                const commonMultiples = new Set(doFrog2 ? [0] : []);
+                const markedPositions = new Map();
+                
+                multiples1List.textContent = '0';
+                if(doFrog2) {
+                    multiples2List.textContent = '0';
+                    commonMultiplesList.textContent = '0';
+                } else {
+                     multiples2List.textContent = '';
+                     commonMultiplesList.textContent = '';
+                }
+
+
+                const mark0 = document.createElement('div');
+                mark0.className = `jump-mark absolute bottom-12 ${doFrog2 ? 'text-red-600' : 'text-gray-500'} text-2xl font-bold -bottom-1`;
+                mark0.style.transform = 'translateY(-22px)';
+                mark0.textContent = '●';
+                mark0.style.left = `calc(0% - 6px)`;
+                numberLineContainer.appendChild(mark0);
+                markedPositions.set(0, mark0);
+
+
+                let i = 1, j = 1;
+                let nextPos1 = jump1;
+                let nextPos2 = doFrog2 ? jump2 : Infinity;
+                
+                function jumpStep() {
+                    if (nextPos1 > maxNum && nextPos2 > maxNum) {
+                        runJumpBtn.disabled = false;
+                        if (multiples1.length > 1) multiples1List.textContent += ', ...';
+                        if (doFrog2 && multiples2.length > 1) multiples2List.textContent += ', ...';
+                        if (doFrog2 && commonMultiples.size > 1) commonMultiplesList.textContent += ', ...';
+                        return;
+                    }
+                    let currentTargetPos, isFrog1;
+                    if (nextPos1 <= nextPos2 && nextPos1 <= maxNum) {
+                        currentTargetPos = nextPos1; isFrog1 = true;
+                    } else if (nextPos2 < nextPos1 && nextPos2 <= maxNum) {
+                        currentTargetPos = nextPos2; isFrog1 = false;
+                    } else { 
+                         currentTargetPos = (nextPos1 <= maxNum) ? nextPos1 : nextPos2;
+                         isFrog1 = (nextPos1 <= maxNum);
+                    }
+                    
+                    if(currentTargetPos > maxNum) {
+                        runJumpBtn.disabled = false; 
+                        if (multiples1.length > 1) multiples1List.textContent += ', ...';
+                        if (doFrog2 && multiples2.length > 1) multiples2List.textContent += ', ...';
+                        if (doFrog2 && commonMultiples.size > 1) commonMultiplesList.textContent += ', ...';
+                        return;
+                    }
+
+                    (isFrog1 ? frog1 : frog2).style.left = `calc(${(currentTargetPos / maxNum) * 100}% - 20px)`;
+
+                    if (isFrog1) {
+                        multiples1.push(currentTargetPos);
+                        multiples1List.textContent = multiples1.join(', ');
+                        i++; nextPos1 = i * jump1;
+                    } else {
+                        multiples2.push(currentTargetPos);
+                        multiples2List.textContent = multiples2.join(', ');
+                        j++; nextPos2 = j * jump2;
+                    }
+                    
+                    if (markedPositions.has(currentTargetPos)) {
+                        const mark = markedPositions.get(currentTargetPos);
+                        mark.className = 'jump-mark absolute bottom-12 text-red-600 text-2xl font-bold -bottom-1';
+                        mark.style.transform = 'translateY(-22px)';
+                        commonMultiples.add(currentTargetPos);
+                    } else {
+                        const mark = document.createElement('div');
+                        mark.className = `jump-mark absolute bottom-12 ${isFrog1 ? 'text-green-600' : 'text-blue-600'} text-lg font-bold`;
+                        mark.textContent = '●';
+                        mark.style.left = `calc(${(currentTargetPos / maxNum) * 100}% - 6px)`;
+                        numberLineContainer.appendChild(mark);
+                        markedPositions.set(currentTargetPos, mark);
+                    }
+
+                    if (doFrog2) {
+                        commonMultiplesList.textContent = Array.from(commonMultiples).sort((a, b) => a - b).join(', ');
+                    }
+                    setTimeout(jumpStep, delay);
+                }
+                setTimeout(jumpStep, 100);
+            });
+
+            // --- Tab 3: Number Grid ---
+            const numberGrid = document.getElementById('number-grid');
+            for (let i = 1; i <= 100; i++) {
+                const numDiv = document.createElement('div');
+                numDiv.className = 'grid-number flex justify-center items-center h-12 text-lg font-medium border rounded-md cursor-pointer hover:bg-gray-200';
+                numDiv.textContent = i;
+                numDiv.dataset.num = i;
+                numberGrid.appendChild(numDiv);
+            }
+            numberGrid.addEventListener('click', e => {
+                if (e.target.classList.contains('grid-number')) {
+                    const selectedNum = parseInt(e.target.dataset.num);
+                    numberGrid.querySelectorAll('.grid-number').forEach(n => {
+                        n.className = 'grid-number flex justify-center items-center h-12 text-lg font-medium border rounded-md cursor-pointer hover:bg-gray-200';
+                        const currentNum = parseInt(n.dataset.num);
+                        if (selectedNum % currentNum === 0) n.classList.add('divisor');
+                        if (currentNum % selectedNum === 0 && currentNum !== selectedNum) n.classList.add('multiple');
+                    });
+                    e.target.classList.add('selected');
+                }
+            });
+
+            // --- Tab 4: Classroom Lineup ---
+            const classASlider = document.getElementById('classA-size');
+            const classBSlider = document.getElementById('classB-size');
+            const rowSizeSlider = document.getElementById('row-size');
+            const classAVal = document.getElementById('classA-val');
+            const classBVal = document.getElementById('classB-val');
+            const rowVal = document.getElementById('row-val');
+            const toggleClassB = document.getElementById('toggle-classB');
+            const lineupModeRadios = document.querySelectorAll('input[name="lineup-mode"]');
+            const autoLineupModeRadios = document.querySelectorAll('input[name="auto-lineup-mode"]');
+            const manualControls = document.getElementById('manual-lineup-controls');
+            const autoControls = document.getElementById('auto-lineup-controls');
+            const manualResultsContainer = document.getElementById('manual-lineup-results-container');
+            const autoResultsContainer = document.getElementById('auto-lineup-results-container');
+            const autoLineupSpeedSlider = document.getElementById('auto-lineup-speed');
+            const autoLineupSpeedVal = document.getElementById('auto-lineup-speed-val');
+            const nextStepLineupBtn = document.getElementById('next-step-lineup');
+            let autoLineupState = null;
+            
+            function updateLineupSetup() {
+                classAVal.textContent = classASlider.value;
+                classBVal.textContent = classBSlider.value;
+                rowVal.textContent = rowSizeSlider.value;
+                const speed = parseInt(autoLineupSpeedSlider.value);
+                if (speed <= 350) autoLineupSpeedVal.textContent = "Rất nhanh";
+                else if (speed <= 700) autoLineupSpeedVal.textContent = "Nhanh";
+                else if (speed <= 1000) autoLineupSpeedVal.textContent = "Trung bình";
+                else autoLineupSpeedVal.textContent = "Chậm";
+            }
+            [classASlider, classBSlider, rowSizeSlider, autoLineupSpeedSlider].forEach(s => s.addEventListener('input', updateLineupSetup));
+            
+            toggleClassB.addEventListener('change', () => {
+                const show = toggleClassB.checked;
+                document.getElementById('classB-controls').classList.toggle('hidden', !show);
+                document.getElementById('lineup-resultB-container').classList.toggle('hidden', !show);
+                document.getElementById('auto-lineup-resultB-container').classList.toggle('hidden', !show);
+                document.getElementById('lineup-common-result').classList.toggle('hidden', !show);
+            });
+            
+            lineupModeRadios.forEach(radio => radio.addEventListener('change', (e) => {
+                const isManual = e.target.value === 'manual';
+                manualControls.classList.toggle('hidden', !isManual);
+                autoControls.classList.toggle('hidden', isManual);
+                manualResultsContainer.classList.toggle('hidden', !isManual);
+                autoResultsContainer.classList.toggle('hidden', isManual);
+            }));
+
+             autoLineupModeRadios.forEach(radio => radio.addEventListener('change', e => {
+                const isStepByStep = e.target.value === 'step-by-step';
+                document.getElementById('full-auto-speed-control').classList.toggle('hidden', isStepByStep);
+             }));
+
+            function performLineup(displayEl, resultEl, classSize, rowSize, studentColorClass, small=false) {
+                displayEl.innerHTML = '';
+                const remainder = classSize % rowSize;
+                let studentHTML = '';
+                const sizeClass = small ? 'w-4 h-4 text-xs' : 'w-6 h-6 text-sm';
+                for (let i = 0; i < classSize; i++) {
+                     studentHTML += `<div class="student-icon ${sizeClass} rounded-full flex items-center justify-center font-bold text-white ${i < classSize - remainder ? studentColorClass : 'bg-gray-400'}" style="animation-delay: ${i*0.01}s; ${i >= classSize - remainder && remainder > 0 ? 'margin-left: 0.5rem;' : ''}"></div>`;
+                }
+                const width = small ? rowSize * 20 : rowSize * 32;
+                displayEl.style.width = `${width}px`;
+                displayEl.innerHTML = studentHTML;
+                return remainder === 0;
+            }
+
+            document.getElementById('run-lineup').addEventListener('click', () => {
+                const sizeA = parseInt(classASlider.value);
+                const row = parseInt(rowSizeSlider.value);
+                const successA = performLineup(document.getElementById('lineup-displayA'), null, sizeA, row, 'bg-purple-500');
+                const resultAEl = document.getElementById('lineup-resultA');
+                resultAEl.textContent = successA ? `Xếp hàng thành công! ${sizeA/row} hàng, không thừa bạn nào. ${row} là ƯỚC của ${sizeA}.` : `Không thể xếp hàng! Thừa ra ${sizeA % row} bạn. ${row} KHÔNG là ước của ${sizeA}.`;
+                resultAEl.className = `text-center font-semibold text-lg p-3 rounded-md ${successA ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+
+                if (toggleClassB.checked) {
+                    const sizeB = parseInt(classBSlider.value);
+                    const successB = performLineup(document.getElementById('lineup-displayB'), null, sizeB, row, 'bg-indigo-500');
+                    const resultBEl = document.getElementById('lineup-resultB');
+                    resultBEl.textContent = successB ? `Xếp hàng thành công! ${sizeB/row} hàng, không thừa bạn nào. ${row} là ƯỚC của ${sizeB}.` : `Không thể xếp hàng! Thừa ra ${sizeB % row} bạn. ${row} KHÔNG là ước của ${sizeB}.`;
+                    resultBEl.className = `text-center font-semibold text-lg p-3 rounded-md ${successB ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+
+                    const commonResultEl = document.getElementById('lineup-common-result');
+                    if (successA && successB) {
+                         commonResultEl.textContent = `Thành Công! ${row} là một ƯỚC CHUNG của ${sizeA} và ${sizeB}.`;
+                         commonResultEl.className = 'mt-4 text-center font-bold text-xl p-4 rounded-md bg-green-100 text-green-800';
+                    } else {
+                        commonResultEl.textContent = `Thất Bại! ${row} KHÔNG phải là ước chung.`;
+                        commonResultEl.className = 'mt-4 text-center font-bold text-xl p-4 rounded-md bg-red-100 text-red-800';
+                    }
+                }
+            });
+
+            const runAutoLineupBtn = document.getElementById('run-auto-lineup');
+            const autoLineupSteps = document.getElementById('auto-lineup-steps');
+            const autoLineupSummary = document.getElementById('auto-lineup-summary');
+
+            function finishAutoLineup() {
+                document.getElementById('auto-lineup-visual-container').classList.add('hidden');
+                const { commonDivisors } = autoLineupState;
+                const ucln = Math.max(...commonDivisors, 0);
+                let summaryText = `Hoàn tất! Các ước chung tìm được là: <strong class="text-green-700">${commonDivisors.join(', ')}</strong>.`;
+                if (ucln > 0) summaryText += `<br>Ước chung lớn nhất (ƯCLN) là <strong class="text-xl text-red-600">${ucln}</strong>.`;
+                autoLineupSummary.innerHTML = summaryText;
+                autoLineupSummary.className = 'mt-4 text-center font-semibold text-lg p-3 rounded-md bg-green-100 text-green-800';
+                runAutoLineupBtn.disabled = false;
+                runAutoLineupBtn.classList.remove('hidden');
+                nextStepLineupBtn.classList.add('hidden');
+                autoLineupState = null;
+            }
+
+            function performAutoLineupStep() {
+                if (!autoLineupState) return;
+                const { i, sizeA, sizeB, useClassB, limit } = autoLineupState;
+
+                if (i > limit) {
+                    finishAutoLineup();
+                    return;
+                }
+
+                document.getElementById('current-step-display').textContent = `${i} HS/hàng`;
+                performLineup(document.getElementById('auto-lineup-displayA'), null, sizeA, i, 'bg-purple-500', true);
+                if (useClassB) performLineup(document.getElementById('auto-lineup-displayB'), null, sizeB, i, 'bg-indigo-500', true);
+
+                const isDivisorA = sizeA % i === 0;
+                const isDivisorB = useClassB ? (sizeB % i === 0) : true;
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'p-2 flex justify-between items-center';
+                let text = `Thử với <strong>${i}</strong> HS/hàng: Lớp A ${isDivisorA ? '✅' : '❌'}`;
+                if (useClassB) text += `, Lớp B ${isDivisorB ? '✅' : '❌'}`;
+                stepDiv.innerHTML = text;
+
+                if (isDivisorA && isDivisorB) {
+                    stepDiv.classList.add('highlight-row');
+                    autoLineupState.commonDivisors.push(i);
+                    stepDiv.innerHTML += '<span class="font-bold text-green-600 ml-4">→ Ước chung!</span>';
+                }
+                
+                autoLineupSteps.appendChild(stepDiv);
+                autoLineupSteps.scrollTop = autoLineupSteps.scrollHeight;
+                
+                autoLineupState.i++;
+            }
+
+            runAutoLineupBtn.addEventListener('click', () => {
+                runAutoLineupBtn.disabled = true;
+                autoLineupSteps.innerHTML = '';
+                autoLineupSummary.innerHTML = '';
+                document.getElementById('auto-lineup-visual-container').classList.remove('hidden');
+
+                const sizeA = parseInt(classASlider.value);
+                const sizeB = parseInt(classBSlider.value);
+                const useClassB = toggleClassB.checked;
+                const mode = document.querySelector('input[name="auto-lineup-mode"]:checked').value;
+                document.getElementById('auto-lineup-resultB-container').classList.toggle('hidden', !useClassB);
+
+                autoLineupState = {
+                    i: 1,
+                    sizeA, sizeB, useClassB,
+                    limit: useClassB ? Math.min(sizeA, sizeB) : sizeA,
+                    commonDivisors: [],
+                    mode: mode
+                };
+                
+                if (mode === 'full-auto') {
+                    const delay = 1400 - parseInt(autoLineupSpeedSlider.value);
+                    const intervalId = setInterval(() => {
+                        if (autoLineupState && autoLineupState.i <= autoLineupState.limit) {
+                            performAutoLineupStep();
+                        } else {
+                            clearInterval(intervalId);
+                            if (autoLineupState) finishAutoLineup();
+                        }
+                    }, delay);
+                } else { // step-by-step
+                    runAutoLineupBtn.classList.add('hidden');
+                    nextStepLineupBtn.classList.remove('hidden');
+                    performAutoLineupStep();
+                }
+            });
+            nextStepLineupBtn.addEventListener('click', performAutoLineupStep);
+
+            // Initial setup calls
+            updateJumpSetup();
+            updateLineupSetup();
+        });
+    </script>
+</body>
+</html>
+
