@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Về Trục Đối Xứng</title>
+    <!-- Tailwind CSS (để giao diện đẹp) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons (để hiện icon) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Hiệu ứng rung nhẹ khi chọn sai */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake {
+            animation: shake 0.3s ease-in-out;
+        }
+        /* Grid cho canvas background */
+        .grid-bg {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        canvas {
+            touch-action: none; /* Chặn cuộn trang khi vẽ trên điện thoại */
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-gray-800 p-4 md:p-8 min-h-screen">
+
+    <!-- HEADER -->
+    <header class="max-w-4xl mx-auto mb-8 text-center">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-blue-700 mb-2">
+            Học Về Trục Đối Xứng
+        </h1>
+        <p class="text-gray-600">Công cụ tương tác dành cho học sinh</p>
+    </header>
+
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- NAVIGATION TABS -->
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button onclick="switchTab('learn')" id="btn-learn" class="tab-btn px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 bg-blue-600 text-white shadow-md transform scale-105">
+                <i data-lucide="book-open" class="w-5 h-5"></i> Lý thuyết
+            </button>
+            <button onclick="switchTab('draw')" id="btn-draw" class="tab-btn px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 bg-white text-gray-700 hover:bg-gray-100 border border-gray-200">
+                <i data-lucide="pencil" class="w-5 h-5"></i> Phòng Tranh
+            </button>
+            <button onclick="switchTab('game')" id="btn-game" class="tab-btn px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 bg-white text-gray-700 hover:bg-gray-100 border border-gray-200">
+                <i data-lucide="grid" class="w-5 h-5"></i> Trò chơi Lưới
+            </button>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 min-h-[500px] flex flex-col items-center border border-gray-100 relative">
+            
+            <!-- 1. LEARN MODE -->
+            <div id="mode-learn" class="mode-content w-full flex flex-col items-center">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Khám phá hình có trục đối xứng</h2>
+                <p class="text-gray-500 mb-6 text-sm">Quan sát hình và tìm trục đối xứng của nó</p>
+
+                <div class="relative w-72 h-64 border border-gray-100 bg-gray-50 rounded-lg mb-6 flex items-center justify-center overflow-hidden shadow-inner grid-bg">
+                    <svg id="learn-svg" width="240" height="220" viewBox="0 0 240 220" class="drop-shadow-md transition-all duration-500">
+                        <!-- Content injected via JS -->
+                    </svg>
+                </div>
+
+                <div class="flex gap-6 items-center mb-8 w-full justify-between px-8 max-w-md">
+                    <button onclick="changeShape(-1)" class="p-3 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors">
+                        <i data-lucide="chevron-left"></i>
+                    </button>
+                    
+                    <div class="flex flex-col items-center">
+                        <span id="shape-name" class="font-bold text-lg text-gray-800">Tam giác cân</span>
+                        <span id="shape-counter" class="text-xs text-gray-400">Hình 1 / 7</span>
+                    </div>
+                    
+                    <button onclick="changeShape(1)" class="p-3 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors">
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                </div>
+
+                <button id="btn-toggle-axis" onclick="toggleAxis()" class="w-full max-w-md py-3 px-6 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 bg-blue-600 text-white shadow-lg hover:bg-blue-700">
+                    <i data-lucide="pencil" class="w-5 h-5"></i> <span>Hiện trục đối xứng</span>
+                </button>
+                
+                <div id="axis-hint" class="hidden mt-4 p-3 bg-yellow-50 text-yellow-800 rounded border border-yellow-100 text-sm text-center animate-fade-in max-w-md">
+                    💡 Trục đối xứng chia hình thành hai phần bằng nhau. Nếu gấp hình theo đường này, chúng sẽ chồng khít lên nhau.
+                </div>
+            </div>
+
+            <!-- 2. DRAW MODE -->
+            <div id="mode-draw" class="mode-content w-full flex-col items-center hidden">
+                <div class="flex gap-4 mb-4 flex-wrap justify-center">
+                    <div class="flex bg-gray-100 p-1 rounded-lg">
+                        <button onclick="setAxisType('vertical')" id="btn-axis-v" class="px-3 py-1 rounded bg-white shadow text-sm font-medium transition-colors">Trục Dọc</button>
+                        <button onclick="setAxisType('horizontal')" id="btn-axis-h" class="px-3 py-1 rounded text-sm font-medium transition-colors text-gray-600 hover:bg-gray-200">Trục Ngang</button>
+                    </div>
+                    <button onclick="clearCanvas()" class="flex items-center gap-1 text-red-600 px-3 py-1 bg-red-50 hover:bg-red-100 rounded border border-red-200 text-sm font-medium">
+                        <i data-lucide="eraser" class="w-4 h-4"></i> Xóa bảng
+                    </button>
+                </div>
+
+                <div class="relative border-2 border-gray-300 rounded shadow-inner bg-white cursor-crosshair touch-none overflow-hidden w-full max-w-[600px] mx-auto">
+                    <!-- Canvas element -->
+                    <canvas id="drawing-canvas" class="w-full h-auto block" style="aspect-ratio: 600/400;"></canvas>
+                    
+                    <div class="absolute top-2 right-2 pointer-events-none bg-white/80 p-2 rounded text-xs text-gray-500 shadow-sm border border-gray-100">
+                        Vẽ bên này (Xanh) - Nhìn bên kia (Lục)
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. GAME MODE -->
+            <div id="mode-game" class="mode-content w-full flex-col items-center hidden max-w-4xl">
+                <div class="mb-6 text-center w-full">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-4 px-4 w-full">
+                        <!-- Difficulty -->
+                        <div class="flex gap-2">
+                            <button onclick="setDifficulty('easy')" id="diff-easy" class="diff-btn px-3 py-1 rounded-md text-sm font-bold border bg-green-100 text-green-700 border-green-200 ring-2 ring-offset-1 ring-blue-300">Dễ</button>
+                            <button onclick="setDifficulty('medium')" id="diff-medium" class="diff-btn px-3 py-1 rounded-md text-sm font-bold border bg-white text-gray-500 border-gray-200">Vừa</button>
+                            <button onclick="setDifficulty('hard')" id="diff-hard" class="diff-btn px-3 py-1 rounded-md text-sm font-bold border bg-white text-gray-500 border-gray-200">Khó</button>
+                        </div>
+                        <!-- Score -->
+                        <div class="flex items-center gap-2 bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full border border-yellow-200 font-bold">
+                            <i data-lucide="trophy" class="w-4 h-4"></i> Điểm: <span id="score-display">0</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm italic">"Hãy nhìn hình bên trái và vẽ lại y hệt sang bên phải."</p>
+                </div>
+
+                <!-- Grid Container -->
+                <div class="overflow-x-auto max-w-full p-4 bg-gray-50 rounded-xl border border-gray-200 mb-6 w-full flex justify-center">
+                    <div id="game-grid" class="grid gap-1 bg-white p-2 rounded shadow-sm relative select-none mx-auto">
+                        <!-- JS creates cells here -->
+                    </div>
+                </div>
+
+                <!-- Game Controls -->
+                <div id="game-controls-playing" class="flex flex-wrap gap-4 justify-center">
+                    <button onclick="resetLevel()" class="flex items-center gap-2 bg-gray-100 text-gray-700 px-5 py-2 rounded-full font-bold hover:bg-gray-200 border border-gray-300">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Làm lại
+                    </button>
+                    <button onclick="newLevel()" class="flex items-center gap-2 bg-gray-100 text-gray-700 px-5 py-2 rounded-full font-bold hover:bg-gray-200 border border-gray-300">
+                        <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Đổi bài
+                    </button>
+                    <button onclick="checkResult()" class="flex items-center gap-2 bg-indigo-600 text-white px-8 py-2 rounded-full font-bold hover:bg-indigo-700 shadow-lg hover:shadow-indigo-200 transform hover:-translate-y-0.5 transition-all">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i> Kiểm tra
+                    </button>
+                </div>
+
+                <!-- Success Message -->
+                <div id="game-msg-success" class="hidden flex-col items-center animate-bounce">
+                    <div class="text-green-600 font-bold text-xl mb-3 flex items-center gap-2 bg-green-50 px-6 py-2 rounded-lg border border-green-200">
+                        <i data-lucide="check-circle"></i> Chính xác! Tuyệt vời!
+                    </div>
+                    <button onclick="newLevel()" class="flex items-center gap-2 bg-green-600 text-white px-8 py-2 rounded-full font-bold hover:bg-green-700 shadow-lg">
+                        <i data-lucide="play" class="w-5 h-5"></i> Bài tiếp theo
+                    </button>
+                </div>
+
+                <!-- Error Message -->
+                <div id="game-msg-error" class="hidden flex-col items-center">
+                    <div class="text-red-500 font-bold text-lg mb-3 flex items-center gap-2 bg-red-50 px-6 py-2 rounded-lg border border-red-200">
+                        <i data-lucide="x-circle"></i> Chưa đúng rồi, thử lại nhé!
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="retryGame()" class="flex items-center gap-2 bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 shadow-md">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Sửa bài
+                        </button>
+                        <button onclick="newLevel()" class="flex items-center gap-2 bg-white text-gray-600 border border-gray-300 px-6 py-2 rounded-full hover:bg-gray-50">
+                            <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Bỏ qua
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    
+    <footer class="text-center text-gray-400 mt-12 text-sm pb-8">
+        Công cụ hỗ trợ dạy học Toán - Hình học trực quan (HTML5)
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- 1. GENERAL & TABS ---
+        lucide.createIcons();
+
+        function switchTab(mode) {
+            // Update Buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 bg-white text-gray-700 hover:bg-gray-100 border border-gray-200";
+            });
+            const activeBtn = document.getElementById(`btn-${mode}`);
+            activeBtn.className = "tab-btn px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 bg-blue-600 text-white shadow-md transform scale-105";
+
+            // Update Content
+            document.querySelectorAll('.mode-content').forEach(div => div.classList.add('hidden'));
+            document.querySelectorAll('.mode-content').forEach(div => div.classList.remove('flex'));
+            
+            const activeDiv = document.getElementById(`mode-${mode}`);
+            activeDiv.classList.remove('hidden');
+            activeDiv.classList.add('flex');
+
+            // Init specific mode functions if needed
+            if(mode === 'draw') initDrawMode();
+            if(mode === 'game' && gameGrid.length === 0) newLevel(); // Init game on first load
+        }
+
+        // --- 2. LEARN MODE LOGIC ---
+        const shapes = [
+            { id: 'triangle', name: 'Tam giác cân', path: "M120,20 L40,180 L200,180 Z", axes: [{ x1: 120, y1: 10, x2: 120, y2: 190 }] },
+            { id: 'rectangle', name: 'Hình chữ nhật', path: "M50,60 L190,60 L190,160 L50,160 Z", axes: [{ x1: 120, y1: 40, x2: 120, y2: 180 }, { x1: 30, y1: 110, x2: 210, y2: 110 }] },
+            { id: 'circle', name: 'Hình tròn', path: "M120,110 m-70,0 a70,70 0 1,0 140,0 a70,70 0 1,0 -140,0", axes: [{ x1: 120, y1: 20, x2: 120, y2: 200 }, { x1: 30, y1: 110, x2: 210, y2: 110 }] },
+            { id: 'rhombus', name: 'Hình thoi', path: "M120,20 L200,110 L120,200 L40,110 Z", axes: [{ x1: 120, y1: 10, x2: 120, y2: 210 }, { x1: 20, y1: 110, x2: 220, y2: 110 }] },
+            { id: 'star', name: 'Ngôi sao', path: "M120,20 L145,85 L215,90 L160,135 L180,200 L120,160 L60,200 L80,135 L25,90 L95,85 Z", axes: [{ x1: 120, y1: 10, x2: 120, y2: 210 }] },
+            { id: 'letter-a', name: 'Chữ cái A', path: "M120,20 L180,180 L150,180 L140,150 L100,150 L90,180 L60,180 L120,20 M120,60 L110,120 L130,120 Z", fillRule: "evenodd", axes: [{ x1: 120, y1: 10, x2: 120, y2: 200 }] },
+            { id: 'letter-h', name: 'Chữ cái H', path: "M60,40 L100,40 L100,100 L140,100 L140,40 L180,40 L180,180 L140,180 L140,120 L100,120 L100,180 L60,180 Z", axes: [{ x1: 120, y1: 20, x2: 120, y2: 200 }, { x1: 40, y1: 110, x2: 200, y2: 110 }] }
+        ];
+
+        let currentShapeIdx = 0;
+        let showAxis = false;
+
+        function renderShape() {
+            const shape = shapes[currentShapeIdx];
+            const svg = document.getElementById('learn-svg');
+            
+            let axisContent = '';
+            if (showAxis) {
+                axisContent = shape.axes.map(a => 
+                    `<line x1="${a.x1}" y1="${a.y1}" x2="${a.x2}" y2="${a.y2}" stroke="#EF4444" stroke-width="2" stroke-dasharray="8,4" class="animate-pulse" />`
+                ).join('');
+            }
+
+            svg.innerHTML = `
+                <path d="${shape.path}" fill="#60A5FA" stroke="#2563EB" stroke-width="3" fill-rule="${shape.fillRule || 'nonzero'}" opacity="0.9" />
+                ${axisContent}
+            `;
+            
+            document.getElementById('shape-name').innerText = shape.name;
+            document.getElementById('shape-counter').innerText = `Hình ${currentShapeIdx + 1} / ${shapes.length}`;
+
+            // Update button text
+            const btn = document.getElementById('btn-toggle-axis');
+            const hint = document.getElementById('axis-hint');
+            if (showAxis) {
+                btn.innerHTML = `<i data-lucide="eraser" class="w-5 h-5"></i> <span>Ẩn trục đối xứng</span>`;
+                btn.className = "w-full max-w-md py-3 px-6 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 bg-red-50 text-red-600 border border-red-200";
+                hint.classList.remove('hidden');
+            } else {
+                btn.innerHTML = `<i data-lucide="pencil" class="w-5 h-5"></i> <span>Hiện trục đối xứng</span>`;
+                btn.className = "w-full max-w-md py-3 px-6 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 bg-blue-600 text-white shadow-lg hover:bg-blue-700";
+                hint.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        function changeShape(dir) {
+            currentShapeIdx = (currentShapeIdx + dir + shapes.length) % shapes.length;
+            showAxis = false; // Reset axis on change
+            renderShape();
+        }
+
+        function toggleAxis() {
+            showAxis = !showAxis;
+            renderShape();
+        }
+
+        // Init Learn Mode
+        renderShape();
+
+
+        // --- 3. DRAW MODE LOGIC ---
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastPos = null;
+        let axisType = 'vertical';
+        const LOGICAL_WIDTH = 600;
+        const LOGICAL_HEIGHT = 400;
+
+        function initDrawMode() {
+            // Set canvas size for high DPI
+            const scale = 2;
+            canvas.width = LOGICAL_WIDTH * scale;
+            canvas.height = LOGICAL_HEIGHT * scale;
+            ctx.scale(scale, scale);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 3;
+            drawGridAndAxis();
+        }
+
+        function drawGridAndAxis() {
+            ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+            // Grid
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let x=0; x<=LOGICAL_WIDTH; x+=20) { ctx.moveTo(x,0); ctx.lineTo(x,LOGICAL_HEIGHT); }
+            for(let y=0; y<=LOGICAL_HEIGHT; y+=20) { ctx.moveTo(0,y); ctx.lineTo(LOGICAL_WIDTH,y); }
+            ctx.stroke();
+
+            // Axis
+            ctx.strokeStyle = '#EF4444';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            if (axisType === 'vertical') {
+                ctx.moveTo(LOGICAL_WIDTH/2, 0);
+                ctx.lineTo(LOGICAL_WIDTH/2, LOGICAL_HEIGHT);
+            } else {
+                ctx.moveTo(0, LOGICAL_HEIGHT/2);
+                ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT/2);
+            }
+            ctx.stroke();
+            
+            // Reset for drawing
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#2563EB';
+            ctx.lineWidth = 3;
+        }
+
+        function setAxisType(type) {
+            axisType = type;
+            // Update UI buttons
+            const btnV = document.getElementById('btn-axis-v');
+            const btnH = document.getElementById('btn-axis-h');
+            if(type === 'vertical') {
+                btnV.className = "px-3 py-1 rounded bg-white shadow text-sm font-medium transition-colors text-blue-700";
+                btnH.className = "px-3 py-1 rounded text-sm font-medium transition-colors text-gray-600 hover:bg-gray-200";
+            } else {
+                btnH.className = "px-3 py-1 rounded bg-white shadow text-sm font-medium transition-colors text-blue-700";
+                btnV.className = "px-3 py-1 rounded text-sm font-medium transition-colors text-gray-600 hover:bg-gray-200";
+            }
+            clearCanvas();
+        }
+
+        function clearCanvas() {
+            drawGridAndAxis();
+        }
+
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = LOGICAL_WIDTH / rect.width;
+            const scaleY = LOGICAL_HEIGHT / rect.height;
+
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function startDrawing(e) {
+            if(e.cancelable) e.preventDefault(); // Prevent scroll on touch
+            isDrawing = true;
+            const coords = getCoordinates(e);
+            lastPos = coords;
+            
+            // Draw dot
+            ctx.beginPath();
+            ctx.fillStyle = '#2563EB';
+            ctx.arc(coords.x, coords.y, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw mirror dot
+            let mirrorX = coords.x, mirrorY = coords.y;
+            if (axisType === 'vertical') mirrorX = LOGICAL_WIDTH - coords.x;
+            else mirrorY = LOGICAL_HEIGHT - coords.y;
+
+            ctx.beginPath();
+            ctx.fillStyle = '#10B981';
+            ctx.arc(mirrorX, mirrorY, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            if(e.cancelable) e.preventDefault();
+            const currentPos = getCoordinates(e);
+
+            // Draw Blue Line
+            ctx.beginPath();
+            ctx.moveTo(lastPos.x, lastPos.y);
+            ctx.lineTo(currentPos.x, currentPos.y);
+            ctx.strokeStyle = '#2563EB';
+            ctx.stroke();
+
+            // Draw Green Mirror Line
+            ctx.beginPath();
+            let lastMX = lastPos.x, lastMY = lastPos.y;
+            let currMX = currentPos.x, currMY = currentPos.y;
+
+            if (axisType === 'vertical') {
+                lastMX = LOGICAL_WIDTH - lastPos.x;
+                currMX = LOGICAL_WIDTH - currentPos.x;
+            } else {
+                lastMY = LOGICAL_HEIGHT - lastPos.y;
+                currMY = LOGICAL_HEIGHT - currentPos.y;
+            }
+
+            ctx.moveTo(lastMX, lastMY);
+            ctx.lineTo(currMX, currMY);
+            ctx.strokeStyle = '#10B981';
+            ctx.stroke();
+
+            lastPos = currentPos;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            lastPos = null;
+        }
+
+        // Event Listeners for Canvas
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+        
+        canvas.addEventListener('touchstart', startDrawing, {passive: false});
+        canvas.addEventListener('touchmove', draw, {passive: false});
+        canvas.addEventListener('touchend', stopDrawing);
+
+
+        // --- 4. GAME MODE LOGIC ---
+        const levels = {
+            easy: { rows: 6, cols: 8, fillRate: 0.25 },
+            medium: { rows: 8, cols: 10, fillRate: 0.35 },
+            hard: { rows: 10, cols: 12, fillRate: 0.45 }
+        };
+        let currentDiff = 'easy';
+        let gameGrid = [];
+        let targetGrid = [];
+        let score = 0;
+        let gameStatus = 'playing'; // playing, correct, wrong
+
+        function setDifficulty(diff) {
+            currentDiff = diff;
+            // Update UI
+            document.querySelectorAll('.diff-btn').forEach(b => {
+                b.className = "diff-btn px-3 py-1 rounded-md text-sm font-bold border bg-white text-gray-500 border-gray-200 hover:bg-gray-50";
+            });
+            const colors = {
+                easy: 'bg-green-100 text-green-700 border-green-200 ring-2 ring-offset-1 ring-blue-300',
+                medium: 'bg-yellow-100 text-yellow-700 border-yellow-200 ring-2 ring-offset-1 ring-blue-300',
+                hard: 'bg-red-100 text-red-700 border-red-200 ring-2 ring-offset-1 ring-blue-300'
+            };
+            document.getElementById(`diff-${diff}`).className = `diff-btn px-3 py-1 rounded-md text-sm font-bold border ${colors[diff]}`;
+            newLevel();
+        }
+
+        function newLevel() {
+            const config = levels[currentDiff];
+            const axisCol = config.cols / 2;
+            gameGrid = [];
+            targetGrid = [];
+            
+            // Create data
+            for(let r=0; r<config.rows; r++) {
+                const row = new Array(config.cols).fill(false);
+                const targetRow = new Array(config.cols).fill(false);
+                for(let c=0; c<axisCol; c++) {
+                    if(Math.random() < config.fillRate) {
+                        row[c] = true;
+                        targetRow[c] = true;
+                        targetRow[(config.cols - 1) - c] = true; // Mirror
+                    }
+                }
+                gameGrid.push(row);
+                targetGrid.push(targetRow);
+            }
+
+            gameStatus = 'playing';
+            renderGrid();
+            showGameControls('playing');
+        }
+
+        function resetLevel() {
+            const config = levels[currentDiff];
+            const axisCol = config.cols / 2;
+            for(let r=0; r<config.rows; r++) {
+                for(let c=axisCol; c<config.cols; c++) {
+                    gameGrid[r][c] = false;
+                }
+            }
+            gameStatus = 'playing';
+            renderGrid();
+            showGameControls('playing');
+        }
+
+        function toggleCell(r, c) {
+            if(gameStatus !== 'playing') return;
+            const config = levels[currentDiff];
+            const axisCol = config.cols / 2;
+            if(c < axisCol) return; // Only right side clickable
+
+            gameGrid[r][c] = !gameGrid[r][c];
+            renderGrid();
+        }
+
+        function checkResult() {
+            const config = levels[currentDiff];
+            let isCorrect = true;
+            for(let r=0; r<config.rows; r++) {
+                for(let c=0; c<config.cols; c++) {
+                    if(gameGrid[r][c] !== targetGrid[r][c]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+
+            if(isCorrect) {
+                gameStatus = 'correct';
+                score++;
+                document.getElementById('score-display').innerText = score;
+                showGameControls('success');
+            } else {
+                gameStatus = 'wrong';
+                renderGrid(); // To show errors
+                showGameControls('error');
+            }
+        }
+
+        function retryGame() {
+            gameStatus = 'playing';
+            renderGrid(); // Clear errors UI
+            showGameControls('playing');
+        }
+
+        function renderGrid() {
+            const container = document.getElementById('game-grid');
+            const config = levels[currentDiff];
+            const axisCol = config.cols / 2;
+
+            // Set grid columns
+            container.style.gridTemplateColumns = `repeat(${config.cols}, minmax(28px, 40px))`;
+            
+            let html = `
+                <!-- Axis -->
+                <div class="absolute top-0 bottom-0 left-1/2 w-1 bg-red-500 transform -translate-x-1/2 z-10 shadow-sm"></div>
+            `;
+
+            for(let r=0; r<config.rows; r++) {
+                for(let c=0; c<config.cols; c++) {
+                    const isActive = gameGrid[r][c];
+                    const isLeft = c < axisCol;
+                    const isError = gameStatus === 'wrong' && isActive !== targetGrid[r][c];
+                    
+                    let bgClass = isActive 
+                        ? (isLeft ? 'bg-blue-500 border-blue-600' : 'bg-green-500 border-green-600') 
+                        : 'bg-white hover:bg-gray-50 border-gray-200';
+                    
+                    if(isError) bgClass = "bg-white border-red-500 animate-pulse ring-2 ring-red-300 z-20";
+
+                    const cursor = (!isLeft && gameStatus === 'playing') ? 'cursor-pointer hover:ring-2 ring-green-300' : '';
+
+                    html += `
+                        <div onclick="toggleCell(${r}, ${c})" 
+                             class="aspect-square border rounded-sm transition-all duration-200 relative ${bgClass} ${cursor}">
+                             ${isError && !isLeft ? '<span class="absolute inset-0 flex items-center justify-center text-red-600 font-bold">!</span>' : ''}
+                        </div>
+                    `;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function showGameControls(state) {
+            document.getElementById('game-controls-playing').className = state === 'playing' ? 'flex flex-wrap gap-4 justify-center' : 'hidden';
+            document.getElementById('game-msg-success').className = state === 'success' ? 'flex flex-col items-center animate-bounce' : 'hidden';
+            document.getElementById('game-msg-error').className = state === 'error' ? 'flex flex-col items-center animate-shake' : 'hidden';
+            lucide.createIcons();
+        }
+
+    </script>
+</body>
+</html>
