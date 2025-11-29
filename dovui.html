@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đố Vui Toán Học & Trí Tuệ - VnDoc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+        }
+
+        .card-container {
+            perspective: 1000px;
+        }
+
+        .card {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-front {
+            background: white;
+            z-index: 2;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c7d2fe; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #818cf8; 
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2 rounded-lg text-white">
+                    <i class="fas fa-puzzle-piece text-xl"></i>
+                </div>
+                <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight hidden sm:block">Đố Vui VnDoc</h1>
+                <h1 class="text-xl font-extrabold text-gray-800 tracking-tight sm:hidden">Đố Vui</h1>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button onclick="filterRiddles('all')" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition active">Tất cả</button>
+                <button onclick="filterRiddles('math')" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">Toán học</button>
+                <button onclick="filterRiddles('fun')" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold text-gray-600 hover:bg-gray-100 transition hidden sm:block">Đố mẹo</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- Stats & Controls -->
+        <div class="mb-8 flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="text-gray-600 mb-4 sm:mb-0">
+                Đang hiển thị <span id="count-display" class="font-bold text-indigo-600">0</span> câu đố
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="shuffleRiddles()" class="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none transition">
+                    <i class="fas fa-random mr-2 text-indigo-500"></i> Xáo trộn
+                </button>
+                <button onclick="toggleAllAnswers()" class="flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none transition">
+                    <i class="fas fa-eye mr-2"></i> Lật tất cả
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid -->
+        <div id="riddle-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cards will be injected here by JS -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+            <p>Nguồn nội dung: <a href="https://vndoc.com/tong-hop-nhung-cau-do-vui-toan-hoc-tri-tue-122231" target="_blank" class="text-indigo-600 hover:underline">VnDoc.com</a></p>
+            <p class="mt-2">Tổng hợp và thiết kế giao diện đố vui.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Data Source
+        const riddles = [
+            {
+                id: 1,
+                question: "Nếu 5 con mèo có thể bắt 5 con chuột trong 5 phút, cần có bao nhiêu con mèo để bắt được 100 con chuột trong 100 phút?",
+                answer: "5 con mèo. (Vì 5 con mèo đó cứ 5 phút bắt được 5 con, thì sau 100 phút chúng sẽ bắt được 100 con).",
+                category: "math",
+                type: "Toán học"
+            },
+            {
+                id: 2,
+                question: "Hãy dùng 3 que diêm để xếp thành một số lớn hơn 3 nhưng nhỏ hơn 4.",
+                answer: "Xếp thành hình số Pi (π ≈ 3.14)",
+                category: "math",
+                type: "Trí tuệ"
+            },
+            {
+                id: 3,
+                question: "Matt chạy nhanh thứ 50 và cũng là người chạy chậm thứ 50 trong cuộc thi. Tổng cộng có bao nhiêu học sinh tham gia?",
+                answer: "99 học sinh. (50 người đầu + 49 người sau Matt = 99)",
+                category: "math",
+                type: "Toán học"
+            },
+            {
+                id: 4,
+                question: "Ông đầu tư địa ốc, lãi gấp đôi mỗi tháng. Tháng 12 có 100 triệu. Vậy khi nào ông ta có 50 triệu?",
+                answer: "Tháng 11. (Vì tháng sau gấp đôi tháng trước, nên lùi lại 1 tháng là một nửa).",
+                category: "math",
+                type: "Toán học"
+            },
+            {
+                id: 5,
+                question: "Có 3 quả táo trên bàn và bạn lấy đi 2 quả. Hỏi bạn còn bao nhiêu quả táo?",
+                answer: "2 quả. (Vì bạn lấy 2 quả thì bạn có 2 quả trên tay).",
+                category: "fun",
+                type: "Đố mẹo"
+            },
+            {
+                id: 6,
+                question: "30 chia 1/2, và cộng thêm 10, bằng bao nhiêu?",
+                answer: "70. (30 chia 0.5 bằng 60, cộng 10 bằng 70).",
+                category: "math",
+                type: "Toán học"
+            },
+            {
+                id: 7,
+                question: "Tháng nào trong năm có 28 ngày?",
+                answer: "Tất cả 12 tháng đều có ít nhất 28 ngày.",
+                category: "fun",
+                type: "Đố mẹo"
+            },
+            {
+                id: 8,
+                question: "Bố Nam năm nay 45 tuổi, gấp 3 lần tuổi Nam. Đố bạn tìm trường hợp người này gấp 720 lần tuổi người kia?",
+                answer: "Ông 60 tuổi và cháu mới sinh được 1 tháng (60 năm = 720 tháng).",
+                category: "math",
+                type: "Trí tuệ"
+            },
+            {
+                id: 9,
+                question: "Sở thú bị cháy, con gì chạy ra đầu tiên?",
+                answer: "Con người.",
+                category: "fun",
+                type: "Đố mẹo"
+            },
+            {
+                id: 10,
+                question: "Con hổ bị xích vào gốc cây, xích dài 30m. Bụi cỏ cách cây 31m. Làm sao hổ ăn được cỏ?",
+                answer: "Hổ không ăn cỏ.",
+                category: "fun",
+                type: "Đố mẹo"
+            },
+            {
+                id: 11,
+                question: "Bạn đang ở trong một cuộc đua và bạn vừa vượt qua người thứ nhì. Bạn đang ở vị trí nào?",
+                answer: "Thứ nhì. (Bạn thế chỗ người đó).",
+                category: "fun",
+                type: "Logic"
+            },
+            {
+                id: 12,
+                question: "Một ly thuỷ tinh đựng đầy nước, làm thế nào để lấy nước dưới đáy ly mà không đổ nước ra ngoài?",
+                answer: "Dùng ống hút.",
+                category: "fun",
+                type: "Đố mẹo"
+            },
+            {
+                id: 13,
+                question: "Có 9 cái bánh, đựng vào 4 cái hộp, mỗi hộp chỉ có đúng 3 cái bánh. Làm thế nào?",
+                answer: "Xếp 9 bánh vào 3 hộp nhỏ, rồi đặt 3 hộp nhỏ đó vào 1 hộp to.",
+                category: "math",
+                type: "Trí tuệ"
+            },
+            {
+                id: 14,
+                question: "Nhà Nam có 4 anh chị em: Xuân, Hạ, Thu. Người em út tên gì?",
+                answer: "Tên Nam.",
+                category: "fun",
+                type: "Đố mẹo"
+            },
+            {
+                id: 15,
+                question: "Sói bắt Cừu và cho Cừu nói 1 câu để trả lời 50 câu hỏi, nếu không sẽ bị ăn thịt. Cừu nói gì?",
+                answer: "'Tôi không biết!'",
+                category: "fun",
+                type: "Thông minh"
+            },
+            {
+                id: 16,
+                question: "Cái gì tay trái cầm được còn tay phải có muốn cầm cũng không được?",
+                answer: "Cùi chỏ tay phải.",
+                category: "fun",
+                type: "Đố mẹo"
+            },
+            {
+                id: 17,
+                question: "Nếu chỉ có một que diêm, bước vào phòng có đèn dầu, bếp dầu, bếp củi, bạn thắp gì trước?",
+                answer: "Thắp que diêm trước.",
+                category: "fun",
+                type: "Logic"
+            },
+            {
+                id: 18,
+                question: "Làm sao dùng cân đĩa (cân trọng lượng) để cân một em bé rất nghịch ngợm không chịu ngồi yên?",
+                answer: "Cân người lớn bế em bé, rồi cân riêng người lớn, sau đó trừ đi.",
+                category: "math",
+                type: "Trí tuệ"
+            },
+            {
+                id: 19,
+                question: "Bình nến nào tắt trước: Bình A (nến lùn), B (nến dài), C (1 dài 1 ngắn), D (đổ nước rồi cho nến dài)?",
+                answer: "Bình C tắt trước (thiếu oxy). Bình D cháy lâu nhất (nước hấp thụ nhiệt và CO2).",
+                category: "math",
+                type: "Khoa học"
+            },
+            {
+                id: 20,
+                question: "Con chuột nào đi bằng 2 chân?",
+                answer: "Chuột Mickey.",
+                category: "fun",
+                type: "Hài hước"
+            },
+            {
+                id: 21,
+                question: "Vậy con vịt nào đi bằng 2 chân?",
+                answer: "Con vịt nào cũng đi bằng 2 chân (trừ vịt bị què).",
+                category: "fun",
+                type: "Hài hước"
+            }
+        ];
+
+        let currentFilter = 'all';
+        let isAllFlipped = false;
+
+        function renderRiddles(filter = 'all') {
+            const grid = document.getElementById('riddle-grid');
+            grid.innerHTML = '';
+            
+            let filteredRiddles = riddles;
+            if (filter !== 'all') {
+                if (filter === 'math') {
+                    filteredRiddles = riddles.filter(r => r.category === 'math');
+                } else {
+                    filteredRiddles = riddles.filter(r => r.category !== 'math');
+                }
+            }
+
+            document.getElementById('count-display').textContent = filteredRiddles.length;
+
+            filteredRiddles.forEach((riddle, index) => {
+                const cardContainer = document.createElement('div');
+                cardContainer.className = 'card-container h-full';
+                cardContainer.style.animationDelay = `${index * 0.05}s`;
+                cardContainer.classList.add('slide-in');
+
+                const typeColor = riddle.category === 'math' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800';
+
+                cardContainer.innerHTML = `
+                    <div class="card h-full" onclick="flipCard(this)">
+                        <div class="card-face card-front border border-gray-200">
+                            <span class="category-badge ${typeColor}">${riddle.type}</span>
+                            <div class="text-center">
+                                <div class="text-4xl text-indigo-100 mb-4"><i class="fas fa-question-circle"></i></div>
+                                <h3 class="text-lg font-bold text-gray-800 mb-2">Câu hỏi #${riddle.id}</h3>
+                                <p class="text-gray-600 font-medium leading-relaxed">${riddle.question}</p>
+                                <div class="mt-6 text-indigo-500 text-sm font-semibold flex items-center justify-center animate-pulse">
+                                    <i class="fas fa-hand-pointer mr-2"></i> Nhấn để xem đáp án
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-face card-back">
+                            <div class="text-center">
+                                <div class="text-4xl text-white/30 mb-4"><i class="fas fa-lightbulb"></i></div>
+                                <h3 class="text-xl font-bold mb-3 border-b border-white/30 pb-2">Đáp án</h3>
+                                <p class="text-lg font-medium leading-relaxed">${riddle.answer}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(cardContainer);
+            });
+        }
+
+        function flipCard(element) {
+            element.classList.toggle('flipped');
+        }
+
+        function filterRiddles(category) {
+            currentFilter = category;
+            
+            // Update buttons
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                // Reset style
+                btn.className = 'filter-btn px-4 py-2 rounded-full text-sm font-semibold text-gray-600 hover:bg-gray-100 transition';
+            });
+            
+            // Highlight active button
+            const activeIndex = category === 'all' ? 0 : (category === 'math' ? 1 : 2);
+            buttons[activeIndex].className = 'filter-btn px-4 py-2 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition active';
+
+            renderRiddles(category);
+        }
+
+        function shuffleRiddles() {
+            // Fisher-Yates Shuffle
+            for (let i = riddles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [riddles[i], riddles[j]] = [riddles[j], riddles[i]];
+            }
+            renderRiddles(currentFilter);
+        }
+
+        function toggleAllAnswers() {
+            const cards = document.querySelectorAll('.card');
+            isAllFlipped = !isAllFlipped;
+            
+            cards.forEach(card => {
+                if (isAllFlipped) {
+                    card.classList.add('flipped');
+                } else {
+                    card.classList.remove('flipped');
+                }
+            });
+
+            // Update button text logic if needed, currently kept simple
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderRiddles();
+        });
+
+    </script>
+</body>
+</html>
