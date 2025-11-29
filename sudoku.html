@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sudoku Master v5.1 (Synchronized)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- GRID SYSTEM --- */
+        .sudoku-board-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            background-color: #334155;
+            border: 2px solid #334155;
+            padding: 2px;
+            border-radius: 4px;
+        }
+
+        .sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 1px;
+            background-color: #334155;
+        }
+
+        .cell {
+            background-color: white;
+            position: relative;
+            padding-bottom: 100%;
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+
+        .cell-value {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            /* SỬA LỖI: Bỏ transparent, dùng màu mặc định slate-700 để đồng bộ */
+            color: #334155; 
+            font-weight: 600; /* Mặc định đậm vừa */
+            pointer-events: none;
+        }
+
+        /* --- BORDERS 3x3 --- */
+        .cell:nth-child(3n) { border-right: 2px solid #334155; }
+        .cell:nth-child(9n) { border-right: none; }
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid #334155; }
+
+        /* --- COLORS & STATES --- */
+        .cell.selected { background-color: #93c5fd !important; }
+        .cell.highlight { background-color: #e0f2fe; }
+        
+        /* Fixed: Đề bài - Sửa lại cho hài hòa, không quá đậm */
+        .cell.fixed .cell-value { 
+            color: #0f172a; /* Slate-900: Đen dịu */
+            font-weight: 700; /* Bold chuẩn, không dùng 800 */
+        }
+        
+        /* User: Người chơi nhập - Giữ nguyên vì bạn thấy tốt */
+        .cell.user .cell-value { 
+            color: #2563eb; /* Blue-600 */
+            font-weight: 600; 
+        }
+        
+        /* Error */
+        .cell.error { background-color: #fee2e2 !important; }
+        .cell.error .cell-value { color: #dc2626; }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50;
+            backdrop-filter: blur(2px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 320px;
+            transform: scale(0.9);
+            transition: transform 0.2s;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+
+        @media (max-width: 380px) { .cell-value { font-size: 1rem; } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center py-4 font-sans select-none text-slate-800">
+
+    <!-- Header -->
+    <div class="w-full max-w-md px-4 flex justify-between items-end mb-3">
+        <div>
+            <h1 class="text-2xl font-bold text-blue-800">Sudoku <span class="text-blue-500">v5.1</span></h1>
+            <div id="status-display" class="text-sm font-semibold text-slate-500">Cấp độ: Dễ</div>
+        </div>
+        <div id="timer" class="text-xl font-mono font-bold text-slate-700 bg-white px-2 py-1 rounded shadow-sm border">00:00</div>
+    </div>
+
+    <!-- Main Board -->
+    <div class="sudoku-board-wrapper shadow-xl">
+        <div id="grid" class="sudoku-grid"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="w-full max-w-md px-2 mt-4 space-y-3">
+        <div class="flex gap-2">
+            <button onclick="showNewGameModal()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 active:scale-95 transition shadow">
+                <i class="fas fa-plus mr-1"></i> Game Mới
+            </button>
+            <button onclick="toggleInputMode()" id="btn-input-mode" class="flex-1 bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 active:scale-95 transition shadow border-2 border-transparent">
+                <i class="fas fa-edit mr-1"></i> Nhập Đề
+            </button>
+        </div>
+
+        <div class="flex gap-2 text-sm">
+            <button onclick="getHint()" class="flex-1 bg-teal-100 text-teal-800 py-2 rounded font-bold hover:bg-teal-200 border border-teal-200 transition">
+                <i class="fas fa-lightbulb"></i> Gợi ý
+            </button>
+            <button onclick="checkErrors()" class="flex-1 bg-amber-100 text-amber-800 py-2 rounded font-bold hover:bg-amber-200 border border-amber-200 transition">
+                <i class="fas fa-check"></i> Kiểm tra
+            </button>
+            <button onclick="solveGame()" class="flex-1 bg-rose-100 text-rose-800 py-2 rounded font-bold hover:bg-rose-200 border border-rose-200 transition">
+                <i class="fas fa-magic"></i> Giải Hết
+            </button>
+        </div>
+
+        <!-- Numpad -->
+        <div class="grid grid-cols-5 gap-2 mt-2">
+            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(1)">1</button>
+            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(2)">2</button>
+            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(3)">3</button>
+            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(4)">4</button>
+            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(5)">5</button>
+            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(6)">6</button>
+            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(7)">7</button>
+            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(8)">8</button>
+            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(9)">9</button>
+            <button class="h-12 bg-red-50 rounded-lg shadow border-b-4 border-red-200 active:translate-y-1 transition font-bold text-xl text-red-500" onclick="inputNumber(0)">
+                <i class="fas fa-eraser"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: New Game -->
+    <div id="modal-new-game" class="modal-overlay">
+        <div class="modal-content text-center">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">Chọn Độ Khó</h3>
+            <div class="space-y-2">
+                <button onclick="startGameDirectly('easy')" class="w-full py-3 bg-green-100 text-green-700 font-bold rounded-lg hover:bg-green-200 transition">
+                    Dễ <span class="text-sm font-normal text-green-600">(~42 ô)</span>
+                </button>
+                <button onclick="startGameDirectly('medium')" class="w-full py-3 bg-yellow-100 text-yellow-700 font-bold rounded-lg hover:bg-yellow-200 transition">
+                    Trung Bình <span class="text-sm font-normal text-yellow-600">(~34 ô)</span>
+                </button>
+                <button onclick="startGameDirectly('hard')" class="w-full py-3 bg-red-100 text-red-700 font-bold rounded-lg hover:bg-red-200 transition">
+                    Khó <span class="text-sm font-normal text-red-600">(~28 ô)</span>
+                </button>
+            </div>
+            <button onclick="closeModal('modal-new-game')" class="mt-4 text-slate-400 font-semibold text-sm hover:text-slate-600">Hủy bỏ</button>
+        </div>
+    </div>
+
+    <!-- MODAL: Alert -->
+    <div id="modal-alert" class="modal-overlay">
+        <div class="modal-content text-center">
+            <div id="alert-icon" class="text-4xl mb-2"></div>
+            <h3 id="alert-title" class="text-xl font-bold mb-2">Thông báo</h3>
+            <p id="alert-msg" class="text-slate-600 mb-6 text-sm">Nội dung</p>
+            <button onclick="closeModal('modal-alert')" class="w-full py-2 bg-slate-800 text-white rounded-lg font-bold">Đóng</button>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DATA ---
+        const BASE_STRING = "534678912672195348198342567859761423426853791713924856961537284287419635345286179";
+        
+        let board = Array(81).fill(0);
+        let solution = Array(81).fill(0);
+        let fixedMask = Array(81).fill(false);
+        let selectedIdx = -1;
+        let isInputMode = false;
+        let timer = 0;
+        let timerInterval;
+
+        const gridEl = document.getElementById('grid');
+        const timerEl = document.getElementById('timer');
+        const statusEl = document.getElementById('status-display');
+        const btnInputMode = document.getElementById('btn-input-mode');
+
+        // --- INIT ---
+        function init() {
+            renderGridStructure();
+            startGameDirectly('easy'); 
+        }
+
+        function renderGridStructure() {
+            gridEl.innerHTML = '';
+            for (let i = 0; i < 81; i++) {
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.onclick = () => selectCell(i);
+                
+                let valSpan = document.createElement('span');
+                valSpan.className = 'cell-value';
+                valSpan.id = `cell-${i}`;
+                
+                cell.appendChild(valSpan);
+                gridEl.appendChild(cell);
+            }
+        }
+
+        function startGameDirectly(difficulty) {
+            closeModal('modal-new-game');
+            isInputMode = false;
+            btnInputMode.classList.remove('ring', 'ring-purple-300', 'bg-purple-700');
+            
+            updateStatus(difficulty === 'easy' ? 'Dễ' : difficulty === 'medium' ? 'Trung Bình' : 'Khó');
+
+            let fullBoard = BASE_STRING.split('').map(Number);
+            shuffleBoard(fullBoard);
+
+            solution = [...fullBoard];
+            board = [...fullBoard];
+
+            let targetClues = difficulty === 'easy' ? 42 : difficulty === 'medium' ? 34 : 28;
+            removeNumbers(board, targetClues);
+            
+            fixedMask = board.map(n => n !== 0);
+            selectedIdx = -1;
+            
+            updateView();
+            resetTimer();
+        }
+
+        function shuffleBoard(b) {
+            let nums = [1,2,3,4,5,6,7,8,9];
+            for (let i = nums.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [nums[i], nums[j]] = [nums[j], nums[i]];
+            }
+            let map = [0, ...nums]; 
+            for(let i=0; i<81; i++) b[i] = map[b[i]];
+
+            for(let block=0; block<9; block+=3) {
+                if(Math.random() > 0.5) swapRows(b, block, block+1);
+                if(Math.random() > 0.5) swapRows(b, block, block+2);
+                if(Math.random() > 0.5) swapRows(b, block+1, block+2);
+            }
+
+            for(let block=0; block<9; block+=3) {
+                if(Math.random() > 0.5) swapCols(b, block, block+1);
+                if(Math.random() > 0.5) swapCols(b, block, block+2);
+                if(Math.random() > 0.5) swapCols(b, block+1, block+2);
+            }
+        }
+
+        function swapRows(b, r1, r2) {
+            for(let c=0; c<9; c++) {
+                let temp = b[r1*9 + c];
+                b[r1*9 + c] = b[r2*9 + c];
+                b[r2*9 + c] = temp;
+            }
+        }
+
+        function swapCols(b, c1, c2) {
+            for(let r=0; r<9; r++) {
+                let temp = b[r*9 + c1];
+                b[r*9 + c1] = b[r*9 + c2];
+                b[r*9 + c2] = temp;
+            }
+        }
+
+        function removeNumbers(grid, targetClues) {
+            let indices = Array.from({length: 81}, (_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+
+            let clues = 81;
+            for(let i=0; i<81; i++) {
+                if(clues <= targetClues) break;
+                if(grid[indices[i]] !== 0) {
+                    grid[indices[i]] = 0;
+                    clues--;
+                }
+            }
+        }
+
+        // --- SOLVER ---
+        function solveHelper(b) {
+            for (let i = 0; i < 81; i++) {
+                if (b[i] === 0) {
+                    for (let n = 1; n <= 9; n++) {
+                        if (isValid(b, i, n)) {
+                            b[i] = n;
+                            if (solveHelper(b)) return true;
+                            b[i] = 0;
+                        }
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function isValid(b, idx, num) {
+            let row = Math.floor(idx / 9);
+            let col = idx % 9;
+            for (let k = 0; k < 9; k++) {
+                if (b[row*9 + k] === num && (row*9+k) !== idx) return false;
+                if (b[k*9 + col] === num && (k*9+col) !== idx) return false;
+            }
+            let startR = row - row % 3;
+            let startC = col - col % 3;
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 3; c++) {
+                    let curIdx = (startR+r)*9 + (startC+c);
+                    if (b[curIdx] === num && curIdx !== idx) return false;
+                }
+            }
+            return true;
+        }
+
+        // --- INTERACTION ---
+        function selectCell(idx) {
+            selectedIdx = idx;
+            updateView();
+        }
+
+        function inputNumber(num) {
+            if (selectedIdx === -1) return;
+            if (!isInputMode && fixedMask[selectedIdx]) return;
+
+            board[selectedIdx] = num;
+            let cell = document.getElementById(`cell-${selectedIdx}`).parentElement;
+            cell.classList.remove('error');
+            
+            updateView();
+            checkWin();
+        }
+
+        function toggleInputMode() {
+            isInputMode = !isInputMode;
+            if (isInputMode) {
+                stopTimer();
+                timerEl.innerText = "--:--";
+                updateStatus("Chế độ: Tự Nhập Đề", "text-purple-600");
+                btnInputMode.classList.add('ring', 'ring-purple-300');
+                
+                board.fill(0);
+                solution.fill(0);
+                fixedMask.fill(false);
+                selectedIdx = -1;
+                showAlert('info', 'Nhập Đề', 'Hãy nhập các số vào bảng. Máy sẽ tự tính toán đáp án.');
+            } else {
+                if (!validateCurrentBoard()) {
+                    isInputMode = true; 
+                    return;
+                }
+                fixedMask = board.map(n => n !== 0);
+                let tempBoard = [...board];
+                if (solveHelper(tempBoard)) {
+                    solution = tempBoard;
+                    updateStatus("Đang chơi (Đề tự nhập)");
+                    btnInputMode.classList.remove('ring', 'ring-purple-300');
+                    startTimer();
+                } else {
+                    showAlert('error', 'Lỗi', 'Đề bài này không có đáp án hợp lệ!');
+                    isInputMode = true;
+                }
+            }
+            updateView();
+        }
+
+        function validateCurrentBoard() {
+            for (let i = 0; i < 81; i++) {
+                if (board[i] !== 0) {
+                    if (!isValid(board, i, board[i])) {
+                        showAlert('error', 'Sai luật', 'Đề bài bạn nhập có số bị trùng lặp quy tắc Sudoku.');
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // --- FEATURES ---
+        function getHint() {
+            if (isInputMode) {
+                let temp = [...board];
+                if(!solveHelper(temp)) { showAlert('error', 'Lỗi', 'Đề bài hiện tại không giải được.'); return; }
+                solution = temp;
+            }
+            let empties = board.map((n, i) => n === 0 ? i : -1).filter(i => i !== -1);
+            if (empties.length === 0) return;
+            let rand = empties[Math.floor(Math.random() * empties.length)];
+            board[rand] = solution[rand];
+            selectedIdx = rand;
+            updateView();
+        }
+
+        function checkErrors() {
+            if (isInputMode) {
+                if(validateCurrentBoard()) showAlert('success', 'Ổn', 'Các số nhập vào hợp lệ.');
+                return;
+            }
+            let errors = 0;
+            let cells = document.getElementsByClassName('cell');
+            for (let i = 0; i < 81; i++) {
+                if (board[i] !== 0 && board[i] !== solution[i]) {
+                    cells[i].classList.add('error');
+                    errors++;
+                }
+            }
+            if (errors > 0) showAlert('error', 'Kết quả', `Có ${errors} ô bị sai (màu đỏ).`);
+            else showAlert('success', 'Tuyệt vời', 'Tất cả các số đã điền đều đúng!');
+        }
+
+        function solveGame() {
+            if (isInputMode) {
+                if(!validateCurrentBoard()) return;
+                fixedMask = board.map(n => n !== 0);
+                isInputMode = false;
+                btnInputMode.classList.remove('ring', 'ring-purple-300');
+            }
+            let temp = board.map((n, i) => fixedMask[i] ? n : 0);
+            if (solveHelper(temp)) {
+                board = temp;
+                solution = [...temp];
+                updateView();
+                updateStatus("Đã giải xong");
+                stopTimer();
+            } else {
+                showAlert('error', 'Thất bại', 'Không tìm thấy lời giải cho bài này.');
+            }
+        }
+
+        function checkWin() {
+            if (isInputMode) return;
+            if (board.includes(0)) return;
+            for (let i = 0; i < 81; i++) if (board[i] !== solution[i]) return;
+            stopTimer();
+            showAlert('success', 'CHIẾN THẮNG!', `Bạn đã hoàn thành trong thời gian ${timerEl.innerText}`);
+        }
+
+        function updateView() {
+            let cells = document.getElementsByClassName('cell');
+            let selectedVal = selectedIdx !== -1 ? board[selectedIdx] : 0;
+            
+            for (let i = 0; i < 81; i++) {
+                let cell = cells[i];
+                let span = cell.firstChild;
+                let val = board[i];
+                
+                cell.className = 'cell';
+                
+                // Text update
+                span.innerText = val === 0 ? '' : val;
+                
+                if (fixedMask[i]) cell.classList.add('fixed');
+                else if (val !== 0) cell.classList.add('user');
+                
+                if (i === selectedIdx) cell.classList.add('selected');
+                else if (selectedVal !== 0 && val === selectedVal) cell.classList.add('highlight');
+            }
+        }
+
+        function updateStatus(text, colorClass = "text-slate-500") {
+            statusEl.innerText = text;
+            statusEl.className = "text-sm font-semibold " + colorClass;
+        }
+
+        function startTimer() {
+            stopTimer(); timer = 0;
+            timerInterval = setInterval(() => {
+                timer++;
+                let m = Math.floor(timer / 60).toString().padStart(2, '0');
+                let s = (timer % 60).toString().padStart(2, '0');
+                timerEl.innerText = `${m}:${s}`;
+            }, 1000);
+        }
+        function stopTimer() { clearInterval(timerInterval); }
+        function resetTimer() { stopTimer(); timerEl.innerText = "00:00"; startTimer(); }
+
+        function showNewGameModal() { document.getElementById('modal-new-game').classList.add('active'); }
+        function showAlert(type, title, msg) {
+            let el = document.getElementById('modal-alert');
+            let icon = document.getElementById('alert-icon');
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-msg').innerText = msg;
+            if (type === 'error') icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+            else if (type === 'success') icon.innerHTML = '<i class="fas fa-trophy text-yellow-500"></i>';
+            else icon.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i>';
+            el.classList.add('active');
+        }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        document.addEventListener('keydown', (e) => {
+            if (selectedIdx === -1) return;
+            if (e.key >= '1' && e.key <= '9') inputNumber(parseInt(e.key));
+            if (e.key === '0' || e.key === 'Backspace' || e.key === 'Delete') inputNumber(0);
+            let r = Math.floor(selectedIdx / 9), c = selectedIdx % 9;
+            if (e.key === 'ArrowUp') r = (r - 1 + 9) % 9;
+            if (e.key === 'ArrowDown') r = (r + 1) % 9;
+            if (e.key === 'ArrowLeft') c = (c - 1 + 9) % 9;
+            if (e.key === 'ArrowRight') c = (c + 1) % 9;
+            if (e.key.startsWith('Arrow')) { selectCell(r * 9 + c); e.preventDefault(); }
+        });
+
+        init();
+    </script>
+</body>
+</html>

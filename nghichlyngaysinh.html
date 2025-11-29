@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Nghịch Lý Ngày Sinh</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .animate-pulse-slow {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen p-4">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="bg-white rounded-xl shadow-sm p-6 text-center border-b-4 border-indigo-500">
+            <h1 class="text-3xl font-bold text-indigo-700 mb-2 flex items-center justify-center gap-2">
+                <!-- Icon Users -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Mô Phỏng Nghịch Lý Ngày Sinh
+            </h1>
+            <p class="text-gray-600">
+                Dành cho học sinh THCS: Cần bao nhiêu bạn trong lớp để có 2 bạn cùng ngày sinh?
+            </p>
+        </header>
+
+        <!-- Math Modal (Hidden by default) -->
+        <div id="mathModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-indigo-50 rounded-t-xl">
+                    <h3 class="text-xl font-bold text-indigo-800 flex items-center gap-2">
+                        <!-- Icon BookOpen -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        Góc Toán Học: Tại sao lại là 50%?
+                    </h3>
+                    <button onclick="toggleMathModal(false)" class="p-1 hover:bg-indigo-200 rounded-full transition-colors">
+                        <!-- Icon X -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                
+                <div class="p-6 space-y-4 text-gray-700">
+                    <p>
+                        Để tính xác suất có <strong>ít nhất 2 bạn</strong> trùng ngày sinh, cách dễ nhất là tính trường hợp ngược lại: 
+                        <br/>
+                        <span class="text-red-600 font-bold">"Xác suất để KHÔNG CÓ ai trùng ngày sinh cả."</span>
+                    </p>
+
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm space-y-2 font-mono">
+                        <p class="font-sans font-bold text-gray-600 mb-2">Hãy tưởng tượng chúng ta mời từng bạn vào lớp:</p>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xs">1</span>
+                            <div>
+                                <span class="font-bold">Bạn thứ 1:</span> Có thể sinh vào bất kỳ ngày nào.
+                                <div class="text-green-600">Tỷ lệ: 365/365 (100%)</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xs">2</span>
+                            <div>
+                                <span class="font-bold">Bạn thứ 2:</span> Phải sinh khác ngày bạn thứ 1 (còn 364 ngày).
+                                <div class="text-green-600">Tỷ lệ: 364/365 (~99.7%)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="pl-4 py-2 text-gray-400">... cứ thế nhân tiếp ...</div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xs">N</span>
+                            <div>
+                                <span class="font-bold">Bạn thứ <span id="mathStudentCount">N</span>:</span> Phải khác tất cả các bạn trước.
+                                <div class="text-green-600">Tỷ lệ giảm dần...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-indigo-700">Công thức tổng quát:</h4>
+                        <p class="p-3 bg-indigo-50 rounded border border-indigo-100 font-medium">
+                            P(Không trùng) = <span class="font-mono">1 × (364/365) × (363/365) × ...</span>
+                        </p>
+                        <p>
+                            Với <strong id="mathStudentCountRef">23</strong> học sinh, xác suất để <strong>KHÔNG</strong> ai trùng nhau là khoảng: 
+                            <span id="mathNonMatchProb" class="font-bold text-xl ml-2 text-red-600">--%</span>
+                        </p>
+                    </div>
+
+                    <div class="border-t pt-4 mt-4">
+                        <h4 class="font-bold text-green-700 text-lg">Kết luận:</h4>
+                        <p>
+                            Vậy xác suất để có <strong>ÍT NHẤT 1 cặp trùng</strong> là:
+                        </p>
+                        <div class="text-2xl font-bold text-center my-2 text-green-700 bg-green-50 p-2 rounded">
+                            100% - <span id="mathNonMatchProbRef">--%</span> = <span id="mathMatchProb">--%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end mt-4">
+                        <button onclick="toggleMathModal(false)" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-bold">
+                            Đã hiểu!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Controls Panel -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <!-- Icon Calculator -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="18"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="8" y1="18" x2="8" y2="18"/></svg>
+                        Thiết lập Lớp học
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Sĩ số lớp học: <span id="studentCountDisplay" class="text-indigo-600 font-bold text-lg">23</span> bạn
+                            </label>
+                            <input
+                                type="range"
+                                min="5"
+                                max="100"
+                                value="23"
+                                id="studentCountSlider"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                            />
+                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>5</span>
+                                <span>50</span>
+                                <span>100</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-indigo-50 p-4 rounded-lg relative overflow-hidden">
+                            <p class="text-sm text-gray-600 mb-1">Theo lý thuyết toán học:</p>
+                            <p id="theoreticalProbDisplay" class="text-2xl font-bold text-indigo-700">
+                                50.73%
+                            </p>
+                            <p class="text-xs text-gray-500 mb-2">
+                                Khả năng có ít nhất 1 cặp trùng ngày sinh.
+                            </p>
+                            <button onclick="toggleMathModal(true)" class="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-full border border-indigo-200 font-bold hover:bg-indigo-50 transition-colors flex items-center gap-1 shadow-sm w-full justify-center">
+                                <!-- Icon BookOpen -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                Xem công thức tính
+                            </button>
+                        </div>
+
+                        <button
+                            id="runBtn"
+                            onclick="runSimulation()"
+                            class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow transition-colors flex items-center justify-center gap-2"
+                        >
+                            <!-- Icon RefreshCw -->
+                            <svg id="runIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                            <span id="runBtnText">Chạy Mô Phỏng</span>
+                        </button>
+                        
+                        <button
+                            id="resetBtn"
+                            onclick="resetStats()"
+                            class="w-full py-2 px-4 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors text-sm hidden"
+                        >
+                            Xóa dữ liệu thống kê
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Panel -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h2 class="text-lg font-bold mb-4">Kết quả Thực nghiệm</h2>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <div class="text-xs text-gray-500">Số lần chạy</div>
+                            <div id="totalRuns" class="text-xl font-bold text-gray-800">0</div>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <div class="text-xs text-gray-500">Số lần có trùng</div>
+                            <div id="totalMatches" class="text-xl font-bold text-green-600">0</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-gray-600">Tỷ lệ thực tế:</span>
+                            <span id="actualProb" class="text-lg font-bold text-indigo-600">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                                id="probBar"
+                                class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" 
+                                style="width: 0%"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Explanation Box -->
+                <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                    <h3 class="font-bold text-yellow-800 flex items-center gap-2 mb-2">
+                        <!-- Icon Info -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Tại sao lại thế?
+                    </h3>
+                    <p class="text-sm text-yellow-900 leading-relaxed mb-2">
+                        Khi lớp có <strong id="explStudentCount">23 học sinh</strong>, chúng ta không so sánh 1 người với những người còn lại, mà so sánh <strong>tất cả các cặp</strong> với nhau.
+                    </p>
+                    <p class="text-sm text-yellow-900 leading-relaxed">
+                        Số cặp có thể xảy ra là: <strong class="font-mono" id="explPairs">253</strong> cặp.
+                        Rất nhiều cơ hội để tìm thấy một sự trùng hợp!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="bg-white p-6 rounded-xl shadow-sm min-h-[500px] border border-gray-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold flex items-center gap-2">
+                            <!-- Icon Users -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            Danh sách Lớp học (<span id="currentStudentCount">0</span>)
+                        </h2>
+                        <div id="matchStatusContainer">
+                            <!-- Status will be injected here -->
+                        </div>
+                    </div>
+
+                    <div id="studentsGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                        <!-- Student cards will be injected here -->
+                        <div class="col-span-full h-64 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+                            <!-- Icon Calendar -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-2 opacity-50"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <p>Nhấn "Chạy Mô Phỏng" để bắt đầu</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="matchDetailsPanel" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hidden">
+                    <h3 class="font-bold text-gray-700 mb-2">Chi tiết các cặp trùng:</h3>
+                    <div id="matchTags" class="flex flex-wrap gap-2">
+                        <!-- Match tags injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        let state = {
+            studentCount: 23,
+            students: [],
+            matches: [],
+            stats: { totalRuns: 0, totalMatches: 0 },
+            isSimulating: false
+        };
+
+        const matchColors = [
+            'bg-red-200 border-red-400 text-red-800',
+            'bg-blue-200 border-blue-400 text-blue-800',
+            'bg-green-200 border-green-400 text-green-800',
+            'bg-yellow-200 border-yellow-400 text-yellow-800',
+            'bg-purple-200 border-purple-400 text-purple-800',
+            'bg-pink-200 border-pink-400 text-pink-800',
+            'bg-indigo-200 border-indigo-400 text-indigo-800',
+            'bg-orange-200 border-orange-400 text-orange-800',
+        ];
+
+        // --- DOM Elements ---
+        const els = {
+            studentCountSlider: document.getElementById('studentCountSlider'),
+            studentCountDisplay: document.getElementById('studentCountDisplay'),
+            theoreticalProbDisplay: document.getElementById('theoreticalProbDisplay'),
+            runBtn: document.getElementById('runBtn'),
+            runIcon: document.getElementById('runIcon'),
+            runBtnText: document.getElementById('runBtnText'),
+            resetBtn: document.getElementById('resetBtn'),
+            totalRuns: document.getElementById('totalRuns'),
+            totalMatches: document.getElementById('totalMatches'),
+            actualProb: document.getElementById('actualProb'),
+            probBar: document.getElementById('probBar'),
+            explStudentCount: document.getElementById('explStudentCount'),
+            explPairs: document.getElementById('explPairs'),
+            studentsGrid: document.getElementById('studentsGrid'),
+            currentStudentCount: document.getElementById('currentStudentCount'),
+            matchStatusContainer: document.getElementById('matchStatusContainer'),
+            matchDetailsPanel: document.getElementById('matchDetailsPanel'),
+            matchTags: document.getElementById('matchTags'),
+            mathModal: document.getElementById('mathModal'),
+            mathStudentCount: document.getElementById('mathStudentCount'),
+            mathStudentCountRef: document.getElementById('mathStudentCountRef'),
+            mathNonMatchProb: document.getElementById('mathNonMatchProb'),
+            mathNonMatchProbRef: document.getElementById('mathNonMatchProbRef'),
+            mathMatchProb: document.getElementById('mathMatchProb')
+        };
+
+        // --- Logic ---
+
+        function calculateTheoreticalProbability(n) {
+            let nonMatchProb = 1;
+            for (let i = 0; i < n; i++) {
+                nonMatchProb *= (365 - i) / 365;
+            }
+            return (1 - nonMatchProb) * 100;
+        }
+
+        function updateTheoreticalDisplay() {
+            const prob = calculateTheoreticalProbability(state.studentCount);
+            els.studentCountDisplay.textContent = state.studentCount;
+            els.theoreticalProbDisplay.textContent = prob.toFixed(2) + '%';
+            
+            // Update explanation text
+            els.explStudentCount.textContent = `${state.studentCount} học sinh`;
+            const pairs = (state.studentCount * (state.studentCount - 1)) / 2;
+            els.explPairs.textContent = pairs;
+            
+            // Update math modal content (if opened or pre-populated)
+            const nonMatchProb = 100 - prob;
+            els.mathStudentCount.textContent = state.studentCount;
+            els.mathStudentCountRef.textContent = state.studentCount;
+            els.mathNonMatchProb.textContent = nonMatchProb.toFixed(2) + '%';
+            els.mathNonMatchProbRef.textContent = nonMatchProb.toFixed(2) + '%';
+            els.mathMatchProb.textContent = prob.toFixed(2) + '%';
+        }
+
+        function generateRandomDate() {
+            const start = new Date(2024, 0, 1);
+            const end = new Date(2024, 11, 31);
+            const randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+            return {
+                day: randomDate.getDate(),
+                month: randomDate.getMonth() + 1,
+                display: `${randomDate.getDate()}/${randomDate.getMonth() + 1}`
+            };
+        }
+
+        function toggleMathModal(show) {
+            if (show) {
+                updateTheoreticalDisplay(); // Ensure fresh data before showing
+                els.mathModal.classList.remove('hidden');
+            } else {
+                els.mathModal.classList.add('hidden');
+            }
+        }
+
+        function runSimulation() {
+            if (state.isSimulating) return;
+            state.isSimulating = true;
+            
+            // UI Loading state
+            els.runBtn.disabled = true;
+            els.runIcon.classList.add('animate-spin');
+            els.runBtnText.textContent = 'Đang tạo...';
+            els.studentsGrid.innerHTML = ''; // Clear old
+
+            setTimeout(() => {
+                // Generate logic
+                const newStudents = Array.from({ length: state.studentCount }, (_, index) => ({
+                    id: index + 1,
+                    date: generateRandomDate(),
+                    matchColorIndex: -1
+                }));
+
+                const dateMap = {};
+                const foundMatches = [];
+                let colorIndex = 0;
+
+                newStudents.forEach((student) => {
+                    const dateKey = student.date.display;
+                    if (!dateMap[dateKey]) {
+                        dateMap[dateKey] = [student.id];
+                    } else {
+                        dateMap[dateKey].push(student.id);
+                    }
+                });
+
+                Object.keys(dateMap).forEach((date) => {
+                    if (dateMap[date].length > 1) {
+                        foundMatches.push({ date, ids: dateMap[date] });
+                        const currentColor = matchColors[colorIndex % matchColors.length];
+                        
+                        dateMap[date].forEach(id => {
+                            const studentIndex = newStudents.findIndex(s => s.id === id);
+                            if (studentIndex !== -1) {
+                                newStudents[studentIndex].matchColorIndex = colorIndex % matchColors.length;
+                                newStudents[studentIndex].customClass = currentColor;
+                            }
+                        });
+                        colorIndex++;
+                    }
+                });
+
+                // Update state
+                state.students = newStudents;
+                state.matches = foundMatches;
+                state.stats.totalRuns += 1;
+                state.stats.totalMatches += (foundMatches.length > 0 ? 1 : 0);
+                state.isSimulating = false;
+
+                // Render Results
+                renderSimulationResults();
+                renderStats();
+
+                // Reset UI Loading state
+                els.runBtn.disabled = false;
+                els.runIcon.classList.remove('animate-spin');
+                els.runBtnText.textContent = 'Chạy Mô Phỏng';
+                els.resetBtn.classList.remove('hidden');
+
+            }, 500); // Small delay for effect
+        }
+
+        function resetStats() {
+            state.stats = { totalRuns: 0, totalMatches: 0 };
+            state.students = [];
+            state.matches = [];
+            renderStats();
+            
+            // Reset grid
+            els.studentsGrid.innerHTML = `
+                <div class="col-span-full h-64 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-2 opacity-50"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <p>Nhấn "Chạy Mô Phỏng" để bắt đầu</p>
+                </div>
+            `;
+            els.matchStatusContainer.innerHTML = '';
+            els.matchDetailsPanel.classList.add('hidden');
+            els.currentStudentCount.textContent = '0';
+            els.resetBtn.classList.add('hidden');
+        }
+
+        function renderStats() {
+            els.totalRuns.textContent = state.stats.totalRuns;
+            els.totalMatches.textContent = state.stats.totalMatches;
+            
+            const prob = state.stats.totalRuns > 0 
+                ? ((state.stats.totalMatches / state.stats.totalRuns) * 100).toFixed(1) 
+                : 0;
+            
+            els.actualProb.textContent = prob + '%';
+            els.probBar.style.width = prob + '%';
+        }
+
+        function renderSimulationResults() {
+            els.currentStudentCount.textContent = state.students.length;
+
+            // Render Status Badge
+            if (state.matches.length > 0) {
+                els.matchStatusContainer.innerHTML = `
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold animate-pulse-slow block">
+                        Đã tìm thấy ${state.matches.length} cặp trùng!
+                    </span>
+                `;
+            } else {
+                els.matchStatusContainer.innerHTML = `
+                    <span class="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-sm font-medium block">
+                        Không có cặp nào trùng
+                    </span>
+                `;
+            }
+
+            // Render Grid
+            els.studentsGrid.innerHTML = state.students.map(student => {
+                const baseClass = student.customClass 
+                    ? `${student.customClass} shadow-md transform scale-105`
+                    : 'bg-white border-gray-200 hover:border-indigo-300 shadow-sm';
+                
+                const dot = student.customClass 
+                    ? `<div class="absolute -top-2 -right-2 bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
+                           <div class="w-3 h-3 rounded-full ${student.customClass.split(' ')[0]}"></div>
+                       </div>`
+                    : '';
+
+                return `
+                    <div class="relative p-3 rounded-lg border text-center transition-all duration-300 hover:scale-105 ${baseClass} animate-fade-in">
+                        <div class="text-xs text-gray-400 mb-1">HS ${student.id}</div>
+                        <div class="font-bold text-lg flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-50"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            ${student.date.display}
+                        </div>
+                        ${dot}
+                    </div>
+                `;
+            }).join('');
+
+            // Render Match Details
+            if (state.matches.length > 0) {
+                els.matchDetailsPanel.classList.remove('hidden');
+                els.matchTags.innerHTML = state.matches.map(match => `
+                    <div class="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center gap-2 border border-gray-200">
+                        <span class="font-bold">Ngày ${match.date}:</span>
+                        <span class="text-gray-600">Học sinh số ${match.ids.join(', ')}</span>
+                    </div>
+                `).join('');
+            } else {
+                els.matchDetailsPanel.classList.add('hidden');
+            }
+        }
+
+        // --- Init Listeners ---
+        els.studentCountSlider.addEventListener('input', (e) => {
+            state.studentCount = parseInt(e.target.value);
+            updateTheoreticalDisplay();
+        });
+
+        // Initialize display
+        updateTheoreticalDisplay();
+
+    </script>
+</body>
+</html>
