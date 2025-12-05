@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kho Tàng Họa Sĩ Toán Học - Desmos Tools</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Tối ưu cho Iframe: Ẩn thanh cuộn mặc định xấu xí, dùng thanh cuộn mỏng */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c7c7c7; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8; 
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #f8fafc; /* Nền sáng nhẹ */
+        }
+        .math-font {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .card-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-color: #818cf8;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        /* Toast notification */
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: #1f2937;
+            color: #fff;
+            text-align: center;
+            border-radius: 50px; /* Bo tròn hơn cho hiện đại */
+            padding: 12px 24px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%) translateY(20px);
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Compact Header (Tối ưu Iframe) -->
+    <header class="bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-40 border-b border-gray-100">
+        <div class="px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="bg-indigo-100 p-2 rounded-lg">
+                    <i class="fa-solid fa-calculator text-indigo-600"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-gray-800 leading-tight">Desmos <span class="gradient-text">Art</span></h1>
+                    <p class="text-xs text-gray-500 hidden sm:block">Kho công thức cho CLB Toán</p>
+                </div>
+            </div>
+            <a href="https://www.desmos.com/calculator" target="_blank" class="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-full transition-colors border border-indigo-200">
+                Mở Desmos <i class="fa-solid fa-arrow-up-right-from-square ml-1"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow px-4 py-6 space-y-8 max-w-6xl mx-auto w-full">
+
+        <!-- Section 1: Tình Yêu (Love) -->
+        <section>
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                <i class="fa-solid fa-heart mr-2 text-pink-500"></i> Hình Trái Tim
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <!-- Card 1 -->
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover relative group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Trái Tim Đỏ (Tô màu)</h3>
+                        <span class="text-xl">❤️</span>
+                    </div>
+                    <code class="block bg-gray-50 text-xs text-pink-600 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">(x^2 + y^2 - 1)^3 - x^2y^3 <= 0</code>
+                    <button onclick="copyToClipboard('(x^2 + y^2 - 1)^3 - x^2y^3 <= 0')" class="w-full py-1.5 text-xs font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                <!-- Card 2: Updated Polar Heart -->
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Trái Tim Cực (Polar)</h3>
+                        <span class="text-xl">💗</span>
+                    </div>
+                    <code class="block bg-gray-50 text-xs text-pink-600 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">r = \frac{sin(\theta)\sqrt{|cos(\theta)|}}{sin(\theta)+1.4}...</code>
+                    <button onclick="copyToClipboard('r=\\frac{\\sin(\\theta)\\sqrt{\\left|\\cos(\\theta)\\right|}}{\\sin(\\theta)+1.4}-2\\sin(\\theta)+2')" class="w-full py-1.5 text-xs font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                 <!-- Card 3 -->
+                 <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Trái Tim Đập (Slider a)</h3>
+                        <span class="text-xl">💓</span>
+                    </div>
+                    <code class="block bg-gray-50 text-xs text-pink-600 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">... <= a</code>
+                    <button onclick="copyToClipboard('(x^2+y^2-1)^3 - x^2y^3 <= a')" class="w-full py-1.5 text-xs font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section NEW: Kiến Trúc & Đời Sống -->
+        <section>
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                <i class="fa-solid fa-city mr-2 text-orange-500"></i> Kiến Trúc & Đời Sống
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <!-- Tool: Polygon -->
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover border-l-4 border-l-orange-400">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Vẽ Đa Giác (Nhà, Cửa)</h3>
+                        <span class="text-xl">🏠</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">Nối các điểm thành hình khép kín</p>
+                    <code class="block bg-gray-50 text-xs text-orange-600 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">polygon((0,0), (2,3), (4,0))</code>
+                    <button onclick="copyToClipboard('polygon((0,0), (2,3), (4,0))')" class="w-full py-1.5 text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                <!-- Tool: Ellipse -->
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Hình Bầu Dục (Khuôn mặt)</h3>
+                        <span class="text-xl">🙂</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">Chỉnh số mẫu số để đổi độ dẹt</p>
+                    <code class="block bg-gray-50 text-xs text-orange-600 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">\frac{x^2}{4} + \frac{y^2}{9} <= 1</code>
+                    <button onclick="copyToClipboard('\\frac{x^2}{4} + \\frac{y^2}{9} <= 1')" class="w-full py-1.5 text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                <!-- Tool: Shading -->
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Tô Màu Giữa 2 Đường</h3>
+                        <span class="text-xl">🎨</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">Dùng để vẽ núi, sông, tóc</p>
+                    <code class="block bg-gray-50 text-xs text-orange-600 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">0 < y < sin(x) {0 < x < 5}</code>
+                    <button onclick="copyToClipboard('0 < y < sin(x) \\{0 < x < 5\\}')" class="w-full py-1.5 text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Thiên Nhiên (Nature) -->
+        <section>
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                <i class="fa-solid fa-leaf mr-2 text-green-500"></i> Thiên Nhiên
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Hoa Đào 5 Cánh</h3>
+                        <span class="text-xl">🌸</span>
+                    </div>
+                    <code class="block bg-gray-50 text-xs text-green-700 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">r = cos(5\theta)</code>
+                    <button onclick="copyToClipboard('r = cos(5\\theta)')" class="w-full py-1.5 text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Cỏ 4 Lá</h3>
+                        <span class="text-xl">🍀</span>
+                    </div>
+                    <code class="block bg-gray-50 text-xs text-green-700 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">r = 3 + cos(4\theta)</code>
+                    <button onclick="copyToClipboard('r = 3 + cos(4\\theta)')" class="w-full py-1.5 text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                <!-- NEW: Butterfly Curve -->
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover border-l-4 border-l-purple-400">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Cánh Bướm (Butterfly)</h3>
+                        <span class="text-xl">🦋</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">Đường cong phức tạp tuyệt đẹp</p>
+                    <button onclick="copyToClipboard('r = e^{sin(\\theta)} - 2cos(4\\theta) + (sin((2\\theta - \\pi)/24))^5')" class="w-full py-1.5 text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy Code
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Chuyển Động & Vật Lý (MỚI) -->
+        <section>
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                <i class="fa-solid fa-atom mr-2 text-blue-500"></i> Chuyển Động & Vật Lý
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <!-- NEW: Lissajous -->
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Lissajous (Dao động)</h3>
+                        <span class="text-xl">〰️</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">Chỉnh slider a, b để thay đổi</p>
+                    <code class="block bg-gray-50 text-xs text-blue-700 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">(cos(at), sin(bt))</code>
+                    <button onclick="copyToClipboard('(cos(at), sin(bt))')" class="w-full py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                <!-- NEW: Astroid -->
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Astroid (Sao 4 cánh)</h3>
+                        <span class="text-xl">✨</span>
+                    </div>
+                    <code class="block bg-gray-50 text-xs text-blue-700 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">x^{2/3} + y^{2/3} = 4</code>
+                    <button onclick="copyToClipboard('x^{2/3} + y^{2/3} = 4')" class="w-full py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                 <!-- NEW: Waves -->
+                 <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Giao Thoa Sóng</h3>
+                        <span class="text-xl">🌊</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">Tổng hợp 2 dao động</p>
+                    <code class="block bg-gray-50 text-xs text-blue-700 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">y = sin(x) + sin(1.1x)</code>
+                    <button onclick="copyToClipboard('y = sin(x) + sin(1.1x)')" class="w-full py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 4: Vũ Trụ & Hình Học -->
+        <section>
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                <i class="fa-solid fa-infinity mr-2 text-purple-500"></i> Vũ Trụ
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Vô Cực (Lemniscate)</h3>
+                        <span class="text-xl">♾️</span>
+                    </div>
+                    <code class="block bg-gray-50 text-xs text-purple-700 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">(x^2+y^2)^2 <= 4(x^2-y^2)</code>
+                    <button onclick="copyToClipboard('(x^2+y^2)^2 <= 4(x^2-y^2)')" class="w-full py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Xoắn Ốc Thôi Miên</h3>
+                        <span class="text-xl">🌀</span>
+                    </div>
+                    <code class="block bg-gray-50 text-xs text-purple-700 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">r = \theta</code>
+                    <button onclick="copyToClipboard('r = \\theta')" class="w-full py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800 text-sm">Pac-Man (Màu vàng)</h3>
+                        <span class="text-xl">ᗧ</span>
+                    </div>
+                    <code class="block bg-gray-50 text-xs text-purple-700 p-2 rounded border border-gray-100 mb-3 math-font overflow-hidden whitespace-nowrap text-ellipsis">r <= 5 {0.5 < \theta < 5.8}</code>
+                    <button onclick="copyToClipboard('r <= 5 {0.5 < \\theta < 5.8}')" class="w-full py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification Element -->
+    <div id="toast"><i class="fa-solid fa-check-circle mr-2 text-green-400"></i> Đã copy công thức!</div>
+
+    <script>
+        function copyToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0"; // Ẩn hoàn toàn khỏi view
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+                if(successful) {
+                    showToast();
+                } else {
+                    alert('Không thể copy tự động. Hãy dùng Ctrl+C');
+                }
+            } catch (err) {
+                console.error('Lỗi khi copy', err);
+                alert('Trình duyệt không hỗ trợ copy tự động.');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function showToast() {
+            var x = document.getElementById("toast");
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500);
+        }
+    </script>
+</body>
+</html>

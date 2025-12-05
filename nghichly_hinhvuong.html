@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bí Ẩn Hình Vuông Bị Mất - CLB Toán Học</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f9ff;
+        }
+        h1, h2, h3, .handwritten {
+            font-family: 'Patrick Hand', cursive;
+        }
+        canvas {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background-color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: none;
+        }
+        /* Custom Scrollbar for Modal */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Animation for Modal */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-modal {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="text-slate-800 select-none h-screen flex flex-col">
+
+    <div class="container mx-auto px-4 py-6 max-w-5xl flex-grow">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-blue-600 mb-1 drop-shadow-sm">Bí Ẩn Hình Vuông Bị Mất</h1>
+            <p class="text-xl text-slate-500 handwritten">Toán học hay Ma thuật? Hãy cùng khám phá!</p>
+        </header>
+
+        <!-- Main Simulation Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Controls & Info -->
+            <div class="lg:col-span-1 space-y-4">
+                <div class="bg-white p-5 rounded-xl shadow-lg border border-blue-50">
+                    <h2 class="text-2xl font-bold mb-3 text-indigo-600">Phòng Thí Nghiệm</h2>
+                    
+                    <button id="toggleBtn" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition transform hover:scale-[1.02] shadow-md mb-4 flex items-center justify-center gap-2 text-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                        <span id="btnText">Úm Ba La... Biến Hình!</span>
+                    </button>
+
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-lg text-sm">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="showLine" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer">
+                            <label for="showLine" class="font-medium cursor-pointer text-slate-700">Dùng "Kính Lúp" (Soi đường chéo)</label>
+                        </div>
+                         <div class="flex items-center gap-2">
+                            <input type="checkbox" id="showGrid" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer">
+                            <label for="showGrid" class="font-medium cursor-pointer text-slate-700">Bật lưới tọa độ</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-100 p-4 rounded-xl border-2 border-yellow-300 shadow-sm transform -rotate-1 hover:rotate-0 transition">
+                    <h3 class="font-bold text-yellow-800 text-xl mb-1">🕵️ Thám tử nhí:</h3>
+                    <p class="text-yellow-900 text-base handwritten leading-tight">
+                        "Hãy đếm số ô vuông của 4 mảnh ghép. Khi chúng đổi chỗ cho nhau, các mảnh ghép có to ra hay nhỏ đi không?"
+                    </p>
+                </div>
+
+                <!-- Explain Trigger Button -->
+                <button id="openExplainBtn" class="w-full bg-white border-2 border-emerald-400 text-emerald-700 hover:bg-emerald-50 font-bold py-3 px-4 rounded-xl transition shadow-sm flex items-center justify-center gap-2 group">
+                    <span class="text-2xl group-hover:scale-110 transition">💡</span>
+                    <span class="text-lg">Tại sao lại thế nhỉ?</span>
+                </button>
+            </div>
+
+            <!-- Canvas -->
+            <div class="lg:col-span-2 flex justify-center items-start">
+                <canvas id="puzzleCanvas" width="600" height="350" class="w-full h-auto border-2 border-slate-200 rounded-xl shadow-xl bg-white"></canvas>
+            </div>
+        </div>
+        
+        <footer class="mt-auto text-center text-slate-400 text-xs py-4 border-t border-slate-200">
+            <p>Mô phỏng phục vụ giáo dục STEM THCS | Được tạo bởi Gemini AI</p>
+        </footer>
+    </div>
+
+    <!-- MODAL POPUP -->
+    <div id="explainModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col animate-modal transform scale-95 transition-transform duration-300">
+            
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <span class="bg-indigo-100 text-indigo-600 p-2 rounded-lg text-2xl">🔍</span>
+                    <h2 class="text-3xl font-bold text-slate-800">Giải Mã Sự Thật</h2>
+                </div>
+                <button id="closeExplainBtn" class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-6 overflow-y-auto modal-content space-y-6">
+                <p class="text-lg text-slate-600 handwritten text-center italic">Sự thật chỉ có một, nhưng mắt thường dễ bị đánh lừa!</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Card 1 -->
+                    <div class="bg-green-50 p-5 rounded-xl border border-green-200">
+                        <h3 class="text-xl font-bold text-green-700 mb-2 flex items-center gap-2">
+                            <span>🧩</span> 1. Diện tích không đổi
+                        </h3>
+                        <p class="text-slate-600 mb-2 text-sm">Cộng diện tích 4 mảnh lại:</p>
+                        <ul class="space-y-1 text-slate-700 text-sm ml-2">
+                            <li class="flex justify-between border-b border-green-200 pb-1"><span>🔴 Tam giác Đỏ:</span> <span class="font-bold">12 ô</span></li>
+                            <li class="flex justify-between border-b border-green-200 pb-1"><span>🔵 Tam giác Xanh:</span> <span class="font-bold">5 ô</span></li>
+                            <li class="flex justify-between border-b border-green-200 pb-1"><span>🟢 Hình Lục:</span> <span class="font-bold">8 ô</span></li>
+                            <li class="flex justify-between border-b border-green-200 pb-1"><span>🟡 Hình Vàng:</span> <span class="font-bold">7 ô</span></li>
+                            <li class="flex justify-between pt-1 text-green-800 font-bold text-base"><span>Tổng cộng:</span> <span>32 ô</span></li>
+                        </ul>
+                        <p class="mt-2 text-xs italic text-slate-500">Dù xếp thế nào, tổng vẫn là 32 ô!</p>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-red-50 p-5 rounded-xl border border-red-200">
+                        <h3 class="text-xl font-bold text-red-700 mb-2 flex items-center gap-2">
+                            <span>⛰️</span> 2. Độ dốc khác nhau
+                        </h3>
+                        <p class="text-slate-600 mb-2 text-sm">Tưởng tượng bạn đang leo núi:</p>
+                        <ul class="space-y-2 text-slate-700 text-sm ml-2">
+                            <li>🔴 <strong>Dốc Đỏ:</strong> Ngang 8, cao 3. <br><span class="text-slate-500">Độ dốc = 3/8 = <span class="font-bold text-red-500">0.375</span></span></li>
+                            <li>🔵 <strong>Dốc Xanh:</strong> Ngang 5, cao 2. <br><span class="text-slate-500">Độ dốc = 2/5 = <span class="font-bold text-blue-500">0.400</span> (Dốc hơn!)</span></li>
+                        </ul>
+                        <div class="mt-3 bg-white p-2 rounded text-red-800 text-xs font-bold border border-red-100 text-center shadow-sm">
+                            🔔 Hai sườn núi này KHÔNG thẳng hàng!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Big Reveal -->
+                <div class="bg-indigo-600 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-20 h-20 bg-indigo-500 rounded-full opacity-50"></div>
+                    
+                    <h3 class="text-2xl font-bold mb-3 relative z-10">💡 Bí mật nằm ở đâu?</h3>
+                    <div class="grid md:grid-cols-2 gap-6 relative z-10 text-indigo-100 text-sm">
+                        <div>
+                            <p class="leading-relaxed mb-2">
+                                Cạnh huyền của hình tam giác lớn KHÔNG PHẢI là một đường thẳng tắp!
+                            </p>
+                            <ul class="space-y-1 pl-4 list-disc">
+                                <li><strong>Hình 1 (Không lỗ):</strong> Đường chéo bị <strong>hóp vào</strong> (lõm).</li>
+                                <li><strong>Hình 2 (Có lỗ):</strong> Đường chéo bị <strong>phình ra</strong> (lồi).</li>
+                            </ul>
+                        </div>
+                        <div class="flex flex-col justify-center bg-indigo-800/50 p-3 rounded-lg text-center">
+                            <p class="font-bold text-lg text-yellow-300 mb-1">
+                                Diện tích khe hở = 1 ô vuông!
+                            </p>
+                            <p class="text-xs opacity-90">
+                                Phần chênh lệch giữa cái "bụng phình" và cái "bụng hóp" tạo ra đúng 1 ô vuông bị mất.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl flex justify-end">
+                <button id="closeExplainBtnBottom" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 px-6 rounded-lg transition">
+                    Đã hiểu!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('puzzleCanvas');
+        const ctx = canvas.getContext('2d');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const btnText = document.getElementById('btnText');
+        const showLineCheckbox = document.getElementById('showLine');
+        const showGridCheckbox = document.getElementById('showGrid');
+        
+        // Modal Elements
+        const modal = document.getElementById('explainModal');
+        const openBtn = document.getElementById('openExplainBtn');
+        const closeBtn = document.getElementById('closeExplainBtn');
+        const closeBtnBottom = document.getElementById('closeExplainBtnBottom');
+
+        // Modal Logic
+        function openModal() {
+            modal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before opacity transition
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+                modal.querySelector('div').classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // Match transition duration
+        }
+
+        openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        closeBtnBottom.addEventListener('click', closeModal);
+        
+        // Close on click outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+        });
+
+        // Config
+        const CELL = 40;
+        const OFFSET_X = 40;
+        const OFFSET_Y = 60;
+        
+        let currentState = 0; // 0: Solid, 1: Hole
+        let animationProgress = 1; 
+        let isAnimating = false;
+
+        // --- SHAPE DEFINITIONS ---
+        const shapes = [
+            {
+                id: 'redTri', 
+                color: '#ef4444', stroke: '#b91c1c',
+                w: 8, h: 3,
+                path: (c) => { c.moveTo(0,3*CELL); c.lineTo(8*CELL, 3*CELL); c.lineTo(8*CELL, 0); c.closePath(); }
+            },
+            {
+                id: 'blueTri', 
+                color: '#3b82f6', stroke: '#1d4ed8',
+                w: 5, h: 2,
+                path: (c) => { c.moveTo(0,2*CELL); c.lineTo(5*CELL, 2*CELL); c.lineTo(5*CELL, 0); c.closePath(); }
+            },
+            {
+                id: 'greenPoly', 
+                color: '#22c55e', stroke: '#15803d',
+                w: 5, h: 2,
+                path: (c) => { 
+                    c.moveTo(0,0); c.lineTo(3*CELL,0); c.lineTo(3*CELL,1*CELL); 
+                    c.lineTo(5*CELL,1*CELL); c.lineTo(5*CELL,2*CELL); 
+                    c.lineTo(0,2*CELL); c.closePath(); 
+                }
+            },
+            {
+                id: 'yellowPoly', 
+                color: '#eab308', stroke: '#a16207',
+                w: 5, h: 2,
+                path: (c) => { 
+                    c.moveTo(0,0); c.lineTo(5*CELL,0); c.lineTo(5*CELL,2*CELL); 
+                    c.lineTo(3*CELL,2*CELL); c.lineTo(3*CELL,1*CELL); 
+                    c.lineTo(0,1*CELL); c.closePath(); 
+                }
+            }
+        ];
+
+        const targets0 = {
+            redTri: {x: 0, y: 2},
+            blueTri: {x: 8, y: 0},
+            greenPoly: {x: 8, y: 3},
+            yellowPoly: {x: 8, y: 2}
+        };
+
+        const targets1 = {
+            redTri: {x: 5, y: 0},
+            blueTri: {x: 0, y: 3},
+            greenPoly: {x: 5, y: 3},
+            yellowPoly: {x: 8, y: 3}
+        };
+
+        let pos = JSON.parse(JSON.stringify(targets0));
+
+        function lerp(start, end, t) {
+            return start * (1 - t) + end * t;
+        }
+
+        function easeInOutBack(x) {
+            const c1 = 1.70158;
+            const c2 = c1 * 1.525;
+            return x < 0.5
+                ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
+                : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (2 * x - 2) + c2) + 2) / 2;
+        }
+
+        function drawGrid() {
+            if(!showGridCheckbox.checked) return;
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let x = 0; x <= 13; x++) {
+                ctx.moveTo(x * CELL + OFFSET_X, OFFSET_Y);
+                ctx.lineTo(x * CELL + OFFSET_X, 5 * CELL + OFFSET_Y);
+            }
+            for (let y = 0; y <= 5; y++) {
+                ctx.moveTo(OFFSET_X, y * CELL + OFFSET_Y);
+                ctx.lineTo(13 * CELL + OFFSET_X, y * CELL + OFFSET_Y);
+            }
+            ctx.stroke();
+            
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            for(let x=0; x<=13; x++) ctx.fillText(x, x*CELL + OFFSET_X, 5*CELL + OFFSET_Y + 20);
+            ctx.textAlign = 'right';
+            for(let y=0; y<=5; y++) ctx.fillText(5-y, OFFSET_X - 8, y*CELL + OFFSET_Y + 4);
+        }
+
+        function drawTrueLine() {
+            if(!showLineCheckbox.checked) return;
+            ctx.save();
+            ctx.translate(OFFSET_X, OFFSET_Y);
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)'; // Reddish transparency
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 6]);
+            ctx.beginPath();
+            ctx.moveTo(0, 5*CELL);
+            ctx.lineTo(13*CELL, 0);
+            ctx.stroke();
+            
+            // Label for the true line
+            ctx.fillStyle = '#ef4444';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillText('Đường thẳng thật', 6*CELL, 3*CELL);
+            
+            ctx.restore();
+        }
+
+        function drawHoleHighlight() {
+            if (currentState === 1 && animationProgress > 0.9) {
+                ctx.save();
+                ctx.translate(OFFSET_X, OFFSET_Y);
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.1)';
+                ctx.fillRect(10*CELL, 4*CELL, CELL, CELL);
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(10*CELL, 4*CELL, CELL, CELL);
+                
+                ctx.fillStyle = '#ef4444';
+                ctx.font = 'bold 24px Patrick Hand';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('?', 10.5*CELL, 4.5*CELL);
+                ctx.restore();
+            }
+        }
+
+        function drawShape(shape, x, y) {
+            ctx.save();
+            ctx.translate(x * CELL + OFFSET_X, y * CELL + OFFSET_Y);
+            
+            // Shadow for depth
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetY = 2;
+
+            ctx.fillStyle = shape.color;
+            ctx.strokeStyle = shape.stroke;
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            shape.path(ctx);
+            ctx.fill();
+            
+            // Turn off shadow for strokes
+            ctx.shadowColor = 'transparent';
+            ctx.stroke();
+
+            // Inner Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i=1; i<shape.w; i++) {
+                ctx.moveTo(i*CELL, 0); ctx.lineTo(i*CELL, shape.h*CELL);
+            }
+            for(let j=1; j<shape.h; j++) {
+                ctx.moveTo(0, j*CELL); ctx.lineTo(shape.w*CELL, j*CELL);
+            }
+            ctx.save();
+            ctx.clip();
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawGrid();
+            drawHoleHighlight();
+
+            const t = easeInOutBack(animationProgress);
+            const target = currentState === 0 ? targets0 : targets1;
+            const start = currentState === 0 ? targets1 : targets0;
+
+            ['redTri', 'blueTri', 'greenPoly', 'yellowPoly'].forEach(id => {
+                const shapeObj = shapes.find(s => s.id === id);
+                const currX = lerp(start[id].x, target[id].x, t);
+                const currY = lerp(start[id].y, target[id].y, t);
+                drawShape(shapeObj, currX, currY);
+            });
+
+            drawTrueLine();
+
+            if (isAnimating) {
+                animationProgress += 0.015;
+                if (animationProgress >= 1) {
+                    animationProgress = 1;
+                    isAnimating = false;
+                }
+                requestAnimationFrame(update);
+            }
+        }
+
+        function toggleState() {
+            if (isAnimating) return;
+            currentState = currentState === 0 ? 1 : 0;
+            animationProgress = 0;
+            isAnimating = true;
+            btnText.innerText = currentState === 0 ? "Úm Ba La... Biến Hình!" : "Quay Lại Ban Đầu";
+            update();
+        }
+
+        toggleBtn.addEventListener('click', toggleState);
+        canvas.addEventListener('pointerdown', toggleState);
+        showLineCheckbox.addEventListener('change', () => requestAnimationFrame(update));
+        showGridCheckbox.addEventListener('change', () => requestAnimationFrame(update));
+
+        update();
+
+    </script>
+</body>
+</html>
