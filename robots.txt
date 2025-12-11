@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Disallow system or private files if necessary
+Disallow: /test
+Disallow: /googleb75a9bb0881a8b9d.html
+
+# Sitemap location
+Sitemap: https://daytoanthayhoang.github.io/sitemap.xml

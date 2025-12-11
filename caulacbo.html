@@ -3,203 +3,396 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Câu Lạc Bộ Toán Học - Dạy Toán Thầy Hoàng</title>
-    <!-- Tích hợp Tailwind CSS và Google Fonts -->
+    <title>CLB Toán Học - THCS Nguyễn An Khương</title>
+    <!-- Tích hợp Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Be Vietnam Pro & Orbitron (cho nét công nghệ) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+            overflow-x: hidden;
         }
-        html {
-            scroll-behavior: smooth;
+        .font-tech {
+            font-family: 'Orbitron', sans-serif;
         }
-        /* --- Kiểu cho nút công cụ --- */
-        .tool-trigger {
-            transition: all 0.3s ease;
+        
+        /* Hiệu ứng nền lưới công nghệ */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(30, 41, 59, 0.5) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(30, 41, 59, 0.5) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
         }
-        .tool-trigger:hover {
+
+        /* Hiệu ứng Glassmorphism */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Nút công cụ (Thẻ bài) */
+        .tool-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+        .tool-card:hover::before {
+            transform: translateX(100%);
+        }
+        .tool-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); /* Cyan Glow */
+            border-color: #38bdf8;
         }
-        .tool-trigger.active {
-            background-color: #7c3aed; /* Màu tím đậm cho trạng thái active */
-            color: white;
-            box-shadow: 0 0 15px rgba(124, 58, 237, 0.6);
-            transform: translateY(-5px) scale(1.02);
-            border-color: #7c3aed;
+        .tool-card.active {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(139, 92, 246, 0.2));
+            border-color: #22d3ee;
+            box-shadow: 0 0 25px rgba(34, 211, 238, 0.4);
         }
-        /* --- Kiểu cho khung mô phỏng --- */
+
+        /* Khung iframe */
         #frame-container {
             transition: all 0.5s ease;
+        }
+        #frame-container.fullscreen-mode {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 100;
+            padding: 0; border-radius: 0;
+            background-color: #0f172a;
         }
         #tool-frame {
             width: 100%;
             height: 80vh;
             border: none;
         }
-        /* --- Chế độ toàn màn hình --- */
-        #frame-container.fullscreen-mode {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 100;
-            padding: 0;
-            border-radius: 0;
-            background-color: white;
-        }
         #frame-container.fullscreen-mode #tool-frame {
             height: 100%;
         }
+
         /* Nút thoát toàn màn hình */
         #exit-fullscreen-btn {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            z-index: 101;
-            background-color: rgba(17, 24, 39, 0.6);
-            color: white;
-            border-radius: 9999px;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: all 0.2s;
-        }
-        #exit-fullscreen-btn:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-        /* Hiệu ứng mờ nền modal */
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
+            position: fixed; top: 1.5rem; right: 1.5rem; z-index: 101;
+            background-color: rgba(15, 23, 42, 0.8);
+            border: 1px solid #38bdf8;
+            color: #38bdf8;
             backdrop-filter: blur(4px);
         }
+        #exit-fullscreen-btn:hover {
+            background-color: #38bdf8;
+            color: #0f172a;
+            box-shadow: 0 0 15px #38bdf8;
+        }
+
+        /* Scrollbar tùy chỉnh */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
+	<!-- SEO Cơ Bản -->
+<title>CLB Toán Học - THCS Nguyễn An Khương | Sân Chơi Trí Tuệ</title>
+<meta name="description" content="Website chính thức của CLB Toán Học THCS Nguyễn An Khương. Nơi chia sẻ các công cụ toán học trực quan, game tư duy Sudoku, đố vui và các bài học hình học 3D thú vị.">
+<meta name="keywords" content="CLB Toán Học, THCS Nguyễn An Khương, Toán học trực quan, Sudoku, Hình học 3D, Desmos, Học toán online">
+<meta name="author" content="Thầy Hoàng">
+
+<!-- Open Graph (Để hiển thị đẹp khi share link lên Zalo/Facebook) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="CLB Toán Học - Sân Chơi Trí Tuệ 4.0">
+<meta property="og:description" content="Tham gia ngay CLB Toán Học với hàng loạt công cụ mô phỏng 3D, giải đố Sudoku và các nghịch lý toán học hấp dẫn!">
+<meta property="og:image" content="[https://daytoanthayhoang.github.io/QRnhomCLB.jpg](https://daytoanthayhoang.github.io/QRnhomCLB.jpg)">
+<meta property="og:url" content="[https://daytoanthayhoang.github.io/caulacbo.html](https://daytoanthayhoang.github.io/caulacbo.html)">
+
+	
+	
 </head>
-<body class="bg-purple-50 text-gray-800">
+<body class="relative">
+
+    <!-- Background Grid -->
+    <div class="fixed inset-0 bg-grid -z-10 pointer-events-none"></div>
+    
+    <!-- Các đốm sáng trang trí (Glow effects) -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] -z-10"></div>
+    <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] -z-10"></div>
 
     <!-- PHẦN ĐẦU TRANG (HEADER) -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-700/50">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="./index.html#hoclieu" class="text-purple-600 font-semibold hover:underline flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                </svg>
-                Quay lại Góc Học Tập
+            <a href="./index.html#hoclieu" class="text-cyan-400 font-semibold hover:text-cyan-300 flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="hidden sm:inline">Góc Học Tập</span>
             </a>
-            <h1 class="text-2xl font-bold text-purple-700 text-center uppercase">Câu Lạc Bộ Toán Học</h1>
-            <div class="w-20"></div> <!-- Spacer -->
+            
+            <div class="text-center">
+                <h1 class="text-xl md:text-2xl font-bold uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 font-tech drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">
+                    CLB Toán Học
+                </h1>
+                <p class="text-[10px] md:text-xs text-slate-400 tracking-widest uppercase mt-1">Trường THCS Nguyễn An Khương</p>
+            </div>
+
+            <button onclick="openZaloModal()" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/50 px-4 py-2 rounded-full text-sm font-medium transition-all hover:shadow-[0_0_15px_rgba(59,130,246,0.4)] flex items-center gap-2">
+                <i class="fa-brands fa-rocketchat"></i> <span class="hidden md:inline">Tham gia Zalo</span>
+            </button>
         </div>
     </header>
 
     <!-- NỘI DUNG CHÍNH -->
-    <main class="container mx-auto px-6 py-10">
+    <main class="container mx-auto px-6 py-10 relative z-10">
         
-        <!-- Giới thiệu -->
-        <div class="text-center mb-10 max-w-3xl mx-auto">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Sân Chơi Trí Tuệ</h2>
-            <p class="text-lg text-gray-600 mb-6">
-                Chào mừng các em đến với phòng thí nghiệm toán học! Hãy chọn một thử thách bên dưới để bắt đầu hành trình khám phá và chinh phục.
+        <!-- Intro Section -->
+        <div class="text-center mb-12 max-w-4xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Sân Chơi Trí Tuệ Số</h2>
+            <p class="text-slate-400 text-lg">
+                Khám phá kho tàng kiến thức và công cụ toán học trực quan. Chọn một <span class="text-cyan-400 font-semibold">Module</span> để bắt đầu.
             </p>
-            
-            <!-- NÚT THAM GIA ZALO -->
-            <button onclick="openZaloModal()" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                </svg>
-                Tham gia nhóm Zalo CLB
-            </button>
         </div>
 
-        <!-- DANH SÁCH CÔNG CỤ -->
+        <!-- DANH SÁCH CÔNG CỤ (GRID) -->
         <section id="tool-list" class="mb-16">
-            <div class="bg-white p-8 rounded-2xl shadow-lg border border-purple-100">
-                <h3 class="text-xl font-bold text-purple-800 mb-6 flex items-center gap-2">
-                    <span class="text-2xl">🧩</span> Danh Sách Thử Thách
-                </h3>
-                
-                <!-- Grid chứa các nút công cụ -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="glass-panel p-1 rounded-2xl">
+                <div class="bg-slate-900/50 p-6 md:p-8 rounded-xl">
                     
-                    <!-- 1. Desmos -->
-                    <button class="tool-trigger bg-green-50 text-green-800 border-2 border-green-100 hover:bg-green-600 hover:text-white hover:border-green-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./desmos.html">
-                        <span class="text-4xl">📈</span>
-                        <span class="text-lg text-center">Họa Sĩ Desmos</span>
-                    </button>
+                    <!-- Nhóm 1: Tư Duy & Logic -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-cyan-400 mb-6 flex items-center gap-3 border-b border-slate-700 pb-2">
+                            <i class="fa-solid fa-brain"></i> Tư Duy & Logic
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                             <!-- Tool: Sudoku -->
+                             <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./sudoku.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-lime-500/20 group-hover:text-lime-400 transition-colors">
+                                    <i class="fa-solid fa-border-all"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Sudoku Logic</h4>
+                                    <p class="text-xs text-slate-500">Rèn luyện tư duy</p>
+                                </div>
+                            </button>
 
-                    <!-- 2. Thử Thách Robot -->
-                    <button class="tool-trigger bg-blue-50 text-blue-800 border-2 border-blue-100 hover:bg-blue-600 hover:text-white hover:border-blue-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./mophong-thuthachrobot.html">
-                        <span class="text-4xl">🤖</span>
-                        <span class="text-lg text-center">Thử Thách Robot</span>
-                    </button>
+                            <!-- Tool: Đố Vui -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./dovui.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-cyan-500/20 group-hover:text-cyan-400 transition-colors">
+                                    <i class="fa-solid fa-question"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Đố Vui Toán Học</h4>
+                                    <p class="text-xs text-slate-500">Thử thách IQ</p>
+                                </div>
+                            </button>
 
-                    <!-- 3. Vẻ Đẹp Đối Xứng Trục -->
-                    <button class="tool-trigger bg-pink-50 text-pink-800 border-2 border-pink-100 hover:bg-pink-600 hover:text-white hover:border-pink-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./trucdoixung.html">
-                        <span class="text-4xl">🦋</span>
-                        <span class="text-lg text-center">Vẻ Đẹp Đối Xứng Trục</span>
-                    </button>
+                            <!-- Tool: Robot -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./mophong-thuthachrobot.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors">
+                                    <i class="fa-solid fa-robot"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Thử Thách Robot</h4>
+                                    <p class="text-xs text-slate-500">Lập trình cánh tay máy</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
 
-                    <!-- 4. Vẻ Đẹp Đối Xứng Tâm -->
-                    <button class="tool-trigger bg-teal-50 text-teal-800 border-2 border-teal-100 hover:bg-teal-600 hover:text-white hover:border-teal-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./tamdoixung.html">
-                        <span class="text-4xl">🌀</span>
-                        <span class="text-lg text-center">Vẻ Đẹp Đối Xứng Tâm</span>
-                    </button>
+                    <!-- Nhóm 2: Hình Học Trực Quan -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-purple-400 mb-6 flex items-center gap-3 border-b border-slate-700 pb-2">
+                            <i class="fa-solid fa-shapes"></i> Hình Học Trực Quan
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            <!-- Tool: 3D Space -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./3d-1.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-purple-500/20 group-hover:text-purple-400 transition-colors">
+                                    <i class="fa-solid fa-cube"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Không Gian 3D</h4>
+                                    <p class="text-xs text-slate-500">Mô phỏng hình học</p>
+                                </div>
+                            </button>
 
-                    <!-- 5. Nghịch Lý Hình Vuông -->
-                    <button class="tool-trigger bg-red-50 text-red-800 border-2 border-red-100 hover:bg-red-600 hover:text-white hover:border-red-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./nghichly_hinhvuong.html">
-                        <span class="text-4xl">🟥</span>
-                        <span class="text-lg text-center">Nghịch Lý Hình Vuông</span>
-                    </button>
+                             <!-- Tool: Gấp Hình Hộp -->
+                             <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./gaphinhhopchunhat.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-orange-500/20 group-hover:text-orange-400 transition-colors">
+                                    <i class="fa-solid fa-box-open"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Gấp Hình Hộp</h4>
+                                    <p class="text-xs text-slate-500">Mô phỏng 2D sang 3D</p>
+                                </div>
+                            </button>
 
-                    <!-- 6. Nghịch Lý Bàn Cờ -->
-                    <button class="tool-trigger bg-gray-50 text-gray-800 border-2 border-gray-200 hover:bg-gray-700 hover:text-white hover:border-gray-700 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./nghichly_banco.html">
-                        <span class="text-4xl">♟️</span>
-                        <span class="text-lg text-center">Nghịch Lý Bàn Cờ</span>
-                    </button>
+                            <!-- Tool: Đối Xứng Trục -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./trucdoixung.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-pink-500/20 group-hover:text-pink-400 transition-colors">
+                                    <i class="fa-solid fa-users-viewfinder"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Đối Xứng Trục</h4>
+                                    <p class="text-xs text-slate-500">Vẻ đẹp cân bằng</p>
+                                </div>
+                            </button>
 
-                    <!-- 7. Nghịch Lý Sô-cô-la -->
-                    <button class="tool-trigger bg-amber-50 text-amber-800 border-2 border-amber-100 hover:bg-amber-600 hover:text-white hover:border-amber-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./nghichly_socola.html">
-                        <span class="text-4xl">🍫</span>
-                        <span class="text-lg text-center">Sô-cô-la Vô Hạn</span>
-                    </button>
+                            <!-- Tool: Đối Xứng Tâm -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./tamdoixung.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-teal-500/20 group-hover:text-teal-400 transition-colors">
+                                    <i class="fa-solid fa-circle-notch"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Đối Xứng Tâm</h4>
+                                    <p class="text-xs text-slate-500">Quay hình 180 độ</p>
+                                </div>
+                            </button>
 
-                    <!-- 8. Bí Ẩn Số Nguyên Tố -->
-                    <button class="tool-trigger bg-indigo-50 text-indigo-800 border-2 border-indigo-100 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./songuyento.html">
-                        <span class="text-4xl">🔢</span>
-                        <span class="text-lg text-center">Bí Ẩn Số Nguyên Tố</span>
-                    </button>
+                            <!-- Tool: Tính Diện Tích & Chu Vi -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./dientichchuvi6.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-yellow-500/20 group-hover:text-yellow-400 transition-colors">
+                                    <i class="fa-solid fa-ruler-combined"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Chu Vi & Diện Tích</h4>
+                                    <p class="text-xs text-slate-500">Công cụ tính toán</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
 
-                    <!-- 9. Nghịch Lý Ngày Sinh -->
-                    <button class="tool-trigger bg-orange-50 text-orange-800 border-2 border-orange-100 hover:bg-orange-600 hover:text-white hover:border-orange-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./nghichlyngaysinh.html">
-                        <span class="text-4xl">🎂</span>
-                        <span class="text-lg text-center">Nghịch Lý Ngày Sinh</span>
-                    </button>
+                    <!-- Nhóm 3: Đại Số & Số Học -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-green-400 mb-6 flex items-center gap-3 border-b border-slate-700 pb-2">
+                            <i class="fa-solid fa-calculator"></i> Đại Số & Số Học
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            <!-- Tool: Desmos -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./desmos.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-green-500/20 group-hover:text-green-400 transition-colors">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Đồ Thị Desmos</h4>
+                                    <p class="text-xs text-slate-500">Vẽ đồ thị hàm số</p>
+                                </div>
+                            </button>
 
-                    <!-- 10. Sudoku -->
-                    <button class="tool-trigger bg-lime-50 text-lime-800 border-2 border-lime-100 hover:bg-lime-600 hover:text-white hover:border-lime-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./sudoku.html">
-                        <span class="text-4xl">▦</span>
-                        <span class="text-lg text-center">Thử Tài Sudoku</span>
-                    </button>
-                    
-                     <!-- 11. Đố Vui -->
-                    <button class="tool-trigger bg-cyan-50 text-cyan-800 border-2 border-cyan-100 hover:bg-cyan-600 hover:text-white hover:border-cyan-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="./dovui.html">
-                        <span class="text-4xl">❓</span>
-                        <span class="text-lg text-center">Đố Vui</span>
-                    </button>
+                            <!-- Tool: Số Nguyên Tố -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./songuyento.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors">
+                                    <i class="fa-solid fa-fingerprint"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Số Nguyên Tố</h4>
+                                    <p class="text-xs text-slate-500">Kiểm tra số nguyên tố</p>
+                                </div>
+                            </button>
 
-                    <!-- 12. Nghịch Lý Biến Mất (MỚI) -->
-                    <button class="tool-trigger bg-violet-50 text-violet-800 border-2 border-violet-100 hover:bg-violet-600 hover:text-white hover:border-violet-600 font-semibold py-6 px-4 rounded-2xl shadow-sm transition-all duration-300 flex flex-col items-center gap-3" data-src="https://www.geogebra.org/m/zef5u7uj">
-                        <span class="text-4xl">🌍</span>
-                        <span class="text-lg text-center">Nghịch Lý Biến Mất</span>
-                    </button>
+                            <!-- Tool: Hằng Đẳng Thức -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./hoc-hang-dang-thuc.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-red-500/20 group-hover:text-red-400 transition-colors">
+                                    <i class="fa-solid fa-superscript"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Hằng Đẳng Thức</h4>
+                                    <p class="text-xs text-slate-500">Ghi nhớ công thức</p>
+                                </div>
+                            </button>
+
+                            <!-- Tool: Lũy Thừa -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./hocthuocluythua.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-amber-500/20 group-hover:text-amber-400 transition-colors">
+                                    <i class="fa-solid fa-arrow-up-9-1"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Luyện Lũy Thừa</h4>
+                                    <p class="text-xs text-slate-500">Trắc nghiệm nhanh</p>
+                                </div>
+                            </button>
+
+                             <!-- Tool: Ước & Bội -->
+                             <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./U-B-UC-BC.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-colors">
+                                    <i class="fa-solid fa-divide"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Ước & Bội</h4>
+                                    <p class="text-xs text-slate-500">Tìm ƯCLN & BCNN</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Nhóm 4: Khám Phá & Nghịch Lý -->
+                    <div>
+                        <h3 class="text-xl font-bold text-rose-400 mb-6 flex items-center gap-3 border-b border-slate-700 pb-2">
+                            <i class="fa-solid fa-lightbulb"></i> Khám Phá & Nghịch Lý
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            
+                            <!-- Tool: Nghịch Lý Hình Vuông -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./nghichly_hinhvuong.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-red-500/20 group-hover:text-red-400 transition-colors">
+                                    <i class="fa-regular fa-square-full"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">NL Hình Vuông</h4>
+                                    <p class="text-xs text-slate-500">Diện tích biến mất?</p>
+                                </div>
+                            </button>
+
+                            <!-- Tool: Nghịch Lý Bàn Cờ -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./nghichly_banco.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-gray-500/20 group-hover:text-gray-400 transition-colors">
+                                    <i class="fa-solid fa-chess-board"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">NL Bàn Cờ</h4>
+                                    <p class="text-xs text-slate-500">64 = 65?</p>
+                                </div>
+                            </button>
+
+                            <!-- Tool: Nghịch Lý Ngày Sinh -->
+                            <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./nghichlyngaysinh.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-orange-500/20 group-hover:text-orange-400 transition-colors">
+                                    <i class="fa-solid fa-cake-candles"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">NL Ngày Sinh</h4>
+                                    <p class="text-xs text-slate-500">Xác suất thống kê</p>
+                                </div>
+                            </button>
+
+                             <!-- Tool: Đồng Hồ Đếm Ngược -->
+                             <button class="tool-trigger tool-card bg-slate-800 border border-slate-700 text-slate-300 p-6 rounded-xl flex flex-col items-center gap-4 text-center group" data-src="./clockcountdown.html">
+                                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center text-3xl group-hover:bg-cyan-500/20 group-hover:text-cyan-400 transition-colors">
+                                    <i class="fa-solid fa-clock"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-white mb-1 group-hover:text-cyan-300">Đếm Ngược</h4>
+                                    <p class="text-xs text-slate-500">Tiện ích thời gian</p>
+                                </div>
+                            </button>
+
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
@@ -207,54 +400,57 @@
         <!-- KHUNG HIỂN THỊ CÔNG CỤ (IFRAME) -->
         <section id="iframe-section" class="scroll-animate">
             <div class="relative text-center mb-4">
-                <div class="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-sm text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Khu vực hiển thị mô phỏng
+                <div class="inline-flex items-center gap-2 bg-slate-800 border border-slate-600 px-6 py-2 rounded-full shadow-lg shadow-cyan-500/20 text-sm text-cyan-400 font-tech uppercase tracking-wide">
+                    <i class="fa-solid fa-tv"></i> Màn hình hiển thị
                 </div>
-                <button id="fullscreen-btn" class="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Phóng to toàn màn hình" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-6-6m6 6v-4m0 4h-4"/><path d="M3 3l6 6m-6-6v4m0-4h4"/></svg>
+                
+                <button id="fullscreen-btn" class="absolute right-0 top-1/2 -translate-y-1/2 p-3 bg-slate-700 hover:bg-cyan-600 text-white rounded-full shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed group" title="Phóng to toàn màn hình" disabled>
+                    <i class="fa-solid fa-expand group-hover:scale-110 transition-transform"></i>
                 </button>
             </div>
 
-            <div id="frame-container" class="bg-white rounded-xl shadow-2xl overflow-hidden min-h-[600px] relative">
-                <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mb-4 text-purple-200 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h3 class="text-2xl font-semibold mb-2">Màn hình sẵn sàng</h3>
-                    <p>Chọn một thử thách ở trên để bắt đầu trải nghiệm ngay!</p>
+            <div id="frame-container" class="glass-panel rounded-xl overflow-hidden min-h-[600px] relative border border-slate-600/50 shadow-2xl">
+                <!-- Loading / Placeholder -->
+                <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-900/90 z-20">
+                    <div class="w-24 h-24 border-4 border-slate-700 border-t-cyan-500 rounded-full animate-spin mb-6"></div>
+                    <h3 class="text-2xl font-bold text-white mb-2 font-tech">System Standby</h3>
+                    <p>Vui lòng chọn một module phía trên để khởi động.</p>
                 </div>
-                <iframe id="tool-frame" class="hidden relative z-10" title="Trình giả lập công cụ toán học"></iframe>
+                
+                <!-- Iframe -->
+                <iframe id="tool-frame" class="hidden relative z-10 w-full h-full bg-white" title="Trình giả lập công cụ toán học"></iframe>
             </div>
         </section>
 
     </main>
     
     <!-- MODAL ZALO -->
-    <div id="zaloModal" class="fixed inset-0 z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 modal-backdrop transition-opacity" onclick="closeZaloModal()"></div>
+    <div id="zaloModal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeZaloModal()"></div>
+        
+        <!-- Modal Content -->
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full relative animate-fade-in-up">
-                <button onclick="closeZaloModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+            <div class="inline-block align-bottom bg-slate-900 rounded-2xl border border-slate-700 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full relative">
+                
+                <!-- Close Button -->
+                <button onclick="closeZaloModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
                 </button>
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 flex flex-col items-center">
-                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
+
+                <div class="px-6 pt-8 pb-6 flex flex-col items-center">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-20 w-20 rounded-full bg-blue-900/50 mb-4 border border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                        <i class="fa-solid fa-comments text-4xl text-blue-400"></i>
                     </div>
-                    <h3 class="text-xl leading-6 font-bold text-gray-900 text-center mb-2" id="modal-title">Tham Gia Câu Lạc Bộ Toán Học</h3>
-                    <p class="text-sm text-gray-500 text-center mb-6">Quét mã QR bên dưới bằng Zalo hoặc nhấn nút để tham gia nhóm thảo luận và nhận thông báo mới nhất.</p>
-                    <div class="bg-white p-2 rounded-xl border-2 border-blue-100 shadow-inner mb-6">
-                        <img src="./QRnhomCLB.jpg" alt="Mã QR Zalo CLB" class="w-56 h-56 object-contain rounded-lg">
+                    <h3 class="text-xl leading-6 font-bold text-white text-center mb-2 font-tech" id="modal-title">Kết Nối Cộng Đồng</h3>
+                    <p class="text-sm text-slate-400 text-center mb-6">Quét mã QR để tham gia nhóm Zalo CLB Toán Học và thảo luận cùng các thành viên khác.</p>
+                    
+                    <div class="bg-white p-3 rounded-xl shadow-inner mb-6">
+                        <img src="./QRnhomCLB.jpg" alt="Mã QR Zalo CLB" class="w-48 h-48 object-contain">
                     </div>
-                    <a href="https://zalo.me/g/nqkjin707" target="_blank" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors text-center flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" /><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" /></svg>
-                        Mở ứng dụng Zalo
+                    
+                    <a href="https://zalo.me/g/nqkjin707" target="_blank" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-colors text-center flex items-center justify-center gap-2">
+                        <span>Mở ứng dụng Zalo</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
                 </div>
             </div>
@@ -262,16 +458,16 @@
     </div>
 
     <!-- FOOTER -->
-    <footer class="bg-gray-800 text-white py-10 mt-12">
+    <footer class="glass-panel border-t border-slate-800 mt-12 py-8">
         <div class="container mx-auto px-6 text-center">
-             <p class="text-sm italic text-purple-300">"Toán học là trò chơi của những con số và quy luật."</p>
-             <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng.</p>
+             <p class="text-slate-400 text-sm mb-2">"Toán học là ngôn ngữ mà vũ trụ dùng để viết nên thế giới."</p>
+             <p class="text-xs text-slate-600 uppercase tracking-widest font-tech">&copy; 2025 CLB Toán Học - THCS Nguyễn An Khương</p>
         </div>
     </footer>
 
     <!-- NÚT THOÁT TOÀN MÀN HÌNH -->
-    <button id="exit-fullscreen-btn" class="hidden" title="Thoát chế độ toàn màn hình (Esc)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+    <button id="exit-fullscreen-btn" class="hidden rounded-full shadow-lg transition-transform hover:scale-110 w-12 h-12 flex items-center justify-center" title="Thoát chế độ toàn màn hình (Esc)">
+        <i class="fa-solid fa-compress text-xl"></i>
     </button>
 
     <script>
@@ -288,26 +484,45 @@
             const toolButtons = document.querySelectorAll('.tool-trigger');
             let currentActiveButton = null;
 
+            // Xử lý click chọn công cụ
             toolButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const toolSrc = this.dataset.src;
+                    
+                    // Hiệu ứng active cho nút
                     if (currentActiveButton) currentActiveButton.classList.remove('active');
                     this.classList.add('active');
                     currentActiveButton = this;
+                    
+                    // Ẩn placeholder, hiện iframe
                     placeholder.classList.add('hidden');
                     toolFrame.classList.remove('hidden');
+                    
+                    // Reset src để load lại hoặc load mới
                     toolFrame.src = toolSrc;
+                    
+                    // Bật nút fullscreen
                     fullscreenBtn.disabled = false;
-                    setTimeout(() => { iframeSection.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+                    fullscreenBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    
+                    // Cuộn xuống khu vực hiển thị
+                    setTimeout(() => { 
+                        iframeSection.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+                    }, 100);
                 });
             });
 
+            // Chế độ toàn màn hình
             function toggleFullscreen(forceExit = false) {
                 const isCurrentlyFullscreen = frameContainer.classList.contains('fullscreen-mode');
                 const goFullscreen = forceExit ? false : !isCurrentlyFullscreen;
+                
                 frameContainer.classList.toggle('fullscreen-mode', goFullscreen);
                 exitFullscreenBtn.classList.toggle('hidden', !goFullscreen);
+                
                 document.body.style.overflow = goFullscreen ? 'hidden' : '';
+                
+                // Ẩn các phần tử khác khi fullscreen để tập trung
                 const header = document.querySelector('header');
                 const footer = document.querySelector('footer');
                 if(header) header.style.display = goFullscreen ? 'none' : '';
@@ -316,6 +531,8 @@
 
             fullscreenBtn.addEventListener('click', () => toggleFullscreen());
             exitFullscreenBtn.addEventListener('click', () => toggleFullscreen(true));
+            
+            // Phím tắt ESC
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape' && frameContainer.classList.contains('fullscreen-mode')) {
                     toggleFullscreen(true);
