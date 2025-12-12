@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò Chơi NIM - Cuộc Chiến Tư Duy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        
+        /* Hiệu ứng đội chơi mới - Clean & Modern */
+        .team-section {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+        }
+        .team-section.active-turn {
+            opacity: 1;
+            transform: translateY(-10px);
+            background: #ffffff;
+            z-index: 10;
+        }
+        /* Hiệu ứng phát sáng riêng cho từng đội */
+        .team-section.active-turn.team-a {
+            border-color: #3b82f6; /* Blue */
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        }
+        .team-section.active-turn.team-b {
+            border-color: #ef4444; /* Red */
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+        }
+
+        .team-section.inactive-turn {
+            opacity: 0.5;
+            transform: scale(0.95);
+            filter: grayscale(0.6);
+            pointer-events: none;
+        }
+
+        /* Avatar Glow Animation */
+        @keyframes avatar-glow {
+            0%, 100% { box-shadow: 0 0 10px currentColor; }
+            50% { box-shadow: 0 0 25px currentColor, 0 0 10px currentColor inset; }
+        }
+        .avatar-active {
+            animation: avatar-glow 2s infinite ease-in-out;
+        }
+
+        .number-btn:hover span.preview {
+            display: inline-block;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px; height: 10px;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); }
+        }
+        
+        /* Hint Box Animation */
+        @keyframes pop-in {
+            0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .hint-pop {
+            animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-950 via-blue-900 to-slate-900 min-h-screen text-slate-800 overflow-hidden relative selection:bg-blue-200">
+
+    <!-- Config Button -->
+    <div class="absolute top-4 right-4 z-50 flex gap-2">
+         <button onclick="openStrategyModal()" class="bg-yellow-400/20 hover:bg-yellow-400/40 text-yellow-200 hover:text-white p-3 rounded-full backdrop-blur-sm transition-all border border-yellow-400/30" title="Giải mã chiến thuật (Dành cho GV)">
+            <i class="fa-solid fa-key"></i>
+        </button>
+        <button onclick="toggleSettings()" class="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-sm transition-all border border-white/20">
+            <i class="fa-solid fa-gear text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 h-screen flex flex-col py-4">
+        
+        <!-- Header -->
+        <header class="text-center mb-4 flex-shrink-0">
+            <h1 class="text-2xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 uppercase tracking-widest drop-shadow-sm">
+                Đấu Trường NIM - CLB TOÁN HỌC THCS NGUYỄN AN KHƯƠNG
+            </h1>
+            <p class="text-blue-200/80 text-sm mt-1">Mục tiêu: Chạm số <span id="header-target" class="font-bold text-yellow-300">21</span> trước tiên!</p>
+        </header>
+
+        <!-- Game Arena: 3 Columns Layout -->
+        <div class="flex-1 flex flex-col md:flex-row gap-4 md:gap-8 min-h-0 items-stretch justify-center relative">
+            
+            <!-- Left: Team A -->
+            <div id="section-a" class="team-section team-a flex-1 glass-panel rounded-3xl p-6 flex flex-col items-center justify-between relative">
+                <div class="text-center w-full">
+                    <div class="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center text-4xl font-black text-blue-600 mb-3 border-4 border-blue-50 transition-all duration-300" id="avatar-a">
+                        A
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">ĐỘI A</h2>
+                    <div class="status-badge mt-2 inline-block px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-700">
+                        Đang suy nghĩ...
+                    </div>
+                </div>
+                
+                <div class="w-full space-y-3 mt-4 control-group" id="controls-a">
+                    <!-- Buttons A generated here -->
+                </div>
+            </div>
+
+            <!-- Center: Game Board & History -->
+            <div class="flex-[1.5] flex flex-col gap-4 relative">
+                
+                <!-- Main Number Display -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col items-center justify-center relative flex-shrink-0 z-10">
+                    <span class="text-slate-400 text-xs font-bold uppercase tracking-widest">Con số hiện tại</span>
+                    <div id="current-number-display" class="text-[8rem] leading-none font-black text-slate-800 tabular-nums my-4 drop-shadow-xl bg-clip-text text-transparent bg-gradient-to-b from-slate-700 to-slate-900 transition-transform duration-200">
+                        0
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-200 h-4 rounded-full overflow-hidden relative shadow-inner mt-4">
+                        <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-500 ease-out" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between w-full text-xs text-slate-400 font-bold mt-1 px-1">
+                        <span>0</span>
+                        <span id="target-display-bar">21</span>
+                    </div>
+
+                    <!-- In-Game Hint Box (Hidden by default) -->
+                    <div id="ingame-hint-box" class="hidden absolute -bottom-16 left-0 right-0 transform">
+                         <div class="bg-yellow-400 text-yellow-900 px-4 py-3 rounded-xl shadow-lg font-bold text-center border-2 border-white hint-pop flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-lightbulb"></i>
+                            <span id="ingame-hint-text">Gợi ý: Hãy chọn +1</span>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- History Log (Newest at Top) -->
+                <div class="glass-panel rounded-3xl p-5 flex-1 flex flex-col min-h-0 overflow-hidden bg-white/60">
+                    <h3 class="text-slate-500 font-bold text-sm uppercase mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Diễn biến (Mới nhất)
+                    </h3>
+                    <div id="game-history" class="overflow-y-auto flex-1 space-y-2 pr-2 scrollbar-thin flex flex-col">
+                        <div class="text-center text-slate-400 text-sm italic mt-8" id="empty-history-msg">Chưa có nước đi nào...</div>
+                        <!-- History Items will be prepended here -->
+                    </div>
+                </div>
+
+                <button onclick="resetGame()" class="bg-slate-700/80 hover:bg-slate-800 text-white py-3 rounded-2xl font-bold transition backdrop-blur-md border border-white/10 shadow-lg active:scale-95">
+                    <i class="fa-solid fa-arrow-rotate-right mr-2"></i> Ván Mới
+                </button>
+            </div>
+
+            <!-- Right: Team B -->
+            <div id="section-b" class="team-section team-b flex-1 glass-panel rounded-3xl p-6 flex flex-col items-center justify-between relative">
+                <div class="text-center w-full">
+                    <div class="w-20 h-20 mx-auto bg-red-100 rounded-full flex items-center justify-center text-4xl font-black text-red-600 mb-3 border-4 border-red-50 transition-all duration-300" id="avatar-b">
+                        B
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">ĐỘI B</h2>
+                    <div class="status-badge mt-2 inline-block px-3 py-1 rounded-full text-sm font-bold bg-slate-100 text-slate-400">
+                        Chờ lượt
+                    </div>
+                </div>
+
+                <div class="w-full space-y-3 mt-4 control-group" id="controls-b">
+                    <!-- Buttons B generated here -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden flex items-center justify-center">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl transform transition-all animate-fade-in">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                <span class="bg-blue-100 p-2 rounded-lg text-blue-600"><i class="fa-solid fa-sliders"></i></span>
+                Thiết Lập Luật Chơi
+            </h2>
+            
+            <div class="space-y-6">
+                <!-- Target Setting -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="font-bold text-slate-700">Số Đích (N)</label>
+                        <span id="target-value" class="bg-blue-600 text-white px-3 py-1 rounded-lg font-mono font-bold">21</span>
+                    </div>
+                    <input type="range" id="target-input" min="15" max="50" value="21" class="w-full accent-blue-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" oninput="updateSettingsUI()">
+                </div>
+
+                <!-- Step Setting -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="font-bold text-slate-700">Bước nhảy tối đa (k)</label>
+                        <span id="step-value" class="bg-purple-600 text-white px-3 py-1 rounded-lg font-mono font-bold">3</span>
+                    </div>
+                    <input type="range" id="step-input" min="2" max="5" value="3" class="w-full accent-purple-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" oninput="updateSettingsUI()">
+                </div>
+
+                <!-- First Turn Setting -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-2 uppercase tracking-wider">Quyền đi trước</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setFirstTurn('A')" class="py-3 rounded-xl border-2 font-bold transition-all setting-turn-btn active" data-team="A">
+                            Đội A (Xanh)
+                        </button>
+                        <button onclick="setFirstTurn('B')" class="py-3 rounded-xl border-2 font-bold transition-all setting-turn-btn" data-team="B">
+                            Đội B (Đỏ)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-3">
+                <button onclick="toggleSettings()" class="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100">Hủy</button>
+                <button onclick="saveSettings()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 transform active:scale-95 transition">
+                    Áp dụng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategy Modal (Teacher Only) -->
+    <div id="strategy-modal" class="fixed inset-0 bg-slate-900/95 backdrop-blur-xl z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="bg-yellow-400 p-6 flex justify-between items-center">
+                <h2 class="text-2xl font-black text-yellow-900 flex items-center gap-3">
+                    <i class="fa-solid fa-brain"></i> GÓC CHIẾN THUẬT (Dành cho Giáo Viên)
+                </h2>
+                <button onclick="closeStrategyModal()" class="text-yellow-900 hover:bg-yellow-500/20 p-2 rounded-full transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-8 overflow-y-auto">
+                
+                <!-- Toggle Public Hint -->
+                <div class="mb-6 bg-indigo-50 border border-indigo-200 rounded-2xl p-5 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-indigo-900 text-lg">Hiển thị gợi ý trên màn hình chơi?</h4>
+                        <p class="text-sm text-indigo-600">Bật tính năng này để học sinh nhìn thấy nước đi gợi ý ngay trên bảng.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="public-hint-toggle" class="sr-only peer" onchange="togglePublicHints()">
+                        <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                </div>
+
+                <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-2xl p-5">
+                    <h3 class="font-bold text-yellow-800 text-lg mb-2">Tình huống hiện tại:</h3>
+                    <ul class="space-y-2 text-yellow-900 font-medium">
+                        <li>🎯 Mục tiêu (N): <span class="font-bold text-xl" id="strat-target">21</span></li>
+                        <li>👣 Bước tối đa (k): <span class="font-bold text-xl" id="strat-step">3</span></li>
+                        <li>🔢 Số hiện tại: <span class="font-bold text-xl text-blue-600" id="strat-current">5</span></li>
+                    </ul>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-blue-500"></i> Cơ sở toán học (Lớp 6)
+                        </h4>
+                        <p class="text-slate-600 mt-2 leading-relaxed">
+                            Đây là trò chơi dựa trên phép chia có dư.
+                            Chu kỳ lặp lại của trò chơi là <span class="font-mono font-bold bg-slate-100 px-2 py-1 rounded text-blue-600">k + 1</span> (ở đây là <span id="strat-cycle" class="font-bold">4</span>).
+                        </p>
+                        <p class="text-slate-600 mt-2">
+                            Để luôn giành thế chủ động, người chơi cần đưa tổng số đếm về các mốc là <strong>Số dư</strong> của phép chia:
+                            <br>
+                            <span class="font-mono bg-slate-100 p-1 rounded font-bold">Mục tiêu (N) chia cho (k+1)</span>.
+                        </p>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 rounded-2xl p-5">
+                        <h4 class="font-bold text-green-800 text-lg mb-2">💡 Gợi ý nước đi tối ưu ngay lúc này:</h4>
+                        <p id="strat-advice" class="text-lg text-green-900 font-bold leading-relaxed">
+                            ...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Overlay -->
+    <div id="victory-overlay" class="fixed inset-0 z-[90] hidden flex flex-col items-center justify-center bg-black/90 text-white backdrop-blur-md">
+        <div class="text-center animate-bounce-in">
+            <div class="text-9xl mb-6 filter drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">🏆</div>
+            <h1 class="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 mb-4">
+                CHIẾN THẮNG!
+            </h1>
+            <div class="text-3xl md:text-4xl font-bold mb-12">
+                <span id="winner-name" class="text-white bg-blue-600 px-6 py-2 rounded-xl">Đội A</span> đã về đích!
+            </div>
+            <button onclick="resetGame()" class="group relative px-10 py-4 bg-white text-slate-900 font-bold rounded-full text-xl hover:scale-105 transition-all shadow-[0_0_50px_rgba(255,255,255,0.3)] overflow-hidden">
+                <span class="relative z-10">Chơi Ván Mới</span>
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-200 to-purple-200 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Game State ---
+        let state = {
+            target: 21,
+            maxStep: 3,
+            current: 0,
+            turn: 'A', // 'A' or 'B'
+            startTurn: 'A',
+            isGameOver: false,
+            publicHints: false // New state for public hints
+        };
+
+        // --- DOM Elements ---
+        const els = {
+            currentNumber: document.getElementById('current-number-display'),
+            progressBar: document.getElementById('progress-bar'),
+            targetDisplayBar: document.getElementById('target-display-bar'),
+            headerTarget: document.getElementById('header-target'),
+            
+            sectionA: document.getElementById('section-a'),
+            sectionB: document.getElementById('section-b'),
+            controlsA: document.getElementById('controls-a'),
+            controlsB: document.getElementById('controls-b'),
+            avatarA: document.getElementById('avatar-a'),
+            avatarB: document.getElementById('avatar-b'),
+            
+            historyLog: document.getElementById('game-history'),
+            emptyHistoryMsg: document.getElementById('empty-history-msg'),
+            
+            settingsModal: document.getElementById('settings-modal'),
+            targetInput: document.getElementById('target-input'),
+            targetValue: document.getElementById('target-value'),
+            stepInput: document.getElementById('step-input'),
+            stepValue: document.getElementById('step-value'),
+            
+            victoryOverlay: document.getElementById('victory-overlay'),
+            winnerName: document.getElementById('winner-name'),
+            
+            // Strategy Elements
+            strategyModal: document.getElementById('strategy-modal'),
+            stratTarget: document.getElementById('strat-target'),
+            stratStep: document.getElementById('strat-step'),
+            stratCurrent: document.getElementById('strat-current'),
+            stratCycle: document.getElementById('strat-cycle'),
+            stratAdvice: document.getElementById('strat-advice'),
+            publicHintToggle: document.getElementById('public-hint-toggle'),
+            
+            // In-Game Hint
+            ingameHintBox: document.getElementById('ingame-hint-box'),
+            ingameHintText: document.getElementById('ingame-hint-text'),
+        };
+
+        // --- Initialization ---
+        function initGame() {
+            state.current = 0;
+            state.turn = state.startTurn;
+            state.isGameOver = false;
+
+            // UI Reset
+            els.currentNumber.textContent = 0;
+            els.targetDisplayBar.textContent = state.target;
+            els.headerTarget.textContent = state.target;
+            els.victoryOverlay.classList.add('hidden');
+            
+            // Reset History (Remove all dynamic items)
+            els.emptyHistoryMsg.style.display = 'block';
+            Array.from(els.historyLog.children).forEach(child => {
+                if (child.id !== 'empty-history-msg') child.remove();
+            });
+            
+            renderControls();
+            updateTurnUI();
+            updateProgress();
+            updateInGameHint(); // Check hints on init
+            
+            // Clean confetti
+            document.querySelectorAll('.confetti').forEach(e => e.remove());
+        }
+
+        function renderControls() {
+            const createBtn = (team, i) => {
+                const btn = document.createElement('button');
+                const isTeamA = team === 'A';
+                const baseColor = isTeamA ? 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-400' : 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-400';
+                
+                btn.className = `number-btn w-full py-4 rounded-xl border-2 font-black text-xl shadow-sm transition-all relative group ${baseColor}`;
+                btn.onclick = () => makeMove(i);
+                btn.id = `btn-${team}-${i}`;
+                
+                // Content: Number + Preview text
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between px-4">
+                        <span>+${i}</span>
+                        <span class="text-sm font-normal opacity-60 group-hover:opacity-100 group-hover:font-bold transition-opacity">
+                            (Lên <span class="calc-preview">${state.current + i}</span>)
+                        </span>
+                    </div>
+                `;
+                return btn;
+            };
+
+            els.controlsA.innerHTML = '';
+            els.controlsB.innerHTML = '';
+
+            for (let i = 1; i <= state.maxStep; i++) {
+                els.controlsA.appendChild(createBtn('A', i));
+                els.controlsB.appendChild(createBtn('B', i));
+            }
+        }
+
+        function updateButtonPreviews() {
+            const update = (team) => {
+                for (let i = 1; i <= state.maxStep; i++) {
+                    const btn = document.getElementById(`btn-${team}-${i}`);
+                    if (btn) {
+                        const previewSpan = btn.querySelector('.calc-preview');
+                        if (previewSpan) previewSpan.textContent = state.current + i;
+                        
+                        if (state.current + i > state.target) {
+                            btn.disabled = true;
+                            btn.classList.add('opacity-30', 'cursor-not-allowed', 'grayscale');
+                        } else {
+                            btn.disabled = false;
+                            btn.classList.remove('opacity-30', 'cursor-not-allowed', 'grayscale');
+                        }
+                    }
+                }
+            };
+            update('A');
+            update('B');
+        }
+
+        function makeMove(increment) {
+            if (state.isGameOver) return;
+
+            const oldVal = state.current;
+            state.current += increment;
+
+            // Animation effect
+            els.currentNumber.classList.add('scale-125', 'text-yellow-400');
+            setTimeout(() => els.currentNumber.classList.remove('scale-125', 'text-yellow-400'), 150);
+
+            // Add History (Prepend to top)
+            els.emptyHistoryMsg.style.display = 'none';
+            const startNum = oldVal + 1;
+            const endNum = state.current;
+            const numbersSaid = [];
+            for(let i = startNum; i <= endNum; i++) numbersSaid.push(i);
+            
+            const isA = state.turn === 'A';
+            const historyItem = document.createElement('div');
+            historyItem.className = `flex items-center gap-3 p-3 rounded-xl border ${isA ? 'bg-blue-50 border-blue-100' : 'bg-red-50 border-red-100'} animate-fade-in`;
+            historyItem.innerHTML = `
+                <div class="w-8 h-8 rounded-full ${isA ? 'bg-blue-500' : 'bg-red-500'} text-white flex items-center justify-center font-bold text-xs shrink-0">
+                    ${state.turn}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs text-slate-500 font-bold mb-1">${isA ? 'Đội A' : 'Đội B'} đếm (+${increment}):</div>
+                    <div class="font-mono text-lg font-bold text-slate-800 tracking-wider truncate" title="${numbersSaid.join(' → ')}">${numbersSaid.join(' → ')}</div>
+                </div>
+            `;
+            // Use prepend to put the newest move at the TOP
+            els.historyLog.prepend(historyItem);
+
+            // Update UI
+            els.currentNumber.textContent = state.current;
+            updateProgress();
+
+            // Check Win
+            if (state.current >= state.target) {
+                handleWin();
+            } else {
+                state.turn = state.turn === 'A' ? 'B' : 'A';
+                updateTurnUI();
+                updateButtonPreviews();
+                updateInGameHint(); // Update hint for next turn
+            }
+        }
+
+        function updateTurnUI() {
+            const isA = state.turn === 'A';
+            
+            // Team A UI
+            if (isA) {
+                els.sectionA.classList.add('active-turn');
+                els.sectionA.classList.remove('inactive-turn');
+                els.sectionA.querySelector('.status-badge').textContent = "Đến lượt đi!";
+                els.sectionA.querySelector('.status-badge').className = "status-badge mt-2 inline-block px-3 py-1 rounded-full text-sm font-bold bg-blue-600 text-white animate-pulse";
+                els.avatarA.classList.add('avatar-active', 'text-blue-600', 'border-blue-200');
+                
+                els.sectionB.classList.add('inactive-turn');
+                els.sectionB.classList.remove('active-turn');
+                els.sectionB.querySelector('.status-badge').textContent = "Đang chờ...";
+                els.sectionB.querySelector('.status-badge').className = "status-badge mt-2 inline-block px-3 py-1 rounded-full text-sm font-bold bg-slate-100 text-slate-400";
+                els.avatarB.classList.remove('avatar-active', 'text-red-600', 'border-red-200');
+            } else {
+                // Team B UI
+                els.sectionB.classList.add('active-turn');
+                els.sectionB.classList.remove('inactive-turn');
+                els.sectionB.querySelector('.status-badge').textContent = "Đến lượt đi!";
+                els.sectionB.querySelector('.status-badge').className = "status-badge mt-2 inline-block px-3 py-1 rounded-full text-sm font-bold bg-red-600 text-white animate-pulse";
+                els.avatarB.classList.add('avatar-active', 'text-red-600', 'border-red-200');
+
+                els.sectionA.classList.add('inactive-turn');
+                els.sectionA.classList.remove('active-turn');
+                els.sectionA.querySelector('.status-badge').textContent = "Đang chờ...";
+                els.sectionA.querySelector('.status-badge').className = "status-badge mt-2 inline-block px-3 py-1 rounded-full text-sm font-bold bg-slate-100 text-slate-400";
+                els.avatarA.classList.remove('avatar-active', 'text-blue-600', 'border-blue-200');
+            }
+            
+            updateButtonPreviews();
+        }
+
+        function updateProgress() {
+            const pct = (state.current / state.target) * 100;
+            els.progressBar.style.width = `${pct}%`;
+        }
+
+        function handleWin() {
+            state.isGameOver = true;
+            els.ingameHintBox.classList.add('hidden'); // Hide hint on win
+            els.sectionA.classList.remove('active-turn', 'inactive-turn');
+            els.sectionB.classList.remove('active-turn', 'inactive-turn');
+            els.avatarA.classList.remove('avatar-active');
+            els.avatarB.classList.remove('avatar-active');
+            
+            els.winnerName.textContent = state.turn === 'A' ? "Đội A" : "Đội B";
+            els.winnerName.className = state.turn === 'A' 
+                ? "text-white bg-blue-600 px-6 py-2 rounded-xl shadow-lg shadow-blue-500/50" 
+                : "text-white bg-red-600 px-6 py-2 rounded-xl shadow-lg shadow-red-500/50";
+            
+            setTimeout(() => {
+                createConfetti();
+                els.victoryOverlay.classList.remove('hidden');
+            }, 500);
+        }
+
+        // --- Strategy Logic ---
+        function openStrategyModal() {
+            const password = prompt("Nhập mật khẩu GV để mở tính năng giải thích:", "");
+            if (password === "thayhoang") {
+                updateStrategyContent();
+                els.strategyModal.classList.remove('hidden');
+            } else if (password !== null) {
+                alert("Mật khẩu không đúng!");
+            }
+        }
+
+        function closeStrategyModal() {
+            els.strategyModal.classList.add('hidden');
+        }
+
+        function togglePublicHints() {
+            state.publicHints = els.publicHintToggle.checked;
+            updateInGameHint();
+        }
+
+        function getOptimalMove() {
+            const k = state.maxStep;
+            const N = state.target;
+            const cycle = k + 1;
+            const remainder = (N - state.current) % cycle;
+            return remainder;
+        }
+
+        function updateInGameHint() {
+            // Only show if setting enabled and game not over
+            if (!state.publicHints || state.isGameOver) {
+                els.ingameHintBox.classList.add('hidden');
+                return;
+            }
+
+            const remainder = getOptimalMove();
+            let hintText = "";
+            
+            if (remainder === 0) {
+                // Losing position
+                hintText = "Tình thế khó: Chọn +1 và chờ đối thủ sai lầm!";
+            } else {
+                // Winning position
+                hintText = `Gợi ý chiến thắng: Hãy chọn +${remainder}`;
+            }
+
+            els.ingameHintText.textContent = hintText;
+            els.ingameHintBox.classList.remove('hidden');
+        }
+
+        function updateStrategyContent() {
+            const k = state.maxStep;
+            const N = state.target;
+            const cycle = k + 1;
+            const remainder = getOptimalMove();
+            
+            els.stratTarget.textContent = N;
+            els.stratStep.textContent = k;
+            els.stratCurrent.textContent = state.current;
+            els.stratCycle.textContent = cycle;
+
+            if (remainder === 0) {
+                els.stratAdvice.innerHTML = `
+                    Hiện tại <span class="text-red-600 font-bold">bạn đang bất lợi</span>.<br>
+                    (N - Hiện tại) = ${N - state.current}, chia hết cho ${cycle}.<br>
+                    <span class="text-sm font-normal text-slate-600">Chiến thuật: Chọn bước nhỏ nhất (+1) và chờ đối thủ sai lầm.</span>
+                `;
+            } else {
+                els.stratAdvice.innerHTML = `
+                    Hãy chọn <span class="text-green-600 font-black text-3xl px-2 border-2 border-green-500 rounded-lg bg-white">+${remainder}</span><br>
+                    <span class="text-sm font-normal text-slate-600 mt-2 block">
+                        Giải thích: ${N} - (${state.current} + ${remainder}) = ${N - (state.current + remainder)}. 
+                        Số này chia hết cho ${cycle}.
+                    </span>
+                `;
+            }
+        }
+
+        // --- Settings Management ---
+        function toggleSettings() {
+            els.settingsModal.classList.toggle('hidden');
+        }
+
+        function updateSettingsUI() {
+            els.targetValue.textContent = els.targetInput.value;
+            els.stepValue.textContent = els.stepInput.value;
+        }
+
+        function setFirstTurn(team) {
+            document.querySelectorAll('.setting-turn-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-blue-500', 'bg-blue-50', 'text-blue-700', 'border-red-500', 'bg-red-50', 'text-red-700');
+                btn.classList.add('border-slate-200', 'text-slate-500');
+                
+                if (btn.dataset.team === team) {
+                    btn.classList.remove('border-slate-200', 'text-slate-500');
+                    if (team === 'A') {
+                        btn.classList.add('active', 'border-blue-500', 'bg-blue-50', 'text-blue-700');
+                    } else {
+                        btn.classList.add('active', 'border-red-500', 'bg-red-50', 'text-red-700');
+                    }
+                }
+            });
+            state.startTurn = team;
+        }
+
+        function saveSettings() {
+            state.target = parseInt(els.targetInput.value);
+            state.maxStep = parseInt(els.stepInput.value);
+            toggleSettings();
+            resetGame();
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        // --- Effects ---
+        function createConfetti() {
+            const colors = ['#ef4444', '#3b82f6', '#eab308', '#22c55e', '#a855f7'];
+            for (let i = 0; i < 150; i++) {
+                const conf = document.createElement('div');
+                conf.classList.add('confetti');
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.top = -10 + 'px';
+                conf.style.animationDuration = Math.random() * 3 + 2 + 's';
+                conf.style.opacity = Math.random();
+                document.body.appendChild(conf);
+            }
+        }
+
+        // Initial Start
+        initGame();
+
+    </script>
+</body>
+</html>
