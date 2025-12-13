@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thám Tử Toán Học - CLB Toán</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#151e2e' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Fix viewport height on mobile */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f1f5f9;
+            overflow-x: hidden;
+            height: 100dvh; /* Dynamic viewport height */
+        }
+        .handwritten {
+            font-family: 'Patrick Hand', cursive;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .house-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Select styling */
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.2em 1.2em;
+            padding-right: 2rem;
+            -webkit-print-color-adjust: exact;
+            appearance: none;
+        }
+
+        /* Clue interactivity */
+        .clue-item {
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .clue-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .clue-item.used {
+            text-decoration: line-through;
+            opacity: 0.4;
+            color: #94a3b8;
+        }
+        .clue-item.used::before {
+            content: "✓";
+            color: #22c55e;
+            font-weight: bold;
+            margin-right: 8px;
+            display: inline-block;
+        }
+
+        /* ROOF STYLES */
+        .roof-container {
+            width: 100%;
+            height: 50px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .roof-shape {
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            transition: background-color 0.3s ease;
+        }
+
+        .bg-roof-default { background-color: #475569; }
+        .bg-roof-Red { background-color: #ef4444; }
+        .bg-roof-Green { background-color: #22c55e; }
+        .bg-roof-White { background-color: #f8fafc; }
+        .bg-roof-Yellow { background-color: #eab308; }
+        .bg-roof-Blue { background-color: #3b82f6; }
+
+        /* Logic Grid Styles */
+        .logic-cell {
+            cursor: pointer;
+            user-select: none;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .logic-cell:hover { background-color: rgba(255,255,255,0.05); }
+        .logic-cell.state-o { color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
+        .logic-cell.state-x { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
+
+        /* Blur Effect for Locked Clues */
+        .clues-blurred {
+            filter: blur(8px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Tab switching for Mobile */
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; }
+        
+        @media (min-width: 1024px) {
+            .tab-content { display: flex !important; }
+            .mobile-tabs { display: none; }
+        }
+        
+        .visual-icon {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-md shrink-0 z-20">
+        <div class="container mx-auto px-4 py-2 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 p-1.5 rounded-lg text-slate-900 shadow-amber-500/20 shadow-lg">
+                    <i class="fa-solid fa-user-secret text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-amber-400 uppercase tracking-wider handwritten leading-none">Thám Tử Toán Học</h1>
+                    <p class="text-[10px] text-slate-400 font-mono tracking-widest uppercase">Logic Puzzle Simulator</p>
+                </div>
+            </div>
+
+            <!-- Header Tools -->
+            <div class="flex items-center gap-3">
+                <!-- Logic Grid Button -->
+                <button onclick="openLogicGrid()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg font-medium text-xs lg:text-sm transition flex items-center gap-2 shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-table-cells"></i> <span class="hidden sm:inline">Bảng Logic</span>
+                </button>
+
+                <!-- Timer Widget -->
+                <div class="flex items-center gap-2 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <div id="timer-display" class="font-mono text-xl font-bold text-green-400 w-16 text-center">00:00</div>
+                    <div class="flex gap-1 border-l border-slate-700 pl-2">
+                        <button onclick="toggleTimer()" id="timer-control" class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-700 text-slate-300 hover:text-white transition">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="resetTimer()" class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-700 text-slate-300 hover:text-red-400 transition">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Tabs (Only visible on small screens) -->
+        <div class="mobile-tabs flex bg-slate-800 border-t border-slate-700 lg:hidden">
+            <button onclick="switchMobileTab('clues')" id="tab-clues" class="flex-1 py-3 text-sm font-bold text-amber-500 border-b-2 border-amber-500 bg-slate-800/50 transition-colors">
+                <i class="fa-solid fa-list-ol mr-2"></i>Manh Mối
+            </button>
+            <button onclick="switchMobileTab('simulation')" id="tab-simulation" class="flex-1 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:bg-slate-700 transition-colors">
+                <i class="fa-solid fa-puzzle-piece mr-2"></i>Giải Đố
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-grow flex flex-col lg:flex-row overflow-hidden relative">
+        
+        <!-- LEFT PANEL: CLUES (Scrollable) -->
+        <section id="panel-clues" class="tab-content active lg:w-[30%] xl:w-[25%] bg-slate-850 border-r border-slate-700 flex-col h-full z-10 shadow-2xl relative">
+            <div class="p-4 bg-slate-800 border-b border-slate-700 shadow-sm shrink-0 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-blue-400"></i>
+                        Dữ Kiện Vụ Án
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Bấm vào dòng để gạch bỏ.</p>
+                </div>
+                <button onclick="toggleCluesLock()" id="clue-lock-btn" class="text-slate-400 hover:text-amber-400 transition" title="Bật/Tắt hiển thị gợi ý">
+                    <i class="fa-solid fa-unlock"></i>
+                </button>
+            </div>
+            
+            <div class="flex-grow relative overflow-hidden">
+                <!-- Content Container -->
+                <div id="clues-container" class="h-full overflow-y-auto p-2 space-y-1 custom-scrollbar pb-20 lg:pb-2 transition-all duration-300">
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">1. Người <strong>Anh</strong> sống trong ngôi nhà màu <strong>Đỏ</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">2. Người <strong>Thụy Điển</strong> nuôi <strong>Chó</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">3. Người <strong>Đan Mạch</strong> thích uống <strong>Trà</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">4. Nhà <strong>Xanh Lá</strong> nằm ngay bên trái nhà <strong>Trắng</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">5. Chủ nhà <strong>Xanh Lá</strong> uống <strong>Cà Phê</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">6. Người ăn <strong>Táo</strong> nuôi <strong>Chim</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">7. Chủ nhà <strong>Vàng</strong> thích ăn <strong>Chuối</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">8. Người ở nhà <strong>chính giữa</strong> uống <strong>Sữa</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">9. Người <strong>Na Uy</strong> sống ở nhà <strong>đầu tiên</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">10. Người ăn <strong>Dừa</strong> sống cạnh người nuôi <strong>Mèo</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">11. Người nuôi <strong>Ngựa</strong> sống cạnh người ăn <strong>Chuối</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">12. Người ăn <strong>Nho</strong> thích uống <strong>Bia</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">13. Người <strong>Đức</strong> thích ăn <strong>Cam</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">14. Người <strong>Na Uy</strong> sống cạnh nhà <strong>Xanh Dương</strong>.</div>
+                    <div class="clue-item p-3 rounded-lg text-sm text-slate-300 border border-transparent hover:border-slate-700 leading-relaxed" onclick="toggleClue(this)">15. Người ăn <strong>Dừa</strong> có hàng xóm uống <strong>Nước Lọc</strong>.</div>
+                </div>
+
+                <!-- Lock Overlay -->
+                <div id="clue-lock-overlay" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm hidden">
+                    <div class="text-6xl mb-4 text-slate-600"><i class="fa-solid fa-lock"></i></div>
+                    <p class="text-slate-400 mb-4 font-bold">Nội dung đã bị ẩn</p>
+                    <button onclick="toggleCluesLock()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition">
+                        <i class="fa-solid fa-key mr-2"></i>Mở Khóa
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-slate-700 bg-slate-800 shrink-0 hidden lg:block">
+                 <div class="p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-indigo-200 text-xs flex gap-3">
+                    <i class="fa-solid fa-circle-info text-lg mt-0.5"></i>
+                    <div>
+                        <strong>Câu hỏi:</strong> Ai là người nuôi <strong>Cá</strong>?
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: SIMULATION AREA -->
+        <section id="panel-simulation" class="tab-content lg:w-[70%] xl:w-[75%] bg-slate-900 flex-col h-full relative">
+            <!-- Toolbar -->
+            <div class="flex justify-between items-center p-4 lg:p-6 pb-2 shrink-0">
+                <h2 class="text-xl lg:text-2xl font-bold text-white hidden lg:block">Bảng Mô Phỏng</h2>
+                <div class="flex gap-2 ml-auto w-full lg:w-auto justify-end">
+                    <button onclick="fillCorrectAnswer()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2 rounded-md font-medium text-xs lg:text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-eye"></i> <span class="inline">Hiện Đáp Án</span>
+                    </button>
+                    <button onclick="resetBoard()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2 rounded-md font-medium text-xs lg:text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> <span class="inline">Làm Lại</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Houses Container -->
+            <div class="flex-grow overflow-auto p-4 lg:p-6 pt-2 pb-24 lg:pb-6 custom-scrollbar">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-4 min-w-[280px] lg:min-w-0 mx-auto max-w-7xl">
+                    
+                    <!-- House 1 -->
+                    <div class="house-wrapper flex flex-col w-full" id="house-1">
+                        <div class="roof-container">
+                            <div class="roof-shape bg-roof-default"></div>
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 bg-slate-800 text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-600 z-20">NHÀ 1</div>
+                        </div>
+                        <div class="house-card bg-slate-800 rounded-b-xl shadow-xl border-x border-b border-slate-700 flex flex-col relative overflow-hidden">
+                            <div class="h-28 bg-slate-850/50 p-2 flex flex-col items-center justify-center relative border-b border-slate-700/50 group">
+                                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/50"></div>
+                                <div class="result-status absolute top-2 right-2 text-xl opacity-0 transition-all duration-300 z-20"></div>
+                                <div class="z-10 flex items-end justify-center w-full gap-2 mb-1">
+                                    <div class="visual-nation text-3xl opacity-20 transform translate-y-1">👤</div>
+                                    <div class="visual-pet text-2xl opacity-20">🐾</div>
+                                </div>
+                                <div class="z-10 flex items-center justify-center gap-3 text-sm text-slate-500">
+                                    <div class="visual-drink opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-mug-hot"></i></div>
+                                    <div class="visual-fruit opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-apple-whole"></i></div>
+                                </div>
+                            </div>
+                            <div class="p-3 space-y-2 bg-slate-800">
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="color" onchange="updateHouseVisual(1)"><option value="">Màu Nhà...</option><option value="Red">🔴 Đỏ</option><option value="Green">🟢 Xanh Lá</option><option value="White">⚪ Trắng</option><option value="Yellow">🟡 Vàng</option><option value="Blue">🔵 Xanh Dương</option></select>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="nation" onchange="updateHouseVisual(1)"><option value="">Quốc Tịch...</option><option value="Brit">🇬🇧 Anh</option><option value="Swede">🇸🇪 Thụy Điển</option><option value="Dane">🇩🇰 Đan Mạch</option><option value="Norwegian">🇳🇴 Na Uy</option><option value="German">🇩🇪 Đức</option></select>
+                                <div class="grid grid-cols-2 gap-2"><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="drink" onchange="updateHouseVisual(1)"><option value="">Đồ uống...</option><option value="Tea">Trà</option><option value="Coffee">Cà Phê</option><option value="Milk">Sữa</option><option value="Beer">Bia</option><option value="Water">Nước</option></select><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="fruit" onchange="updateHouseVisual(1)"><option value="">Trái cây...</option><option value="Apple">Táo</option><option value="Banana">Chuối</option><option value="Coconut">Dừa</option><option value="Grapes">Nho</option><option value="Orange">Cam</option></select></div>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="pet" onchange="updateHouseVisual(1)"><option value="">Vật nuôi...</option><option value="Dog">🐕 Chó</option><option value="Bird">🐦 Chim</option><option value="Cat">🐈 Mèo</option><option value="Horse">🐎 Ngựa</option><option value="Fish">🐠 Cá</option></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- House 2 -->
+                    <div class="house-wrapper flex flex-col w-full" id="house-2">
+                        <div class="roof-container">
+                            <div class="roof-shape bg-roof-default"></div>
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 bg-slate-800 text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-600 z-20">NHÀ 2</div>
+                        </div>
+                        <div class="house-card bg-slate-800 rounded-b-xl shadow-xl border-x border-b border-slate-700 flex flex-col relative overflow-hidden">
+                            <div class="h-28 bg-slate-850/50 p-2 flex flex-col items-center justify-center relative border-b border-slate-700/50 group">
+                                <div class="result-status absolute top-2 right-2 text-xl opacity-0 transition-all duration-300 z-20"></div>
+                                <div class="z-10 flex items-end justify-center w-full gap-2 mb-1">
+                                    <div class="visual-nation text-3xl opacity-20 transform translate-y-1">👤</div>
+                                    <div class="visual-pet text-2xl opacity-20">🐾</div>
+                                </div>
+                                <div class="z-10 flex items-center justify-center gap-3 text-sm text-slate-500">
+                                    <div class="visual-drink opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-mug-hot"></i></div>
+                                    <div class="visual-fruit opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-apple-whole"></i></div>
+                                </div>
+                            </div>
+                            <div class="p-3 space-y-2 bg-slate-800">
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="color" onchange="updateHouseVisual(2)"><option value="">Màu Nhà...</option><option value="Red">🔴 Đỏ</option><option value="Green">🟢 Xanh Lá</option><option value="White">⚪ Trắng</option><option value="Yellow">🟡 Vàng</option><option value="Blue">🔵 Xanh Dương</option></select>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="nation" onchange="updateHouseVisual(2)"><option value="">Quốc Tịch...</option><option value="Brit">🇬🇧 Anh</option><option value="Swede">🇸🇪 Thụy Điển</option><option value="Dane">🇩🇰 Đan Mạch</option><option value="Norwegian">🇳🇴 Na Uy</option><option value="German">🇩🇪 Đức</option></select>
+                                <div class="grid grid-cols-2 gap-2"><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="drink" onchange="updateHouseVisual(2)"><option value="">Đồ uống...</option><option value="Tea">Trà</option><option value="Coffee">Cà Phê</option><option value="Milk">Sữa</option><option value="Beer">Bia</option><option value="Water">Nước</option></select><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="fruit" onchange="updateHouseVisual(2)"><option value="">Trái cây...</option><option value="Apple">Táo</option><option value="Banana">Chuối</option><option value="Coconut">Dừa</option><option value="Grapes">Nho</option><option value="Orange">Cam</option></select></div>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="pet" onchange="updateHouseVisual(2)"><option value="">Vật nuôi...</option><option value="Dog">🐕 Chó</option><option value="Bird">🐦 Chim</option><option value="Cat">🐈 Mèo</option><option value="Horse">🐎 Ngựa</option><option value="Fish">🐠 Cá</option></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- House 3 -->
+                    <div class="house-wrapper flex flex-col w-full" id="house-3">
+                        <div class="roof-container">
+                            <div class="roof-shape bg-roof-default"></div>
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 bg-slate-800 text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-600 z-20">NHÀ 3</div>
+                        </div>
+                        <div class="house-card bg-slate-800 rounded-b-xl shadow-xl border-x border-b border-slate-700 flex flex-col relative overflow-hidden">
+                            <div class="h-28 bg-slate-850/50 p-2 flex flex-col items-center justify-center relative border-b border-slate-700/50 group">
+                                <div class="result-status absolute top-2 right-2 text-xl opacity-0 transition-all duration-300 z-20"></div>
+                                <div class="z-10 flex items-end justify-center w-full gap-2 mb-1">
+                                    <div class="visual-nation text-3xl opacity-20 transform translate-y-1">👤</div>
+                                    <div class="visual-pet text-2xl opacity-20">🐾</div>
+                                </div>
+                                <div class="z-10 flex items-center justify-center gap-3 text-sm text-slate-500">
+                                    <div class="visual-drink opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-mug-hot"></i></div>
+                                    <div class="visual-fruit opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-apple-whole"></i></div>
+                                </div>
+                            </div>
+                            <div class="p-3 space-y-2 bg-slate-800">
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="color" onchange="updateHouseVisual(3)"><option value="">Màu Nhà...</option><option value="Red">🔴 Đỏ</option><option value="Green">🟢 Xanh Lá</option><option value="White">⚪ Trắng</option><option value="Yellow">🟡 Vàng</option><option value="Blue">🔵 Xanh Dương</option></select>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="nation" onchange="updateHouseVisual(3)"><option value="">Quốc Tịch...</option><option value="Brit">🇬🇧 Anh</option><option value="Swede">🇸🇪 Thụy Điển</option><option value="Dane">🇩🇰 Đan Mạch</option><option value="Norwegian">🇳🇴 Na Uy</option><option value="German">🇩🇪 Đức</option></select>
+                                <div class="grid grid-cols-2 gap-2"><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="drink" onchange="updateHouseVisual(3)"><option value="">Đồ uống...</option><option value="Tea">Trà</option><option value="Coffee">Cà Phê</option><option value="Milk">Sữa</option><option value="Beer">Bia</option><option value="Water">Nước</option></select><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="fruit" onchange="updateHouseVisual(3)"><option value="">Trái cây...</option><option value="Apple">Táo</option><option value="Banana">Chuối</option><option value="Coconut">Dừa</option><option value="Grapes">Nho</option><option value="Orange">Cam</option></select></div>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="pet" onchange="updateHouseVisual(3)"><option value="">Vật nuôi...</option><option value="Dog">🐕 Chó</option><option value="Bird">🐦 Chim</option><option value="Cat">🐈 Mèo</option><option value="Horse">🐎 Ngựa</option><option value="Fish">🐠 Cá</option></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- House 4 -->
+                    <div class="house-wrapper flex flex-col w-full" id="house-4">
+                        <div class="roof-container">
+                            <div class="roof-shape bg-roof-default"></div>
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 bg-slate-800 text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-600 z-20">NHÀ 4</div>
+                        </div>
+                        <div class="house-card bg-slate-800 rounded-b-xl shadow-xl border-x border-b border-slate-700 flex flex-col relative overflow-hidden">
+                            <div class="h-28 bg-slate-850/50 p-2 flex flex-col items-center justify-center relative border-b border-slate-700/50 group">
+                                <div class="result-status absolute top-2 right-2 text-xl opacity-0 transition-all duration-300 z-20"></div>
+                                <div class="z-10 flex items-end justify-center w-full gap-2 mb-1">
+                                    <div class="visual-nation text-3xl opacity-20 transform translate-y-1">👤</div>
+                                    <div class="visual-pet text-2xl opacity-20">🐾</div>
+                                </div>
+                                <div class="z-10 flex items-center justify-center gap-3 text-sm text-slate-500">
+                                    <div class="visual-drink opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-mug-hot"></i></div>
+                                    <div class="visual-fruit opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-apple-whole"></i></div>
+                                </div>
+                            </div>
+                            <div class="p-3 space-y-2 bg-slate-800">
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="color" onchange="updateHouseVisual(4)"><option value="">Màu Nhà...</option><option value="Red">🔴 Đỏ</option><option value="Green">🟢 Xanh Lá</option><option value="White">⚪ Trắng</option><option value="Yellow">🟡 Vàng</option><option value="Blue">🔵 Xanh Dương</option></select>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="nation" onchange="updateHouseVisual(4)"><option value="">Quốc Tịch...</option><option value="Brit">🇬🇧 Anh</option><option value="Swede">🇸🇪 Thụy Điển</option><option value="Dane">🇩🇰 Đan Mạch</option><option value="Norwegian">🇳🇴 Na Uy</option><option value="German">🇩🇪 Đức</option></select>
+                                <div class="grid grid-cols-2 gap-2"><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="drink" onchange="updateHouseVisual(4)"><option value="">Đồ uống...</option><option value="Tea">Trà</option><option value="Coffee">Cà Phê</option><option value="Milk">Sữa</option><option value="Beer">Bia</option><option value="Water">Nước</option></select><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="fruit" onchange="updateHouseVisual(4)"><option value="">Trái cây...</option><option value="Apple">Táo</option><option value="Banana">Chuối</option><option value="Coconut">Dừa</option><option value="Grapes">Nho</option><option value="Orange">Cam</option></select></div>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="pet" onchange="updateHouseVisual(4)"><option value="">Vật nuôi...</option><option value="Dog">🐕 Chó</option><option value="Bird">🐦 Chim</option><option value="Cat">🐈 Mèo</option><option value="Horse">🐎 Ngựa</option><option value="Fish">🐠 Cá</option></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- House 5 -->
+                    <div class="house-wrapper flex flex-col w-full" id="house-5">
+                        <div class="roof-container">
+                            <div class="roof-shape bg-roof-default"></div>
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 bg-slate-800 text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-600 z-20">NHÀ 5</div>
+                        </div>
+                        <div class="house-card bg-slate-800 rounded-b-xl shadow-xl border-x border-b border-slate-700 flex flex-col relative overflow-hidden">
+                            <div class="h-28 bg-slate-850/50 p-2 flex flex-col items-center justify-center relative border-b border-slate-700/50 group">
+                                <div class="result-status absolute top-2 right-2 text-xl opacity-0 transition-all duration-300 z-20"></div>
+                                <div class="z-10 flex items-end justify-center w-full gap-2 mb-1">
+                                    <div class="visual-nation text-3xl opacity-20 transform translate-y-1">👤</div>
+                                    <div class="visual-pet text-2xl opacity-20">🐾</div>
+                                </div>
+                                <div class="z-10 flex items-center justify-center gap-3 text-sm text-slate-500">
+                                    <div class="visual-drink opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-mug-hot"></i></div>
+                                    <div class="visual-fruit opacity-20 bg-slate-800 p-1 rounded-full"><i class="fa-solid fa-apple-whole"></i></div>
+                                </div>
+                            </div>
+                            <div class="p-3 space-y-2 bg-slate-800">
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="color" onchange="updateHouseVisual(5)"><option value="">Màu Nhà...</option><option value="Red">🔴 Đỏ</option><option value="Green">🟢 Xanh Lá</option><option value="White">⚪ Trắng</option><option value="Yellow">🟡 Vàng</option><option value="Blue">🔵 Xanh Dương</option></select>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="nation" onchange="updateHouseVisual(5)"><option value="">Quốc Tịch...</option><option value="Brit">🇬🇧 Anh</option><option value="Swede">🇸🇪 Thụy Điển</option><option value="Dane">🇩🇰 Đan Mạch</option><option value="Norwegian">🇳🇴 Na Uy</option><option value="German">🇩🇪 Đức</option></select>
+                                <div class="grid grid-cols-2 gap-2"><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="drink" onchange="updateHouseVisual(5)"><option value="">Đồ uống...</option><option value="Tea">Trà</option><option value="Coffee">Cà Phê</option><option value="Milk">Sữa</option><option value="Beer">Bia</option><option value="Water">Nước</option></select><select class="w-full bg-slate-700 border-none text-white text-[10px] py-1.5 pl-1 rounded focus:ring-1 focus:ring-amber-500" data-type="fruit" onchange="updateHouseVisual(5)"><option value="">Trái cây...</option><option value="Apple">Táo</option><option value="Banana">Chuối</option><option value="Coconut">Dừa</option><option value="Grapes">Nho</option><option value="Orange">Cam</option></select></div>
+                                <select class="w-full bg-slate-700 border-none text-white text-xs py-2 pl-2 rounded focus:ring-1 focus:ring-amber-500" data-type="pet" onchange="updateHouseVisual(5)"><option value="">Vật nuôi...</option><option value="Dog">🐕 Chó</option><option value="Bird">🐦 Chim</option><option value="Cat">🐈 Mèo</option><option value="Horse">🐎 Ngựa</option><option value="Fish">🐠 Cá</option></select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Global Action Bar -->
+            <div class="p-4 bg-slate-800 border-t border-slate-700 lg:absolute lg:bottom-6 lg:left-1/2 lg:-translate-x-1/2 lg:w-auto lg:rounded-full lg:shadow-2xl lg:border lg:bg-slate-800/90 backdrop-blur-sm z-30 shrink-0">
+                 <button onclick="checkAnswers()" class="w-full lg:w-auto px-12 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold rounded-lg lg:rounded-full text-lg shadow-[0_0_20px_rgba(34,197,94,0.4)] transform transition hover:scale-105 active:scale-95 flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-clipboard-check"></i> KIỂM TRA KẾT QUẢ
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Notification -->
+    <div id="resultModal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-2xl p-8 max-w-md w-full text-center shadow-2xl transform transition-all scale-95 opacity-0" id="modalContent">
+            <div id="modalIcon" class="text-6xl mb-4"></div>
+            <h2 id="modalTitle" class="text-3xl font-bold text-slate-100 mb-2"></h2>
+            <p id="modalMessage" class="text-slate-400 mb-6"></p>
+            <button onclick="closeModal()" class="bg-slate-700 text-white px-6 py-2 rounded-lg font-bold hover:bg-slate-600 transition w-full">Đóng</button>
+        </div>
+    </div>
+
+    <!-- Logic Grid Modal -->
+    <div id="logicGridModal" class="fixed inset-0 bg-black/90 z-[90] hidden flex items-center justify-center p-2 lg:p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-4xl h-[90vh] flex flex-col shadow-2xl relative">
+            <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800 rounded-t-xl">
+                <h2 class="text-xl font-bold text-amber-400"><i class="fa-solid fa-table-cells mr-2"></i>Bảng Logic Hỗ Trợ Suy Luận</h2>
+                <button onclick="closeLogicGrid()" class="text-slate-400 hover:text-white text-xl px-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="flex-grow overflow-auto p-4 custom-scrollbar bg-slate-900">
+                <p class="text-slate-400 text-sm mb-4 text-center">Bấm vào ô để đánh dấu: <strong>Trống</strong> &rarr; <strong class="text-green-500">O (Đúng)</strong> &rarr; <strong class="text-red-500">X (Sai)</strong></p>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-sm text-slate-300">
+                        <thead>
+                            <tr>
+                                <th class="p-2 border border-slate-700 bg-slate-800 text-left min-w-[150px]">Thuộc tính</th>
+                                <th class="p-2 border border-slate-700 bg-slate-800 w-20">Nhà 1</th>
+                                <th class="p-2 border border-slate-700 bg-slate-800 w-20">Nhà 2</th>
+                                <th class="p-2 border border-slate-700 bg-slate-800 w-20">Nhà 3</th>
+                                <th class="p-2 border border-slate-700 bg-slate-800 w-20">Nhà 4</th>
+                                <th class="p-2 border border-slate-700 bg-slate-800 w-20">Nhà 5</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logic-grid-body">
+                            <!-- Generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+             <div class="p-3 border-t border-slate-700 bg-slate-800 rounded-b-xl text-center">
+                <button onclick="clearLogicGrid()" class="text-xs text-red-400 hover:text-red-300 underline">Xóa toàn bộ đánh dấu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTS & DATA ---
+        const solution = [
+            { color: "Yellow", nation: "Norwegian", drink: "Water", fruit: "Banana", pet: "Cat" },
+            { color: "Blue", nation: "Dane", drink: "Tea", fruit: "Coconut", pet: "Horse" },
+            { color: "Red", nation: "Brit", drink: "Milk", fruit: "Apple", pet: "Bird" },
+            { color: "Green", nation: "German", drink: "Coffee", fruit: "Orange", pet: "Fish" }, // Solution!
+            { color: "White", nation: "Swede", drink: "Beer", fruit: "Grapes", pet: "Dog" }
+        ];
+
+        const visualData = {
+            nation: { Brit: "🇬🇧", Swede: "🇸🇪", Dane: "🇩🇰", Norwegian: "🇳🇴", German: "🇩🇪" },
+            pet: { Dog: "🐕", Bird: "🐦", Cat: "🐈", Horse: "🐎", Fish: "🐠" },
+            drink: { Tea: "🍵", Coffee: "☕", Milk: "🥛", Beer: "🍺", Water: "💧" },
+            fruit: { Apple: "🍎", Banana: "🍌", Coconut: "🥥", Grapes: "🍇", Orange: "🍊" }
+        };
+
+        const categories = {
+            "Màu sắc": ["Đỏ", "Xanh Lá", "Trắng", "Vàng", "Xanh Dương"],
+            "Quốc tịch": ["Anh", "Thụy Điển", "Đan Mạch", "Na Uy", "Đức"],
+            "Đồ uống": ["Trà", "Cà Phê", "Sữa", "Bia", "Nước"],
+            "Trái cây": ["Táo", "Chuối", "Dừa", "Nho", "Cam"],
+            "Vật nuôi": ["Chó", "Chim", "Mèo", "Ngựa", "Cá"]
+        };
+
+        // --- TIMER LOGIC ---
+        let timerInterval;
+        let seconds = 0;
+        let isRunning = false;
+        let cluesLocked = false;
+
+        function updateTimerDisplay() {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').textContent = `${m}:${s}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timer-control');
+            if (isRunning) {
+                clearInterval(timerInterval);
+                btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                btn.className = "w-8 h-8 flex items-center justify-center rounded hover:bg-slate-700 text-green-400 hover:text-green-300 transition";
+            } else {
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    updateTimerDisplay();
+                }, 1000);
+                btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                btn.className = "w-8 h-8 flex items-center justify-center rounded hover:bg-slate-700 text-amber-400 hover:text-amber-300 transition";
+            }
+            isRunning = !isRunning;
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            seconds = 0;
+            updateTimerDisplay();
+            const btn = document.getElementById('timer-control');
+            btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            btn.className = "w-8 h-8 flex items-center justify-center rounded hover:bg-slate-700 text-slate-300 hover:text-white transition";
+        }
+
+        // --- UI LOGIC ---
+        function switchMobileTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`panel-${tabName}`).classList.add('active');
+            
+            // Update buttons
+            document.getElementById('tab-clues').className = `flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${tabName === 'clues' ? 'text-amber-500 border-amber-500 bg-slate-800/50' : 'text-slate-400 border-transparent hover:bg-slate-700'}`;
+            document.getElementById('tab-simulation').className = `flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${tabName === 'simulation' ? 'text-amber-500 border-amber-500 bg-slate-800/50' : 'text-slate-400 border-transparent hover:bg-slate-700'}`;
+        }
+
+        function toggleClue(element) {
+            if (cluesLocked) return;
+            element.classList.toggle('used');
+        }
+
+        function toggleCluesLock() {
+            const container = document.getElementById('clues-container');
+            const overlay = document.getElementById('clue-lock-overlay');
+            const btn = document.getElementById('clue-lock-btn');
+            
+            if (!cluesLocked) {
+                // Lock it immediately
+                cluesLocked = true;
+                container.classList.add('clues-blurred');
+                overlay.classList.remove('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-lock text-amber-500"></i>';
+            } else {
+                // Unlock requires password
+                const pass = prompt("Nhập mật khẩu để mở khóa:");
+                if (pass === "thayhoang") {
+                    cluesLocked = false;
+                    container.classList.remove('clues-blurred');
+                    overlay.classList.add('hidden');
+                    btn.innerHTML = '<i class="fa-solid fa-unlock"></i>';
+                } else if (pass !== null) {
+                    alert("Sai mật khẩu!");
+                }
+            }
+        }
+
+        function updateHouseVisual(houseId) {
+            const houseWrapper = document.getElementById(`house-${houseId}`);
+            
+            // Get values
+            const color = houseWrapper.querySelector('[data-type="color"]').value;
+            const nation = houseWrapper.querySelector('[data-type="nation"]').value;
+            const drink = houseWrapper.querySelector('[data-type="drink"]').value;
+            const fruit = houseWrapper.querySelector('[data-type="fruit"]').value;
+            const pet = houseWrapper.querySelector('[data-type="pet"]').value;
+
+            // 1. Update Roof - Updated to use background color on clip-path
+            const roof = houseWrapper.querySelector('.roof-shape');
+            // Remove all bg-roof-* classes
+            roof.className = `roof-shape bg-roof-${color || 'default'}`;
+
+            // 2. Update Icons
+            const vNation = houseWrapper.querySelector('.visual-nation');
+            const vPet = houseWrapper.querySelector('.visual-pet');
+            const vDrink = houseWrapper.querySelector('.visual-drink');
+            const vFruit = houseWrapper.querySelector('.visual-fruit');
+
+            // Helper to update visual state
+            const setVisual = (el, val, map) => {
+                if (val && map[val]) {
+                    el.textContent = map[val];
+                    el.classList.remove('opacity-20');
+                    el.classList.add('opacity-100', 'scale-110');
+                    // Reset scale animation
+                    setTimeout(() => el.classList.remove('scale-110'), 200);
+                } else {
+                     el.classList.add('opacity-20');
+                     el.classList.remove('opacity-100');
+                }
+            };
+            
+            // Basic Icons
+            if (nation) { vNation.textContent = visualData.nation[nation]; vNation.classList.replace('opacity-20', 'opacity-100'); } else { vNation.classList.replace('opacity-100', 'opacity-20'); }
+            if (pet) { vPet.textContent = visualData.pet[pet]; vPet.classList.replace('opacity-20', 'opacity-100'); } else { vPet.classList.replace('opacity-100', 'opacity-20'); }
+            
+            // Small icons (Drink/Fruit) needs inner HTML update or text content depending on structure
+            if (drink) { vDrink.innerHTML = `<span class="text-lg">${visualData.drink[drink]}</span>`; vDrink.classList.replace('opacity-20', 'opacity-100'); vDrink.classList.add('bg-slate-700'); } 
+            else { vDrink.innerHTML = '<i class="fa-solid fa-mug-hot"></i>'; vDrink.classList.replace('opacity-100', 'opacity-20'); vDrink.classList.remove('bg-slate-700'); }
+            
+            if (fruit) { vFruit.innerHTML = `<span class="text-lg">${visualData.fruit[fruit]}</span>`; vFruit.classList.replace('opacity-20', 'opacity-100'); vFruit.classList.add('bg-slate-700'); } 
+            else { vFruit.innerHTML = '<i class="fa-solid fa-apple-whole"></i>'; vFruit.classList.replace('opacity-100', 'opacity-20'); vFruit.classList.remove('bg-slate-700'); }
+
+            // Clear result status when changing
+            const statusIcon = houseWrapper.querySelector('.result-status');
+            statusIcon.style.opacity = '0';
+            houseWrapper.querySelector('.house-card').classList.remove('ring-2', 'ring-green-500', 'ring-red-500');
+        }
+
+        // --- LOGIC GRID ---
+        function initLogicGrid() {
+            const tbody = document.getElementById('logic-grid-body');
+            tbody.innerHTML = '';
+            
+            for (const [category, items] of Object.entries(categories)) {
+                // Category Header Row
+                const catRow = document.createElement('tr');
+                catRow.innerHTML = `<td colspan="6" class="p-2 bg-slate-800/50 font-bold text-amber-500 border border-slate-700 text-xs uppercase tracking-wider">${category}</td>`;
+                tbody.appendChild(catRow);
+
+                items.forEach(item => {
+                    const row = document.createElement('tr');
+                    const labelCell = document.createElement('td');
+                    labelCell.className = "p-2 border border-slate-700 bg-slate-800 font-medium";
+                    labelCell.textContent = item;
+                    row.appendChild(labelCell);
+
+                    for (let i = 1; i <= 5; i++) {
+                        const cell = document.createElement('td');
+                        cell.className = "p-2 border border-slate-700 logic-cell";
+                        cell.onclick = function() { toggleLogicCell(this); };
+                        row.appendChild(cell);
+                    }
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        function toggleLogicCell(cell) {
+            if (cell.classList.contains('state-o')) {
+                cell.classList.remove('state-o');
+                cell.classList.add('state-x');
+                cell.textContent = 'X';
+            } else if (cell.classList.contains('state-x')) {
+                cell.classList.remove('state-x');
+                cell.textContent = '';
+            } else {
+                cell.classList.add('state-o');
+                cell.textContent = 'O';
+            }
+        }
+
+        function openLogicGrid() {
+            document.getElementById('logicGridModal').classList.remove('hidden');
+        }
+
+        function closeLogicGrid() {
+            document.getElementById('logicGridModal').classList.add('hidden');
+        }
+        
+        function clearLogicGrid() {
+            if(confirm("Bạn có chắc chắn muốn xóa toàn bộ đánh dấu?")) {
+                const cells = document.querySelectorAll('.logic-cell');
+                cells.forEach(cell => {
+                    cell.className = "p-2 border border-slate-700 logic-cell";
+                    cell.textContent = "";
+                });
+            }
+        }
+
+        // --- GAME LOGIC ---
+        function resetBoard() {
+            for(let i=1; i<=5; i++) {
+                const houseWrapper = document.getElementById(`house-${i}`);
+                houseWrapper.querySelectorAll('select').forEach(s => s.value = "");
+                updateHouseVisual(i);
+            }
+            // Reset clues
+            document.querySelectorAll('.clue-item').forEach(c => c.classList.remove('used'));
+        }
+
+        function fillCorrectAnswer() {
+            for(let i=0; i<5; i++) {
+                const sol = solution[i];
+                const houseWrapper = document.getElementById(`house-${i+1}`);
+                houseWrapper.querySelector('[data-type="color"]').value = sol.color;
+                houseWrapper.querySelector('[data-type="nation"]').value = sol.nation;
+                houseWrapper.querySelector('[data-type="drink"]').value = sol.drink;
+                houseWrapper.querySelector('[data-type="fruit"]').value = sol.fruit;
+                houseWrapper.querySelector('[data-type="pet"]').value = sol.pet;
+                updateHouseVisual(i+1);
+            }
+        }
+
+        function checkAnswers() {
+            let correctCount = 0;
+            let filledCount = 0;
+
+            for (let i = 0; i < 5; i++) {
+                const houseWrapper = document.getElementById(`house-${i+1}`);
+                const houseCard = houseWrapper.querySelector('.house-card');
+                
+                const userVal = {
+                    color: houseWrapper.querySelector('[data-type="color"]').value,
+                    nation: houseWrapper.querySelector('[data-type="nation"]').value,
+                    drink: houseWrapper.querySelector('[data-type="drink"]').value,
+                    fruit: houseWrapper.querySelector('[data-type="fruit"]').value,
+                    pet: houseWrapper.querySelector('[data-type="pet"]').value
+                };
+                
+                if(Object.values(userVal).some(v => v !== "")) filledCount++;
+
+                const sol = solution[i];
+                const isCorrect = 
+                    userVal.color === sol.color &&
+                    userVal.nation === sol.nation &&
+                    userVal.drink === sol.drink &&
+                    userVal.fruit === sol.fruit &&
+                    userVal.pet === sol.pet;
+
+                const statusIcon = houseWrapper.querySelector('.result-status');
+                statusIcon.style.opacity = '1';
+
+                if (isCorrect) {
+                    correctCount++;
+                    houseCard.classList.add('ring-2', 'ring-green-500');
+                    houseCard.classList.remove('ring-red-500');
+                    statusIcon.innerHTML = '<i class="fa-solid fa-circle-check text-green-500 bg-slate-900 rounded-full"></i>';
+                } else {
+                    if(Object.values(userVal).some(v => v !== "")) {
+                        houseCard.classList.add('ring-2', 'ring-red-500');
+                        houseCard.classList.remove('ring-green-500');
+                        statusIcon.innerHTML = '<i class="fa-solid fa-circle-xmark text-red-500 bg-slate-900 rounded-full"></i>';
+                    } else {
+                        houseCard.classList.remove('ring-2', 'ring-green-500', 'ring-red-500');
+                        statusIcon.style.opacity = '0';
+                    }
+                }
+            }
+
+            if (correctCount === 5) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                showModal('win');
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            } else if (filledCount === 0) {
+                showModal('empty');
+            } else {
+                showModal('lose', correctCount);
+            }
+        }
+
+        function showModal(type, count = 0) {
+            const modal = document.getElementById('resultModal');
+            const content = document.getElementById('modalContent');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const msg = document.getElementById('modalMessage');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            if (type === 'win') {
+                icon.innerHTML = '🏆';
+                title.textContent = 'XUẤT SẮC!';
+                title.className = 'text-3xl font-bold text-green-400 mb-2';
+                msg.textContent = `Vụ án đã được phá giải trong ${document.getElementById('timer-display').textContent}!`;
+            } else if (type === 'empty') {
+                icon.innerHTML = '📝';
+                title.textContent = 'Chưa có dữ liệu';
+                title.className = 'text-3xl font-bold text-amber-400 mb-2';
+                msg.textContent = 'Hãy nhập suy luận của bạn vào các ngôi nhà trước khi kiểm tra.';
+            } else {
+                icon.innerHTML = '🔎';
+                title.textContent = 'Cần cố gắng hơn';
+                title.className = 'text-3xl font-bold text-red-400 mb-2';
+                msg.textContent = `Bạn đã đúng ${count}/5 ngôi nhà. Hãy kiểm tra lại manh mối và thử lại nhé!`;
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('resultModal');
+            const content = document.getElementById('modalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        // Initialize grid on load
+        initLogicGrid();
+    </script>
+</body>
+</html>
