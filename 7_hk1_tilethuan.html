@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinh Phục Đại Lượng Tỉ Lệ Thuận</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+        }
+        .chalkboard {
+            background-color: #263238; /* Dark Slate */
+            color: #eceff1;
+            border: 8px solid #795548; /* Brown border like wood */
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .chalkboard::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMSAxTDQ5IDQ5TTEgNDlMNDkgMSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        .btn-mode {
+            transition: all 0.2s;
+            border-bottom: 4px solid transparent;
+        }
+        .btn-mode:active {
+            transform: translateY(2px);
+            border-bottom-width: 0;
+        }
+        .mode-active {
+            background-color: #059669 !important; /* emerald-600 */
+            color: white !important;
+            border-bottom: 4px solid #064e3b !important; /* emerald-800 */
+            transform: translateY(-2px);
+        }
+        .step-item {
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: slideDown 0.4s forwards;
+        }
+        @keyframes slideDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Fraction CSS class */
+        .frac {
+            display: inline-block;
+            position: relative;
+            vertical-align: middle;
+            letter-spacing: 0.001em;
+            text-align: center;
+        }
+        .frac > span {
+            display: block;
+            padding: 0.1em;
+        }
+        .frac span.bottom {
+            border-top: thin solid white;
+        }
+        .frac span.symbol {
+            display: none;
+        }
+        /* Dark theme fraction adjustment */
+        .text-gray-800 .frac span.bottom {
+            border-top: thin solid #1f2937;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 md:p-4">
+
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-emerald-200">
+        <!-- Header -->
+        <div class="bg-emerald-600 p-4 md:p-6 text-center relative">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
+                <i class="fas fa-balance-scale mr-2"></i>ĐẠI LƯỢNG TỈ LỆ THUẬN
+            </h1>
+            <p class="text-emerald-100 mt-1 text-sm md:text-base">Mô phỏng lời giải & Luyện tập - daytoanthayhoang.github.io</p>
+            <div class="absolute top-4 right-4 bg-white/20 px-3 py-1 rounded-full text-white font-bold text-sm">
+                Điểm: <span id="score">0</span>
+            </div>
+        </div>
+
+        <div class="p-4 md:p-6 space-y-6">
+            
+            <!-- Mode Selection Buttons -->
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <label class="block text-gray-700 font-bold mb-3 text-sm uppercase tracking-wide"><i class="fas fa-layer-group mr-2"></i>Chọn dạng bài:</label>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                    <button onclick="setMode('find_k')" id="btn-find_k" class="btn-mode bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-bold text-sm hover:bg-emerald-50 shadow-sm">
+                        1. Tìm hệ số (k)
+                    </button>
+                    <button onclick="setMode('find_val')" id="btn-find_val" class="btn-mode bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-bold text-sm hover:bg-emerald-50 shadow-sm">
+                        2. Tìm giá trị (y)
+                    </button>
+                    <button onclick="setMode('word_simple')" id="btn-word_simple" class="btn-mode bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-bold text-sm hover:bg-emerald-50 shadow-sm">
+                        3. Bài toán đố (Đơn giản)
+                    </button>
+                    <button onclick="setMode('word_hard')" id="btn-word_hard" class="btn-mode bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-bold text-sm hover:bg-emerald-50 shadow-sm">
+                        4. Bài toán đố (Nâng cao)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Left: Question Board -->
+                <div class="flex flex-col">
+                    <div class="chalkboard p-6 md:p-8 text-center relative flex-grow flex flex-col justify-center items-center min-h-[300px]">
+                        <div class="absolute top-2 left-3 text-gray-400 text-xs font-mono">Đề bài:</div>
+                        
+                        <!-- Question Content -->
+                        <div id="question-text" class="text-xl md:text-2xl font-bold tracking-wide mb-6 font-mono leading-relaxed text-yellow-100">
+                            Loading...
+                        </div>
+                        
+                        <!-- Formula Hint Overlay (Optional) -->
+                        <div id="formula-display" class="mt-4 p-2 border border-dashed border-gray-500 rounded text-sm text-gray-300 hidden">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-1"></i> Gợi ý: <span class="font-mono">y = k.x</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Step-by-step & Hint Area -->
+                <div class="bg-white rounded-xl border-2 border-dashed border-emerald-300 p-4 flex flex-col shadow-inner h-[400px]">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+                        <h3 class="font-bold text-gray-700 text-sm md:text-base"><i class="fas fa-shoe-prints mr-2 text-emerald-500"></i>Các bước giải:</h3>
+                        <button onclick="showNextStep()" id="btn-show-step" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs md:text-sm font-bold py-1.5 px-3 rounded-lg shadow transition-colors flex items-center">
+                            <i class="fas fa-eye mr-2"></i> Gợi ý bước sau
+                        </button>
+                    </div>
+                    
+                    <!-- Steps Container -->
+                    <div id="steps-container" class="flex-grow space-y-3 overflow-y-auto pr-2 text-gray-800 font-mono text-sm md:text-base">
+                        <div class="text-gray-400 italic text-sm text-center mt-10">
+                            Bấm "Gợi ý bước sau" để xem từng bước giải chi tiết...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center mt-4 bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                <div class="w-full md:w-1/3">
+                     <label class="block text-xs font-bold text-emerald-800 uppercase mb-1 ml-1">Nhập đáp án của bạn:</label>
+                     <input type="number" step="0.01" id="user-answer" placeholder="Kết quả..." 
+                        class="w-full text-center text-2xl font-bold p-3 border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors shadow-inner text-emerald-800"
+                        onkeydown="if(event.key === 'Enter') checkAnswer()">
+                </div>
+                
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="checkAnswer()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all shadow-lg transform hover:-translate-y-1">
+                        <i class="fas fa-check-circle mr-2"></i>Kiểm tra
+                    </button>
+                    
+                    <button onclick="nextQuestion()" class="flex-1 md:flex-none bg-white hover:bg-gray-50 text-gray-600 border border-gray-300 font-bold py-3 px-6 rounded-xl text-lg transition-colors">
+                        <i class="fas fa-forward mr-2"></i>Bỏ qua
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Feedback -->
+            <div id="feedback" class="hidden text-center fade-in mt-2 p-4 rounded-xl"></div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        let currentQuestion = {};
+        let score = 0;
+        let isAnswered = false;
+        let currentMode = 'find_k';
+        let stepIndex = 0;
+
+        // --- Utilities ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Tạo phân số HTML
+        function toFracHTML(num, den) {
+            if (den === 1) return num;
+            return `<div class="frac"><span>${num}</span><span class="symbol">/</span><span class="bottom">${den}</span></div>`;
+        }
+
+        // Định dạng số (nếu số nguyên thì hiển thị nguyên, nếu thập phân thì hiển thị gọn)
+        function fmt(num) {
+            return Number.isInteger(num) ? num : parseFloat(num.toFixed(2));
+        }
+
+        // --- Generators ---
+
+        // Dạng 1: Tìm hệ số k (y = kx)
+        function genFindK() {
+            const k = getRandomInt(2, 9) * (Math.random() > 0.5 ? 1 : -1);
+            const x = getRandomInt(2, 10);
+            const y = k * x;
+
+            return {
+                type: 'basic',
+                display: `Cho biết <span class="text-yellow-300">y</span> tỉ lệ thuận với <span class="text-yellow-300">x</span>.<br> Khi <span class="text-green-300">x = ${x}</span> thì <span class="text-green-300">y = ${y}</span>.<br><br>Tìm hệ số tỉ lệ <span class="text-pink-300">k</span>?`,
+                answer: k,
+                steps: [
+                    `Công thức tổng quát: <b>y = k . x</b>`,
+                    `Suy ra công thức tìm k: <b>k = ${toFracHTML('y','x')}</b>`,
+                    `Thay số: k = ${toFracHTML(y, x)}`,
+                    `Tính toán: k = ${k}`
+                ],
+                hint: "Nhớ công thức: y = k.x"
+            };
+        }
+
+        // Dạng 2: Tìm y khi biết k và x
+        function genFindVal() {
+            const k = getRandomInt(2, 8) * (Math.random() > 0.5 ? 1 : -1);
+            const x_given = getRandomInt(3, 12);
+            // Chọn một cặp ban đầu để học sinh tự tìm k trước (nâng cao hơn chút)
+            // Hoặc cho thẳng k. Để mô phỏng "bài toán mẫu", ta cho y tỉ lệ thuận với x theo hệ số k.
+            
+            return {
+                type: 'basic',
+                display: `Cho <span class="text-yellow-300">y</span> tỉ lệ thuận với <span class="text-yellow-300">x</span> theo hệ số tỉ lệ <span class="text-pink-300">k = ${k}</span>.<br><br>Tính giá trị của <span class="text-green-300">y</span> khi <span class="text-green-300">x = ${x_given}</span>?`,
+                answer: k * x_given,
+                steps: [
+                    `Công thức liên hệ: <b>y = ${k} . x</b>`,
+                    `Thay giá trị x = ${x_given} vào công thức.`,
+                    `y = ${k} . ${x_given}`,
+                    `y = ${k * x_given}`
+                ],
+                hint: "Thay k và x vào công thức y = kx"
+            };
+        }
+
+        // Dạng 3: Bài toán đố (Rút về đơn vị / Tam suất đơn giản)
+        function genWordSimple() {
+            // Template: Mua A cái B hết C tiền. Mua D cái B hết bao nhiêu?
+            const items = ["quyển vở", "cây bút", "gói kẹo", "mét vải", "kg gạo"];
+            const item = items[getRandomInt(0, items.length - 1)];
+            
+            const unitPrice = getRandomInt(2, 9) * 1000; // Giá 2000 - 9000
+            const quantity1 = getRandomInt(2, 5);
+            const total1 = unitPrice * quantity1;
+            
+            const quantity2 = getRandomInt(6, 10);
+            const total2 = unitPrice * quantity2;
+
+            return {
+                type: 'word',
+                display: `Mua <b>${quantity1}</b> ${item} hết <b>${(total1/1000)}k</b> đồng.<br>Hỏi mua <b>${quantity2}</b> ${item} như thế hết bao nhiêu tiền? <br><small class="text-gray-400 text-sm">(Nhập kết quả theo đơn vị đồng, ví dụ: 50000)</small>`,
+                answer: total2,
+                steps: [
+                    `<b>Bước 1: Rút về đơn vị (Tìm giá 1 ${item})</b>`,
+                    `Giá 1 ${item} là: ${total1} : ${quantity1} = ${unitPrice} (đồng)`,
+                    `<b>Bước 2: Tính giá tiền cho ${quantity2} ${item}</b>`,
+                    `Số tiền phải trả: ${unitPrice} . ${quantity2} = ${total2} (đồng)`
+                ],
+                hint: "Tính giá tiền 1 món trước, sau đó nhân lên."
+            };
+        }
+
+        // Dạng 4: Bài toán đố nâng cao (Dùng tỉ lệ thức hoặc khối lượng công việc)
+        function genWordHard() {
+            // Template: Máy làm X sản phẩm hết Y phút. Hỏi làm Z sản phẩm hết bao nhiêu phút?
+            const subjects = [
+                { name: "Máy in", action: "in được", unit1: "trang", unit2: "phút" },
+                { name: "Công nhân", action: "làm được", unit1: "sản phẩm", unit2: "giờ" },
+                { name: "Ô tô", action: "đi được", unit1: "km", unit2: "lít xăng" }
+            ];
+            const subj = subjects[getRandomInt(0, subjects.length - 1)];
+
+            // Setup số liệu sao cho đẹp
+            const rate = getRandomInt(10, 50); // Năng suất (ví dụ: 20 trang/phút)
+            
+            const time1 = getRandomInt(2, 5); 
+            const work1 = rate * time1;
+
+            const time2 = getRandomInt(6, 12);
+            const work2 = rate * time2;
+            
+            // Ẩn time2, hỏi time2
+            return {
+                type: 'word',
+                display: `Một ${subj.name} trong <b>${time1} ${subj.unit2}</b> ${subj.action} <b>${work1} ${subj.unit1}</b>.<br>Hỏi để ${subj.action} <b>${work2} ${subj.unit1}</b> thì cần bao nhiêu <b>${subj.unit2}</b>?`,
+                answer: time2,
+                steps: [
+                    `Vì số ${subj.unit1} và thời gian là hai đại lượng tỉ lệ thuận.`,
+                    `Ta có tỉ lệ thức: ${toFracHTML('t_1', 't_2')} = ${toFracHTML('sp_1', 'sp_2')}`,
+                    `Thay số: ${toFracHTML(time1, '?')} = ${toFracHTML(work1, work2)}`,
+                    `Suy ra: ? = ${toFracHTML(`${time1} . ${work2}`, work1)}`,
+                    `Kết quả: ${time2} (${subj.unit2})`
+                ],
+                hint: "Dùng quy tắc nhân chéo chia ngang."
+            };
+        }
+
+        // --- Core UI Logic ---
+
+        function setMode(mode) {
+            currentMode = mode;
+            // Update UI buttons
+            document.querySelectorAll('.btn-mode').forEach(btn => btn.classList.remove('mode-active'));
+            document.getElementById(`btn-${mode}`).classList.add('mode-active');
+            
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            // Reset UI
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('user-answer').value = '';
+            document.getElementById('user-answer').disabled = false;
+            document.getElementById('user-answer').focus();
+            
+            // Reset Steps
+            stepIndex = 0;
+            const stepsContainer = document.getElementById('steps-container');
+            stepsContainer.innerHTML = `<div class="text-gray-400 italic text-sm text-center mt-10">Bấm "Gợi ý bước sau" để xem từng bước giải chi tiết...</div>`;
+            
+            const btnStep = document.getElementById('btn-show-step');
+            btnStep.disabled = false;
+            btnStep.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+            btnStep.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+            btnStep.innerHTML = '<i class="fas fa-eye mr-2"></i> Gợi ý bước sau';
+            
+            isAnswered = false;
+
+            // Generate Question based on mode
+            switch(currentMode) {
+                case 'find_k': currentQuestion = genFindK(); break;
+                case 'find_val': currentQuestion = genFindVal(); break;
+                case 'word_simple': currentQuestion = genWordSimple(); break;
+                case 'word_hard': currentQuestion = genWordHard(); break;
+                default: currentQuestion = genFindK();
+            }
+
+            document.getElementById('question-text').innerHTML = currentQuestion.display;
+        }
+
+        function showNextStep() {
+            const container = document.getElementById('steps-container');
+            
+            // Clear placeholder text on first click
+            if (stepIndex === 0) container.innerHTML = '';
+
+            if (stepIndex < currentQuestion.steps.length) {
+                const stepDiv = document.createElement('div');
+                // Animation & Styling
+                stepDiv.className = 'step-item bg-gray-50 p-3 rounded-lg border-l-4 border-emerald-400 mb-2 shadow-sm';
+                
+                // Highlight last step (Answer)
+                if (stepIndex === currentQuestion.steps.length - 1) {
+                     stepDiv.classList.add('bg-emerald-50', 'border-emerald-600', 'font-bold', 'text-emerald-800');
+                     stepDiv.innerHTML = `<span class="inline-block bg-emerald-600 text-white text-xs px-2 py-1 rounded mr-2 mb-1">ĐÁP ÁN</span><br>${currentQuestion.steps[stepIndex]}`;
+                } else {
+                     stepDiv.innerHTML = `<span class="text-gray-500 text-xs font-bold uppercase mr-2">Bước ${stepIndex + 1}:</span> ${currentQuestion.steps[stepIndex]}`;
+                }
+                
+                container.appendChild(stepDiv);
+                
+                // Auto scroll
+                container.scrollTop = container.scrollHeight;
+                
+                stepIndex++;
+            }
+
+            // Disable button if done
+            if (stepIndex >= currentQuestion.steps.length) {
+                const btn = document.getElementById('btn-show-step');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-check mr-2"></i> Đã hiện hết';
+                btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
+                btn.classList.add('bg-gray-400', 'opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function checkAnswer() {
+            if (isAnswered) return;
+
+            const input = document.getElementById('user-answer');
+            const feedback = document.getElementById('feedback');
+            
+            // Hỗ trợ nhập "20000" hoặc "20.000" đều được
+            let rawVal = input.value.trim().replace(/\./g, '').replace(/,/g, '.'); 
+            const val = parseFloat(rawVal);
+
+            if (isNaN(val)) {
+                alert("Vui lòng nhập một số!");
+                return;
+            }
+
+            isAnswered = true;
+            input.disabled = true;
+
+            // Chấp nhận sai số nhỏ (cho trường hợp thập phân)
+            if (Math.abs(val - currentQuestion.answer) < 0.1) {
+                score += 10;
+                document.getElementById('score').textContent = score;
+                feedback.innerHTML = `
+                    <div class="text-emerald-600 font-extrabold text-2xl mb-1"><i class="fas fa-check-circle"></i> CHÍNH XÁC!</div>
+                    <div class="text-gray-600">Đáp án là <b>${currentQuestion.answer}</b></div>
+                `;
+                feedback.className = "text-center fade-in mt-4 p-4 rounded-xl bg-green-100 border-2 border-green-300 shadow-md";
+                
+                // Show full steps if correct
+                const revealInterval = setInterval(() => {
+                    if(stepIndex < currentQuestion.steps.length) {
+                        showNextStep();
+                    } else {
+                        clearInterval(revealInterval);
+                    }
+                }, 200);
+                
+            } else {
+                feedback.innerHTML = `
+                    <div class="text-red-500 font-extrabold text-2xl mb-1"><i class="fas fa-times-circle"></i> SAI RỒI!</div>
+                    <div class="text-gray-800 text-lg mb-2">Đáp án đúng: <strong>${currentQuestion.answer}</strong></div>
+                    <div class="text-sm text-gray-500 bg-white inline-block px-3 py-1 rounded-full border">Xem hướng dẫn chi tiết bên cạnh nhé! 👉</div>
+                `;
+                feedback.className = "text-center fade-in mt-4 p-4 rounded-xl bg-red-50 border-2 border-red-200 shadow-md";
+                
+                // Auto reveal all steps if wrong
+                const revealInterval = setInterval(() => {
+                    if(stepIndex < currentQuestion.steps.length) {
+                        showNextStep();
+                    } else {
+                        clearInterval(revealInterval);
+                    }
+                }, 800);
+            }
+            feedback.classList.remove('hidden');
+        }
+
+        // Init
+        window.onload = () => {
+            setMode('find_k');
+        };
+
+    </script>
+</body>
+</html>

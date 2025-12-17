@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toán 6/7 - Làm Tròn & Ước Lượng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+        }
+        .chalkboard {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border: 8px solid #d35400;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .chalk-text {
+            font-family: 'Nunito', cursive; 
+        }
+        .btn-mode {
+            transition: all 0.2s;
+            border-bottom: 4px solid transparent;
+        }
+        .btn-mode:active {
+            transform: translateY(2px);
+            border-bottom: 0;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .step-item {
+            border-left: 3px solid #3498db;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.5s ease;
+        }
+        .step-item.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .highlight-digit {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .target-digit {
+            color: #f1c40f;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-decoration: underline;
+        }
+        /* Custom scrollbar for chalkboard */
+        #explanation-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        #explanation-area::-webkit-scrollbar-track {
+            background: #2c3e50; 
+        }
+        #explanation-area::-webkit-scrollbar-thumb {
+            background: #7f8c8d; 
+            border-radius: 4px;
+        }
+        #explanation-area::-webkit-scrollbar-thumb:hover {
+            background: #95a5a6; 
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-2">
+                <i class="fas fa-calculator mr-2"></i>Làm Tròn & Ước Lượng
+            </h1>
+            <p class="text-gray-600 text-lg">Hệ thống hỗ trợ số lớn & số âm</p>
+        </header>
+
+        <!-- Mode Selection -->
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button onclick="setMode('rounding')" id="btn-rounding" class="btn-mode px-6 py-3 bg-white border-2 border-blue-200 rounded-xl hover:bg-blue-50 hover:border-blue-400 font-bold text-blue-600 shadow-sm">
+                <i class="fas fa-bullseye mr-2"></i>Làm tròn số
+            </button>
+            <button onclick="setMode('estimate_sum')" id="btn-estimate-sum" class="btn-mode px-6 py-3 bg-white border-2 border-green-200 rounded-xl hover:bg-green-50 hover:border-green-400 font-bold text-green-600 shadow-sm">
+                <i class="fas fa-plus-minus mr-2"></i>Ước lượng Tổng/Hiệu
+            </button>
+            <button onclick="setMode('estimate_prod')" id="btn-estimate-prod" class="btn-mode px-6 py-3 bg-white border-2 border-purple-200 rounded-xl hover:bg-purple-50 hover:border-purple-400 font-bold text-purple-600 shadow-sm">
+                <i class="fas fa-times mr-2"></i>Ước lượng Tích
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column: Question & Interaction -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 border-t-8 border-blue-500">
+                <div class="flex justify-between items-center mb-6">
+                    <span id="question-type" class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">Làm tròn số</span>
+                    <div class="text-gray-400">
+                        <i class="fas fa-star text-yellow-400"></i> Điểm: <span id="score" class="font-bold text-gray-700">0</span>
+                    </div>
+                </div>
+
+                <div class="mb-8 text-center">
+                    <div id="question-display" class="text-3xl font-bold text-gray-800 mb-4 leading-relaxed">
+                        Đang tải câu hỏi...
+                    </div>
+                    
+                    <div class="flex justify-center items-center gap-4 max-w-md mx-auto">
+                        <!-- Type text to allow space, comma and negative sign -->
+                        <input type="text" inputmode="decimal" id="user-answer" 
+                            class="w-full text-center text-2xl p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
+                            placeholder="Nhập đáp án (ví dụ: -2 500)"
+                            onkeypress="handleKeyPress(event)">
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 italic">Dùng dấu trừ (-) cho số âm. Dấu phẩy (,) cho số thập phân.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="checkAnswer()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transform active:scale-95 transition-all text-lg">
+                        Kiểm tra
+                    </button>
+                    <button onclick="nextQuestion()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl shadow transform active:scale-95 transition-all text-lg">
+                        Câu khác <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+
+                <!-- Feedback Area -->
+                <div id="feedback" class="hidden mt-6">
+                    <!-- Content injected by JS -->
+                </div>
+            </div>
+
+            <!-- Right Column: Chalkboard Explanation -->
+            <div class="chalkboard p-6 h-[500px] relative">
+                <div class="border-b border-gray-600 pb-3 mb-4 flex justify-between items-center flex-shrink-0">
+                    <h3 class="text-xl font-bold text-yellow-400"><i class="fas fa-chalkboard-teacher mr-2"></i>Hướng dẫn giải</h3>
+                    <span class="text-xs text-gray-400 italic">Làm tròn đến hàng cao nhất</span>
+                </div>
+                
+                <!-- Scrollable Content -->
+                <div id="explanation-area" class="flex-grow chalk-text text-lg space-y-4 overflow-y-auto pb-16">
+                    <div class="text-gray-400 text-center mt-10 italic">
+                        Hãy chọn câu hỏi và thử làm bài.<br>
+                        Sau khi kiểm tra, bấm nút bên dưới để xem từng bước giải.
+                    </div>
+                </div>
+
+                <!-- Next Step Button (Floating at bottom) -->
+                <div id="step-controls" class="absolute bottom-4 left-0 right-0 flex justify-center hidden">
+                    <button onclick="showNextStep()" class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-full shadow-lg transform active:scale-95 transition-all animate-bounce">
+                        <i class="fas fa-shoe-prints mr-2"></i> Xem bước tiếp theo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        let currentMode = 'rounding';
+        let currentQuestion = {};
+        let score = 0;
+        
+        // Manual Step Logic Variables
+        let stepQueue = [];
+        let currentStepIndex = 0;
+
+        // Utility: Format number with spaces for thousands and comma for decimal
+        // 1234.5 -> "1 234,5"
+        const formatNum = (num) => {
+            const cleanNum = parseFloat(num.toPrecision(12));
+            // Get standard vi-VN: 1.234,56
+            let str = cleanNum.toLocaleString('vi-VN');
+            // Replace dots with spaces
+            return str.replace(/\./g, ' ');
+        };
+
+        // Utility: Round to specific place
+        const roundToPlace = (num, precision) => {
+            if (precision < 1) {
+                const factor = 1 / precision;
+                return Math.round(num * factor) / factor;
+            } else {
+                return Math.round(num / precision) * precision;
+            }
+        };
+
+        const getPlaceName = (placeValue) => {
+            if (placeValue === 0.01) return 'phần trăm';
+            if (placeValue === 0.1) return 'phần mười';
+            if (placeValue === 1) return 'đơn vị';
+            if (placeValue === 10) return 'chục';
+            if (placeValue === 100) return 'trăm';
+            if (placeValue === 1000) return 'nghìn';
+            if (placeValue === 10000) return 'chục nghìn';
+            if (placeValue === 100000) return 'trăm nghìn';
+            if (placeValue === 1000000) return 'triệu';
+            if (placeValue === 10000000) return 'chục triệu';
+            if (placeValue === 100000000) return 'trăm triệu';
+            if (placeValue === 1000000000) return 'tỉ';
+            if (placeValue === 10000000000) return 'chục tỉ';
+            if (placeValue === 100000000000) return 'trăm tỉ';
+            
+            // Fallback for huge numbers
+            if (placeValue > 1000000000) return 'tỉ (hoặc lớn hơn)';
+            
+            return 'cao nhất';
+        };
+
+        const getHighestPlaceInfo = (num) => {
+            const numAbs = Math.abs(num);
+            if (numAbs === 0) return { value: 1, name: 'đơn vị', digit: 0, nextDigit: 0 };
+            
+            const magnitude = Math.floor(Math.log10(numAbs));
+            const placeValue = Math.pow(10, magnitude);
+            
+            const digit = Math.floor(numAbs / placeValue);
+            
+            const remainder = numAbs % placeValue;
+            const nextPlaceValue = placeValue / 10;
+            const nextDigit = Math.floor(remainder / nextPlaceValue);
+
+            return {
+                value: placeValue,
+                name: getPlaceName(placeValue),
+                digit: digit,
+                nextDigit: nextDigit
+            };
+        };
+
+        // Function to generate random integer with varying magnitude
+        const generateRandomLargeInt = (minMagnitude = 2, maxMagnitude = 11) => {
+            const power = Math.floor(Math.random() * (maxMagnitude - minMagnitude + 1)) + minMagnitude;
+            const min = Math.pow(10, power);
+            const max = Math.pow(10, power + 1) - 1;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        };
+
+        // Helper to format number with parenthesis if negative
+        const formatWithParen = (num) => {
+            const s = formatNum(num);
+            return num < 0 ? `(${s})` : s;
+        };
+
+        // GENERATORS
+        const generateRoundingQuestion = () => {
+            const isDecimal = Math.random() < 0.3; 
+            const isNegative = Math.random() < 0.4; // 40% chance of negative number
+
+            let num, placeValue, placeName, targetDigit, nextDigit;
+            let steps = [];
+
+            if (isDecimal) {
+                const intPart = Math.floor(Math.random() * 100); 
+                const decPart = Math.floor(Math.random() * 900) + 100;
+                num = parseFloat(`${intPart}.${decPart}`);
+                const options = [1, 0.1, 0.01];
+                placeValue = options[Math.floor(Math.random() * options.length)];
+                
+                // For logic extraction, we use absolute value
+                const shifted = num / placeValue; 
+                targetDigit = Math.floor(Math.abs(shifted)) % 10;
+                nextDigit = Math.floor(Math.abs(shifted * 10)) % 10;
+
+            } else {
+                num = generateRandomLargeInt(2, 11); 
+                const numStr = num.toString();
+                const maxPower = numStr.length - 1;
+                
+                const targetPower = Math.floor(Math.random() * maxPower) + 1; 
+                placeValue = Math.pow(10, targetPower);
+                
+                targetDigit = Math.floor((num / placeValue) % 10);
+                nextDigit = Math.floor((num / (placeValue/10)) % 10);
+            }
+
+            // Apply sign
+            if (isNegative) num = -num;
+
+            placeName = getPlaceName(placeValue);
+            const answer = roundToPlace(num, placeValue);
+            const absAnswer = roundToPlace(Math.abs(num), placeValue); // Round of absolute
+
+            // Build Steps
+            if (isNegative) {
+                steps.push(`Vì đây là số âm, ta xét số đối của nó là: <strong>${formatNum(Math.abs(num))}</strong>.`);
+                steps.push(`Ta làm tròn số dương <strong>${formatNum(Math.abs(num))}</strong> đến hàng ${placeName}.`);
+            } else {
+                steps.push(`Xác định hàng làm tròn: Hàng <strong>${placeName}</strong>.`);
+            }
+
+            steps.push(`Chữ số ở hàng ${placeName} (của phần số) là <span class="target-digit">${targetDigit}</span>.`);
+            steps.push(`Chữ số ngay bên phải là <span class="highlight-digit">${nextDigit}</span>.`);
+            
+            steps.push(nextDigit >= 5 
+                ? `Vì <span class="highlight-digit">${nextDigit}</span> $\\ge$ 5, nên ta <strong>tăng</strong> chữ số hàng làm tròn thêm 1 đơn vị.`
+                : `Vì <span class="highlight-digit">${nextDigit}</span> < 5, nên ta <strong>giữ nguyên</strong> chữ số hàng làm tròn.`);
+
+            if (isNegative) {
+                steps.push(`Làm tròn số dương ta được: <strong>${formatNum(absAnswer)}</strong>.`);
+                steps.push(`Đặt dấu "trừ" trước kết quả vừa tìm được.`);
+                steps.push(`Kết quả cuối cùng: <strong>${formatNum(answer)}</strong>.`);
+            } else {
+                steps.push(placeValue >= 1 && !Number.isInteger(placeValue)
+                    ? `Các chữ số ở phần thập phân phía sau bị bỏ đi.`
+                    : (placeValue >= 10 ? `Các chữ số ở hàng thấp hơn được thay bằng số 0.` : `Phần thập phân phía sau được bỏ đi.`));
+                steps.push(`Kết quả: <strong>${formatNum(answer)}</strong>`);
+            }
+
+            return {
+                question: `Làm tròn số <strong>${formatNum(num)}</strong> đến hàng <strong>${placeName}</strong>.`,
+                answer: answer,
+                steps: steps
+            };
+        };
+
+        const generateEstimationQuestion = (isProduct = false) => {
+            let n1, n2;
+            const allowDecimal = Math.random() < 0.2; 
+            
+            // Random signs
+            const sign1 = Math.random() < 0.3 ? -1 : 1;
+            const sign2 = Math.random() < 0.3 ? -1 : 1;
+
+            if (isProduct) {
+                if (allowDecimal) {
+                     n1 = parseFloat((Math.random() * 10 + 1).toFixed(1)); 
+                     n2 = Math.floor(Math.random() * 20) + 2;
+                } else {
+                    const randType = Math.random();
+                    if (randType < 0.4) {
+                         n1 = generateRandomLargeInt(2, 4); 
+                         n2 = generateRandomLargeInt(2, 3); 
+                    } else {
+                        n1 = generateRandomLargeInt(5, 10);
+                        n2 = Math.floor(Math.random() * 9) + 2;
+                    }
+                }
+            } else {
+                if (allowDecimal) {
+                    n1 = parseFloat((Math.random() * 1000 + 10).toFixed(1)); 
+                    n2 = parseFloat((Math.random() * 1000 + 10).toFixed(1));
+                } else {
+                    const magnitude = Math.floor(Math.random() * 7) + 3;
+                    const min = Math.pow(10, magnitude);
+                    const max = Math.pow(10, magnitude + 1) - 1;
+                    n1 = Math.floor(Math.random() * (max - min)) + min;
+                    n2 = Math.floor(Math.random() * (max - min)) + min;
+                }
+            }
+
+            // Apply signs
+            n1 = n1 * sign1;
+            n2 = n2 * sign2;
+
+            const info1 = getHighestPlaceInfo(n1);
+            const info2 = getHighestPlaceInfo(n2);
+
+            const round1 = roundToPlace(n1, info1.value);
+            const round2 = roundToPlace(n2, info2.value);
+
+            let operation = '+';
+            let rawResult = 0;
+
+            if (isProduct) {
+                operation = '×';
+                rawResult = round1 * round2;
+            } else {
+                if (Math.random() > 0.5) {
+                    operation = '+';
+                    rawResult = round1 + round2;
+                } else {
+                    operation = '-';
+                    // We don't swap if negative involved, let them calculate negative results
+                    rawResult = round1 - round2;
+                }
+            }
+
+            // Steps generation for Negative Numbers
+            const steps = [
+                `Quy tắc: Làm tròn từng số đến <strong>hàng cao nhất</strong> của nó.`,
+                `<strong>Số ${formatNum(n1)}:</strong> Hàng cao nhất là hàng ${info1.name}. ${n1 < 0 ? '(Làm tròn số đối rồi thêm dấu trừ)' : ''}
+                 <br>$\u2192$ Làm tròn thành: <span class="text-yellow-300 font-bold">${formatNum(round1)}</span>`,
+                `<strong>Số ${formatNum(n2)}:</strong> Hàng cao nhất là hàng ${info2.name}. ${n2 < 0 ? '(Làm tròn số đối rồi thêm dấu trừ)' : ''}
+                 <br>$\u2192$ Làm tròn thành: <span class="text-yellow-300 font-bold">${formatNum(round2)}</span>`,
+                `Thực hiện phép tính với số đã làm tròn:`,
+                `${formatWithParen(round1)} ${operation} ${formatWithParen(round2)} = <strong>${formatNum(rawResult)}</strong>`
+            ];
+
+            return {
+                question: `Ước lượng kết quả phép tính: <br> <span class="text-4xl text-blue-600 mt-2 block break-all">${formatWithParen(n1)} ${operation} ${formatWithParen(n2)}</span>`,
+                answer: rawResult,
+                steps: steps
+            };
+        };
+
+        // UI & CONTROL LOGIC
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.btn-mode').forEach(btn => {
+                btn.classList.remove('bg-blue-50', 'bg-green-50', 'bg-purple-50', 'border-blue-400', 'border-green-400', 'border-purple-400');
+                btn.classList.add('bg-white');
+            });
+
+            const activeBtn = document.getElementById(
+                mode === 'rounding' ? 'btn-rounding' : 
+                mode === 'estimate_sum' ? 'btn-estimate-sum' : 'btn-estimate-prod'
+            );
+            
+            const colorClass = mode === 'rounding' ? 'blue' : (mode === 'estimate_sum' ? 'green' : 'purple');
+            activeBtn.classList.remove('bg-white');
+            activeBtn.classList.add(`bg-${colorClass}-50`, `border-${colorClass}-400`);
+            
+            document.getElementById('question-type').innerText = 
+                mode === 'rounding' ? 'Làm tròn số (Có số âm)' : 
+                mode === 'estimate_sum' ? 'Ước lượng Tổng/Hiệu' : 'Ước lượng Tích';
+
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            document.getElementById('user-answer').value = '';
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('explanation-area').innerHTML = '<div class="text-gray-400 text-center mt-10 italic">Đang chờ câu trả lời...</div>';
+            document.getElementById('step-controls').classList.add('hidden');
+            document.getElementById('user-answer').focus();
+
+            if (currentMode === 'rounding') {
+                currentQuestion = generateRoundingQuestion();
+            } else if (currentMode === 'estimate_sum') {
+                currentQuestion = generateEstimationQuestion(false);
+            } else {
+                currentQuestion = generateEstimationQuestion(true);
+            }
+
+            document.getElementById('question-display').innerHTML = currentQuestion.question;
+        }
+
+        function checkAnswer() {
+            let rawInput = document.getElementById('user-answer').value;
+            rawInput = rawInput.trim();
+            // Handle space thousand separators, comma decimals, and minus sign
+            // Remove spaces, replace comma with dot. Keep minus.
+            let standardInput = rawInput.replace(/\s/g, '').replace(/,/g, '.');
+            
+            // Remove internal dots that were thousand separators (e.g. 1.000 -> 1000)
+            // But 1.5 (if user typed dot for decimal) stays 1.5. 
+            // However, we enforce comma for decimal in instruction. 
+            // If text contains both dot and comma? Comma is decimal.
+            // Simple approach: remove all dots, then use replaced comma.
+            
+            // Standard approach for this input:
+            // 1. Remove spaces (thousand sep)
+            // 2. Replace comma with special token
+            // 3. Remove all dots
+            // 4. Replace token with dot
+            
+            let clean = rawInput.replace(/\s/g, ''); // Remove spaces
+            clean = clean.replace(/,/g, 'DECIMAL');
+            clean = clean.replace(/\./g, ''); // Remove thousand dots
+            clean = clean.replace(/DECIMAL/g, '.');
+
+            if (clean === '' || clean === '-') return;
+
+            const userVal = parseFloat(clean);
+            const correctVal = parseFloat(currentQuestion.answer.toPrecision(12));
+
+            const feedback = document.getElementById('feedback');
+            const explanationArea = document.getElementById('explanation-area');
+            
+            explanationArea.innerHTML = ''; 
+            
+            // Setup for step-by-step
+            stepQueue = currentQuestion.steps;
+            currentStepIndex = 0;
+            document.getElementById('step-controls').classList.remove('hidden');
+
+            if (Math.abs(userVal - correctVal) < 0.0000001) {
+                score += 10;
+                document.getElementById('score').innerText = score;
+                feedback.innerHTML = `
+                    <div class="text-green-600 font-bold text-2xl mb-2"><i class="fas fa-check-circle"></i> Chính xác!</div>
+                    <div class="text-sm text-gray-500">Bấm nút "Xem bước tiếp theo" để xem lại các bước giải nhé.</div>
+                `;
+                feedback.className = "text-center fade-in mt-4 p-4 rounded-xl bg-green-50 border-2 border-green-200";
+            } else {
+                feedback.innerHTML = `
+                    <div class="text-red-500 font-bold text-2xl mb-2"><i class="fas fa-times-circle"></i> Chưa đúng rồi!</div>
+                    <div class="text-gray-800 text-lg mb-2">Đáp án đúng là: <strong>${formatNum(currentQuestion.answer)}</strong></div>
+                    <div class="text-sm text-gray-500">Bấm nút "Xem bước tiếp theo" để hiểu cách làm nhé!</div>
+                `;
+                feedback.className = "text-center fade-in mt-4 p-4 rounded-xl bg-red-50 border-2 border-red-200";
+            }
+            feedback.classList.remove('hidden');
+        }
+
+        function showNextStep() {
+            if (currentStepIndex >= stepQueue.length) return;
+
+            const container = document.getElementById('explanation-area');
+            const text = stepQueue[currentStepIndex];
+            
+            const div = document.createElement('div');
+            div.className = 'step-item show'; // Add 'show' immediately for animation
+            div.innerHTML = `<div class="font-bold text-yellow-500 text-sm mb-1">Bước ${currentStepIndex + 1}:</div><div>${text}</div>`;
+            container.appendChild(div);
+            
+            // Auto scroll
+            container.scrollTop = container.scrollHeight;
+
+            currentStepIndex++;
+
+            // Hide button if done
+            if (currentStepIndex >= stepQueue.length) {
+                document.getElementById('step-controls').classList.add('hidden');
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        }
+
+        window.onload = () => {
+            setMode('rounding');
+        };
+
+    </script>
+</body>
+</html>
