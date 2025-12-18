@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Thi Toán 6 - Bài 2: Thực Hiện Phép Tính</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* Green tint */
+            background-image: radial-gradient(#86efac 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .chalkboard {
+            background-color: #1a2e1a; /* Dark Green Board */
+            color: #ecf0f1;
+            border: 8px solid #5d4037; /* Wood color */
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 280px;
+        }
+        .btn-mode {
+            transition: all 0.2s;
+            border-bottom: 4px solid transparent;
+        }
+        .btn-mode:active {
+            transform: translateY(2px);
+            border-bottom-width: 0;
+        }
+        .mode-active {
+            background-color: #15803d !important; /* green-700 */
+            color: white !important;
+            border-bottom: 4px solid #14532d !important; /* green-900 */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Animation for steps */
+        .step-row {
+            opacity: 0;
+            transform: translateX(-10px);
+            animation: slideIn 0.3s forwards;
+        }
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        #steps-container::-webkit-scrollbar { width: 8px; }
+        #steps-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        #steps-container::-webkit-scrollbar-thumb { background: #86efac; border-radius: 4px; }
+        #steps-container::-webkit-scrollbar-thumb:hover { background: #4ade80; }
+
+        /* Math Display Styles */
+        .math-font {
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 md:p-6">
+
+    <div class="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-green-200">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-green-700 to-emerald-500 p-4 md:p-6 text-center relative shadow-lg">
+            <h1 class="text-2xl md:text-4xl font-extrabold text-white uppercase tracking-wider drop-shadow-md">
+                <i class="fas fa-calculator mr-3"></i>Ôn Tập Toán 6 - BÀI 2
+            </h1>
+            <p class="text-green-50 mt-2 text-sm md:text-base font-semibold">THỰC HIỆN PHÉP TÍNH & TÍNH NHANH</p>
+            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white font-bold border border-white/30 shadow-sm">
+                Điểm: <span id="score" class="text-yellow-300 text-xl">0</span>
+            </div>
+        </div>
+
+        <div class="p-4 md:p-6 space-y-6">
+            
+            <!-- Mode Selection -->
+            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 shadow-inner">
+                <label class="block text-gray-700 font-bold mb-3 text-sm uppercase tracking-wide flex items-center">
+                    <i class="fas fa-layer-group text-green-700 mr-2"></i>Chọn dạng bài ưu tiên:
+                </label>
+                
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="setMode('mix')" id="btn-mix" class="btn-mode flex-1 min-w-[120px] bg-yellow-100 border border-yellow-300 text-yellow-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-yellow-200">
+                        <i class="fas fa-random mr-1"></i> Tổng hợp
+                    </button>
+                    
+                    <button onclick="setMode('typeA')" id="btn-typeA" class="btn-mode flex-1 min-w-[150px] bg-blue-100 border border-blue-300 text-blue-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-blue-200">
+                        <i class="fas fa-cubes mr-1"></i> Câu A (3 số)
+                    </button>
+
+                    <button onclick="setMode('typeB')" id="btn-typeB" class="btn-mode flex-1 min-w-[150px] bg-purple-100 border border-purple-300 text-purple-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-purple-200">
+                        <i class="fas fa-times mr-1"></i> Câu B (Tổng Tích)
+                    </button>
+                    
+                    <button onclick="setMode('smart')" id="btn-smart" class="btn-mode flex-1 min-w-[120px] bg-red-100 border border-red-300 text-red-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-red-200">
+                        <i class="fas fa-bolt mr-1"></i> Tính nhanh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left: Question Board -->
+                <div class="flex flex-col h-full">
+                    <div class="chalkboard p-6 md:p-8">
+                        <div class="absolute top-4 left-4 text-gray-400 text-xs font-mono border border-gray-500 px-2 py-1 rounded">
+                            <i class="fas fa-tag mr-1"></i><span id="question-type-label">...</span>
+                        </div>
+                        
+                        <div id="question-text" class="text-2xl md:text-4xl font-bold tracking-wider mb-6 font-mono leading-relaxed text-center math-font">
+                            Loading...
+                        </div>
+                        
+                        <div class="text-gray-400 text-sm mt-auto border-t border-gray-600 pt-4 w-full text-center">
+                            <i class="fas fa-info-circle mr-1"></i> <span id="input-hint">Tính giá trị của biểu thức</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Step-by-step & Hint Area -->
+                <div class="bg-white rounded-2xl border-2 border-dashed border-green-300 p-5 flex flex-col h-full shadow-sm max-h-[450px]">
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                        <h3 class="font-bold text-gray-700 flex items-center">
+                            <span class="bg-green-100 text-green-700 p-1.5 rounded-lg mr-2"><i class="fas fa-shoe-prints"></i></span>
+                            Lời giải
+                        </h3>
+                        <button onclick="showNextStep()" id="btn-show-step" class="bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i> Gợi ý
+                        </button>
+                    </div>
+                    
+                    <!-- Rule Hint Box -->
+                    <div id="rule-hint" class="hidden mb-3 text-sm bg-yellow-50 text-yellow-800 p-3 rounded-xl border border-yellow-200 flex items-start">
+                        <i class="fas fa-star text-yellow-500 mt-1 mr-2 flex-shrink-0"></i>
+                        <span id="rule-content" class="font-medium"></span>
+                    </div>
+
+                    <!-- Steps Container (Table-like structure) -->
+                    <div id="steps-container" class="flex-grow overflow-y-auto pr-2">
+                        <!-- Steps will appear here as rows -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center pt-2">
+                <div class="relative w-full md:w-1/3">
+                    <input type="text" id="user-answer" placeholder="Nhập kết quả..." autocomplete="off"
+                        class="w-full text-center text-2xl font-bold p-3 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-100 focus:outline-none transition-all placeholder-gray-300 math-font"
+                        onkeydown="if(event.key === 'Enter') checkAnswer()">
+                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs hidden md:block">
+                        ENTER
+                    </div>
+                </div>
+                
+                <button onclick="checkAnswer()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all shadow-lg transform hover:-translate-y-1 active:translate-y-0 flex items-center justify-center min-w-[140px]">
+                    <i class="fas fa-check mr-2"></i> Kiểm tra
+                </button>
+                
+                <button onclick="nextQuestion()" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl text-lg transition-colors flex items-center justify-center">
+                    <i class="fas fa-forward mr-2"></i> Câu khác
+                </button>
+            </div>
+
+            <!-- Result Feedback -->
+            <div id="feedback" class="hidden transform transition-all duration-300 ease-out origin-top"></div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        let currentQuestion = {};
+        let score = 0;
+        let isAnswered = false;
+        let currentMode = 'mix';
+        let stepIndex = 0;
+
+        // --- Utility Functions ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function fmt(num) {
+            return num < 0 ? `(${num})` : `${num}`;
+        }
+        
+        // --- Logic Generators (Updated for Step Objects) ---
+
+        // CÂU A: TỔNG HIỆU 3 SỐ NGUYÊN
+        function generateTypeA() {
+            const a = getRandomInt(-20, 20);
+            const b = getRandomInt(-20, 20);
+            const c = getRandomInt(-20, 20);
+            
+            const op1 = Math.random() > 0.5 ? '+' : '-';
+            const op2 = Math.random() > 0.5 ? '+' : '-';
+            
+            const display = `${fmt(a)} ${op1} ${fmt(b)} ${op2} ${fmt(c)}`;
+            
+            let val1 = a;
+            let val2 = (op1 === '+') ? b : -b;
+            let val3 = (op2 === '+') ? c : -c;
+            
+            let step1_res = val1 + val2;
+            let final_res = step1_res + val3;
+
+            // Steps logic: Math only in 'math', Explanation in 'note'
+            let steps = [
+                { 
+                    math: `= ${step1_res} ${op2} ${fmt(c)}`, 
+                    note: `(Tính từ trái sang phải: ${fmt(a)} ${op1} ${fmt(b)} = ${step1_res})` 
+                },
+                { 
+                    math: `= ${final_res}`, 
+                    note: `` 
+                }
+            ];
+
+            return {
+                label: "Câu A: Cộng Trừ 3 Số",
+                display: display,
+                answer: final_res,
+                hintRule: "Thực hiện phép tính từ trái sang phải.",
+                steps: steps
+            };
+        }
+
+        // CÂU B: TỔNG HIỆU CÁC TÍCH
+        function generateTypeB() {
+            const subtype = Math.random() > 0.3 ? 2 : 3; 
+            let steps = [];
+            let display = "";
+            let final_res = 0;
+
+            if (subtype === 2) {
+                // a.b +/- c.d
+                const a = getRandomInt(-10, 10);
+                const b = getRandomInt(-10, 10);
+                const c = getRandomInt(-10, 10);
+                const d = getRandomInt(-10, 10);
+                
+                const p1 = a * b;
+                const p2 = c * d;
+                const op = Math.random() > 0.5 ? '+' : '-';
+                
+                display = `${fmt(a)} . ${fmt(b)} ${op} ${fmt(c)} . ${fmt(d)}`;
+                final_res = (op === '+') ? (p1 + p2) : (p1 - p2);
+
+                steps = [
+                    {
+                        math: `= ${p1} ${op} ${fmt(p2)}`,
+                        note: `(Thực hiện nhân chia trước: ${fmt(a)}.${fmt(b)}=${p1} và ${fmt(c)}.${fmt(d)}=${p2})`
+                    },
+                    {
+                        math: `= ${final_res}`,
+                        note: ``
+                    }
+                ];
+            } else {
+                // a.b +/- c.d +/- e.f
+                const a = getRandomInt(-5, 5) || 2;
+                const b = getRandomInt(-10, 10);
+                const c = getRandomInt(-5, 5) || 2;
+                const d = getRandomInt(-10, 10);
+                const e = getRandomInt(-5, 5) || 2;
+                const f = getRandomInt(-10, 10);
+
+                const p1 = a * b;
+                const p2 = c * d;
+                const p3 = e * f;
+
+                const op1 = Math.random() > 0.5 ? '+' : '-';
+                const op2 = Math.random() > 0.5 ? '+' : '-';
+
+                display = `${fmt(a)}.${fmt(b)} ${op1} ${fmt(c)}.${fmt(d)} ${op2} ${fmt(e)}.${fmt(f)}`;
+                
+                let temp = (op1 === '+') ? (p1 + p2) : (p1 - p2);
+                final_res = (op2 === '+') ? (temp + p3) : (temp - p3);
+
+                steps = [
+                    {
+                        math: `= ${p1} ${op1} ${fmt(p2)} ${op2} ${fmt(p3)}`,
+                        note: `(Tính các tích trước)`
+                    },
+                    {
+                        math: `= ${temp} ${op2} ${fmt(p3)}`,
+                        note: `(Thực hiện phép tính đầu tiên)`
+                    },
+                    {
+                        math: `= ${final_res}`,
+                        note: ``
+                    }
+                ];
+            }
+
+            return {
+                label: "Câu B: Tổng Hiệu Tích",
+                display: display,
+                answer: final_res,
+                hintRule: "Ưu tiên phép nhân trước, sau đó cộng trừ.",
+                steps: steps
+            };
+        }
+
+        // TÍNH NHANH
+        function generateSmart() {
+            const type = getRandomInt(0, 1);
+            let display = "", steps = [], result = 0;
+
+            if (type === 0) { // Distributive
+                const A = getRandomInt(-20, 20) || 5;
+                const B = getRandomInt(10, 90);
+                const targetSum = (Math.random() > 0.5) ? 100 : -100;
+                const C = targetSum - B;
+                result = A * (B + C);
+                
+                display = `${fmt(A)} . ${fmt(B)} + ${fmt(A)} . ${fmt(C)}`;
+                
+                steps = [
+                    { math: `= ${fmt(A)} . [ ${fmt(B)} + ${fmt(C)} ]`, note: `(Đặt thừa số chung ${A})` },
+                    { math: `= ${fmt(A)} . ${targetSum}`, note: `(Tính tổng trong ngoặc)` },
+                    { math: `= ${result}`, note: `` }
+                ];
+            } else { // Grouping
+                const A = getRandomInt(10, 50); 
+                const C = 100 - A;
+                const B = getRandomInt(-50, -10);
+                const D = -100 - B;
+                result = (A+C) + (B+D);
+                
+                display = `${A} + ${fmt(B)} + ${C} + ${fmt(D)}`;
+                
+                steps = [
+                    { math: `= (${A} + ${C}) + (${fmt(B)} + ${fmt(D)})`, note: `(Nhóm các số tròn chục/trăm)` },
+                    { math: `= 100 + (${B+D})`, note: `(Tính giá trị từng nhóm)` },
+                    { math: `= ${result}`, note: `` }
+                ];
+            }
+            return { label: "Tính Nhanh", display, answer: result, hintRule: "Sử dụng tính chất phân phối hoặc giao hoán/kết hợp.", steps };
+        }
+
+        // LŨY THỪA
+        function generateOrder() {
+            const base = getRandomInt(2, 5);
+            const exp = getRandomInt(2, 3);
+            const pow = Math.pow(base, exp);
+            const a = getRandomInt(2, 5);
+            const b = getRandomInt(10, 50);
+            
+            const result = a * pow - b;
+            const display = `${a} . ${base}<sup>${exp}</sup> - ${b}`;
+            
+            let steps = [
+                { math: `= ${a} . ${pow} - ${b}`, note: `(Tính lũy thừa: ${base}^${exp} = ${pow})` },
+                { math: `= ${a * pow} - ${b}`, note: `(Thực hiện phép nhân)` },
+                { math: `= ${result}`, note: `` }
+            ];
+            
+            return {
+                label: "Lũy Thừa",
+                display: display,
+                answer: result,
+                hintRule: "Thứ tự: Lũy thừa -> Nhân/Chia -> Cộng/Trừ",
+                steps: steps
+            };
+        }
+
+        // --- Controller ---
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.btn-mode').forEach(btn => btn.classList.remove('mode-active'));
+            document.getElementById(`btn-${mode}`).classList.add('mode-active');
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            // Reset UI
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('user-answer').value = '';
+            document.getElementById('user-answer').disabled = false;
+            document.getElementById('user-answer').focus();
+            document.getElementById('rule-hint').classList.add('hidden');
+            document.getElementById('steps-container').innerHTML = '';
+            
+            stepIndex = 0;
+            const btnStep = document.getElementById('btn-show-step');
+            btnStep.disabled = false;
+            btnStep.innerHTML = '<i class="fas fa-lightbulb mr-2"></i> Gợi ý';
+            btnStep.className = 'bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center';
+
+            isAnswered = false;
+
+            // Generate Logic
+            if (currentMode === 'typeA') currentQuestion = generateTypeA();
+            else if (currentMode === 'typeB') currentQuestion = generateTypeB();
+            else if (currentMode === 'smart') currentQuestion = generateSmart();
+            else {
+                const rand = Math.random();
+                if (rand < 0.40) currentQuestion = generateTypeA();
+                else if (rand < 0.80) currentQuestion = generateTypeB();
+                else if (rand < 0.90) currentQuestion = generateSmart();
+                else currentQuestion = generateOrder();
+            }
+
+            // Render
+            document.getElementById('question-text').innerHTML = currentQuestion.display;
+            document.getElementById('question-type-label').textContent = currentQuestion.label;
+        }
+
+        function showNextStep() {
+            const container = document.getElementById('steps-container');
+            
+            // Show Rule Hint first
+            if (stepIndex === 0 && currentQuestion.hintRule) {
+                document.getElementById('rule-content').textContent = currentQuestion.hintRule;
+                document.getElementById('rule-hint').classList.remove('hidden');
+            }
+
+            if (stepIndex < currentQuestion.steps.length) {
+                const stepData = currentQuestion.steps[stepIndex];
+                
+                // Create row container
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'step-row flex flex-wrap md:flex-nowrap items-baseline mb-3 pb-2 border-b border-gray-100 last:border-0';
+                
+                // 1. Math Part (Bold, Bigger)
+                const mathDiv = document.createElement('div');
+                mathDiv.className = 'font-bold text-xl md:text-2xl text-gray-800 math-font mr-3 w-full md:w-auto flex-shrink-0';
+                // If it's the first step, we might want to repeat the expression line? 
+                // No, per request, just the equals lines.
+                mathDiv.innerHTML = stepData.math;
+                
+                // 2. Note Part (Small, Gray, Italic)
+                const noteDiv = document.createElement('div');
+                noteDiv.className = 'text-sm text-gray-500 italic mt-1 md:mt-0 md:ml-4';
+                noteDiv.innerHTML = stepData.note;
+
+                rowDiv.appendChild(mathDiv);
+                if (stepData.note) rowDiv.appendChild(noteDiv);
+                
+                container.appendChild(rowDiv);
+                container.scrollTop = container.scrollHeight;
+                stepIndex++;
+            }
+
+            if (stepIndex >= currentQuestion.steps.length) {
+                const btn = document.getElementById('btn-show-step');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-check mr-1"></i> Xong';
+                btn.className = 'bg-gray-400 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg cursor-not-allowed flex items-center';
+            }
+        }
+
+        function checkAnswer() {
+            if (isAnswered) return;
+
+            const input = document.getElementById('user-answer');
+            const feedback = document.getElementById('feedback');
+            const userVal = parseInt(input.value.trim());
+
+            if (isNaN(userVal)) {
+                alert("Vui lòng nhập một số nguyên!");
+                return;
+            }
+
+            isAnswered = true;
+            input.disabled = true;
+
+            if (userVal === currentQuestion.answer) {
+                score += 10;
+                document.getElementById('score').textContent = score;
+                feedback.innerHTML = `
+                    <div class="text-green-700 font-bold text-xl mb-1 flex items-center justify-center animate-bounce">
+                        <i class="fas fa-check-circle mr-2 text-3xl"></i> Chính xác!
+                    </div>
+                `;
+                feedback.className = "text-center mt-4 p-4 rounded-xl bg-green-100 border-2 border-green-300 shadow-lg";
+                while(stepIndex < currentQuestion.steps.length) showNextStep();
+            } else {
+                feedback.innerHTML = `
+                    <div class="text-red-600 font-bold text-xl mb-1 flex items-center justify-center">
+                        <i class="fas fa-times-circle mr-2 text-3xl"></i> Sai rồi!
+                    </div>
+                    <div class="text-gray-700 mb-2">Đáp án đúng: <strong class="text-xl text-red-600">${currentQuestion.answer}</strong></div>
+                `;
+                feedback.className = "text-center mt-4 p-4 rounded-xl bg-red-50 border-2 border-red-200 shadow-lg";
+                let intv = setInterval(() => {
+                    if(stepIndex < currentQuestion.steps.length) showNextStep();
+                    else clearInterval(intv);
+                }, 800);
+            }
+            feedback.classList.remove('hidden');
+        }
+
+        window.onload = () => {
+            setMode('mix');
+        };
+    </script>
+</body>
+</html>

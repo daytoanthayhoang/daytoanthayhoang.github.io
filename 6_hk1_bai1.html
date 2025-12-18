@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Thi Toán 6 - Trục Số & So Sánh Số Nguyên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #ecfdf5; /* Green tint for nature/growth */
+            background-image: radial-gradient(#6ee7b7 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .chalkboard {
+            background-color: #064e3b; /* Dark Green Board */
+            color: #ecf0f1;
+            border: 8px solid #92400e; /* Wood border */
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .btn-mode {
+            transition: all 0.2s;
+            border-bottom: 4px solid transparent;
+        }
+        .btn-mode:active {
+            transform: translateY(2px);
+            border-bottom-width: 0;
+        }
+        .mode-active {
+            background-color: #059669 !important; /* emerald-600 */
+            color: white !important;
+            border-bottom: 4px solid #064e3b !important; /* emerald-800 */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .step-item {
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: slideDown 0.4s forwards;
+        }
+        @keyframes slideDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom scrollbar */
+        #steps-container::-webkit-scrollbar { width: 8px; }
+        #steps-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        #steps-container::-webkit-scrollbar-thumb { background: #34d399; border-radius: 4px; }
+        #steps-container::-webkit-scrollbar-thumb:hover { background: #10b981; }
+
+        .number-line-point {
+            transition: all 0.3s ease;
+        }
+        .number-line-point:hover circle {
+            r: 6;
+            fill: #fbbf24;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 md:p-6">
+
+    <div class="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-emerald-200">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 md:p-6 text-center relative shadow-lg">
+            <h1 class="text-2xl md:text-4xl font-extrabold text-white uppercase tracking-wider drop-shadow-md">
+                <i class="fas fa-arrows-alt-h mr-3"></i>Luyện Thi Toán 6 - TRỤC SỐ & SO SÁNH
+            </h1>
+            <p class="text-emerald-100 mt-2 text-sm md:text-base font-semibold">TẬP HỢP SỐ NGUYÊN Z - THỨ TỰ TRONG Z</p>
+            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white font-bold border border-white/30 shadow-sm">
+                Điểm: <span id="score" class="text-yellow-300 text-xl">0</span>
+            </div>
+        </div>
+
+        <div class="p-4 md:p-6 space-y-6">
+            
+            <!-- Mode Selection -->
+            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 shadow-inner">
+                <label class="block text-gray-700 font-bold mb-3 text-sm uppercase tracking-wide flex items-center">
+                    <i class="fas fa-shapes text-emerald-600 mr-2"></i>Chọn dạng bài:
+                </label>
+                
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="setMode('mix')" id="btn-mix" class="btn-mode flex-1 min-w-[120px] bg-red-100 border border-red-300 text-red-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-red-200">
+                        <i class="fas fa-random mr-1"></i> Tổng hợp
+                    </button>
+                    
+                    <button onclick="setMode('compare')" id="btn-compare" class="btn-mode flex-1 min-w-[120px] bg-blue-100 border border-blue-300 text-blue-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-blue-200">
+                        <i class="fas fa-less-than-equal mr-1"></i> So Sánh 2 Số
+                    </button>
+
+                    <button onclick="setMode('order')" id="btn-order" class="btn-mode flex-1 min-w-[120px] bg-purple-100 border border-purple-300 text-purple-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-purple-200">
+                        <i class="fas fa-sort-amount-down mr-1"></i> Sắp Xếp
+                    </button>
+                    
+                    <button onclick="setMode('range')" id="btn-range" class="btn-mode flex-1 min-w-[140px] bg-yellow-100 border border-yellow-300 text-yellow-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-yellow-200">
+                        <i class="fas fa-ellipsis-h mr-1"></i> Liệt Kê (Khoảng)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left: Question Board -->
+                <div class="flex flex-col h-full">
+                    <div class="chalkboard p-4 md:p-6 min-h-[320px] w-full">
+                        <div class="absolute top-4 left-4 text-gray-400 text-xs font-mono border border-gray-500 px-2 py-1 rounded">
+                            <i class="fas fa-tag mr-1"></i><span id="question-type-label">...</span>
+                        </div>
+                        
+                        <!-- Content Area -->
+                        <div id="question-content" class="w-full h-full flex flex-col justify-center items-center space-y-6">
+                            <!-- Text/Math Display -->
+                            <div id="math-display" class="text-3xl md:text-5xl font-bold tracking-wider font-mono text-center">
+                                Loading...
+                            </div>
+                            <!-- Visualization (SVG Number Line) -->
+                            <div id="visual-container" class="w-full flex justify-center mt-4">
+                                <!-- SVG will be injected here -->
+                            </div>
+                        </div>
+
+                        <div class="text-gray-400 text-sm mt-auto border-t border-gray-600 pt-4 w-full text-center absolute bottom-4 left-0 px-6">
+                            <i class="fas fa-info-circle mr-1"></i> <span id="input-hint">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Step-by-step & Hint Area -->
+                <div class="bg-white rounded-2xl border-2 border-dashed border-emerald-300 p-5 flex flex-col h-full shadow-sm">
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                        <h3 class="font-bold text-gray-700 flex items-center">
+                            <span class="bg-emerald-100 text-emerald-700 p-1.5 rounded-lg mr-2"><i class="fas fa-list-ol"></i></span>
+                            Hướng dẫn giải
+                        </h3>
+                        <button onclick="showNextStep()" id="btn-show-step" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i> Gợi ý
+                        </button>
+                    </div>
+                    
+                    <!-- Rule Hint Box -->
+                    <div id="rule-hint" class="hidden mb-3 text-sm bg-yellow-50 text-yellow-800 p-3 rounded-xl border border-yellow-200 flex items-start">
+                        <i class="fas fa-star text-yellow-500 mt-1 mr-2 flex-shrink-0"></i>
+                        <span id="rule-content" class="font-medium"></span>
+                    </div>
+
+                    <!-- Steps Container -->
+                    <div id="steps-container" class="flex-grow space-y-3 overflow-y-auto max-h-[250px] text-gray-800 font-mono text-base pr-2">
+                        <!-- Steps will appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center pt-2">
+                <div class="relative w-full md:w-1/3">
+                    <input type="text" id="user-answer" placeholder="Nhập đáp án..." autocomplete="off"
+                        class="w-full text-center text-xl font-bold p-3 border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none transition-all placeholder-gray-300"
+                        onkeydown="if(event.key === 'Enter') checkAnswer()">
+                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs hidden md:block">
+                        ENTER
+                    </div>
+                </div>
+                
+                <button onclick="checkAnswer()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all shadow-lg transform hover:-translate-y-1 active:translate-y-0 flex items-center justify-center min-w-[140px]">
+                    <i class="fas fa-check mr-2"></i> Kiểm tra
+                </button>
+                
+                <button onclick="nextQuestion()" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl text-lg transition-colors flex items-center justify-center">
+                    <i class="fas fa-forward mr-2"></i> Câu khác
+                </button>
+            </div>
+
+            <!-- Result Feedback -->
+            <div id="feedback" class="hidden transform transition-all duration-300 ease-out origin-top"></div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        let currentQuestion = {};
+        let score = 0;
+        let isAnswered = false;
+        let currentMode = 'mix';
+        let stepIndex = 0;
+
+        // --- Utility ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // --- SVG Drawing Helper ---
+        function createNumberLineSVG(min, max, highlights = []) {
+            // Adjust range to be a bit wider for aesthetics
+            const displayMin = Math.min(min, ...highlights) - 2;
+            const displayMax = Math.max(max, ...highlights) + 2;
+            const range = displayMax - displayMin;
+            
+            const width = 600;
+            const height = 100;
+            const padding = 40;
+            const stepSize = (width - 2 * padding) / range;
+            const zeroX = padding + (0 - displayMin) * stepSize;
+
+            let ticks = '';
+            let labels = '';
+            let points = '';
+
+            for (let i = displayMin; i <= displayMax; i++) {
+                const x = padding + (i - displayMin) * stepSize;
+                
+                // Tick mark
+                const isZero = i === 0;
+                const tickHeight = isZero ? 20 : 10;
+                const strokeWidth = isZero ? 3 : 2;
+                ticks += `<line x1="${x}" y1="${height/2 - tickHeight/2}" x2="${x}" y2="${height/2 + tickHeight/2}" stroke="white" stroke-width="${strokeWidth}" />`;
+                
+                // Label (show every number if range is small, otherwise skip)
+                if (range < 25 || i % 5 === 0 || i === 0 || highlights.includes(i)) {
+                    labels += `<text x="${x}" y="${height/2 + 30}" fill="${isZero ? '#fbbf24' : '#d1d5db'}" font-size="14" text-anchor="middle" font-family="monospace" font-weight="${isZero ? 'bold' : 'normal'}">${i}</text>`;
+                }
+            }
+
+            // Highlight specific points
+            highlights.forEach(val => {
+                const x = padding + (val - displayMin) * stepSize;
+                points += `<circle cx="${x}" cy="${height/2}" r="5" fill="#ef4444" stroke="white" stroke-width="2" class="number-line-point"/>`;
+            });
+
+            return `
+                <svg width="100%" viewBox="0 0 ${width} ${height}" class="overflow-visible">
+                    <!-- Main Line: Removed marker-start="url(#arrowtail)" -->
+                    <line x1="${padding - 10}" y1="${height/2}" x2="${width - padding + 10}" y2="${height/2}" stroke="white" stroke-width="2" marker-end="url(#arrowhead)" />
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="white" />
+                        </marker>
+                    </defs>
+                    ${ticks}
+                    ${labels}
+                    ${points}
+                </svg>
+            `;
+        }
+
+
+        // --- Generators ---
+
+        // 1. Comparison: Compare a and b
+        function generateComparison() {
+            // Types: neg vs pos, neg vs neg, neg vs 0
+            const type = getRandomInt(0, 2);
+            let a, b;
+            
+            if (type === 0) { // Neg vs Pos
+                a = getRandomInt(-20, -1);
+                b = getRandomInt(1, 20);
+            } else if (type === 1) { // Neg vs Neg
+                a = getRandomInt(-30, -1);
+                b = getRandomInt(-30, -1);
+                while (a === b) b = getRandomInt(-30, -1);
+            } else { // Neg vs 0
+                a = getRandomInt(-20, -1);
+                b = 0;
+            }
+
+            // Randomize order display
+            if (Math.random() > 0.5) [a, b] = [b, a];
+
+            const answer = a > b ? '>' : (a < b ? '<' : '=');
+            
+            let rule = "";
+            let steps = [];
+
+            if (a < 0 && b > 0) {
+                rule = "Số nguyên dương luôn lớn hơn số nguyên âm.";
+                steps = ["Số dương nằm bên phải số 0.", "Số âm nằm bên trái số 0.", `Vì ${b} là số dương, ${a} là số âm nên ${a} < ${b}.`];
+            } else if (a > 0 && b < 0) {
+                rule = "Số nguyên dương luôn lớn hơn số nguyên âm.";
+                steps = [`Vì ${a} là số dương, ${b} là số âm nên ${a} > ${b}.`];
+            } else if (a < 0 && b < 0) {
+                rule = "Hai số nguyên âm: Số nào có giá trị tuyệt đối nhỏ hơn thì lớn hơn.";
+                steps = [
+                    `So sánh giá trị tuyệt đối: |${a}| = ${Math.abs(a)} và |${b}| = ${Math.abs(b)}.`,
+                    Math.abs(a) > Math.abs(b) ? `Vì ${Math.abs(a)} > ${Math.abs(b)} nên số âm ${a} nhỏ hơn.` : `Vì ${Math.abs(a)} < ${Math.abs(b)} nên số âm ${a} lớn hơn.`,
+                    `Kết quả: ${a} ${answer} ${b}`
+                ];
+            } else {
+                rule = "Số nguyên âm luôn nhỏ hơn 0. Số nguyên dương luôn lớn hơn 0.";
+                steps = [`Số 0 lớn hơn mọi số nguyên âm.`, `Vậy ${a} ${answer} ${b}`];
+            }
+
+            return {
+                label: "So Sánh Số Nguyên",
+                display: `<div class="flex items-center gap-4 text-5xl">${a} <span class="bg-white/10 px-4 py-2 rounded border border-white/30 text-yellow-300">?</span> ${b}</div>`,
+                visual: createNumberLineSVG(Math.min(a,b), Math.max(a,b), [a, b]),
+                answerType: "sign",
+                answer: answer,
+                hintInput: "Điền dấu > , < hoặc =",
+                hintRule: rule,
+                steps: steps
+            };
+        }
+
+        // 2. Ordering: Sort 4-5 numbers
+        function generateOrdering() {
+            const count = getRandomInt(4, 5);
+            let nums = new Set();
+            while(nums.size < count) {
+                nums.add(getRandomInt(-15, 15));
+            }
+            let arr = Array.from(nums);
+            
+            const isAscending = Math.random() > 0.5;
+            const sorted = [...arr].sort((a,b) => a - b);
+            const answerArr = isAscending ? sorted : sorted.reverse();
+            
+            const steps = [
+                "1. Tách các số thành nhóm âm, số 0, nhóm dương.",
+                `   - Số âm: ${arr.filter(n => n < 0).join(', ')}`,
+                `   - Số dương: ${arr.filter(n => n > 0).join(', ')}`,
+                "2. So sánh nội bộ từng nhóm.",
+                `   - Thứ tự tăng dần: ${sorted.join(' < ')}`,
+                `3. Kết luận theo yêu cầu đề bài (${isAscending ? 'Tăng dần' : 'Giảm dần'}).`
+            ];
+
+            return {
+                label: `Sắp xếp ${isAscending ? "Tăng dần" : "Giảm dần"}`,
+                display: `<div class="text-4xl text-yellow-300 tracking-wider mb-2">${arr.join(' ; ')}</div><div class="text-base text-gray-300 font-normal mt-2">(Dùng dấu phẩy hoặc chấm phẩy ngăn cách)</div>`,
+                visual: createNumberLineSVG(Math.min(...arr), Math.max(...arr), arr),
+                answerType: "list",
+                answer: answerArr,
+                hintInput: `Nhập dãy số ${isAscending ? "tăng dần" : "giảm dần"}`,
+                hintRule: "Số âm < 0 < Số dương. Số âm có giá trị tuyệt đối càng lớn thì càng bé.",
+                steps: steps
+            };
+        }
+
+        // 3. Range Listing: List integers between a and b
+        function generateRange() {
+            // x in (a, b] or [a, b) etc. 
+            // Simplified for Grade 6: a < x < b or a <= x <= b
+            
+            let a = getRandomInt(-10, 5);
+            let gap = getRandomInt(3, 7);
+            let b = a + gap;
+            
+            // Randomize inequality types: 0: < <, 1: <= <=, 2: < <=, 3: <= <
+            const type = getRandomInt(0, 3);
+            let leftOp = (type === 1 || type === 3) ? '&le;' : '<';
+            let rightOp = (type === 1 || type === 2) ? '&le;' : '<';
+            
+            let start = (type === 1 || type === 3) ? a : a + 1;
+            let end = (type === 1 || type === 2) ? b : b - 1;
+            
+            let resultArr = [];
+            for(let i = start; i <= end; i++) resultArr.push(i);
+            
+            let steps = [
+                `Liệt kê các số nguyên nằm giữa ${a} và ${b} thỏa mãn điều kiện.`,
+                `Vẽ trục số: Xác định đầu mút ${a} và ${b}.`,
+                `Lấy các số nguyên ${leftOp === '&le;' ? 'từ' : 'lớn hơn'} ${a} đến ${rightOp === '&le;' ? '' : 'nhỏ hơn'} ${b}.`,
+                `x &in; { ${resultArr.join('; ')} }`
+            ];
+
+            return {
+                label: "Tìm x thuộc Z",
+                display: `<div class="text-4xl">${a} ${leftOp} x ${rightOp} ${b}</div>`,
+                visual: createNumberLineSVG(a-1, b+1, resultArr),
+                answerType: "list",
+                answer: resultArr,
+                hintInput: "Liệt kê các số x (cách nhau bởi dấu phẩy)",
+                hintRule: "Chú ý dấu < (không lấy đầu mút) và dấu ≤ (lấy đầu mút).",
+                steps: steps
+            };
+        }
+
+
+        // --- UI Controller ---
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.btn-mode').forEach(btn => btn.classList.remove('mode-active'));
+            document.getElementById(`btn-${mode}`).classList.add('mode-active');
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            // Reset UI
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('user-answer').value = '';
+            document.getElementById('user-answer').disabled = false;
+            document.getElementById('user-answer').focus();
+            document.getElementById('rule-hint').classList.add('hidden');
+            
+            // Reset Steps
+            stepIndex = 0;
+            const stepsContainer = document.getElementById('steps-container');
+            stepsContainer.innerHTML = ''; 
+            
+            const btnStep = document.getElementById('btn-show-step');
+            btnStep.disabled = false;
+            btnStep.innerHTML = '<i class="fas fa-lightbulb mr-2"></i> Gợi ý';
+            btnStep.className = 'bg-indigo-500 hover:bg-indigo-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center';
+            
+            isAnswered = false;
+
+            // Generator Routing
+            if (currentMode === 'compare') {
+                currentQuestion = generateComparison();
+            } else if (currentMode === 'order') {
+                currentQuestion = generateOrdering();
+            } else if (currentMode === 'range') {
+                currentQuestion = generateRange();
+            } else {
+                // Mix
+                const r = Math.random();
+                if (r < 0.4) currentQuestion = generateComparison();
+                else if (r < 0.7) currentQuestion = generateOrdering();
+                else currentQuestion = generateRange();
+            }
+
+            // Update DOM
+            document.getElementById('math-display').innerHTML = currentQuestion.display;
+            document.getElementById('visual-container').innerHTML = currentQuestion.visual;
+            document.getElementById('question-type-label').textContent = currentQuestion.label || "Bài tập";
+            document.getElementById('input-hint').textContent = currentQuestion.hintInput;
+        }
+
+        function showNextStep() {
+            const container = document.getElementById('steps-container');
+            
+            // Show Rule first
+            if (stepIndex === 0 && currentQuestion.hintRule) {
+                document.getElementById('rule-content').textContent = currentQuestion.hintRule;
+                document.getElementById('rule-hint').classList.remove('hidden');
+            }
+
+            if (stepIndex < currentQuestion.steps.length) {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step-item bg-emerald-50 p-3 rounded-lg border-l-4 border-emerald-400 font-bold shadow-sm text-lg font-mono';
+                
+                if (stepIndex === currentQuestion.steps.length - 1) {
+                     stepDiv.className = 'step-item bg-green-100 p-3 rounded-lg border-l-4 border-green-600 font-bold text-green-800 shadow-sm text-lg font-mono';
+                }
+                
+                stepDiv.innerHTML = currentQuestion.steps[stepIndex];
+                container.appendChild(stepDiv);
+                
+                container.scrollTop = container.scrollHeight;
+                stepIndex++;
+            }
+
+            // Button State
+            if (stepIndex >= currentQuestion.steps.length) {
+                const btn = document.getElementById('btn-show-step');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-check mr-1"></i> Xong';
+                btn.className = 'bg-gray-400 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg cursor-not-allowed flex items-center';
+            }
+        }
+
+        function checkAnswer() {
+            if (isAnswered) return;
+
+            const input = document.getElementById('user-answer');
+            const feedback = document.getElementById('feedback');
+            let rawVal = input.value.trim();
+
+            if (!rawVal) {
+                alert("Bạn chưa nhập đáp án!");
+                return;
+            }
+
+            isAnswered = true;
+            input.disabled = true;
+            let isCorrect = false;
+
+            if (currentQuestion.answerType === "sign") {
+                // Check sign < > =
+                // Allow user to type words too? Nah, just signs for now.
+                isCorrect = (rawVal === currentQuestion.answer);
+            } else if (currentQuestion.answerType === "list") {
+                // Check list of numbers
+                // Normalize: split by , or ; space, remove empty, parse Int
+                let userNums = rawVal.split(/[;, ]+/).filter(x => x !== "").map(Number);
+                let correctNums = currentQuestion.answer;
+                
+                // Compare arrays
+                if (userNums.length === correctNums.length) {
+                    isCorrect = userNums.every((val, index) => val === correctNums[index]);
+                }
+            }
+
+            if (isCorrect) {
+                score += 10;
+                document.getElementById('score').textContent = score;
+                feedback.innerHTML = `
+                    <div class="text-green-700 font-bold text-xl mb-1 flex items-center justify-center animate-bounce">
+                        <i class="fas fa-check-circle mr-2 text-3xl"></i> Chính xác!
+                    </div>
+                    <div class="text-green-600">Đáp án: ${Array.isArray(currentQuestion.answer) ? currentQuestion.answer.join('; ') : currentQuestion.answer}</div>
+                `;
+                feedback.className = "text-center mt-4 p-4 rounded-xl bg-green-100 border-2 border-green-300 shadow-lg";
+                while(stepIndex < currentQuestion.steps.length) showNextStep();
+                
+            } else {
+                feedback.innerHTML = `
+                    <div class="text-red-600 font-bold text-xl mb-1 flex items-center justify-center">
+                        <i class="fas fa-times-circle mr-2 text-3xl"></i> Sai rồi!
+                    </div>
+                    <div class="text-gray-700 mb-2">Đáp án đúng: <strong class="text-xl text-red-600">${Array.isArray(currentQuestion.answer) ? currentQuestion.answer.join('; ') : currentQuestion.answer}</strong></div>
+                `;
+                feedback.className = "text-center mt-4 p-4 rounded-xl bg-red-50 border-2 border-red-200 shadow-lg";
+                
+                let intv = setInterval(() => {
+                    if(stepIndex < currentQuestion.steps.length) showNextStep();
+                    else clearInterval(intv);
+                }, 800);
+            }
+            feedback.classList.remove('hidden');
+        }
+
+        // Init
+        window.onload = () => {
+            setMode('mix');
+        };
+    </script>
+</body>
+</html>
