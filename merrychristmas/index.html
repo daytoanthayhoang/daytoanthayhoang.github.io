@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Christmas</title>
+    <title>🎄Magic Christmas🎅</title>
     
     <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -103,7 +103,7 @@
         }
         #camera-preview:hover { opacity: 1; }
 
-        /* --- NEW: Upload Button Style --- */
+        /* Upload Button Style */
         #upload-container {
             position: absolute; top: 20px; left: 20px; 
             z-index: 200;
@@ -136,12 +136,24 @@
         }
 
         .christmas-btn-upload span {
-            font-size: 24px; /* Icon size */
+            font-size: 24px;
+        }
+
+        /* Loading Overlay */
+        #loading {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #FFD700;
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Cinzel', serif; font-size: 24px;
+            z-index: 1000;
+            transition: opacity 1s;
         }
     </style>
 </head>
 <body>
-    <!-- NEW: Upload Input -->
+    <div id="loading">Loading Magic...</div>
+    
+    <!-- Upload Input -->
     <div id="upload-container">
         <input type="file" id="imgUpload" multiple accept="image/*" style="display: none;">
         <label for="imgUpload" class="christmas-btn-upload">
@@ -152,9 +164,9 @@
     <!-- UI -->
     <div id="ui-layer">
         <div class="guide-container">
-            <div class="guide-item">🖐 <b>Open:</b> Tree</div>
-            <div class="guide-item">🤏 <b>Pinch:</b> Photo</div>
-            <div class="guide-item">✊ <b>Fist:</b> Explode</div>
+            <div class="guide-item">🤏 <b>Pinch:</b> Select</div>
+            <div class="guide-item">👋 <b>Open:</b> Explode</div>
+			<div class="guide-item" style="opacity: 0.2"> ❓ <b>Secret:</b> L ∩ R ≠ ∅</div>	
         </div>
 		
         <button id="btnStart" onclick="startSystem()">✨ Start Magic ✨</button>
@@ -173,26 +185,72 @@
         bgMusic.loop = true; bgMusic.volume = 1.0;
 
         const loader = new THREE.TextureLoader();
-        // Fallback images in case user doesn't upload
-        const defaultPhotoFiles = ['./image1.jpeg', './image2.jpeg', './image3.jpeg', './image4.jpeg', './image5.jpeg'];
-        const photoTextures = [];
         
-        // Load default textures initially
-        defaultPhotoFiles.forEach((f, i) => photoTextures[i] = loader.load(f));
+        // --- HELPERS FOR ASPECT RATIO ---
+        function updateMeshAspectRatio(mesh, aspect) {
+            const h = 8;
+            const w = h * aspect;
 
-        // --- NEW: Handle User Upload ---
+            // 1. Main Photo
+            mesh.geometry.dispose();
+            mesh.geometry = new THREE.PlaneGeometry(w, h);
+
+            // 2. Border (Child 0)
+            const border = mesh.children[0];
+            if(border) {
+                border.geometry.dispose();
+                border.geometry = new THREE.PlaneGeometry(w + 0.5, h + 0.5);
+            }
+
+            // 3. Glow (Named "glow")
+            const glow = mesh.getObjectByName("glow");
+            if(glow) {
+                glow.geometry.dispose();
+                glow.geometry = new THREE.PlaneGeometry(w + 4, h + 4);
+            }
+
+            // 4. Shadow (Last child usually, checking index 2 or 3)
+            // In creation: add(border), add(glow), add(shadow). So shadow is child 2.
+            const shadow = mesh.children[2];
+            if(shadow && shadow !== glow) {
+                shadow.geometry.dispose();
+                shadow.geometry = new THREE.PlaneGeometry(w + 2, h + 2);
+            }
+        }
+
+        const defaultPhotoFiles = ['./image1.jpeg', './image2.jpeg', './image3.jpeg', './image4.jpeg', './image5.jpeg'];
+
+        const photoTextures = [];
+        let texturesLoaded = 0;
+
+        // Load default textures
+        defaultPhotoFiles.forEach((f, i) => {
+            loader.load(f, (tex) => {
+                photoTextures[i] = tex;
+                texturesLoaded++;
+                
+                // If meshes are already created (Start clicked first), update aspect now
+                if (photoMeshes.length > i && photoMeshes[i]) {
+                    const aspect = tex.image.width / tex.image.height;
+                    updateMeshAspectRatio(photoMeshes[i], aspect);
+                    photoMeshes[i].material.map = tex;
+                    photoMeshes[i].material.needsUpdate = true;
+                }
+
+                if(texturesLoaded === 5) document.getElementById('loading').style.opacity = 0;
+            });
+        });
+        setTimeout(() => document.getElementById('loading').style.display = 'none', 1500);
+
+        // Handle User Upload
         document.getElementById('imgUpload').addEventListener('change', function(e) {
             if (e.target.files && e.target.files.length > 0) {
-                // Get up to 5 files
                 const files = Array.from(e.target.files).slice(0, 5);
-                
-                // Show notification (simple console for now, or visual feedback)
                 const btnLabel = document.querySelector('.christmas-btn-upload');
                 const originalText = btnLabel.innerHTML;
                 btnLabel.innerHTML = "<span>✨</span> Loading...";
 
                 let loadedCount = 0;
-
                 files.forEach((file, index) => {
                     const reader = new FileReader();
                     reader.onload = function(event) {
@@ -201,12 +259,12 @@
                         img.onload = () => {
                             const newTex = new THREE.Texture(img);
                             newTex.needsUpdate = true;
-                            
-                            // Replace texture at specific index
                             photoTextures[index] = newTex;
                             
-                            // If meshes already exist, update them immediately
-                            if(photoMeshes.length > 0 && photoMeshes[index]) {
+                            // Update Aspect Ratio if mesh exists
+                            if(photoMeshes.length > index && photoMeshes[index]) {
+                                const aspect = img.width / img.height;
+                                updateMeshAspectRatio(photoMeshes[index], aspect);
                                 photoMeshes[index].material.map = newTex;
                                 photoMeshes[index].material.needsUpdate = true;
                             }
@@ -214,9 +272,7 @@
                             loadedCount++;
                             if(loadedCount === files.length) {
                                 btnLabel.innerHTML = "<span>✅</span> Ready!";
-                                setTimeout(() => {
-                                    btnLabel.innerHTML = originalText;
-                                }, 2000);
+                                setTimeout(() => { btnLabel.innerHTML = originalText; }, 2000);
                             }
                         };
                     };
@@ -224,7 +280,6 @@
                 });
             }
         });
-
 
         function createCustomTexture(type) {
             const canvas = document.createElement('canvas');
@@ -280,7 +335,7 @@
             giftCount: 150,
             snowCount: 600, 
             explodeRadius: 65,  
-            photoOrbitRadius: 28,
+            photoOrbitRadius: 30, // Tăng nhẹ bán kính để thoáng hơn
             treeHeight: 80,
             treeBaseRadius: 36
         };
@@ -293,7 +348,10 @@
         let state = 'TREE'; 
         let selectedIndex = 0;
         let handX = 0.5;
-        let heartHoldStart = 0; // Biến đếm thời gian giữ trái tim
+        let heartHoldStart = 0;
+        
+        let currentSceneRotation = 0;
+        let targetSceneRotation = 0;
 
         // ==========================================
         // 3. THREE.JS SYSTEM
@@ -386,7 +444,6 @@
                 if (type === 'gold') {
                     const loops = 8; 
                     const spiralOffset = (h / CONFIG.treeHeight) * Math.PI * 2 * loops;
-                    const jitterR = Math.random() * 2; 
                     const jitterTh = (Math.random() - 0.5) * 0.5;
                     r = maxR + (Math.random() - 0.5) * 4; 
                     theta = spiralOffset + jitterTh;
@@ -397,7 +454,7 @@
                 }
                 pTreeTargets.push(r * Math.cos(theta), y, r * Math.sin(theta));
 
-                // EXPLODE
+                // EXPLODE - Optimized to form a ring around photos
                 const u = Math.random();
                 const v = Math.random();
                 const phi = Math.acos(2 * v - 1);
@@ -463,22 +520,51 @@
         }
 
         function createPhotos() {
-            const geo = new THREE.PlaneGeometry(8, 8);
-            const borderGeo = new THREE.PlaneGeometry(8.5, 8.5); 
+            // Border material (Shared)
             const borderMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 }); 
+            // Shadow material (Shared)
+            const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5 });
+            // Glow material (Shared)
+            const glowMat = new THREE.MeshBasicMaterial({ 
+                map: textures.sparkle, 
+                color: 0xFFD700,
+                transparent: true, 
+                opacity: 0.0,
+                blending: THREE.AdditiveBlending 
+            });
 
             for(let i=0; i<5; i++) {
+                let aspect = 1.0;
+                // Check if texture is already loaded to get Aspect
+                if(photoTextures[i] && photoTextures[i].image) {
+                    aspect = photoTextures[i].image.width / photoTextures[i].image.height;
+                }
+
+                const h = 8;
+                const w = h * aspect;
+
+                // 1. Photo Mesh
+                const geo = new THREE.PlaneGeometry(w, h);
                 const mat = new THREE.MeshBasicMaterial({ map: photoTextures[i], side: THREE.DoubleSide });
                 const mesh = new THREE.Mesh(geo, mat);
                 
+                // 2. Border
+                const borderGeo = new THREE.PlaneGeometry(w + 0.5, h + 0.5); 
                 const border = new THREE.Mesh(borderGeo, borderMat);
                 border.position.z = -0.05; 
                 mesh.add(border);
                 
-                const shadowGeo = new THREE.PlaneGeometry(10, 10);
-                const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5 });
+                // 3. Glow
+                const glowGeo = new THREE.PlaneGeometry(w + 4, h + 4);
+                const glow = new THREE.Mesh(glowGeo, glowMat);
+                glow.position.z = -0.1;
+                glow.name = "glow";
+                mesh.add(glow);
+
+                // 4. Shadow
+                const shadowGeo = new THREE.PlaneGeometry(w + 2, h + 2);
                 const shadow = new THREE.Mesh(shadowGeo, shadowMat);
-                shadow.position.z = -0.1;
+                shadow.position.z = -0.15;
                 mesh.add(shadow);
 
                 mesh.visible = false; mesh.scale.set(0,0,0);
@@ -541,31 +627,27 @@
             loveCanvas.width = 1024; loveCanvas.height = 256;
             const lCtx = loveCanvas.getContext('2d');
             
-            // --- UPDATED FONT & POSITION & COLOR ---
-            // Create Gradient (Gold) like Title
             const lGradient = lCtx.createLinearGradient(0, 0, 0, 256);
             lGradient.addColorStop(0.2, "#FFF8DC");
             lGradient.addColorStop(0.5, "#FFD700");
             lGradient.addColorStop(0.8, "#DAA520");
 
             lCtx.font = 'bold 100px "Mountains of Christmas", cursive';
-            lCtx.fillStyle = lGradient; // Gold gradient
+            lCtx.fillStyle = lGradient; 
             lCtx.textAlign = 'center';
-            lCtx.shadowColor = "rgba(255, 69, 0, 0.8)"; // Warm shadow like title
+            lCtx.shadowColor = "rgba(255, 69, 0, 0.8)"; 
             lCtx.shadowBlur = 50; 
             lCtx.fillText("I LOVE YOU ❤️", 512, 140);
             
             const loveTex = new THREE.CanvasTexture(loveCanvas);
             const loveMat = new THREE.MeshBasicMaterial({ map: loveTex, transparent: true, blending: THREE.AdditiveBlending });
             loveMesh = new THREE.Mesh(new THREE.PlaneGeometry(70, 18), loveMat);
-            
-            // CHỈNH ĐỘ CAO CHỮ Ở ĐÂY (Thay số 45 thành số khác, càng lớn càng cao)
             loveMesh.position.set(0, 45, 0); 
             loveMesh.visible = false;
             scene.add(loveMesh);
         }
 
-        function updateParticleGroup(group, type, targetState, speed, handRotY, time) {
+        function updateParticleGroup(group, type, targetState, speed, sceneRotY, time) {
             const positions = group.geometry.attributes.position.array;
             const sizes = group.geometry.attributes.size.array;
             const colors = group.geometry.attributes.color.array;
@@ -582,11 +664,11 @@
             }
             group.geometry.attributes.position.needsUpdate = true;
             
-            // 2. Visual Effects
+            // 2. Rotation & Visual Effects
             const count = positions.length / 3;
             
             if (targetState === 'TREE') {
-                group.rotation.y += 0.005; // Slightly faster spin
+                group.rotation.y += 0.005; // Auto spin tree
                 
                 for(let i=0; i<count; i++) {
                     sizes[i] = baseSize;
@@ -599,24 +681,19 @@
                     } else if(type === 'red') {
                         brightness = 0.8 + 0.4 * Math.sin(time * 2 + phases[i]);
                     }
-                    
                     colors[i*3]   = baseColor.r * brightness;
                     colors[i*3+1] = baseColor.g * brightness;
                     colors[i*3+2] = baseColor.b * brightness;
                 }
 
             } else if (targetState === 'HEART') {
-                group.rotation.y = 0;
-                // Heartbeat animation
+                group.rotation.y = 0; // Fixed heart
                 const beatScale = 1 + Math.pow(Math.abs(Math.sin(time * 3.5)), 3) * 0.15; 
                 group.scale.set(beatScale, beatScale, beatScale);
 
                 for(let i=0; i<count; i++) {
-                    // --- CHANGED: KEEP ORIGINAL COLORS (Logic similar to Tree/Explode) ---
-                    // Don't turn pink. Use baseColor.
                     let brightness = 1.0;
                     if(type === 'gold') {
-                        // Twinkle calculation
                         const twinkle = Math.sin(time * 5 + phases[i] * 10) + Math.cos(time * 3 + phases[i]);
                         brightness = 0.6 + 0.4 * twinkle;
                         if(brightness > 1.2) brightness = 1.5;
@@ -628,14 +705,17 @@
                     colors[i*3+1] = baseColor.g * brightness;
                     colors[i*3+2] = baseColor.b * brightness;
                     
-                    // Filter particles for shape definition
                     if (i % 3 === 0) sizes[i] = baseSize * 1.3;
                     else sizes[i] = 0;
                 }
 
             } else {
+                // EXPLODE & PHOTO MODE: Use the calculated sceneRotation
                 group.scale.set(1,1,1);
-                group.rotation.y += (handRotY - group.rotation.y) * 0.1;
+                
+                // --- SMOOTH ROTATION LERP ---
+                // Interpolate current rotation to target rotation
+                group.rotation.y += (sceneRotY - group.rotation.y) * 0.1;
 
                 for(let i=0; i<count; i++) {
                     sizes[i] = baseSize;
@@ -670,11 +750,33 @@
             requestAnimationFrame(animate);
             const time = Date.now() * 0.001;
             const speed = 0.08;
-            const handRotY = (handX - 0.5) * 4.0;
 
-            updateParticleGroup(groupGold, 'gold', state, speed, handRotY, time);
-            updateParticleGroup(groupRed, 'red', state, speed, handRotY, time);
-            updateParticleGroup(groupGift, 'gift', state, speed, handRotY, time);
+            // --- IMPROVED CONTROL LOGIC ---
+            // Reverted to raw mapping for "Drag" feel as requested
+            // Center (0.4 - 0.6) = Stop
+            
+            let rotationVelocity = 0;
+            // Only apply manual rotation in Explode/Photo mode
+            if (state === 'EXPLODE' || state === 'PHOTO') {
+                const deadZone = 0.1; // 10% deadzone around center
+                const center = 0.5;
+                const sensitivity = 0.05; // Adjust speed here
+                
+                // Using raw handX (not inverted) to give "reverse/drag" feel
+                if (Math.abs(handX - center) > deadZone) {
+                    let val = (handX - center);
+                    if (val > 0) val -= deadZone; else val += deadZone;
+                    rotationVelocity = val * sensitivity;
+                }
+            }
+
+            // Update Target Rotation
+            targetSceneRotation += rotationVelocity;
+
+            // Update Groups
+            updateParticleGroup(groupGold, 'gold', state, speed, targetSceneRotation, time);
+            updateParticleGroup(groupRed, 'red', state, speed, targetSceneRotation, time);
+            updateParticleGroup(groupGift, 'gift', state, speed, targetSceneRotation, time);
             
             updateSnow(time);
             if(groupStars) groupStars.rotation.y += 0.0002;
@@ -688,7 +790,7 @@
             if (state === 'TREE') {
                 titleMesh.visible = true; starMesh.visible = true; loveMesh.visible = false;
                 titleMesh.scale.lerp(new THREE.Vector3(1,1,1), 0.1);
-                titleMesh.position.y = 52 + Math.sin(time * 0.8) * 3; // Float
+                titleMesh.position.y = 52 + Math.sin(time * 0.8) * 3; 
 
                 starMesh.rotation.z -= 0.015; 
                 const pulse = 1 + Math.sin(time*3)*0.15;
@@ -702,19 +804,20 @@
                 photoMeshes.forEach(m => { m.visible = false; });
                 const s = 1 + Math.abs(Math.sin(time*3.5))*0.1;
                 loveMesh.scale.set(s,s,1);
-                
-                // --- NEW: Floating effect for I LOVE YOU text ---
-                // CHỈNH ĐỘ CAO CHỮ KHI CHUYỂN ĐỘNG (Thay số 45 bằng số tương tự ở trên)
                 loveMesh.position.y = 45 + Math.sin(time * 0.8) * 2;
 
             } else if (state === 'EXPLODE') {
                 titleMesh.visible = false; starMesh.visible = false; loveMesh.visible = false;
+                
+                // Use the Group's actual current rotation to calculate positions
+                // Note: We use groupGold as the reference for rotation
                 const baseAngle = groupGold.rotation.y; 
                 const angleStep = (Math.PI * 2) / 5;
                 let bestIdx = 0; let maxZ = -999;
                 
                 photoMeshes.forEach((mesh, i) => {
                     mesh.visible = true;
+                    // Position based on current accumulated rotation
                     const angle = baseAngle + i * angleStep;
                     const x = Math.sin(angle) * CONFIG.photoOrbitRadius;
                     const z = Math.cos(angle) * CONFIG.photoOrbitRadius;
@@ -725,11 +828,17 @@
                     
                     if (z > maxZ) { maxZ = z; bestIdx = i; }
                     
-                    if (z > 5) { 
+                    // Highlight logic
+                    const glow = mesh.getObjectByName("glow");
+                    if (z > 10) { 
+                        // Front Item: Scale up and Highlight
                         const ds = 1.0 + (z/CONFIG.photoOrbitRadius)*0.8; 
                         mesh.scale.lerp(new THREE.Vector3(ds, ds, ds), 0.1);
+                        if(glow) glow.material.opacity = 0.6 + 0.4*Math.sin(time*10); // Pulse
                     } else {
+                        // Back Items
                         mesh.scale.lerp(new THREE.Vector3(0.6, 0.6, 0.6), 0.1);
+                        if(glow) glow.material.opacity = 0;
                     }
                 });
                 selectedIndex = bestIdx;
@@ -737,11 +846,14 @@
             } else if (state === 'PHOTO') {
                 loveMesh.visible = false;
                 photoMeshes.forEach((mesh, i) => {
+                    const glow = mesh.getObjectByName("glow");
                     if (i === selectedIndex) {
+                        // Bring selected photo to front
                         mesh.position.lerp(new THREE.Vector3(0, 0, 60), 0.1);
                         mesh.scale.lerp(new THREE.Vector3(5, 5, 5), 0.1);
                         mesh.lookAt(camera.position); 
                         mesh.rotation.z = Math.sin(time*0.5)*0.03; 
+                        if(glow) glow.material.opacity = 0; // Hide glow when viewing
                     } else {
                         mesh.scale.lerp(new THREE.Vector3(0,0,0), 0.1);
                     }
@@ -765,33 +877,25 @@
             hands.onResults(results => {
                 ctx.clearRect(0,0,100,75); ctx.drawImage(results.image, 0, 0, 100, 75);
 
-                // --- Hand Logic: Secret Heart (Easter Egg) ---
+                // Heart Secret Logic
                 if (results.multiHandLandmarks.length === 2) {
                     const h1 = results.multiHandLandmarks[0]; const h2 = results.multiHandLandmarks[1];
-                    // Khoảng cách chặt hơn (0.05) để yêu cầu làm chuẩn
                     const distIndex = Math.hypot(h1[8].x - h2[8].x, h1[8].y - h2[8].y);
                     const distThumb = Math.hypot(h1[4].x - h2[4].x, h1[4].y - h2[4].y);
-                    
+                 // Khoảng cách chặt hơn (0.05) để yêu cầu làm chuẩn
+				// Nếu giữ đủ 2 giây (2000ms)
                     if (distIndex < 0.08 && distThumb < 0.08) {
-                        if (heartHoldStart === 0) {
-                            heartHoldStart = Date.now(); // Bắt đầu đếm giờ
-                        }
-                        
-                        // Nếu giữ đủ 2 giây (2000ms)
-                        if (Date.now() - heartHoldStart > 1500) {
-                            state = 'HEART'; 
-                            return; // Chặn các logic khác
-                        }
-                    } else {
-                        heartHoldStart = 0; // Reset nếu tay rời ra
-                    }
-                } else {
-                    heartHoldStart = 0; // Reset nếu không đủ 2 tay
-                }
+                        if (heartHoldStart === 0) heartHoldStart = Date.now();
+                        if (Date.now() - heartHoldStart > 1500) { state = 'HEART'; return; }
+                    } else { heartHoldStart = 0; }
+                } else { heartHoldStart = 0; }
 
                 if(results.multiHandLandmarks.length > 0) {
                     const lm = results.multiHandLandmarks[0];
+                    
+                    // --- REVERTED to raw X for "Opposite/Drag" feel ---
                     handX = lm[9].x; 
+                    
                     const tips = [8,12,16,20]; const wrist = lm[0];
                     let openDist = 0; tips.forEach(i => openDist += Math.hypot(lm[i].x-wrist.x, lm[i].y-wrist.y));
                     const avgDist = openDist / 4;
