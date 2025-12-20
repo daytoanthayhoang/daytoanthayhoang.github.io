@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🎄Magic Christmas🎅</title>
     
     <!-- Libraries -->
@@ -21,6 +21,7 @@
             margin: 0; overflow: hidden; 
             background: radial-gradient(circle at center, #1a0505 0%, #000000 100%); 
             font-family: 'Poppins', sans-serif; 
+            touch-action: none; /* Prevent scroll on mobile */
         }
         #canvas-container { width: 100%; height: 100vh; display: block; }
         
@@ -43,6 +44,17 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
             display: flex; gap: 20px;
+            transition: opacity 0.5s;
+        }
+
+        /* Mobile specific adjustments for guide */
+        @media (max-width: 600px) {
+            .guide-container {
+                flex-direction: column;
+                gap: 5px;
+                padding: 10px 20px;
+                align-items: center;
+            }
         }
 
         .guide-item {
@@ -75,6 +87,7 @@
             box-shadow: 0 0 20px rgba(139, 0, 0, 0.4), inset 0 0 10px rgba(255, 215, 0, 0.1);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative; overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
         
         button::before {
@@ -103,6 +116,15 @@
         }
         #camera-preview:hover { opacity: 1; }
 
+        /* Mobile specific adjustments for camera preview */
+        @media (max-width: 600px) {
+            #camera-preview {
+                width: 100px; height: 75px;
+                top: 10px; right: 10px;
+                opacity: 0.5;
+            }
+        }
+
         /* Upload Button Style */
         #upload-container {
             position: absolute; top: 20px; left: 20px; 
@@ -125,6 +147,15 @@
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             backdrop-filter: blur(4px);
             display: flex; align-items: center; gap: 8px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @media (max-width: 600px) {
+            .christmas-btn-upload {
+                padding: 8px 16px;
+                font-size: 16px;
+            }
+            #upload-container { top: 10px; left: 10px; }
         }
 
         .christmas-btn-upload:hover {
@@ -163,20 +194,29 @@
 
     <!-- UI -->
     <div id="ui-layer">
-        <div class="guide-container">
+        <div class="guide-container" id="guidePanel">
             <div class="guide-item">🤏 <b>Pinch:</b> Select</div>
             <div class="guide-item">👋 <b>Open:</b> Explode</div>
-			<div class="guide-item" style="opacity: 0.2"> ❓ <b>Secret:</b> L ∩ R ≠ ∅</div>	
+						<div class="guide-item" style="opacity: 0.2"> ❓ <b>Secret:</b> L ∩ R ≠ ∅</div>	
+
         </div>
 		
         <button id="btnStart" onclick="startSystem()">✨ Start Magic ✨</button>
     </div>
 
     <div id="canvas-container"></div>
-    <video class="input_video" style="display:none"></video>
+    <!-- Crucial for iOS: playsinline, muted, autoplay -->
+    <video class="input_video" style="display:none" playsinline webkit-playsinline muted autoplay></video>
     <canvas id="camera-preview"></canvas>
 
     <script>
+        // ==========================================
+        // 0. MOBILE DETECTION & OPTIMIZATION
+        // ==========================================
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        console.log("Device detected as Mobile:", isMobile);
+
         // ==========================================
         // 1. RESOURCES & TEXTURES
         // ==========================================
@@ -209,8 +249,7 @@
                 glow.geometry = new THREE.PlaneGeometry(w + 4, h + 4);
             }
 
-            // 4. Shadow (Last child usually, checking index 2 or 3)
-            // In creation: add(border), add(glow), add(shadow). So shadow is child 2.
+            // 4. Shadow
             const shadow = mesh.children[2];
             if(shadow && shadow !== glow) {
                 shadow.geometry.dispose();
@@ -229,7 +268,6 @@
                 photoTextures[i] = tex;
                 texturesLoaded++;
                 
-                // If meshes are already created (Start clicked first), update aspect now
                 if (photoMeshes.length > i && photoMeshes[i]) {
                     const aspect = tex.image.width / tex.image.height;
                     updateMeshAspectRatio(photoMeshes[i], aspect);
@@ -237,6 +275,11 @@
                     photoMeshes[i].material.needsUpdate = true;
                 }
 
+                if(texturesLoaded === 5) document.getElementById('loading').style.opacity = 0;
+            }, undefined, (err) => {
+                // Error handling for missing images
+                console.warn("Could not load image:", f);
+                texturesLoaded++;
                 if(texturesLoaded === 5) document.getElementById('loading').style.opacity = 0;
             });
         });
@@ -261,7 +304,6 @@
                             newTex.needsUpdate = true;
                             photoTextures[index] = newTex;
                             
-                            // Update Aspect Ratio if mesh exists
                             if(photoMeshes.length > index && photoMeshes[index]) {
                                 const aspect = img.width / img.height;
                                 updateMeshAspectRatio(photoMeshes[index], aspect);
@@ -283,39 +325,42 @@
 
         function createCustomTexture(type) {
             const canvas = document.createElement('canvas');
-            canvas.width = 64; canvas.height = 64;
+            // Reduce texture size on mobile for performance
+            const size = isMobile ? 32 : 64;
+            canvas.width = size; canvas.height = size;
             const ctx = canvas.getContext('2d');
-            const cx = 32, cy = 32;
+            const cx = size/2, cy = size/2;
+            const radius = size/2 - 2;
 
             if (type === 'sparkle') {
-                const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 30);
+                const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
                 grd.addColorStop(0, 'rgba(255, 255, 255, 1)');
                 grd.addColorStop(0.2, 'rgba(255, 250, 200, 0.8)');
                 grd.addColorStop(0.5, 'rgba(255, 215, 0, 0.2)');
                 grd.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = grd; ctx.fillRect(0,0,64,64);
+                ctx.fillStyle = grd; ctx.fillRect(0,0,size,size);
                 
                 ctx.fillStyle = 'white';
                 ctx.beginPath();
-                ctx.moveTo(cx, 10); ctx.lineTo(cx+3, cy); ctx.lineTo(cx, 54); ctx.lineTo(cx-3, cy);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(10, cy); ctx.lineTo(cx, cy+3); ctx.lineTo(54, cy); ctx.lineTo(cx, cy-3);
-                ctx.fill();
+                // Simple cross shape
+                const w = isMobile ? 1 : 3;
+                const l = isMobile ? size/2 - 5 : size/2 - 2;
+                ctx.fillRect(cx - w/2, cy - l, w, l*2);
+                ctx.fillRect(cx - l, cy - w/2, l*2, w);
 
             } else if (type === 'glow_red') {
-                const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 28);
+                const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
                 grd.addColorStop(0, 'rgba(255, 150, 150, 1)');
                 grd.addColorStop(0.4, 'rgba(255, 0, 0, 0.5)');
                 grd.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = grd; ctx.fillRect(0,0,64,64);
+                ctx.fillStyle = grd; ctx.fillRect(0,0,size,size);
 
             } else if (type === 'snow') {
-                const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 25);
+                const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
                 grd.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
                 grd.addColorStop(0.6, 'rgba(220, 230, 255, 0.4)');
                 grd.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = grd; ctx.fillRect(0,0,64,64);
+                ctx.fillStyle = grd; ctx.fillRect(0,0,size,size);
             }
             return new THREE.CanvasTexture(canvas);
         }
@@ -327,17 +372,18 @@
         };
 
         // ==========================================
-        // 2. CONFIGURATION
+        // 2. CONFIGURATION (Adaptive)
         // ==========================================
+        // Reduce particle counts significantly for mobile to ensure high FPS
         const CONFIG = {
-            goldCount: 3000, 
-            redCount: 500,
-            giftCount: 150,
-            snowCount: 600, 
-            explodeRadius: 65,  
-            photoOrbitRadius: 30, // Tăng nhẹ bán kính để thoáng hơn
-            treeHeight: 80,
-            treeBaseRadius: 36
+            goldCount: isMobile ? 1000 : 3000, 
+            redCount: isMobile ? 200 : 500,
+            giftCount: isMobile ? 50 : 150,
+            snowCount: isMobile ? 200 : 600, 
+            explodeRadius: isMobile ? 50 : 65,  
+            photoOrbitRadius: isMobile ? 25 : 30,
+            treeHeight: isMobile ? 65 : 80,
+            treeBaseRadius: isMobile ? 28 : 36
         };
 
         let scene, camera, renderer;
@@ -362,20 +408,25 @@
             scene.fog = new THREE.FogExp2(0x0a0505, 0.0025); 
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-            camera.position.z = 100;
+            camera.position.z = isMobile ? 120 : 100; // Zoom out slightly on mobile
 
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            
+            // Limit Pixel Ratio on mobile to 1 to save battery/perf, PC gets max 2
+            renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
             renderer.outputEncoding = THREE.sRGBEncoding;
             container.appendChild(renderer.domElement);
 
             createStarfield();
             createSnowSystem();
 
-            groupGold = createParticleSystem('gold', CONFIG.goldCount, 2.2);
-            groupRed = createParticleSystem('red', CONFIG.redCount, 3.8); 
-            groupGift = createParticleSystem('gift', CONFIG.giftCount, 3.0); 
+            // Mobile: slightly larger particles to compensate for lower count
+            const sizeMult = isMobile ? 1.5 : 1.0;
+
+            groupGold = createParticleSystem('gold', CONFIG.goldCount, 2.2 * sizeMult);
+            groupRed = createParticleSystem('red', CONFIG.redCount, 3.8 * sizeMult); 
+            groupGift = createParticleSystem('gift', CONFIG.giftCount, 3.0 * sizeMult); 
 
             createPhotos();
             createDecorations();
@@ -384,12 +435,18 @@
             scene.add(ambientLight);
 
             animate();
+            
+            // Register Touch Events for Mobile (Fallback/Hybrid)
+            if(isMobile) {
+                initTouchControls();
+            }
         }
 
         function createStarfield() {
+            const count = isMobile ? 500 : 1500;
             const geometry = new THREE.BufferGeometry();
             const vertices = [];
-            for (let i = 0; i < 1500; i++) {
+            for (let i = 0; i < count; i++) {
                 vertices.push(
                     THREE.MathUtils.randFloatSpread(800),
                     THREE.MathUtils.randFloatSpread(800),
@@ -397,7 +454,7 @@
                 );
             }
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-            const material = new THREE.PointsMaterial({ color: 0xaaaaaa, size: 0.8, transparent: true, opacity: 0.6 });
+            const material = new THREE.PointsMaterial({ color: 0xaaaaaa, size: isMobile ? 1.5 : 0.8, transparent: true, opacity: 0.6 });
             groupStars = new THREE.Points(geometry, material);
             scene.add(groupStars);
         }
@@ -418,7 +475,7 @@
             geometry.userData = { speeds: speeds };
             
             const material = new THREE.PointsMaterial({
-                size: 2.5, map: textures.snow, 
+                size: isMobile ? 3.5 : 2.5, map: textures.snow, 
                 transparent: true, opacity: 0.7, 
                 blending: THREE.AdditiveBlending, depthWrite: false
             });
@@ -454,7 +511,7 @@
                 }
                 pTreeTargets.push(r * Math.cos(theta), y, r * Math.sin(theta));
 
-                // EXPLODE - Optimized to form a ring around photos
+                // EXPLODE
                 const u = Math.random();
                 const v = Math.random();
                 const phi = Math.acos(2 * v - 1);
@@ -520,11 +577,8 @@
         }
 
         function createPhotos() {
-            // Border material (Shared)
             const borderMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 }); 
-            // Shadow material (Shared)
             const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5 });
-            // Glow material (Shared)
             const glowMat = new THREE.MeshBasicMaterial({ 
                 map: textures.sparkle, 
                 color: 0xFFD700,
@@ -535,7 +589,6 @@
 
             for(let i=0; i<5; i++) {
                 let aspect = 1.0;
-                // Check if texture is already loaded to get Aspect
                 if(photoTextures[i] && photoTextures[i].image) {
                     aspect = photoTextures[i].image.width / photoTextures[i].image.height;
                 }
@@ -594,7 +647,7 @@
             const tex = new THREE.CanvasTexture(canvas);
             const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, blending: THREE.AdditiveBlending });
             titleMesh = new THREE.Mesh(new THREE.PlaneGeometry(65, 16), mat);
-            titleMesh.position.set(0, 52, 0);
+            titleMesh.position.set(0, isMobile ? 45 : 52, 0); // Lower title on mobile
             scene.add(titleMesh);
 
             // STAR TOPPER
@@ -668,7 +721,7 @@
             const count = positions.length / 3;
             
             if (targetState === 'TREE') {
-                group.rotation.y += 0.005; // Auto spin tree
+                group.rotation.y += 0.005; 
                 
                 for(let i=0; i<count; i++) {
                     sizes[i] = baseSize;
@@ -687,7 +740,7 @@
                 }
 
             } else if (targetState === 'HEART') {
-                group.rotation.y = 0; // Fixed heart
+                group.rotation.y = 0; 
                 const beatScale = 1 + Math.pow(Math.abs(Math.sin(time * 3.5)), 3) * 0.15; 
                 group.scale.set(beatScale, beatScale, beatScale);
 
@@ -710,11 +763,9 @@
                 }
 
             } else {
-                // EXPLODE & PHOTO MODE: Use the calculated sceneRotation
                 group.scale.set(1,1,1);
                 
                 // --- SMOOTH ROTATION LERP ---
-                // Interpolate current rotation to target rotation
                 group.rotation.y += (sceneRotY - group.rotation.y) * 0.1;
 
                 for(let i=0; i<count; i++) {
@@ -751,18 +802,14 @@
             const time = Date.now() * 0.001;
             const speed = 0.08;
 
-            // --- IMPROVED CONTROL LOGIC ---
-            // Reverted to raw mapping for "Drag" feel as requested
-            // Center (0.4 - 0.6) = Stop
-            
             let rotationVelocity = 0;
             // Only apply manual rotation in Explode/Photo mode
             if (state === 'EXPLODE' || state === 'PHOTO') {
-                const deadZone = 0.1; // 10% deadzone around center
+                const deadZone = 0.1; 
                 const center = 0.5;
-                const sensitivity = 0.05; // Adjust speed here
+                const sensitivity = 0.05; 
                 
-                // Using raw handX (not inverted) to give "reverse/drag" feel
+                // Using raw handX (not inverted)
                 if (Math.abs(handX - center) > deadZone) {
                     let val = (handX - center);
                     if (val > 0) val -= deadZone; else val += deadZone;
@@ -790,7 +837,7 @@
             if (state === 'TREE') {
                 titleMesh.visible = true; starMesh.visible = true; loveMesh.visible = false;
                 titleMesh.scale.lerp(new THREE.Vector3(1,1,1), 0.1);
-                titleMesh.position.y = 52 + Math.sin(time * 0.8) * 3; 
+                titleMesh.position.y = (isMobile ? 45 : 52) + Math.sin(time * 0.8) * 3; 
 
                 starMesh.rotation.z -= 0.015; 
                 const pulse = 1 + Math.sin(time*3)*0.15;
@@ -809,8 +856,6 @@
             } else if (state === 'EXPLODE') {
                 titleMesh.visible = false; starMesh.visible = false; loveMesh.visible = false;
                 
-                // Use the Group's actual current rotation to calculate positions
-                // Note: We use groupGold as the reference for rotation
                 const baseAngle = groupGold.rotation.y; 
                 const angleStep = (Math.PI * 2) / 5;
                 let bestIdx = 0; let maxZ = -999;
@@ -831,7 +876,7 @@
                     // Highlight logic
                     const glow = mesh.getObjectByName("glow");
                     if (z > 10) { 
-                        // Front Item: Scale up and Highlight
+                        // Front Item: Scale up
                         const ds = 1.0 + (z/CONFIG.photoOrbitRadius)*0.8; 
                         mesh.scale.lerp(new THREE.Vector3(ds, ds, ds), 0.1);
                         if(glow) glow.material.opacity = 0.6 + 0.4*Math.sin(time*10); // Pulse
@@ -862,28 +907,103 @@
             renderer.render(scene, camera);
         }
 
-        function startSystem() {
+        // ==========================================
+        // 4. TOUCH CONTROLS (Mobile Fallback)
+        // ==========================================
+        function initTouchControls() {
+            let touchStartX = 0;
+            let touchStartDist = 0;
+            let lastStateBeforeTouch = 'TREE';
+
+            document.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    touchStartX = e.touches[0].clientX;
+                    // If we are in TREE mode, touching screen opens to EXPLODE
+                    if (state === 'TREE') {
+                        state = 'EXPLODE';
+                    }
+                } else if (e.touches.length === 2) {
+                    touchStartDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            }, { passive: false });
+
+            document.addEventListener('touchmove', (e) => {
+                if (state === 'TREE') return; // Don't rotate tree manually
+
+                if (e.touches.length === 1) {
+                    // Rotate Logic (Drag)
+                    const touchCurrentX = e.touches[0].clientX;
+                    const deltaX = (touchCurrentX - touchStartX) * 0.005;
+                    targetSceneRotation += deltaX; // Direct control
+                    touchStartX = touchCurrentX;
+                    
+                    // Override handX to prevent conflict (center it)
+                    handX = 0.5; 
+
+                } else if (e.touches.length === 2) {
+                    // Pinch Logic
+                    const dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    
+                    // Zoom In (Spread) vs Zoom Out (Pinch)
+                    if (dist > touchStartDist + 50) {
+                        state = 'EXPLODE'; // Spread = Open
+                    } else if (dist < touchStartDist - 50) {
+                        state = 'PHOTO'; // Pinch = Select
+                    }
+                }
+            }, { passive: false });
+
+            // Optional: Auto reset to tree if no interaction for a long time?
+            // For now, let's keep it simple.
+        }
+
+
+        // ==========================================
+        // 5. SYSTEM START
+        // ==========================================
+        async function startSystem() {
             document.getElementById('btnStart').style.display = 'none';
-            bgMusic.play().catch(e => console.log(e));
+            document.getElementById('guidePanel').style.opacity = 0; // Hide guide to clear view
+            
+            try {
+                await bgMusic.play();
+            } catch(e) { console.log("Audio autoplay blocked, will play on interaction"); }
+
             init3D();
 
             const video = document.getElementsByClassName('input_video')[0];
             const canvas = document.getElementById('camera-preview');
             const ctx = canvas.getContext('2d');
             
+            // MediaPipe Configuration for Mobile
             const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
-            hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+            
+            hands.setOptions({ 
+                maxNumHands: isMobile ? 1 : 2, // Reduce hands on mobile
+                modelComplexity: isMobile ? 0 : 1, // 0 = Lite (Fast), 1 = Full
+                minDetectionConfidence: 0.5, 
+                minTrackingConfidence: 0.5 
+            });
 
             hands.onResults(results => {
-                ctx.clearRect(0,0,100,75); ctx.drawImage(results.image, 0, 0, 100, 75);
+                // Draw Preview
+                ctx.clearRect(0,0,canvas.width, canvas.height); 
+                // Maintain aspect ratio in preview
+                ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
-                // Heart Secret Logic
+                // --- LOGIC ---
+                // Heart Secret Logic (Requires 2 hands - Mostly PC only now unless tablet)
                 if (results.multiHandLandmarks.length === 2) {
                     const h1 = results.multiHandLandmarks[0]; const h2 = results.multiHandLandmarks[1];
                     const distIndex = Math.hypot(h1[8].x - h2[8].x, h1[8].y - h2[8].y);
                     const distThumb = Math.hypot(h1[4].x - h2[4].x, h1[4].y - h2[4].y);
-                 // Khoảng cách chặt hơn (0.05) để yêu cầu làm chuẩn
-				// Nếu giữ đủ 2 giây (2000ms)
+                    
                     if (distIndex < 0.08 && distThumb < 0.08) {
                         if (heartHoldStart === 0) heartHoldStart = Date.now();
                         if (Date.now() - heartHoldStart > 1500) { state = 'HEART'; return; }
@@ -892,8 +1012,6 @@
 
                 if(results.multiHandLandmarks.length > 0) {
                     const lm = results.multiHandLandmarks[0];
-                    
-                    // --- REVERTED to raw X for "Opposite/Drag" feel ---
                     handX = lm[9].x; 
                     
                     const tips = [8,12,16,20]; const wrist = lm[0];
@@ -909,14 +1027,24 @@
                         state = 'EXPLODE'; 
                     }
                 } else {
-                    state = 'TREE'; 
+                    // If no hands detected, don't force TREE immediately on mobile
+                    // to allow Touch Controls to persist state.
+                    if (!isMobile) state = 'TREE'; 
                 }
             });
 
             const cameraUtils = new Camera(video, {
-                onFrame: async () => { await hands.send({image: video}); }, width: 320, height: 240
+                onFrame: async () => { await hands.send({image: video}); }, 
+                width: isMobile ? 320 : 640, // Lower resolution on mobile
+                height: isMobile ? 240 : 480 
             });
-            cameraUtils.start();
+            
+            cameraUtils.start().catch(err => {
+                console.error("Camera failed to start:", err);
+                alert("Camera access failed or blocked. Starting Touch Mode.");
+                // Ensure 3D still runs if camera fails
+                if(!scene) init3D();
+            });
         }
 
         window.addEventListener('resize', () => {
