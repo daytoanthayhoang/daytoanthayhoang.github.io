@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Chinh Phục Toán 6 HK1 - Câu 7,8</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #ecfeff; /* Cyan background for Measurement */
+        }
+        
+        .option-card {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        .option-card:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .option-card:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+
+        /* SVG Shape Styles */
+        .shape-svg {
+            stroke: #0e7490; /* cyan-700 */
+            stroke-width: 3;
+            fill: #cffafe; /* cyan-100 */
+            transition: all 0.3s ease;
+        }
+        .shape-label {
+            font-size: 14px;
+            fill: #083344;
+            font-weight: bold;
+        }
+        .shape-dim-line {
+            stroke: #0891b2;
+            stroke-width: 1;
+            stroke-dasharray: 4;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-6 px-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-cyan-800 mb-2 uppercase drop-shadow-sm">
+            <i class="fas fa-ruler-combined mr-2"></i>Ôn tập Chinh Phục Toán 6 HK1 - Câu 7,8
+        </h1>
+        <p class="text-cyan-600 font-medium">Chủ đề: Chu vi & Diện tích (Công thức & Vận dụng)</p>
+    </header>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-4xl flex flex-col gap-6">
+        
+        <!-- Control Panel (Category Selection) -->
+        <div class="bg-white rounded-xl shadow-md p-4">
+            <p class="text-sm text-gray-500 mb-3 font-bold text-center uppercase">Chọn dạng bài tập</p>
+            <div class="flex flex-wrap justify-center gap-2" id="category-buttons">
+                <!-- Buttons injected by JS -->
+            </div>
+        </div>
+
+        <!-- Stats Board -->
+        <div class="bg-white rounded-xl shadow-md p-4 grid grid-cols-4 gap-2 text-center select-none" id="stats-container">
+            <!-- Stats injected by JS -->
+        </div>
+
+        <!-- Question Area -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-[350px] border-b-4 border-cyan-500">
+            
+            <!-- Question Badge -->
+            <div class="absolute top-0 left-0 bg-cyan-100 text-cyan-800 px-4 py-1 rounded-br-xl text-xs font-bold uppercase z-10" id="badge-topic">
+                Tổng hợp
+            </div>
+
+            <div id="question-container" class="p-6 md:p-8 pt-10">
+                <!-- Content -->
+                <div id="quiz-content" class="fade-in">
+                    <!-- Visual Area for Shapes -->
+                    <div id="visual-area" class="flex justify-center items-center mb-6 h-48 md:h-56 bg-gray-50 rounded-xl border border-dashed border-gray-300 hidden">
+                        <!-- SVG injected here -->
+                    </div>
+
+                    <h2 id="question-text" class="text-xl md:text-2xl font-bold text-gray-800 mb-8 leading-relaxed text-center">
+                        Nhấn nút bắt đầu để làm bài!
+                    </h2>
+
+                    <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Options injected here -->
+                    </div>
+
+                    <!-- Khu vực hiển thị giải thích inline -->
+                    <div id="explanation-area" class="hidden mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in">
+                        <!-- Nội dung giải thích sẽ được JS thêm vào đây -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer / Controls -->
+            <div class="bg-gray-50 p-4 border-t border-gray-100 flex items-center justify-between">
+                <div id="feedback-inline" class="text-lg font-bold hidden pl-2"></div>
+                <button id="btn-next" onclick="handleNextClick()" class="ml-auto bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center shadow-sm">
+                    Bỏ qua <i class="fas fa-forward ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
+
+    <!-- Feedback Modal (Overlay) -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-blue-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-blue-500 font-bold uppercase mb-1">Giải thích chi tiết:</p>
+                <p id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></p>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-cyan-600 text-white font-bold rounded-xl shadow-lg hover:bg-cyan-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & GENERATORS ---
+
+        // Helper: Sinh số ngẫu nhiên
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Helper: Trộn mảng
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Helper: Vẽ SVG (Updated for Measurment)
+        const renderShapeSVG = (type, params = {}) => {
+            const size = 180;
+            const center = size / 2;
+            let svgContent = '';
+            let labels = '';
+            
+            // params: { showLabels: boolean, a: val, b: val, h: val }
+            const showL = params.showLabels || false;
+
+            switch(type) {
+                case 'hinhvuong':
+                    svgContent = `<rect x="40" y="40" width="100" height="100" class="shape-svg" />`;
+                    if(showL) labels = `<text x="90" y="155" class="shape-label" text-anchor="middle">a</text>`;
+                    break;
+                case 'hinhchunhat':
+                    svgContent = `<rect x="30" y="50" width="120" height="80" class="shape-svg" />`;
+                    if(showL) labels = `<text x="90" y="145" class="shape-label" text-anchor="middle">a</text><text x="160" y="90" class="shape-label">b</text>`;
+                    break;
+                case 'hinhthoi':
+                    svgContent = `
+                        <polygon points="${center},20 ${size-40},${center} ${center},${size-20} 40,${center}" class="shape-svg" />
+                        ${showL ? `<line x1="${center}" y1="20" x2="${center}" y2="${size-20}" class="shape-dim-line" />
+                        <line x1="40" y1="${center}" x2="${size-40}" y2="${center}" class="shape-dim-line" />` : ''}
+                    `;
+                    break;
+                case 'hinhbinhhanh':
+                    svgContent = `
+                        <polygon points="50,40 150,40 130,120 30,120" class="shape-svg" />
+                        ${showL ? `<line x1="50" y1="40" x2="50" y2="120" class="shape-dim-line" />` : ''}
+                    `;
+                    if(showL) labels = `<text x="90" y="135" class="shape-label" text-anchor="middle">a</text><text x="40" y="80" class="shape-label">h</text>`;
+                    break;
+                case 'hinhthang':
+                    svgContent = `
+                        <polygon points="60,40 120,40 160,120 20,120" class="shape-svg" />
+                        ${showL ? `<line x1="60" y1="40" x2="60" y2="120" class="shape-dim-line" />` : ''}
+                    `;
+                    if(showL) labels = `<text x="90" y="35" class="shape-label" text-anchor="middle">a</text><text x="90" y="135" class="shape-label" text-anchor="middle">b</text><text x="50" y="80" class="shape-label">h</text>`;
+                    break;
+                case 'tamgiac':
+                    svgContent = `
+                        <polygon points="${center},20 ${size-30},140 30,140" class="shape-svg" />
+                        ${showL ? `<line x1="${center}" y1="20" x2="${center}" y2="140" class="shape-dim-line" />` : ''}
+                    `;
+                    if(showL) labels = `<text x="${center}" y="155" class="shape-label" text-anchor="middle">a</text><text x="${center + 5}" y="90" class="shape-label">h</text>`;
+                    break;
+                default:
+                    svgContent = '';
+            }
+            return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" class="shape-container">${svgContent}${labels}</svg>`;
+        };
+
+        // --- CONTENT GENERATORS (Câu 7, 8 Specific) ---
+
+        // 1. FORMULA RECOGNITION (Nhận biết công thức - 70% Core)
+        // Cập nhật: Random hóa các dạng công thức để tránh học vẹt
+        const generateFormulaQuestion = () => {
+            const shapesData = [
+                {
+                    id: 'hinhvuong', name: 'Hình vuông',
+                    variations_area: [
+                        { a: "S = a . a", d: ["S = a x 4", "S = a + a", "S = 2 . a"] },
+                        { a: "S = a²", d: ["S = 4a", "S = a + 4", "S = 2a"] },
+                        { a: "S = a x a", d: ["S = a . 4", "S = (a + a) . 2", "S = a + a"] }
+                    ],
+                    variations_perim: [
+                        { a: "C = 4 . a", d: ["C = a . a", "C = a + 4", "C = a : 4"] },
+                        { a: "C = a x 4", d: ["C = a x a", "C = (a + 4) x 2", "C = a + 4"] }
+                    ],
+                    q_area: "Diện tích S của hình vuông cạnh a là:",
+                    expl_area: "Diện tích hình vuông bằng cạnh nhân cạnh.",
+                    q_perim: "Chu vi C của hình vuông cạnh a là:",
+                    expl_perim: "Chu vi hình vuông bằng cạnh nhân 4."
+                },
+                {
+                    id: 'hinhchunhat', name: 'Hình chữ nhật',
+                    variations_area: [
+                        { a: "S = a . b", d: ["S = (a + b) . 2", "S = a + b", "S = 2.a.b"] },
+                        { a: "S = a x b", d: ["S = a + b", "S = 2 x (a + b)", "S = a : b"] }
+                    ],
+                    variations_perim: [
+                        { a: "C = 2.(a + b)", d: ["C = a . b", "C = a + b", "C = 4.(a + b)"] },
+                        { a: "C = (a + b) x 2", d: ["C = a x b", "C = a + b + 2", "C = a x b x 2"] }
+                    ],
+                    q_area: "Diện tích S của hình chữ nhật có chiều dài a và chiều rộng b là:",
+                    expl_area: "Diện tích hình chữ nhật bằng chiều dài nhân chiều rộng.",
+                    q_perim: "Chu vi C của hình chữ nhật cạnh a và b là:",
+                    expl_perim: "Chu vi hình chữ nhật bằng tổng hai cạnh kề nhân 2."
+                },
+                {
+                    id: 'hinhthang', name: 'Hình thang',
+                    variations_area: [
+                        { a: "S = (a + b).h : 2", d: ["S = (a + b).h", "S = a.b.h", "S = (a + b).h : 4"] },
+                        { a: "S = [(a + b) x h] / 2", d: ["S = (a + b) x h", "S = (a x b) / h", "S = 2 x (a + b) x h"] },
+                        { a: "S = 1/2 . (a + b) . h", d: ["S = 1/2 . a . b", "S = (a + b) . h", "S = 2 . (a + b) . h"] }
+                    ],
+                    q_area: "Diện tích hình thang có hai đáy a, b và chiều cao h là:",
+                    expl_area: "Diện tích hình thang bằng tổng độ dài hai đáy nhân với chiều cao rồi chia đôi."
+                },
+                {
+                    id: 'hinhbinhhanh', name: 'Hình bình hành',
+                    variations_area: [
+                        { a: "S = a . h", d: ["S = a . h : 2", "S = (a + h) . 2", "S = a . a"] },
+                        { a: "S = a x h", d: ["S = (a x h) / 2", "S = a + h", "S = a : h"] }
+                    ],
+                    q_area: "Diện tích hình bình hành có cạnh đáy a và chiều cao h tương ứng là:",
+                    expl_area: "Diện tích hình bình hành bằng độ dài đáy nhân với chiều cao tương ứng."
+                },
+                {
+                    id: 'hinhthoi', name: 'Hình thoi',
+                    variations_area: [
+                        { a: "S = (m . n) : 2", d: ["S = m . n", "S = (m + n) . 2", "S = 2 . m . n"] },
+                        { a: "S = 1/2 . m . n", d: ["S = m . n", "S = 2 . (m + n)", "S = m + n"] },
+                        { a: "S = (m x n) / 2", d: ["S = m x n", "S = (m + n) / 2", "S = m x n x 2"] }
+                    ],
+                    q_area: "Diện tích hình thoi có hai đường chéo m và n là:",
+                    expl_area: "Diện tích hình thoi bằng tích hai đường chéo chia đôi."
+                },
+                {
+                    id: 'tamgiac', name: 'Hình tam giác',
+                    variations_area: [
+                        { a: "S = (a . h) : 2", d: ["S = a . h", "S = 2 . a . h", "S = (a + h) : 2"] },
+                        { a: "S = 1/2 . a . h", d: ["S = a . h", "S = a . h . 2", "S = 1/2 . (a + h)"] },
+                        { a: "S = (a x h) / 2", d: ["S = a x h", "S = 2 x a x h", "S = (a + h) / 2"] }
+                    ],
+                    q_area: "Diện tích tam giác có đáy a và chiều cao h là:",
+                    expl_area: "Diện tích tam giác bằng độ dài đáy nhân với chiều cao rồi chia đôi."
+                }
+            ];
+
+            const shape = shapesData[randomInt(0, shapesData.length - 1)];
+            
+            // Randomly choose Area or Perimeter (if available)
+            // Weight Area higher (70%)
+            const hasPerim = shape.variations_perim && shape.variations_perim.length > 0;
+            const askArea = !hasPerim || Math.random() > 0.3;
+            
+            let qText = askArea ? shape.q_area : shape.q_perim;
+            let expl = askArea ? shape.expl_area : shape.expl_perim;
+            let variations = askArea ? shape.variations_area : shape.variations_perim;
+            
+            // Pick a random format variation
+            const variant = variations[randomInt(0, variations.length - 1)];
+
+            return {
+                type: 'formula',
+                categoryLabel: 'Lý thuyết công thức',
+                svg: renderShapeSVG(shape.id, {showLabels: true}),
+                question: qText,
+                options: shuffleArray([variant.a, ...variant.d]),
+                correct: variant.a,
+                explanation: expl
+            };
+        };
+
+        // 2. BASIC CALCULATION (Tính toán cơ bản - 70% Core)
+        const generateCalculationQuestion = () => {
+            const types = ['hinhvuong', 'hinhchunhat', 'hinhbinhhanh', 'hinhthoi', 'hinhthang', 'tamgiac'];
+            const type = types[randomInt(0, types.length - 1)];
+            
+            let q = "", a = "", d = [], exp = "", svg = "";
+            const n1 = randomInt(3, 15);
+            const n2 = randomInt(3, 15);
+            const n3 = randomInt(2, 10);
+
+            switch(type) {
+                case 'hinhvuong':
+                    if (Math.random() > 0.5) {
+                        q = `Tính diện tích hình vuông có cạnh bằng ${n1} cm.`;
+                        const res = n1 * n1;
+                        a = `${res} cm²`;
+                        d = [`${n1 * 4} cm²`, `${n1 * 2} cm²`, `${res + 10} cm²`];
+                        exp = `Diện tích hình vuông = cạnh x cạnh = ${n1} x ${n1} = ${res} (cm²).`;
+                    } else {
+                        q = `Tính chu vi hình vuông có cạnh bằng ${n1} cm.`;
+                        const res = n1 * 4;
+                        a = `${res} cm`;
+                        d = [`${n1 * n1} cm`, `${n1 * 2} cm`, `${res + 4} cm`];
+                        exp = `Chu vi hình vuông = cạnh x 4 = ${n1} x 4 = ${res} (cm).`;
+                    }
+                    svg = renderShapeSVG('hinhvuong');
+                    break;
+                case 'hinhchunhat':
+                    q = `Tính diện tích hình chữ nhật có chiều dài ${Math.max(n1, n2)} cm, chiều rộng ${Math.min(n1, n2)} cm.`;
+                    const sHCN = n1 * n2;
+                    a = `${sHCN} cm²`;
+                    d = [`${(n1+n2)*2} cm²`, `${n1+n2} cm²`, `${Math.floor(sHCN/2)} cm²`];
+                    exp = `Diện tích = dài x rộng = ${Math.max(n1,n2)} x ${Math.min(n1,n2)} = ${sHCN} (cm²).`;
+                    svg = renderShapeSVG('hinhchunhat');
+                    break;
+                case 'hinhbinhhanh':
+                    q = `Hình bình hành có độ dài đáy là ${n1} cm và chiều cao tương ứng là ${n2} cm. Diện tích là:`;
+                    const sHBH = n1 * n2;
+                    a = `${sHBH} cm²`;
+                    d = [`${sHBH/2} cm²`, `${(n1+n2)*2} cm²`, `${n1+n2} cm²`];
+                    exp = `Diện tích hình bình hành = đáy x cao = ${n1} x ${n2} = ${sHBH} (cm²).`;
+                    svg = renderShapeSVG('hinhbinhhanh');
+                    break;
+                case 'hinhthoi':
+                    q = `Tính diện tích hình thoi biết độ dài hai đường chéo là ${n1} cm và ${n2 * 2} cm.`;
+                    const d2 = n2 * 2;
+                    const sHT = (n1 * d2) / 2;
+                    a = `${sHT} cm²`;
+                    d = [`${n1 * d2} cm²`, `${(n1 + d2)*2} cm²`, `${n1 + d2} cm²`];
+                    exp = `Diện tích hình thoi = (chéo 1 x chéo 2) : 2 = (${n1} x ${d2}) : 2 = ${sHT} (cm²).`;
+                    svg = renderShapeSVG('hinhthoi');
+                    break;
+                case 'hinhthang':
+                    q = `Hình thang có đáy bé ${Math.min(n1,n2)} cm, đáy lớn ${Math.max(n1,n2)} cm và chiều cao ${n3 * 2} cm. Diện tích là:`;
+                    const hT = n3 * 2;
+                    const sThang = ((n1 + n2) * hT) / 2;
+                    a = `${sThang} cm²`;
+                    d = [`${(n1 + n2) * hT} cm²`, `${n1 + n2 + hT} cm²`, `${sThang * 2} cm²`];
+                    exp = `Diện tích = (tổng 2 đáy x cao) : 2 = (${n1} + ${n2}) x ${hT} : 2 = ${sThang} (cm²).`;
+                    svg = renderShapeSVG('hinhthang');
+                    break;
+                case 'tamgiac':
+                    q = `Một tam giác có đáy ${n1} cm và chiều cao tương ứng ${n2 * 2} cm. Diện tích là:`;
+                    const hTri = n2 * 2;
+                    const sTri = (n1 * hTri) / 2;
+                    a = `${sTri} cm²`;
+                    d = [`${n1 * hTri} cm²`, `${n1 + hTri} cm²`, `${sTri * 2} cm²`];
+                    exp = `Diện tích tam giác = (đáy x cao) : 2 = (${n1} x ${hTri}) : 2 = ${sTri} (cm²).`;
+                    svg = renderShapeSVG('tamgiac');
+                    break;
+            }
+
+            return {
+                type: 'calculation',
+                categoryLabel: 'Bài tập tính toán',
+                svg: svg,
+                question: q,
+                options: shuffleArray([a, ...d]),
+                correct: a,
+                explanation: exp
+            };
+        };
+
+        // 3. REAL WORLD & ADVANCED (Vận dụng - 30% Expanded)
+        const generateAdvancedQuestion = () => {
+            const scenarios = [
+                {
+                    type: 'realworld',
+                    gen: () => {
+                        const side = randomInt(5, 12) * 2; 
+                        const perim = side * 4;
+                        return {
+                            q: `Bác An muốn rào xung quanh một khu vườn hình vuông có cạnh ${side}m bằng lưới thép. Hỏi bác An cần mua bao nhiêu mét lưới?`,
+                            a: `${perim} m`,
+                            d: [`${side * side} m`, `${side * 2} m`, `${perim + 10} m`],
+                            expl: `Số mét lưới cần mua chính là chu vi hình vuông.<br>Chu vi = ${side} x 4 = ${perim} (m).`
+                        };
+                    }
+                },
+                {
+                    type: 'realworld',
+                    gen: () => {
+                        const l_fixed = randomInt(4, 10);
+                        const area = 4 * l_fixed; 
+                        const count = area / 0.25;
+                        
+                        return {
+                            q: `Một nền nhà hình chữ nhật có chiều rộng 4m, chiều dài ${l_fixed}m. Người ta lát nền bằng các viên gạch hình vuông cạnh 50cm. Hỏi cần bao nhiêu viên gạch? (Giả sử mạch vữa không đáng kể)`,
+                            a: `${count} viên`,
+                            d: [`${count + 10} viên`, `${count / 2} viên`, `${area * 10} viên`],
+                            expl: `Diện tích nền nhà: 4 x ${l_fixed} = ${area} (m²).<br>Đổi 50cm = 0,5m. Diện tích 1 viên gạch: 0,5 x 0,5 = 0,25 (m²).<br>Số viên gạch: ${area} : 0,25 = ${count} (viên).`
+                        };
+                    }
+                },
+                {
+                    type: 'reverse',
+                    gen: () => {
+                        const base = randomInt(4, 10);
+                        const h = randomInt(4, 10);
+                        const area = base * h;
+                        return {
+                            q: `Một hình bình hành có diện tích ${area} cm² và độ dài đáy là ${base} cm. Chiều cao tương ứng là bao nhiêu?`,
+                            a: `${h} cm`,
+                            d: [`${area * base} cm`, `${area + base} cm`, `${h * 2} cm`],
+                            expl: `Từ công thức S = a x h => h = S : a.<br>Chiều cao = ${area} : ${base} = ${h} (cm).`
+                        };
+                    }
+                },
+                {
+                     type: 'reverse',
+                     gen: () => {
+                         const base = randomInt(6, 12);
+                         const h = randomInt(4, 8) * 2;
+                         const area = (base * h) / 2;
+                         return {
+                             q: `Một hình tam giác có diện tích ${area} cm² và độ dài đáy ${base} cm. Chiều cao của tam giác đó là:`,
+                             a: `${h} cm`,
+                             d: [`${area / base} cm`, `${h / 2} cm`, `${area * 2} cm`],
+                             expl: `Từ công thức S = (a x h) : 2 => h = (S x 2) : a.<br>Chiều cao = (${area} x 2) : ${base} = ${h} (cm).`
+                         }
+                     }
+                }
+            ];
+
+            const item = scenarios[randomInt(0, scenarios.length - 1)].gen();
+            return {
+                type: 'advanced',
+                categoryLabel: 'Vận dụng thực tế',
+                svg: null,
+                question: item.q,
+                options: shuffleArray([item.a, ...item.d]),
+                correct: item.a,
+                explanation: item.expl
+            };
+        };
+
+        // --- APP STATE ---
+        const state = {
+            currentCategory: 'all', 
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        function initCategoryButtons() {
+            const categories = [
+                { id: 'all', label: 'Tổng hợp', icon: 'fa-random', color: 'bg-cyan-700' },
+                { id: 'formula', label: 'Công thức', icon: 'fa-book', color: 'bg-emerald-600' },
+                { id: 'calculation', label: 'Tính toán', icon: 'fa-calculator', color: 'bg-blue-600' },
+                { id: 'advanced', label: 'Vận dụng', icon: 'fa-brain', color: 'bg-purple-600' }
+            ];
+
+            const container = document.getElementById('category-buttons');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="changeCategory('${cat.id}')" 
+                    class="category-btn ${cat.id === 'all' ? 'ring-2 ring-offset-2 ring-cyan-400' : ''} 
+                           flex items-center gap-2 px-3 py-2 rounded-lg text-white text-sm font-bold shadow-md 
+                           ${cat.color} hover:opacity-90 transition-all">
+                    <i class="fas ${cat.icon}"></i> ${cat.label}
+                </button>
+            `).join('');
+        }
+
+        function changeCategory(id) {
+            state.currentCategory = id;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2', 'ring-cyan-400');
+            });
+            event.currentTarget.classList.add('ring-2', 'ring-offset-2', 'ring-cyan-400');
+            generateNewQuestion(true);
+        }
+
+        function getQuestionData() {
+            let mode = state.currentCategory;
+            let qData;
+
+            // Probability Logic for 'all' mode
+            // 70% Core (Formula + Basic Calc), 30% Advanced
+            if (mode === 'all') {
+                const rand = Math.random();
+                if (rand < 0.35) mode = 'formula';
+                else if (rand < 0.70) mode = 'calculation';
+                else mode = 'advanced';
+            }
+
+            if (mode === 'formula') {
+                qData = generateFormulaQuestion();
+            } else if (mode === 'calculation') {
+                qData = generateCalculationQuestion();
+            } else if (mode === 'advanced') {
+                qData = generateAdvancedQuestion();
+            } else {
+                // Fallback
+                qData = generateFormulaQuestion();
+            }
+            
+            return qData;
+        }
+
+        function generateNewQuestion(skipStats = false) {
+            state.isAnswered = false;
+            
+            // UI Reset
+            document.getElementById('feedback-inline').className = "hidden";
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "ml-auto bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center shadow-sm";
+            
+            document.getElementById('explanation-area').classList.add('hidden');
+            document.getElementById('explanation-area').innerHTML = '';
+            
+            const visualArea = document.getElementById('visual-area');
+            
+            // Get Data
+            const q = getQuestionData();
+            state.currentQuestion = q; 
+
+            // Find correct index
+            const correctIndex = q.options.indexOf(q.correct);
+            state.currentQuestion.correctIndex = correctIndex;
+
+            // Render Badge & Question
+            document.getElementById('badge-topic').innerText = q.categoryLabel || 'Tổng hợp';
+            document.getElementById('question-text').innerHTML = q.question;
+            
+            // Show SVG if exists
+            if (q.svg) {
+                visualArea.classList.remove('hidden');
+                visualArea.innerHTML = q.svg;
+            } else {
+                visualArea.classList.add('hidden');
+            }
+
+            // Options
+            const optionsHtml = q.options.map((opt, index) => `
+                <button onclick="checkAnswer(this, ${index})" 
+                    class="option-card w-full text-left p-4 rounded-xl border-2 border-gray-100 bg-cyan-50 hover:border-cyan-300 hover:bg-cyan-100 text-gray-700 font-semibold relative overflow-hidden group">
+                    <span class="inline-block w-8 h-8 rounded-full bg-white text-center leading-8 mr-3 text-cyan-600 font-bold shadow-sm group-hover:bg-cyan-600 group-hover:text-white transition">
+                        ${String.fromCharCode(65 + index)}
+                    </span>
+                    ${opt}
+                </button>
+            `).join('');
+            document.getElementById('options-grid').innerHTML = optionsHtml;
+        }
+
+        function checkAnswer(btn, selectedIndex) {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const isCorrect = selectedIndex === state.currentQuestion.correctIndex;
+            const inlineFeedback = document.getElementById('feedback-inline');
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+
+            // Disable buttons
+            const allBtns = document.querySelectorAll('.option-card');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-75');
+            });
+
+            // Highlight Correct
+            const correctBtn = allBtns[state.currentQuestion.correctIndex];
+            correctBtn.classList.remove('bg-cyan-50', 'border-gray-100', 'hover:border-cyan-300', 'hover:bg-cyan-100', 'opacity-75');
+            correctBtn.classList.add('bg-green-100', 'border-green-500', 'text-green-800', 'opacity-100', 'border-2');
+            const correctSpan = correctBtn.querySelector('span');
+            correctSpan.classList.remove('text-cyan-600', 'bg-white');
+            correctSpan.classList.add('bg-green-600', 'text-white');
+
+            if (isCorrect) {
+                state.streak++;
+                state.correct++;
+                
+                btn.classList.add('bg-green-500', 'text-white');
+                btn.querySelector('span').classList.remove('bg-green-600', 'text-white');
+                btn.querySelector('span').classList.add('bg-white', 'text-green-600');
+                btn.classList.add('pop');
+
+                inlineFeedback.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>';
+                inlineFeedback.className = "text-lg font-bold block pl-2 animate-bounce";
+            } else {
+                state.streak = 0;
+                state.wrong++;
+
+                btn.classList.remove('bg-cyan-50', 'border-gray-100');
+                btn.classList.add('bg-red-500', 'border-red-600', 'text-white', 'shake', 'opacity-100');
+                btn.querySelector('span').classList.remove('text-cyan-600', 'bg-white');
+                btn.querySelector('span').classList.add('text-red-600', 'bg-white');
+
+                inlineFeedback.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>';
+                inlineFeedback.className = "text-lg font-bold block pl-2";
+
+                // Setup Modal
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Chưa chính xác";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerText = `Đáp án đúng là: ${state.currentQuestion.correct}`;
+                
+                // Show modal
+                setTimeout(() => { overlay.classList.remove('hidden'); }, 400);
+            }
+
+            // Show explanation
+            const explArea = document.getElementById('explanation-area');
+            explArea.innerHTML = `<p class="font-bold text-cyan-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+
+            // Modal detail
+            detail.innerHTML = state.currentQuestion.explanation;
+
+            renderStats();
+
+            // Update Next Btn
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Tiếp theo <i class="fas fa-arrow-right ml-2"></i>';
+            btnNext.className = "ml-auto bg-cyan-600 text-white px-6 py-2 rounded-full font-bold hover:bg-cyan-700 transition flex items-center shadow-lg transform scale-105";
+        }
+
+        function renderStats() {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span class="text-3xl font-extrabold ${state.streak > 2 ? 'streak-fire' : 'text-cyan-900'}">
+                        ${state.streak > 2 ? '<i class="fas fa-fire"></i> ' : ''}${state.streak}
+                    </span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span class="text-xl font-bold text-green-600">${state.correct}</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span class="text-xl font-bold text-red-500">${state.wrong}</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span class="text-xl font-bold text-gray-400">${state.skipped}</span>
+                </div>
+            `;
+        }
+
+        function handleNextClick() {
+            if (!state.isAnswered) {
+                state.streak = 0;
+                state.skipped++;
+                renderStats();
+            }
+            generateNewQuestion();
+        }
+
+        function closeModal() {
+            document.getElementById('feedback-overlay').classList.add('hidden');
+        }
+
+        // Init
+        initCategoryButtons();
+        renderStats();
+        generateNewQuestion();
+
+    </script>
+</body>
+</html>

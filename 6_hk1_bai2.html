@@ -3,507 +3,716 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luyện Thi Toán 6 - Bài 2: Thực Hiện Phép Tính</title>
+    <title>Ôn tập Chinh Phục Toán 6 HK1 - Bài 2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f0fdf4; /* Green tint */
-            background-image: radial-gradient(#86efac 1px, transparent 1px);
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
             background-size: 20px 20px;
         }
         .chalkboard {
-            background-color: #1a2e1a; /* Dark Green Board */
+            background-color: #2c3e50;
             color: #ecf0f1;
-            border: 8px solid #5d4037; /* Wood color */
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            border: 8px solid #854d0e;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            min-height: 280px;
         }
-        .btn-mode {
-            transition: all 0.2s;
-            border-bottom: 4px solid transparent;
+        .chalkboard::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMTAgMTBRNDAgNDAgMTAgNzAiIHN0cm9rZT0id2hpdGUiIG9wYWNpdHk9IjAuMDUiIGZpbGw9Im5vbmUiLz4KPC9zdmc+');
+            opacity: 0.1;
+            pointer-events: none;
         }
-        .btn-mode:active {
-            transform: translateY(2px);
-            border-bottom-width: 0;
-        }
-        .mode-active {
-            background-color: #15803d !important; /* green-700 */
-            color: white !important;
-            border-bottom: 4px solid #14532d !important; /* green-900 */
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Animation for steps */
-        .step-row {
+        .step-item {
             opacity: 0;
-            transform: translateX(-10px);
-            animation: slideIn 0.3s forwards;
+            transform: translateY(-10px);
+            animation: slideDown 0.3s forwards;
         }
-        @keyframes slideIn {
-            to { opacity: 1; transform: translateX(0); }
+        @keyframes slideDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #steps-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #steps-container::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        #steps-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        #steps-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .input-group:focus-within label {
+            color: #4f46e5;
         }
 
-        #steps-container::-webkit-scrollbar { width: 8px; }
-        #steps-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        #steps-container::-webkit-scrollbar-thumb { background: #86efac; border-radius: 4px; }
-        #steps-container::-webkit-scrollbar-thumb:hover { background: #4ade80; }
-
-        /* Math Display Styles */
-        .math-font {
-            font-family: 'Courier New', Courier, monospace;
+        /* --- STYLES FOR STATS --- */
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+        .stats-box {
+            transition: all 0.3s ease;
+        }
+        .stats-box:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-2 md:p-6">
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
 
-    <div class="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-green-200">
+    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-blue-200">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-green-700 to-emerald-500 p-4 md:p-6 text-center relative shadow-lg">
-            <h1 class="text-2xl md:text-4xl font-extrabold text-white uppercase tracking-wider drop-shadow-md">
-                <i class="fas fa-calculator mr-3"></i>Ôn Tập Toán 6 - BÀI 2
+        <div class="bg-indigo-600 p-4 text-center relative shadow-lg">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
+                <i class="fas fa-calculator mr-2"></i>Ôn tập Chinh Phục Toán 6 HK1 - Bài 2
             </h1>
-            <p class="text-green-50 mt-2 text-sm md:text-base font-semibold">THỰC HIỆN PHÉP TÍNH & TÍNH NHANH</p>
-            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white font-bold border border-white/30 shadow-sm">
-                Điểm: <span id="score" class="text-yellow-300 text-xl">0</span>
-            </div>
+		    <p class="text-white font-medium opacity-90">Chủ đề: Thực hiện phép tính (Cộng, Trừ, Nhân, Chia số nguyên)</p>
         </div>
 
-        <div class="p-4 md:p-6 space-y-6">
+        <div class="p-4 md:p-6 space-y-4">
             
-            <!-- Mode Selection -->
-            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 shadow-inner">
-                <label class="block text-gray-700 font-bold mb-3 text-sm uppercase tracking-wide flex items-center">
-                    <i class="fas fa-layer-group text-green-700 mr-2"></i>Chọn dạng bài ưu tiên:
-                </label>
-                
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="setMode('mix')" id="btn-mix" class="btn-mode flex-1 min-w-[120px] bg-yellow-100 border border-yellow-300 text-yellow-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-yellow-200">
-                        <i class="fas fa-random mr-1"></i> Tổng hợp
-                    </button>
-                    
-                    <button onclick="setMode('typeA')" id="btn-typeA" class="btn-mode flex-1 min-w-[150px] bg-blue-100 border border-blue-300 text-blue-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-blue-200">
-                        <i class="fas fa-cubes mr-1"></i> Câu A (3 số)
-                    </button>
-
-                    <button onclick="setMode('typeB')" id="btn-typeB" class="btn-mode flex-1 min-w-[150px] bg-purple-100 border border-purple-300 text-purple-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-purple-200">
-                        <i class="fas fa-times mr-1"></i> Câu B (Tổng Tích)
-                    </button>
-                    
-                    <button onclick="setMode('smart')" id="btn-smart" class="btn-mode flex-1 min-w-[120px] bg-red-100 border border-red-300 text-red-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-red-200">
-                        <i class="fas fa-bolt mr-1"></i> Tính nhanh
-                    </button>
+            <!-- STATS BOARD -->
+            <div class="bg-white rounded-xl shadow-md p-3 grid grid-cols-4 gap-2 text-center select-none border border-gray-100" id="stats-container">
+                <div class="flex flex-col items-center stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span id="stat-streak" class="text-2xl md:text-3xl font-extrabold text-indigo-900">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span id="stat-correct" class="text-xl md:text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span id="stat-wrong" class="text-xl md:text-2xl font-bold text-red-500">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span id="stat-skipped" class="text-xl md:text-2xl font-bold text-gray-400">0</span>
                 </div>
             </div>
-
-            <!-- Question Area -->
+            
+            <!-- Main Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Left: Question Board -->
-                <div class="flex flex-col h-full">
-                    <div class="chalkboard p-6 md:p-8">
-                        <div class="absolute top-4 left-4 text-gray-400 text-xs font-mono border border-gray-500 px-2 py-1 rounded">
-                            <i class="fas fa-tag mr-1"></i><span id="question-type-label">...</span>
+                
+                <!-- Left Column: Chalkboard & Inputs -->
+                <div class="flex flex-col gap-4">
+                    <!-- Chalkboard -->
+                    <div class="chalkboard p-6 min-h-[350px] relative">
+                        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs font-mono uppercase tracking-widest opacity-60">
+                            Đề bài
+                        </div>
+                        <div class="absolute top-2 right-4 text-xs font-bold px-2 py-1 rounded bg-white/10 text-white/80" id="mode-display">
+                            Cơ bản
                         </div>
                         
-                        <div id="question-text" class="text-2xl md:text-4xl font-bold tracking-wider mb-6 font-mono leading-relaxed text-center math-font">
-                            Loading...
+                        <div class="space-y-8 font-mono text-xl md:text-2xl w-full px-2 mt-4">
+                            <!-- Question A -->
+                            <div class="flex flex-col">
+                                <div class="flex items-start mb-2">
+                                    <span class="text-yellow-400 font-bold mr-3 mt-1">a)</span>
+                                    <div id="q-a-text" class="text-white tracking-wider leading-relaxed break-words">Loading...</div>
+                                </div>
+                            </div>
+
+                            <!-- Question B -->
+                            <div class="flex flex-col border-t border-gray-600 pt-6">
+                                <div class="flex items-start mb-2">
+                                    <span class="text-yellow-400 font-bold mr-3 mt-1">b)</span>
+                                    <div id="q-b-text" class="text-white tracking-wider leading-relaxed break-words">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-inner">
+                        <div class="grid grid-cols-2 gap-6 mb-4">
+                            <!-- Input A -->
+                            <div class="input-group">
+                                <label class="block text-gray-500 font-bold text-sm uppercase mb-1 text-center">Kết quả câu a</label>
+                                <input type="tel" id="ans-a" placeholder="?" 
+                                    class="w-full text-center font-bold text-xl p-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors"
+                                    onkeydown="if(event.key === 'Enter') document.getElementById('ans-b').focus()">
+                            </div>
+                            <!-- Input B -->
+                            <div class="input-group">
+                                <label class="block text-gray-500 font-bold text-sm uppercase mb-1 text-center">Kết quả câu b</label>
+                                <input type="tel" id="ans-b" placeholder="?" 
+                                    class="w-full text-center font-bold text-xl p-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors"
+                                    onkeydown="if(event.key === 'Enter') checkAnswer()">
+                            </div>
+                        </div>
+
+                        <!-- Difficulty Toggle -->
+                        <div class="flex items-center justify-end mt-4 mb-2">
+                            <label class="inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                <span class="ms-2 text-sm font-bold text-gray-600 peer-checked:text-red-600 transition-colors">
+                                    <i class="fas fa-skull-crossbones mr-1"></i>Chế độ khó
+                                </span>
+                            </label>
                         </div>
                         
-                        <div class="text-gray-400 text-sm mt-auto border-t border-gray-600 pt-4 w-full text-center">
-                            <i class="fas fa-info-circle mr-1"></i> <span id="input-hint">Tính giá trị của biểu thức</span>
+                        <!-- Buttons -->
+                        <div class="flex gap-3">
+                            <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-sync-alt"></i> Bài mới
+                            </button>
+                            <button onclick="checkAnswer()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i> Kiểm tra
+                            </button>
                         </div>
+
+                        <!-- Feedback Area -->
+                        <div id="feedback" class="hidden mt-3 text-center p-3 rounded-lg text-sm font-bold"></div>
                     </div>
                 </div>
 
-                <!-- Right: Step-by-step & Hint Area -->
-                <div class="bg-white rounded-2xl border-2 border-dashed border-green-300 p-5 flex flex-col h-full shadow-sm max-h-[450px]">
-                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-                        <h3 class="font-bold text-gray-700 flex items-center">
-                            <span class="bg-green-100 text-green-700 p-1.5 rounded-lg mr-2"><i class="fas fa-shoe-prints"></i></span>
-                            Lời giải
-                        </h3>
-                        <button onclick="showNextStep()" id="btn-show-step" class="bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center">
-                            <i class="fas fa-lightbulb mr-2"></i> Gợi ý
-                        </button>
+                <!-- Right Column: Step-by-step -->
+                <div class="flex flex-col h-[500px] lg:h-[600px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-4 relative">
+                    <!-- HEADER WITH BUTTON -->
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 shrink-0">
+                        <div class="flex items-center gap-2 flex-grow">
+                            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide whitespace-nowrap">
+                                <i class="fas fa-file-signature text-blue-500 mr-1"></i>Trình bày bài thi
+                            </h3>
+                            <!-- Button -->
+                            <button onclick="showNextStep()" id="btn-show-step" 
+                                class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed ml-2">
+                                <span>Gợi ý tiếp</span> <i class="fas fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                        <span id="step-counter" class="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded ml-2">0/0</span>
                     </div>
-                    
-                    <!-- Rule Hint Box -->
-                    <div id="rule-hint" class="hidden mb-3 text-sm bg-yellow-50 text-yellow-800 p-3 rounded-xl border border-yellow-200 flex items-start">
-                        <i class="fas fa-star text-yellow-500 mt-1 mr-2 flex-shrink-0"></i>
+
+                    <!-- Fixed Rule Hint Area -->
+                    <div id="rule-area" class="hidden mb-3 bg-yellow-50 text-yellow-900 text-sm p-3 rounded-lg border-l-4 border-yellow-400 shadow-sm transition-all duration-300 shrink-0">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
                         <span id="rule-content" class="font-medium"></span>
                     </div>
-
-                    <!-- Steps Container (Table-like structure) -->
-                    <div id="steps-container" class="flex-grow overflow-y-auto pr-2">
-                        <!-- Steps will appear here as rows -->
+                    
+                    <!-- Scrollable Steps -->
+                    <div id="steps-container" class="flex-grow overflow-y-auto bg-white p-3 rounded-lg shadow-inner border border-gray-100 scroll-smooth">
+                        <div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center">
+                            <i class="fas fa-pen-nib text-3xl mb-2 opacity-30"></i>
+                            <span>Bấm "Gợi ý tiếp" để xem bài làm mẫu</span>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Controls -->
-            <div class="flex flex-col md:flex-row gap-4 justify-center items-center pt-2">
-                <div class="relative w-full md:w-1/3">
-                    <input type="text" id="user-answer" placeholder="Nhập kết quả..." autocomplete="off"
-                        class="w-full text-center text-2xl font-bold p-3 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-100 focus:outline-none transition-all placeholder-gray-300 math-font"
-                        onkeydown="if(event.key === 'Enter') checkAnswer()">
-                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs hidden md:block">
-                        ENTER
-                    </div>
-                </div>
-                
-                <button onclick="checkAnswer()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all shadow-lg transform hover:-translate-y-1 active:translate-y-0 flex items-center justify-center min-w-[140px]">
-                    <i class="fas fa-check mr-2"></i> Kiểm tra
-                </button>
-                
-                <button onclick="nextQuestion()" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl text-lg transition-colors flex items-center justify-center">
-                    <i class="fas fa-forward mr-2"></i> Câu khác
-                </button>
-            </div>
-
-            <!-- Result Feedback -->
-            <div id="feedback" class="hidden transform transition-all duration-300 ease-out origin-top"></div>
 
         </div>
     </div>
 
-    <script>
-        // --- State ---
-        let currentQuestion = {};
-        let score = 0;
-        let isAnswered = false;
-        let currentMode = 'mix';
-        let stepIndex = 0;
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
 
-        // --- Utility Functions ---
+    <script>
+        // --- Configuration & Utils ---
+        const state = {
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0
+        };
+
+        let currentData = {
+            ansA: 0,
+            ansB: 0,
+            allSteps: []
+        };
+        let isAnswered = false;
+        let stepIndex = 0;
+        let usedHint = false;
+
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
+        function getNonZeroRandomInt(min, max) {
+            let n = 0;
+            while(n === 0) n = getRandomInt(min, max);
+            return n;
+        }
+
+        // Shuffle array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Format number for display (wrap negatives in parens)
         function fmt(num) {
-            return num < 0 ? `(${num})` : `${num}`;
+            if (num < 0) return `(${num})`;
+            return `${num}`;
         }
         
-        // --- Logic Generators (Updated for Step Objects) ---
+        // --- Logic: Generate Part A (Addition/Subtraction) ---
+        function generatePartA(isHard = false) {
+            if (!isHard) {
+                // NORMAL MODE: 80% (3 terms)
+                let terms = [];
+                for (let i = 0; i < 3; i++) terms.push(getNonZeroRandomInt(-50, 50));
+                
+                let displayStr = `${terms[0]}`;
+                let ops = [Math.random() < 0.5 ? '+' : '-', Math.random() < 0.5 ? '+' : '-'];
+                
+                for(let i=0; i<2; i++) displayStr += ` ${ops[i]} ${fmt(terms[i+1])}`;
+                
+                let valsToSum = [terms[0]];
+                let transformStr = `${terms[0]}`;
+                let hasTransform = false;
 
-        // CÂU A: TỔNG HIỆU 3 SỐ NGUYÊN
-        function generateTypeA() {
-            const a = getRandomInt(-20, 20);
-            const b = getRandomInt(-20, 20);
-            const c = getRandomInt(-20, 20);
-            
-            const op1 = Math.random() > 0.5 ? '+' : '-';
-            const op2 = Math.random() > 0.5 ? '+' : '-';
-            
-            const display = `${fmt(a)} ${op1} ${fmt(b)} ${op2} ${fmt(c)}`;
-            
-            let val1 = a;
-            let val2 = (op1 === '+') ? b : -b;
-            let val3 = (op2 === '+') ? c : -c;
-            
-            let step1_res = val1 + val2;
-            let final_res = step1_res + val3;
-
-            // Steps logic: Math only in 'math', Explanation in 'note'
-            let steps = [
-                { 
-                    math: `= ${step1_res} ${op2} ${fmt(c)}`, 
-                    note: `(Tính từ trái sang phải: ${fmt(a)} ${op1} ${fmt(b)} = ${step1_res})` 
-                },
-                { 
-                    math: `= ${final_res}`, 
-                    note: `` 
+                for (let i = 0; i < 2; i++) {
+                    let nextTerm = terms[i+1];
+                    if (ops[i] === '-') {
+                        valsToSum.push(-nextTerm);
+                        transformStr += ` + ${fmt(-nextTerm)}`;
+                        hasTransform = true;
+                    } else {
+                        valsToSum.push(nextTerm);
+                        transformStr += ` + ${fmt(nextTerm)}`;
+                    }
                 }
-            ];
 
-            return {
-                label: "Câu A: Cộng Trừ 3 Số",
-                display: display,
-                answer: final_res,
-                hintRule: "Thực hiện phép tính từ trái sang phải.",
-                steps: steps
-            };
-        }
-
-        // CÂU B: TỔNG HIỆU CÁC TÍCH
-        function generateTypeB() {
-            const subtype = Math.random() > 0.3 ? 2 : 3; 
-            let steps = [];
-            let display = "";
-            let final_res = 0;
-
-            if (subtype === 2) {
-                // a.b +/- c.d
-                const a = getRandomInt(-10, 10);
-                const b = getRandomInt(-10, 10);
-                const c = getRandomInt(-10, 10);
-                const d = getRandomInt(-10, 10);
+                let total = valsToSum.reduce((a,b)=>a+b, 0);
+                let stepList = [displayStr];
+                if(hasTransform) stepList.push(`= ${transformStr}`);
                 
-                const p1 = a * b;
-                const p2 = c * d;
-                const op = Math.random() > 0.5 ? '+' : '-';
-                
-                display = `${fmt(a)} . ${fmt(b)} ${op} ${fmt(c)} . ${fmt(d)}`;
-                final_res = (op === '+') ? (p1 + p2) : (p1 - p2);
+                let inter = valsToSum[0] + valsToSum[1];
+                stepList.push(`= ${inter} + ${fmt(valsToSum[2])}`);
+                stepList.push(`= ${total}`);
 
-                steps = [
-                    {
-                        math: `= ${p1} ${op} ${fmt(p2)}`,
-                        note: `(Thực hiện nhân chia trước: ${fmt(a)}.${fmt(b)}=${p1} và ${fmt(c)}.${fmt(d)}=${p2})`
-                    },
-                    {
-                        math: `= ${final_res}`,
-                        note: ``
-                    }
-                ];
+                return {
+                    display: displayStr,
+                    answer: total,
+                    steps: stepList,
+                    rule: "Quy tắc dấu ngoặc: Trừ đi một số nguyên bằng cộng với số đối của nó."
+                };
             } else {
-                // a.b +/- c.d +/- e.f
-                const a = getRandomInt(-5, 5) || 2;
-                const b = getRandomInt(-10, 10);
-                const c = getRandomInt(-5, 5) || 2;
-                const d = getRandomInt(-10, 10);
-                const e = getRandomInt(-5, 5) || 2;
-                const f = getRandomInt(-10, 10);
-
-                const p1 = a * b;
-                const p2 = c * d;
-                const p3 = e * f;
-
-                const op1 = Math.random() > 0.5 ? '+' : '-';
-                const op2 = Math.random() > 0.5 ? '+' : '-';
-
-                display = `${fmt(a)}.${fmt(b)} ${op1} ${fmt(c)}.${fmt(d)} ${op2} ${fmt(e)}.${fmt(f)}`;
+                // HARD MODE: Smart Sums (Commutative/Associative)
+                // Goal: Create pairs that sum to nice numbers (0, 10, -10, 20, -20, 100, -100)
                 
-                let temp = (op1 === '+') ? (p1 + p2) : (p1 - p2);
-                final_res = (op2 === '+') ? (temp + p3) : (temp - p3);
+                const targets = [0, 10, -10, 20, -20, 100, -100];
+                let numPairs = Math.random() < 0.6 ? 2 : 3; // 4 or 6 numbers
+                let hasLoose = Math.random() < 0.3; // 30% chance for a loose number
+                
+                let pairs = [];
+                let looseVal = 0;
+                
+                // Generate pairs
+                for(let i=0; i<numPairs; i++) {
+                    let target = targets[getRandomInt(0, targets.length-1)];
+                    let n1 = getNonZeroRandomInt(-50, 50);
+                    let n2 = target - n1;
+                    pairs.push({n1, n2, target});
+                }
+                
+                if (hasLoose) looseVal = getNonZeroRandomInt(-20, 20);
 
-                steps = [
-                    {
-                        math: `= ${p1} ${op1} ${fmt(p2)} ${op2} ${fmt(p3)}`,
-                        note: `(Tính các tích trước)`
-                    },
-                    {
-                        math: `= ${temp} ${op2} ${fmt(p3)}`,
-                        note: `(Thực hiện phép tính đầu tiên)`
-                    },
-                    {
-                        math: `= ${final_res}`,
-                        note: ``
+                // Flat list for shuffling
+                let allTerms = [];
+                pairs.forEach(p => { allTerms.push(p.n1); allTerms.push(p.n2); });
+                if(hasLoose) allTerms.push(looseVal);
+                
+                // Shuffle terms to hide the pairs
+                let shuffledTerms = [...allTerms];
+                shuffleArray(shuffledTerms);
+
+                // Build Display
+                let displayStr = `${shuffledTerms[0]}`;
+                for(let i=1; i<shuffledTerms.length; i++) {
+                    // Randomize operators but keep value correct (subtract negative vs add positive)
+                    // actually just simpler to use '+' for all in advanced mode to emphasize grouping
+                    // unless we want to convert sub to add. Let's stick to + for clarity in grouping demo
+                    let val = shuffledTerms[i];
+                    if (val < 0) displayStr += ` + ${fmt(val)}`;
+                    else displayStr += ` + ${val}`;
+                }
+
+                // Steps
+                let stepList = [displayStr];
+                
+                // Grouping Step
+                let groupStr = "";
+                pairs.forEach((p, idx) => {
+                    groupStr += `[${p.n1} + ${fmt(p.n2)}]`;
+                    if (idx < pairs.length - 1 || hasLoose) groupStr += " + ";
+                });
+                if(hasLoose) groupStr += `${fmt(looseVal)}`;
+                
+                stepList.push(`= ${groupStr} (Tính chất giao hoán & kết hợp)`);
+                
+                // Calc Step
+                let calcStr = "";
+                let finalTotal = 0;
+                pairs.forEach((p, idx) => {
+                    calcStr += `${p.target}`;
+                    finalTotal += p.target;
+                    if (idx < pairs.length - 1 || hasLoose) calcStr += " + ";
+                });
+                if(hasLoose) {
+                    calcStr += `${fmt(looseVal)}`;
+                    finalTotal += looseVal;
+                }
+                
+                stepList.push(`= ${calcStr}`);
+                stepList.push(`= ${finalTotal}`);
+
+                return {
+                    display: displayStr,
+                    answer: finalTotal,
+                    steps: stepList,
+                    rule: "Nhóm các số hạng có tổng là số tròn chục, tròn trăm hoặc bằng 0 để tính nhanh."
+                };
+            }
+        }
+
+        // --- Logic: Generate Part B (Mixed Operations) ---
+        function generatePartB(isHard = false) {
+            if (!isHard) {
+                // NORMAL MODE: 80% (Same as before)
+                let n1 = getNonZeroRandomInt(-15, 15);
+                let n2 = getNonZeroRandomInt(-10, 10);
+                let n3 = getNonZeroRandomInt(-10, 10);
+                let n4 = getNonZeroRandomInt(-10, 10);
+                
+                let display = `${fmt(n1)} . ${fmt(n2)} - ${fmt(n3)} . ${fmt(n4)}`;
+                let val1 = n1*n2;
+                let val2 = n3*n4;
+                let ans = val1 - val2;
+                
+                return {
+                    display: display,
+                    answer: ans,
+                    steps: [
+                        display,
+                        `= ${fmt(val1)} - ${fmt(val2)}`,
+                        `= ${ans}`
+                    ],
+                    rule: "Thực hiện phép nhân trước, phép trừ sau."
+                };
+            } else {
+                // HARD MODE: Distributive Property with Nice Numbers
+                // Structure: a.b + a.c (+ a.d)
+                
+                let common = getNonZeroRandomInt(-20, 20); // Common factor 'a'
+                let targetSum = [10, -10, 20, -20, 100, -100, 200, -200][getRandomInt(0, 7)]; // Sum inside brackets
+                
+                // Decide structure: 2 groups or 3 groups?
+                let type = Math.random() < 0.7 ? 2 : 3;
+                let parts = [];
+                
+                if (type === 2) {
+                    let b = getNonZeroRandomInt(-50, 50);
+                    let c = targetSum - b;
+                    parts = [b, c];
+                } else {
+                    let b = getNonZeroRandomInt(-30, 30);
+                    let c = getNonZeroRandomInt(-30, 30);
+                    let d = targetSum - b - c;
+                    parts = [b, c, d];
+                }
+
+                // Chance for a "loose" non-distributable term?
+                // Prompt: "2 groups + 1 group cannot distribute"
+                let looseTerm = 0;
+                let hasLoose = Math.random() < 0.4;
+                if (hasLoose) looseTerm = getNonZeroRandomInt(-20, 20);
+
+                // Build Display
+                // Shuffle terms to make it less obvious? E.g. a.b + K + a.c
+                // But typically exams group them somewhat near. Let's just list them.
+                
+                let termObjs = parts.map(p => ({
+                    val: p,
+                    str: `${fmt(common)} . ${fmt(p)}`
+                }));
+                
+                // Add loose term to the mix if exists
+                if(hasLoose) {
+                    termObjs.push({
+                        val: null, // Marker
+                        str: `${looseTerm > 0 ? '+ ' : '- '}${Math.abs(looseTerm)}`
+                    });
+                }
+                
+                // Construct string
+                // Note: For the first term we don't need operator if positive, but loose term logic handled above is for trailing.
+                // Let's simpler logic: Join with + or - 
+                
+                let display = "";
+                // We'll reconstruct display carefully
+                let rawTerms = parts.map(p => {
+                     return { type: 'mul', a: common, b: p };
+                });
+                
+                if (hasLoose) {
+                    // Insert loose term at random position (start, middle, end)
+                    let pos = getRandomInt(0, rawTerms.length);
+                    rawTerms.splice(pos, 0, { type: 'val', val: looseTerm });
+                }
+                
+                // Build string
+                rawTerms.forEach((t, i) => {
+                    if (t.type === 'mul') {
+                        let s = `${fmt(t.a)} . ${fmt(t.b)}`;
+                        if (i === 0) display += s;
+                        else display += ` + ${s}`;
+                    } else {
+                        // Loose val
+                        if (i === 0) display += `${t.val}`;
+                        else display += ` ${t.val < 0 ? '-' : '+'} ${Math.abs(t.val)}`;
                     }
-                ];
-            }
+                });
 
-            return {
-                label: "Câu B: Tổng Hiệu Tích",
-                display: display,
-                answer: final_res,
-                hintRule: "Ưu tiên phép nhân trước, sau đó cộng trừ.",
-                steps: steps
-            };
+                // Calculate
+                let total = (common * targetSum) + looseTerm;
+
+                // Steps
+                let stepList = [display];
+                
+                // Step 2: Group
+                // a . (b + c ...) + loose
+                let insideStr = parts.map(p => fmt(p)).join(' + ');
+                let groupStep = `${fmt(common)} . [${insideStr}]`;
+                if(hasLoose) groupStep += ` ${looseTerm < 0 ? '-' : '+'} ${Math.abs(looseTerm)}`;
+                
+                stepList.push(`= ${groupStep} (Tính chất phân phối)`);
+                stepList.push(`= ${fmt(common)} . ${targetSum} ${hasLoose ? (looseTerm < 0 ? '-' : '+') + ' ' + Math.abs(looseTerm) : ''}`);
+                
+                let mulRes = common * targetSum;
+                if(hasLoose) {
+                    stepList.push(`= ${mulRes} ${looseTerm < 0 ? '-' : '+'} ${Math.abs(looseTerm)}`);
+                }
+                stepList.push(`= ${total}`);
+
+                return {
+                    display: display,
+                    answer: total,
+                    steps: stepList,
+                    rule: "Sử dụng tính chất phân phối: a.b + a.c = a.(b+c) khi tổng trong ngoặc là số tròn."
+                };
+            }
         }
 
-        // TÍNH NHANH
-        function generateSmart() {
-            const type = getRandomInt(0, 1);
-            let display = "", steps = [], result = 0;
-
-            if (type === 0) { // Distributive
-                const A = getRandomInt(-20, 20) || 5;
-                const B = getRandomInt(10, 90);
-                const targetSum = (Math.random() > 0.5) ? 100 : -100;
-                const C = targetSum - B;
-                result = A * (B + C);
+        function buildSteps(partA, partB) {
+            return [
+                { type: 'header', text: 'Câu a', rule: partA.rule },
+                ...partA.steps.map(s => ({ type: 'step', text: s, isLast: s === partA.steps[partA.steps.length-1] })),
                 
-                display = `${fmt(A)} . ${fmt(B)} + ${fmt(A)} . ${fmt(C)}`;
-                
-                steps = [
-                    { math: `= ${fmt(A)} . [ ${fmt(B)} + ${fmt(C)} ]`, note: `(Đặt thừa số chung ${A})` },
-                    { math: `= ${fmt(A)} . ${targetSum}`, note: `(Tính tổng trong ngoặc)` },
-                    { math: `= ${result}`, note: `` }
-                ];
-            } else { // Grouping
-                const A = getRandomInt(10, 50); 
-                const C = 100 - A;
-                const B = getRandomInt(-50, -10);
-                const D = -100 - B;
-                result = (A+C) + (B+D);
-                
-                display = `${A} + ${fmt(B)} + ${C} + ${fmt(D)}`;
-                
-                steps = [
-                    { math: `= (${A} + ${C}) + (${fmt(B)} + ${fmt(D)})`, note: `(Nhóm các số tròn chục/trăm)` },
-                    { math: `= 100 + (${B+D})`, note: `(Tính giá trị từng nhóm)` },
-                    { math: `= ${result}`, note: `` }
-                ];
-            }
-            return { label: "Tính Nhanh", display, answer: result, hintRule: "Sử dụng tính chất phân phối hoặc giao hoán/kết hợp.", steps };
-        }
-
-        // LŨY THỪA
-        function generateOrder() {
-            const base = getRandomInt(2, 5);
-            const exp = getRandomInt(2, 3);
-            const pow = Math.pow(base, exp);
-            const a = getRandomInt(2, 5);
-            const b = getRandomInt(10, 50);
-            
-            const result = a * pow - b;
-            const display = `${a} . ${base}<sup>${exp}</sup> - ${b}`;
-            
-            let steps = [
-                { math: `= ${a} . ${pow} - ${b}`, note: `(Tính lũy thừa: ${base}^${exp} = ${pow})` },
-                { math: `= ${a * pow} - ${b}`, note: `(Thực hiện phép nhân)` },
-                { math: `= ${result}`, note: `` }
+                { type: 'header', text: 'Câu b', rule: partB.rule },
+                ...partB.steps.map(s => ({ type: 'step', text: s, isLast: s === partB.steps[partB.steps.length-1] }))
             ];
-            
-            return {
-                label: "Lũy Thừa",
-                display: display,
-                answer: result,
-                hintRule: "Thứ tự: Lũy thừa -> Nhân/Chia -> Cộng/Trừ",
-                steps: steps
-            };
         }
 
-        // --- Controller ---
+        // --- Main UI Functions ---
 
-        function setMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.btn-mode').forEach(btn => btn.classList.remove('mode-active'));
-            document.getElementById(`btn-${mode}`).classList.add('mode-active');
-            nextQuestion();
+        function renderStats() {
+            const streakEl = document.getElementById('stat-streak');
+            streakEl.textContent = state.streak;
+            if (state.streak > 2) {
+                streakEl.innerHTML = `<i class="fas fa-fire"></i> ${state.streak}`;
+                streakEl.classList.add('streak-fire');
+            } else {
+                streakEl.classList.remove('streak-fire');
+            }
+
+            document.getElementById('stat-correct').textContent = state.correct;
+            document.getElementById('stat-wrong').textContent = state.wrong;
+            document.getElementById('stat-skipped').textContent = state.skipped;
         }
 
         function nextQuestion() {
-            // Reset UI
-            document.getElementById('feedback').classList.add('hidden');
-            document.getElementById('user-answer').value = '';
-            document.getElementById('user-answer').disabled = false;
-            document.getElementById('user-answer').focus();
-            document.getElementById('rule-hint').classList.add('hidden');
-            document.getElementById('steps-container').innerHTML = '';
-            
-            stepIndex = 0;
-            const btnStep = document.getElementById('btn-show-step');
-            btnStep.disabled = false;
-            btnStep.innerHTML = '<i class="fas fa-lightbulb mr-2"></i> Gợi ý';
-            btnStep.className = 'bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center';
-
-            isAnswered = false;
-
-            // Generate Logic
-            if (currentMode === 'typeA') currentQuestion = generateTypeA();
-            else if (currentMode === 'typeB') currentQuestion = generateTypeB();
-            else if (currentMode === 'smart') currentQuestion = generateSmart();
-            else {
-                const rand = Math.random();
-                if (rand < 0.40) currentQuestion = generateTypeA();
-                else if (rand < 0.80) currentQuestion = generateTypeB();
-                else if (rand < 0.90) currentQuestion = generateSmart();
-                else currentQuestion = generateOrder();
+            if (!isAnswered && document.getElementById('q-a-text').innerText !== 'Loading...') {
+                state.skipped++;
+                state.streak = 0;
+                renderStats();
             }
 
-            // Render
-            document.getElementById('question-text').innerHTML = currentQuestion.display;
-            document.getElementById('question-type-label').textContent = currentQuestion.label;
+            // Reset UI
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('rule-area').classList.add('hidden');
+            
+            ['ans-a', 'ans-b'].forEach(id => {
+                const el = document.getElementById(id);
+                el.value = '';
+                el.disabled = false;
+                el.classList.remove('border-green-500', 'border-red-500', 'bg-green-50', 'bg-red-50');
+            });
+            
+            isAnswered = false;
+            stepIndex = 0;
+            usedHint = false;
+            
+            const stepsContainer = document.getElementById('steps-container');
+            stepsContainer.innerHTML = `<div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center"><i class="fas fa-pen-nib text-3xl mb-2 opacity-30"></i><span>Bấm "Gợi ý tiếp" để xem bài làm mẫu</span></div>`;
+            
+            const btnStep = document.getElementById('btn-show-step');
+            btnStep.innerHTML = '<span>Gợi ý tiếp</span> <i class="fas fa-arrow-right text-[10px]"></i>';
+            btnStep.disabled = false;
+
+            // Generate Logic
+            const isHardMode = document.getElementById('mode-hard').checked;
+            document.getElementById('mode-display').textContent = isHardMode ? "Nâng cao" : "Cơ bản";
+            document.getElementById('mode-display').className = isHardMode 
+                ? "absolute top-2 right-4 text-xs font-bold px-2 py-1 rounded bg-red-600 text-white shadow"
+                : "absolute top-2 right-4 text-xs font-bold px-2 py-1 rounded bg-white/10 text-white/80";
+
+            const pA = generatePartA(isHardMode);
+            const pB = generatePartB(isHardMode);
+
+            currentData = {
+                ansA: pA.answer,
+                ansB: pB.answer,
+                allSteps: buildSteps(pA, pB)
+            };
+
+            document.getElementById('q-a-text').textContent = pA.display;
+            document.getElementById('q-b-text').textContent = pB.display;
+            document.getElementById('step-counter').textContent = `0/${currentData.allSteps.length}`;
+            
+            document.getElementById('ans-a').focus();
         }
 
         function showNextStep() {
-            const container = document.getElementById('steps-container');
+            usedHint = true; 
             
-            // Show Rule Hint first
-            if (stepIndex === 0 && currentQuestion.hintRule) {
-                document.getElementById('rule-content').textContent = currentQuestion.hintRule;
-                document.getElementById('rule-hint').classList.remove('hidden');
-            }
+            const container = document.getElementById('steps-container');
+            const ruleArea = document.getElementById('rule-area');
+            const ruleContent = document.getElementById('rule-content');
+            
+            if (stepIndex === 0) container.innerHTML = '';
 
-            if (stepIndex < currentQuestion.steps.length) {
-                const stepData = currentQuestion.steps[stepIndex];
+            if (stepIndex < currentData.allSteps.length) {
+                const item = currentData.allSteps[stepIndex];
                 
-                // Create row container
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'step-row flex flex-wrap md:flex-nowrap items-baseline mb-3 pb-2 border-b border-gray-100 last:border-0';
-                
-                // 1. Math Part (Bold, Bigger)
-                const mathDiv = document.createElement('div');
-                mathDiv.className = 'font-bold text-xl md:text-2xl text-gray-800 math-font mr-3 w-full md:w-auto flex-shrink-0';
-                // If it's the first step, we might want to repeat the expression line? 
-                // No, per request, just the equals lines.
-                mathDiv.innerHTML = stepData.math;
-                
-                // 2. Note Part (Small, Gray, Italic)
-                const noteDiv = document.createElement('div');
-                noteDiv.className = 'text-sm text-gray-500 italic mt-1 md:mt-0 md:ml-4';
-                noteDiv.innerHTML = stepData.note;
+                if (item.type === 'header') {
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = "mt-4 mb-2 text-sm font-bold text-gray-600 uppercase border-b-2 border-indigo-100 pb-1 flex items-center";
+                    headerDiv.innerHTML = `<i class="fas fa-chevron-circle-right mr-2 text-indigo-500"></i> ${item.text}`;
+                    container.appendChild(headerDiv);
 
-                rowDiv.appendChild(mathDiv);
-                if (stepData.note) rowDiv.appendChild(noteDiv);
-                
-                container.appendChild(rowDiv);
-                container.scrollTop = container.scrollHeight;
+                    // Show Hint Rule
+                    if (item.rule) {
+                        ruleContent.textContent = item.rule;
+                        ruleArea.classList.remove('hidden');
+                        ruleArea.classList.remove('animate-pulse');
+                        void ruleArea.offsetWidth;
+                        ruleArea.classList.add('animate-pulse');
+                    }
+                } else {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'step-item bg-white p-3 rounded-r-lg border-l-4 shadow-sm mb-3 text-base font-mono leading-relaxed';
+                    
+                    if (item.isLast) {
+                        stepDiv.classList.add('border-green-500', 'bg-green-50');
+                        stepDiv.innerHTML = `<span class="text-green-700 font-bold">${item.text}</span>`;
+                    } else {
+                        stepDiv.classList.add('border-blue-400');
+                        stepDiv.textContent = item.text;
+                    }
+                    container.appendChild(stepDiv);
+                }
+
+                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
                 stepIndex++;
+                document.getElementById('step-counter').textContent = `${stepIndex}/${currentData.allSteps.length}`;
             }
 
-            if (stepIndex >= currentQuestion.steps.length) {
+            if (stepIndex >= currentData.allSteps.length) {
                 const btn = document.getElementById('btn-show-step');
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-check mr-1"></i> Xong';
-                btn.className = 'bg-gray-400 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg cursor-not-allowed flex items-center';
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> <span>Đã hết</span>';
             }
         }
 
         function checkAnswer() {
             if (isAnswered) return;
+            
+            const iA = document.getElementById('ans-a');
+            const iB = document.getElementById('ans-b');
+            
+            const vA = parseInt(iA.value);
+            const vB = parseInt(iB.value);
+            
+            let correctCount = 0;
 
-            const input = document.getElementById('user-answer');
-            const feedback = document.getElementById('feedback');
-            const userVal = parseInt(input.value.trim());
-
-            if (isNaN(userVal)) {
-                alert("Vui lòng nhập một số nguyên!");
-                return;
-            }
-
-            isAnswered = true;
-            input.disabled = true;
-
-            if (userVal === currentQuestion.answer) {
-                score += 10;
-                document.getElementById('score').textContent = score;
-                feedback.innerHTML = `
-                    <div class="text-green-700 font-bold text-xl mb-1 flex items-center justify-center animate-bounce">
-                        <i class="fas fa-check-circle mr-2 text-3xl"></i> Chính xác!
-                    </div>
-                `;
-                feedback.className = "text-center mt-4 p-4 rounded-xl bg-green-100 border-2 border-green-300 shadow-lg";
-                while(stepIndex < currentQuestion.steps.length) showNextStep();
+            // Check A
+            if (vA === currentData.ansA) {
+                correctCount++;
+                iA.classList.add('border-green-500', 'bg-green-50');
+                iA.classList.remove('border-gray-300');
             } else {
-                feedback.innerHTML = `
-                    <div class="text-red-600 font-bold text-xl mb-1 flex items-center justify-center">
-                        <i class="fas fa-times-circle mr-2 text-3xl"></i> Sai rồi!
-                    </div>
-                    <div class="text-gray-700 mb-2">Đáp án đúng: <strong class="text-xl text-red-600">${currentQuestion.answer}</strong></div>
-                `;
-                feedback.className = "text-center mt-4 p-4 rounded-xl bg-red-50 border-2 border-red-200 shadow-lg";
-                let intv = setInterval(() => {
-                    if(stepIndex < currentQuestion.steps.length) showNextStep();
-                    else clearInterval(intv);
-                }, 800);
+                iA.classList.add('border-red-500', 'bg-red-50');
             }
-            feedback.classList.remove('hidden');
+
+            // Check B
+            if (vB === currentData.ansB) {
+                correctCount++;
+                iB.classList.add('border-green-500', 'bg-green-50');
+                iB.classList.remove('border-gray-300');
+            } else {
+                iB.classList.add('border-red-500', 'bg-red-50');
+            }
+
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800', 'bg-blue-100', 'text-blue-800');
+
+            if (correctCount === 2) {
+                if (!usedHint) {
+                    state.correct++;
+                    state.streak++;
+                    feedback.innerHTML = '<i class="fas fa-crown text-xl mb-1 block"></i> Tuyệt vời! Bạn đúng cả 2 câu.';
+                    feedback.classList.add('bg-green-100', 'text-green-800');
+                } else {
+                    feedback.innerHTML = '<i class="fas fa-check"></i> Chính xác! (Không tính điểm vì đã xem gợi ý)';
+                    feedback.classList.add('bg-blue-100', 'text-blue-800');
+                }
+                
+                renderStats();
+                
+                // Auto reveal steps
+                const reveal = setInterval(() => {
+                    if(stepIndex < currentData.allSteps.length) showNextStep();
+                    else clearInterval(reveal);
+                }, 150);
+                isAnswered = true;
+            } else {
+                state.wrong++;
+                state.streak = 0;
+                renderStats();
+
+                feedback.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Bạn đúng ${correctCount}/2 câu.<br>Hãy kiểm tra lại dấu và thứ tự tính toán!`;
+                feedback.classList.add('bg-red-100', 'text-red-800');
+            }
         }
 
-        window.onload = () => {
-            setMode('mix');
-        };
+        window.onload = nextQuestion;
+
     </script>
 </body>
 </html>

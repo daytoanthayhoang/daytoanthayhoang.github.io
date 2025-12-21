@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Chinh Phục Toán 6 HK1 - Câu 1,2,3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* Light green bg */
+        }
+
+        .btn-option {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-option:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        /* Animation cho đúng/sai */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+
+        .mode-active {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .mode-inactive {
+            background-color: white;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+        .mode-inactive:hover {
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-2xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-green-700 uppercase drop-shadow-sm">
+            Ôn tập Chinh Phục Toán 6 HK1 - Câu 1,2,3
+        </h1>
+        <p class="text-sm text-gray-600 mt-1">Chủ đề 1, 2, 3: Số nguyên & Thứ tự</p>
+    </header>
+
+    <!-- Mode Selection -->
+    <div class="w-full max-w-2xl grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+        <button onclick="setMode('all')" id="btn-mode-all" class="mode-active py-2 px-4 rounded-lg font-bold border-2 shadow-sm">
+            <i class="fas fa-random mr-1"></i> Tổng Hợp
+        </button>
+        <button onclick="setMode(1)" id="btn-mode-1" class="mode-inactive py-2 px-4 rounded-lg font-bold border-2 shadow-sm">
+            Câu 1: Số nguyên âm và tập hợp Z
+        </button>
+        <button onclick="setMode(2)" id="btn-mode-2" class="mode-inactive py-2 px-4 rounded-lg font-bold border-2 shadow-sm">
+            Câu 2: Số đối
+        </button>
+        <button onclick="setMode(3)" id="btn-mode-3" class="mode-inactive py-2 px-4 rounded-lg font-bold border-2 shadow-sm">
+            Câu 3: Sắp thứ tự
+        </button>
+    </div>
+
+    <!-- Stats Board -->
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-md p-4 mb-6 grid grid-cols-4 gap-2 text-center select-none" id="stats-container">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- Question Card -->
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-lg border-b-4 border-green-600 p-6 relative overflow-hidden">
+        
+        <!-- Question Badge -->
+        <div class="absolute top-0 left-0 bg-green-100 text-green-800 px-3 py-1 rounded-br-lg text-xs font-bold uppercase" id="question-type-badge">
+            Dạng câu hỏi
+        </div>
+
+        <!-- Question Content -->
+        <div class="mt-4 mb-8 fade-in">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-center leading-relaxed" id="question-text">
+                Đang tải câu hỏi...
+            </h2>
+        </div>
+
+        <!-- Options Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="options-container">
+            <!-- Buttons will be injected here -->
+        </div>
+
+        <!-- Explanation Area (New) -->
+        <div id="explanation-area" class="hidden mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in">
+             <!-- JS will inject content -->
+        </div>
+
+        <!-- Feedback & Next -->
+        <div class="mt-6 h-12 flex items-center justify-between">
+            <div id="feedback-msg" class="text-lg font-bold hidden pl-2"></div>
+            <button onclick="handleNextClick()" id="btn-next" class="bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center ml-auto shadow-sm">
+                Bỏ qua <i class="fas fa-forward ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <footer class="mt-auto py-6 text-center text-gray-400 text-xs">
+        © Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io
+    </footer>
+
+    <!-- Feedback Modal (Overlay) -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-blue-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-blue-500 font-bold uppercase mb-1">Giải thích:</p>
+                <p id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></p>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const state = {
+            mode: 'all', // all, 1, 2, 3
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        // --- UTILS ---
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const generateUniqueInts = (count, min, max, exclude = []) => {
+            let res = new Set(exclude);
+            while(res.size < count + exclude.length) {
+                res.add(randomInt(min, max));
+            }
+            let arr = Array.from(res);
+            return arr.filter(x => !exclude.includes(x)).slice(0, count);
+        };
+
+        // --- QUESTION GENERATORS ---
+
+        // CÂU 1: NHẬN BIẾT SỐ NGUYÊN
+        const generateQ1 = () => {
+            const isStandard = Math.random() < 0.7;
+            let question, correct, distractors, explanation;
+
+            if (isStandard) {
+                question = "Trong các số sau đây, số nào là <b>số nguyên âm</b>?";
+                const negatives = [-9, -4, -1, -8, -5, -6, -2, -3, -11, -29];
+                correct = negatives[randomInt(0, negatives.length - 1)];
+                const positives = [0, 12, 5, 10, 25, 4, 2, 3, 9, 6, 15];
+                distractors = shuffleArray(positives).slice(0, 3);
+                explanation = `Số nguyên âm là các số nhỏ hơn 0 và có dấu trừ (-) đằng trước. Số <b>${correct}</b> thỏa mãn điều kiện này. Các số 0 và số dương không phải là số nguyên âm.`;
+            } else {
+                const subType = randomInt(1, 2);
+                if (subType === 1) {
+                    question = "Số nào <b>không phải</b> là số nguyên âm, cũng <b>không phải</b> là số nguyên dương?";
+                    correct = 0;
+                    distractors = generateUniqueInts(3, -10, 10, [0]);
+                    explanation = "Số 0 không phải là số nguyên âm và cũng không phải là số nguyên dương. Nó là ranh giới giữa hai tập hợp này.";
+                } else {
+                    question = "Phần tử nào sau đây <b>không thuộc</b> tập hợp số nguyên Z?";
+                    const decimals = [1.5, 0.5, -2.4, "1/3", "2/5"];
+                    correct = decimals[randomInt(0, decimals.length - 1)];
+                    distractors = generateUniqueInts(3, -10, 10);
+                    explanation = `Tập hợp số nguyên Z chỉ gồm các số nguyên âm, số 0 và số nguyên dương. <b>${correct}</b> là số thập phân (hoặc phân số) nên không thuộc Z.`;
+                }
+            }
+
+            return {
+                typeLabel: "Câu 1: Nhận biết",
+                text: question,
+                correct: correct,
+                options: shuffleArray([correct, ...distractors]),
+                explanation: explanation
+            };
+        };
+
+        // CÂU 2: SỐ ĐỐI
+        const generateQ2 = () => {
+            const isStandard = Math.random() < 0.7;
+            let targetNum, correct, question, distractors, explanation;
+
+            if (isStandard) {
+                const inputs = [-11, -3, -6, -8, -9, -10, -5, -99, -12];
+                targetNum = inputs[randomInt(0, inputs.length - 1)];
+                question = `Số đối của số <b>${targetNum}</b> là:`;
+                correct = -targetNum;
+                
+                let d1 = targetNum;
+                let d2 = 0;
+                let d3 = Math.abs(targetNum) + (Math.random() < 0.5 ? 1 : -1); 
+                if (d3 === 0) d3 = 1;
+                distractors = [d1, d2, d3];
+                explanation = `Hai số đối nhau có tổng bằng 0. Số đối của một số âm là số dương tương ứng. Vậy số đối của ${targetNum} là <b>${correct}</b>.`;
+            } else {
+                if (Math.random() < 0.2) {
+                    targetNum = 0;
+                    question = "Số đối của số <b>0</b> là:";
+                    correct = 0;
+                    distractors = [1, -1, 10];
+                    explanation = "Số đối của 0 là chính nó (0).";
+                } else {
+                    const inputs = [5, 6, 12, 18, 26];
+                    targetNum = inputs[randomInt(0, inputs.length - 1)];
+                    question = `Số đối của số <b>${targetNum}</b> là:`;
+                    correct = -targetNum;
+                    distractors = [targetNum, 0, targetNum + 1];
+                    explanation = `Số đối của một số dương là số âm tương ứng. Vậy số đối của ${targetNum} là <b>${correct}</b>.`;
+                }
+            }
+
+            return {
+                typeLabel: "Câu 2: Số đối",
+                text: question,
+                correct: correct,
+                options: shuffleArray([correct, ...distractors]),
+                explanation: explanation
+            };
+        };
+
+        // CÂU 3: THỨ TỰ SỐ NGUYÊN
+        const generateQ3 = () => {
+            const isAscending = Math.random() < 0.7; // 70% Tăng dần
+            
+            let count = 4;
+            let numbers = [];
+            numbers.push(randomInt(-20, -1));
+            numbers.push(randomInt(1, 20));
+            if (Math.random() < 0.5) numbers.push(0);
+            else numbers.push(randomInt(-20, 20));
+            
+            while(numbers.length < count) {
+                let n = randomInt(-30, 30);
+                if (!numbers.includes(n)) numbers.push(n);
+            }
+
+            let sortedArr = [...numbers].sort((a, b) => a - b);
+            if (!isAscending) sortedArr.reverse();
+
+            const orderText = isAscending ? "tăng dần" : "giảm dần";
+            const question = `Sắp xếp các số nguyên sau theo thứ tự <b>${orderText}</b>: <br/> <span class="text-blue-600 font-mono text-lg">[ ${numbers.join("; ")} ]</span>`;
+            
+            const correctStr = sortedArr.join("; ");
+
+            let wrong1 = [...sortedArr].reverse().join("; ");
+            let wrong2 = shuffleArray([...numbers]).join("; ");
+            while(wrong2 === correctStr) wrong2 = shuffleArray([...numbers]).join("; ");
+
+            let w3Arr = [...sortedArr];
+            if (w3Arr.length >= 2) {
+                let temp = w3Arr[1];
+                w3Arr[1] = w3Arr[2];
+                w3Arr[2] = temp;
+            }
+            let wrong3 = w3Arr.join("; ");
+
+            let optionsSet = new Set([correctStr, wrong1, wrong2, wrong3]);
+            while (optionsSet.size < 4) {
+                optionsSet.add(shuffleArray([...numbers]).join("; "));
+            }
+
+            const explanation = `Thứ tự đúng trên trục số là: Số âm nhỏ hơn 0, 0 nhỏ hơn số dương. Với số âm, số nào có phần tự nhiên lớn hơn thì nhỏ hơn.<br>Thứ tự ${orderText} đúng là: <b>${correctStr}</b>`;
+
+            return {
+                typeLabel: "Câu 3: Thứ tự",
+                text: question,
+                correct: correctStr,
+                options: shuffleArray(Array.from(optionsSet)),
+                explanation: explanation
+            };
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        const renderStats = () => {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span class="text-3xl font-extrabold ${state.streak > 2 ? 'streak-fire' : 'text-gray-800'}">
+                        ${state.streak > 2 ? '<i class="fas fa-fire"></i> ' : ''}${state.streak}
+                    </span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span class="text-xl font-bold text-green-600">${state.correct}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span class="text-xl font-bold text-red-500">${state.wrong}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span class="text-xl font-bold text-gray-400">${state.skipped}</span>
+                </div>
+            `;
+        };
+
+        const setMode = (mode) => {
+            state.mode = mode;
+            ['all', 1, 2, 3].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m == mode) {
+                    btn.className = "mode-active py-2 px-4 rounded-lg font-bold border-2 shadow-sm transform scale-105 transition";
+                } else {
+                    btn.className = "mode-inactive py-2 px-4 rounded-lg font-bold border-2 shadow-sm transition";
+                }
+            });
+            handleNextClick(true);
+        };
+
+        const loadQuestion = () => {
+            state.isAnswered = false;
+            let qData;
+            
+            let selectedMode = state.mode;
+            if (state.mode === 'all') {
+                selectedMode = randomInt(1, 3);
+            }
+
+            if (selectedMode == 1) qData = generateQ1();
+            else if (selectedMode == 2) qData = generateQ2();
+            else qData = generateQ3();
+
+            state.currentQuestion = qData;
+
+            // Render UI
+            document.getElementById('question-type-badge').innerText = qData.typeLabel;
+            document.getElementById('question-text').innerHTML = qData.text;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option w-full bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 p-4 rounded-xl text-lg font-semibold shadow-sm text-left flex items-center group";
+                const labels = ['A', 'B', 'C', 'D'];
+                btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-blue-200 text-center leading-8 mr-3 text-blue-800 font-bold shadow-sm group-hover:bg-blue-600 group-hover:text-white transition">${labels[index]}</span> ${opt}`;
+                
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Reset footer & Feedback
+            document.getElementById('feedback-msg').className = "hidden";
+            document.getElementById('explanation-area').className = "hidden mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in";
+            document.getElementById('explanation-area').innerHTML = '';
+            
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center ml-auto shadow-sm";
+        };
+
+        const checkAnswer = (selectedVal, btnElement) => {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const isCorrect = selectedVal == state.currentQuestion.correct;
+            const feedbackEl = document.getElementById('feedback-msg');
+            const explArea = document.getElementById('explanation-area');
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+
+            // Disable all buttons
+            const allBtns = document.querySelectorAll('.btn-option');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-70');
+            });
+
+            // --- TÌM VÀ TÔ ĐẬM ĐÁP ÁN ĐÚNG ---
+            let correctBtn = null;
+            allBtns.forEach(b => {
+                if(b.innerText.includes(state.currentQuestion.correct.toString())) {
+                     // Kiểm tra kỹ hơn để tránh trường hợp số 1 nằm trong 10
+                     // Logic tạm thời: so sánh text. Với trắc nghiệm toán text options khá unique.
+                     // Tuy nhiên để chính xác tuyệt đối, ta có thể đánh dấu index lúc render.
+                     // Ở đây ta dùng logic text includes đơn giản vì options generator đảm bảo độc nhất.
+                     
+                     // Cải thiện logic tìm: Lấy text content sau label "A ", "B "
+                     const textContent = b.textContent.trim().substring(2); // Bỏ A, B...
+                     if (textContent == state.currentQuestion.correct.toString()) {
+                         correctBtn = b;
+                     }
+                }
+            });
+            // Fallback nếu không tìm thấy chính xác (do khoảng trắng hay format)
+            if(!correctBtn) {
+                 allBtns.forEach(b => { 
+                     if(b.innerText.includes(state.currentQuestion.correct)) correctBtn = b; 
+                 });
+            }
+
+            if (correctBtn) {
+                correctBtn.classList.remove('bg-blue-50', 'text-blue-900', 'border-blue-200', 'opacity-70');
+                correctBtn.classList.add('bg-green-100', 'text-green-800', 'border-green-600', 'border-2', 'opacity-100');
+                const span = correctBtn.querySelector('span');
+                if(span) {
+                    span.classList.remove('bg-blue-200', 'text-blue-800');
+                    span.classList.add('bg-green-600', 'text-white');
+                }
+            }
+
+            if (isCorrect) {
+                // UI Correct (User chose correct)
+                btnElement.classList.add('bg-green-500', 'text-white', 'pop'); // Thêm hiệu ứng pop cho nút chọn
+                btnElement.classList.remove('bg-green-100', 'text-green-800'); // Override style default correct
+                const span = btnElement.querySelector('span');
+                if(span) {
+                    span.classList.remove('bg-green-600', 'text-white');
+                    span.classList.add('bg-white', 'text-green-600');
+                }
+
+                feedbackEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2 animate-bounce";
+                
+                state.streak++;
+                state.correct++;
+            } else {
+                // UI Wrong (User chose wrong)
+                btnElement.classList.remove('bg-blue-50', 'text-blue-900', 'border-blue-200');
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600', 'shake', 'opacity-100');
+                const span = btnElement.querySelector('span');
+                if(span) {
+                     span.classList.remove('bg-blue-200', 'text-blue-800');
+                     span.classList.add('bg-white', 'text-red-600');
+                }
+                
+                feedbackEl.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2";
+
+                state.streak = 0;
+                state.wrong++;
+
+                // Setup Modal
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Chưa chính xác";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerText = `Đáp án đúng là: ${state.currentQuestion.correct}`;
+                
+                // Show modal after delay
+                setTimeout(() => { overlay.classList.remove('hidden'); }, 400);
+            }
+
+            renderStats();
+
+            // Hiển thị giải thích inline
+            explArea.innerHTML = `<p class="font-bold text-blue-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích chi tiết:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+
+            // Setup Modal Detail (luôn set nội dung để khi mở modal là có)
+            detail.innerHTML = state.currentQuestion.explanation;
+
+            // Update Next Button
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = `Tiếp theo <i class="fas fa-arrow-right ml-2"></i>`;
+            btnNext.className = "bg-green-600 text-white px-6 py-2 rounded-full font-bold hover:bg-green-700 transition flex items-center ml-auto shadow-lg transform scale-105";
+        };
+
+        const handleNextClick = (forceSkip = false) => {
+            if (!state.isAnswered && !forceSkip) {
+                // Logic Bỏ qua
+                state.streak = 0;
+                state.skipped++;
+                renderStats();
+            }
+            loadQuestion();
+        };
+
+        const closeModal = () => {
+            document.getElementById('feedback-overlay').classList.add('hidden');
+        };
+
+        // Init
+        window.onload = () => {
+            renderStats();
+            loadQuestion();
+        }
+
+    </script>
+</body>
+</html>

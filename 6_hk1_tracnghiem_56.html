@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Chinh Phục Toán 6 HK1 - Câu 5,6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fdf2f8; /* Pink/Rose background for Geometry */
+        }
+        
+        .option-card {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        .option-card:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .option-card:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+
+        /* SVG Shape Styles */
+        .shape-svg {
+            stroke: #4b5563;
+            stroke-width: 3;
+            fill: #e0f2fe; /* light blue fill */
+            transition: all 0.3s ease;
+        }
+        .shape-container:hover .shape-svg {
+            fill: #bae6fd;
+            filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07));
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-6 px-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-pink-700 mb-2 uppercase drop-shadow-sm">
+            <i class="fas fa-shapes mr-2"></i>Ôn tập Chinh Phục Toán 6 HK1 - Câu 5,6
+        </h1>
+        <p class="text-pink-600 font-medium">Chủ đề: Tam giác đều, Hình vuông, Lục giác đều & Các hình mở rộng</p>
+    </header>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-4xl flex flex-col gap-6">
+        
+        <!-- Control Panel (Category Selection) -->
+        <div class="bg-white rounded-xl shadow-md p-4">
+            <p class="text-sm text-gray-500 mb-3 font-bold text-center uppercase">Chọn dạng bài tập</p>
+            <div class="flex flex-wrap justify-center gap-2" id="category-buttons">
+                <!-- Buttons injected by JS -->
+            </div>
+        </div>
+
+        <!-- Stats Board -->
+        <div class="bg-white rounded-xl shadow-md p-4 grid grid-cols-4 gap-2 text-center select-none" id="stats-container">
+            <!-- Stats injected by JS -->
+        </div>
+
+        <!-- Question Area -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-[350px] border-b-4 border-pink-500">
+            
+            <!-- Question Badge -->
+            <div class="absolute top-0 left-0 bg-pink-100 text-pink-800 px-4 py-1 rounded-br-xl text-xs font-bold uppercase z-10" id="badge-topic">
+                Tổng hợp
+            </div>
+
+            <div id="question-container" class="p-6 md:p-8 pt-10">
+                <!-- Content -->
+                <div id="quiz-content" class="fade-in">
+                    <!-- Visual Area for Shapes -->
+                    <div id="visual-area" class="flex justify-center items-center mb-6 h-48 md:h-56 bg-gray-50 rounded-xl border border-dashed border-gray-300 hidden">
+                        <!-- SVG injected here -->
+                    </div>
+
+                    <h2 id="question-text" class="text-xl md:text-2xl font-bold text-gray-800 mb-8 leading-relaxed text-center">
+                        Nhấn nút bắt đầu để làm bài!
+                    </h2>
+
+                    <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Options injected here -->
+                    </div>
+
+                    <!-- Khu vực hiển thị giải thích inline -->
+                    <div id="explanation-area" class="hidden mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in">
+                        <!-- Nội dung giải thích sẽ được JS thêm vào đây -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer / Controls -->
+            <div class="bg-gray-50 p-4 border-t border-gray-100 flex items-center justify-between">
+                <div id="feedback-inline" class="text-lg font-bold hidden pl-2"></div>
+                <button id="btn-next" onclick="handleNextClick()" class="ml-auto bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center shadow-sm">
+                    Bỏ qua <i class="fas fa-forward ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
+
+    <!-- Feedback Modal (Overlay) -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-blue-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-blue-500 font-bold uppercase mb-1">Giải thích:</p>
+                <p id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></p>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-pink-600 text-white font-bold rounded-xl shadow-lg hover:bg-pink-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & GENERATORS ---
+
+        // Helper: Sinh số ngẫu nhiên
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Helper: Trộn mảng
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Helper: Vẽ SVG
+        const renderShapeSVG = (type) => {
+            const size = 160;
+            const center = size / 2;
+            let svgContent = '';
+            
+            switch(type) {
+                case 'tamgiacdeu':
+                    // Tam giác đều: 3 đỉnh
+                    svgContent = `<polygon points="${center},10 ${size-20},${size-20} 20,${size-20}" class="shape-svg" />`;
+                    break;
+                case 'hinhvuong':
+                    svgContent = `<rect x="30" y="30" width="100" height="100" class="shape-svg" />`;
+                    break;
+                case 'lucgiacdeu':
+                    // Lục giác đều
+                    const r = 60;
+                    let points = [];
+                    for(let i=0; i<6; i++) {
+                        let angle_deg = 60 * i - 30;
+                        let angle_rad = Math.PI / 180 * angle_deg;
+                        let x = center + r * Math.cos(angle_rad);
+                        let y = center + r * Math.sin(angle_rad);
+                        points.push(`${x},${y}`);
+                    }
+                    svgContent = `<polygon points="${points.join(' ')}" class="shape-svg" />`;
+                    break;
+                case 'hinhchunhat':
+                    svgContent = `<rect x="20" y="50" width="120" height="60" class="shape-svg" />`;
+                    break;
+                case 'hinhthoi':
+                    svgContent = `<polygon points="${center},10 ${size-30},${center} ${center},${size-10} 30,${center}" class="shape-svg" />`;
+                    break;
+                case 'hinhbinhhanh':
+                    svgContent = `<polygon points="40,40 140,40 120,120 20,120" class="shape-svg" />`;
+                    break;
+                case 'hinhthangcan':
+                    svgContent = `<polygon points="50,40 110,40 140,120 20,120" class="shape-svg" />`;
+                    break;
+                default:
+                    svgContent = '';
+            }
+            return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" class="shape-container">${svgContent}</svg>`;
+        };
+
+        // --- CONTENT GENERATORS ---
+
+        // 1. NHẬN DIỆN HÌNH ẢNH (Visual)
+        const generateVisualQuestion = (isCore = true) => {
+            let shapes = [];
+            if (isCore) {
+                shapes = [
+                    { id: 'tamgiacdeu', name: 'Tam giác đều', correct: 'Tam giác đều' },
+                    { id: 'hinhvuong', name: 'Hình vuông', correct: 'Hình vuông' },
+                    { id: 'lucgiacdeu', name: 'Lục giác đều', correct: 'Lục giác đều' }
+                ];
+            } else {
+                shapes = [
+                    { id: 'hinhchunhat', name: 'Hình chữ nhật', correct: 'Hình chữ nhật' },
+                    { id: 'hinhthoi', name: 'Hình thoi', correct: 'Hình thoi' },
+                    { id: 'hinhbinhhanh', name: 'Hình bình hành', correct: 'Hình bình hành' },
+                    { id: 'hinhthangcan', name: 'Hình thang cân', correct: 'Hình thang cân' }
+                ];
+            }
+
+            const target = shapes[randomInt(0, shapes.length - 1)];
+            
+            // Tạo phương án nhiễu
+            const allNames = ['Tam giác đều', 'Hình vuông', 'Lục giác đều', 'Hình chữ nhật', 'Hình thoi', 'Hình bình hành', 'Hình thang cân'];
+            const distractors = shuffleArray(allNames.filter(n => n !== target.name)).slice(0, 3);
+            
+            // Tạo giải thích kèm lưu ý về tính chồng lấp
+            let extraNote = "";
+            if (target.name === 'Hình vuông') {
+                extraNote = `<br><span class="text-xs text-gray-500 italic mt-1 block"><i class="fas fa-info-circle mr-1"></i>Lưu ý: Hình vuông cũng là hình chữ nhật (có 4 cạnh bằng nhau) và là hình thoi (có 4 góc vuông). Tuy nhiên, tên gọi "Hình vuông" là tên gọi chính xác và đầy đủ tính chất nhất cho hình này.</span>`;
+            } else if (target.name === 'Tam giác đều') {
+                extraNote = `<br><span class="text-xs text-gray-500 italic mt-1 block"><i class="fas fa-info-circle mr-1"></i>Lưu ý: Tam giác đều cũng là tam giác cân (cân tại cả 3 đỉnh), nhưng tên gọi "Tam giác đều" cụ thể hơn vì nó chỉ rõ 3 cạnh bằng nhau.</span>`;
+            } else if (target.name === 'Hình thoi') {
+                extraNote = `<br><span class="text-xs text-gray-500 italic mt-1 block"><i class="fas fa-info-circle mr-1"></i>Lưu ý: Hình thoi cũng là hình bình hành (có 4 cạnh bằng nhau). Đáp án "Hình thoi" là chính xác nhất.</span>`;
+            } else if (target.name === 'Hình chữ nhật') {
+                 extraNote = `<br><span class="text-xs text-gray-500 italic mt-1 block"><i class="fas fa-info-circle mr-1"></i>Lưu ý: Hình chữ nhật cũng là hình bình hành (có 4 góc vuông).</span>`;
+            }
+
+            return {
+                type: 'visual',
+                categoryLabel: 'Nhận dạng hình vẽ',
+                svg: renderShapeSVG(target.id),
+                question: "Hình vẽ trên là hình gì?",
+                options: shuffleArray([target.name, ...distractors]),
+                correct: target.name,
+                explanation: `Hình vẽ trên có đầy đủ các đặc điểm nhận dạng đặc trưng nhất của <b>${target.name}</b>.${extraNote}`
+            };
+        };
+
+        // 2. ĐẶC ĐIỂM HÌNH HỌC (Text Properties)
+        const generatePropertyQuestion = (isCore = true) => {
+            const dataCore = [
+                {
+                    q: "Hình có 3 cạnh bằng nhau và 3 góc bằng nhau là:",
+                    a: "Tam giác đều",
+                    expl: "Tam giác đều là tam giác có 3 cạnh bằng nhau và 3 góc bằng nhau (đều bằng 60 độ). <br><span class='text-xs italic text-gray-500'>* Tam giác đều cũng là tam giác cân, nhưng tam giác cân thông thường chỉ có 2 cạnh bằng nhau.</span>"
+                },
+                {
+                    q: "Hình vuông có đặc điểm nào sau đây?",
+                    a: "4 cạnh bằng nhau và 4 góc vuông",
+                    d: ["4 cạnh bằng nhau và 2 góc nhọn", "Các cặp cạnh đối song song nhưng không bằng nhau", "Chỉ có 2 góc vuông"],
+                    expl: "Hình vuông là tứ giác có 4 góc vuông và 4 cạnh bằng nhau. <br><span class='text-xs italic text-gray-500'>* Hình vuông mang đầy đủ tính chất của hình chữ nhật và hình thoi.</span>"
+                },
+                {
+                    q: "Lục giác đều ABCDEF được ghép bởi bao nhiêu tam giác đều?",
+                    a: "6 tam giác đều",
+                    d: ["4 tam giác đều", "5 tam giác đều", "3 tam giác đều"],
+                    expl: "Lục giác đều có thể chia thành 6 tam giác đều bằng nhau có chung đỉnh là tâm của lục giác."
+                },
+                {
+                    q: "Trong hình lục giác đều, các đường chéo chính có đặc điểm gì?",
+                    a: "Bằng nhau và cắt nhau tại trung điểm mỗi đường",
+                    d: ["Vuông góc với nhau", "Không bằng nhau", "Song song với nhau"],
+                    expl: "Trong lục giác đều, 3 đường chéo chính bằng nhau và cắt nhau tại tâm của hình."
+                },
+                {
+                    q: "Hình vuông có bao nhiêu trục đối xứng?",
+                    a: "4 trục",
+                    d: ["2 trục", "3 trục", "1 trục"],
+                    expl: "Hình vuông có 4 trục đối xứng (2 đường chéo và 2 đường thẳng đi qua trung điểm các cạnh đối diện)."
+                }
+            ];
+
+            const dataExpanded = [
+                {
+                    q: "Hình thoi có hai đường chéo như thế nào?",
+                    a: "Vuông góc với nhau",
+                    d: ["Bằng nhau", "Song song", "Không cắt nhau"],
+                    expl: "Một trong những tính chất đặc trưng của hình thoi là hai đường chéo vuông góc với nhau. <br><span class='text-xs italic text-gray-500'>* Đây là điểm khác biệt so với hình bình hành thông thường.</span>"
+                },
+                {
+                    q: "Hình chữ nhật có đặc điểm nào sau đây KHÁC với hình vuông?",
+                    a: "4 cạnh không nhất thiết bằng nhau (chỉ có các cạnh đối bằng nhau)",
+                    d: ["Có 4 góc vuông", "Hai đường chéo bằng nhau", "Các cạnh đối song song"],
+                    expl: "Cả hình vuông và hình chữ nhật đều có 4 góc vuông, nhưng hình vuông yêu cầu 4 cạnh phải bằng nhau. <br><span class='text-xs italic text-gray-500'>* Có thể nói hình vuông là trường hợp đặc biệt của hình chữ nhật.</span>"
+                },
+                {
+                    q: "Hình thang cân là hình thang có:",
+                    a: "Hai góc kề một đáy bằng nhau",
+                    d: ["Hai cạnh bên song song", "Hai đáy bằng nhau", "Hai đường chéo vuông góc"],
+                    expl: "Hình thang cân là hình thang có hai góc kề một đáy bằng nhau (hoặc hai đường chéo bằng nhau)."
+                },
+                {
+                    q: "Tứ giác có các cạnh đối song song là hình gì?",
+                    a: "Hình bình hành",
+                    d: ["Hình thang cân", "Hình tam giác", "Hình thang vuông"],
+                    expl: "Hình bình hành là tứ giác có các cặp cạnh đối song song. <br><span class='text-xs italic text-gray-500'>* Hình vuông, hình chữ nhật, hình thoi đều là các dạng đặc biệt của hình bình hành.</span>"
+                }
+            ];
+
+            const pool = isCore ? dataCore : dataExpanded;
+            const item = pool[randomInt(0, pool.length - 1)];
+
+            // Nếu chưa có distractors (d), tự sinh
+            let options = [];
+            if (item.d) {
+                options = shuffleArray([item.a, ...item.d]);
+            } else {
+                const shapes = ["Tam giác đều", "Hình vuông", "Lục giác đều", "Hình chữ nhật", "Hình thoi"];
+                const dists = shuffleArray(shapes.filter(s => s !== item.a)).slice(0, 3);
+                options = shuffleArray([item.a, ...dists]);
+            }
+
+            return {
+                type: 'property',
+                categoryLabel: 'Tính chất hình học',
+                svg: null,
+                question: item.q,
+                options: options,
+                correct: item.a,
+                explanation: item.expl
+            };
+        };
+
+        // 3. LIÊN HỆ THỰC TẾ (Real World)
+        const generateRealWorldQuestion = () => {
+            const data = [
+                {
+                    q: "Biển báo giao thông 'Cảnh báo nguy hiểm' (viền đỏ, nền vàng) thường có dạng hình gì?",
+                    a: "Hình tam giác đều",
+                    expl: "Các biển báo nguy hiểm thường có dạng hình tam giác đều."
+                },
+                {
+                    q: "Viên gạch lát nền hình tổ ong thường có dạng hình gì?",
+                    a: "Hình lục giác đều",
+                    expl: "Cấu trúc tổ ong và các loại gạch lát nền tổ ong là hình lục giác đều, giúp ghép khít nhau không tạo khe hở."
+                },
+                {
+                    q: "Mặt của khối Rubik (3x3) có dạng hình gì?",
+                    a: "Hình vuông",
+                    expl: "Mỗi mặt của khối lập phương Rubik là một hình vuông."
+                },
+                {
+                    q: "Khung cửa sổ thông thường có dạng hình gì?",
+                    a: "Hình chữ nhật",
+                    expl: "Đa số khung cửa sổ, cửa ra vào có dạng hình chữ nhật (các góc vuông và cạnh đối bằng nhau)."
+                },
+                {
+                    q: "Cánh diều truyền thống thường gợi liên tưởng đến hình gì?",
+                    a: "Hình thoi",
+                    expl: "Hình dạng tứ giác có 4 cạnh bằng nhau thường gặp ở cánh diều là hình thoi."
+                },
+                {
+                    q: "Màn hình TV, máy tính thường có dạng hình gì?",
+                    a: "Hình chữ nhật",
+                    expl: "Màn hình các thiết bị điện tử thường có dạng hình chữ nhật."
+                },
+                {
+                    q: "Bánh chưng truyền thống ngày Tết có dạng hình gì (nhìn từ mặt trên)?",
+                    a: "Hình vuông",
+                    expl: "Bánh chưng được gói theo khuôn hình vuông, tượng trưng cho Đất."
+                }
+            ];
+
+            const item = data[randomInt(0, data.length - 1)];
+            const shapes = ["Hình tam giác đều", "Hình vuông", "Hình lục giác đều", "Hình chữ nhật", "Hình tròn"];
+            const dists = shuffleArray(shapes.filter(s => s !== item.a)).slice(0, 3);
+
+            return {
+                type: 'realworld',
+                categoryLabel: 'Liên hệ thực tế',
+                svg: null,
+                question: item.q,
+                options: shuffleArray([item.a, ...dists]),
+                correct: item.a,
+                explanation: item.expl
+            };
+        };
+
+        // --- APP STATE ---
+        const state = {
+            currentCategory: 'all', // all, visual, realworld, property
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        function initCategoryButtons() {
+            const categories = [
+                { id: 'all', label: 'Tổng hợp', icon: 'fa-random', color: 'bg-indigo-600' },
+                { id: 'visual', label: 'Qua hình vẽ', icon: 'fa-eye', color: 'bg-green-600' },
+                { id: 'realworld', label: 'Thực tế', icon: 'fa-globe-asia', color: 'bg-blue-600' },
+                { id: 'property', label: 'Tính chất', icon: 'fa-list-ul', color: 'bg-pink-600' }
+            ];
+
+            const container = document.getElementById('category-buttons');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="changeCategory('${cat.id}')" 
+                    class="category-btn ${cat.id === 'all' ? 'ring-2 ring-offset-2 ring-pink-400' : ''} 
+                           flex items-center gap-2 px-3 py-2 rounded-lg text-white text-sm font-bold shadow-md 
+                           ${cat.color} hover:opacity-90 transition-all">
+                    <i class="fas ${cat.icon}"></i> ${cat.label}
+                </button>
+            `).join('');
+        }
+
+        function changeCategory(id) {
+            state.currentCategory = id;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2', 'ring-pink-400');
+            });
+            event.currentTarget.classList.add('ring-2', 'ring-offset-2', 'ring-pink-400');
+            generateNewQuestion(true);
+        }
+
+        function getQuestionData() {
+            // Xác định loại câu hỏi dựa trên Category (Chế độ)
+            let mode = state.currentCategory;
+            
+            // Nếu là 'all', random ra 1 trong 3 chế độ
+            if (mode === 'all') {
+                const modes = ['visual', 'realworld', 'property'];
+                mode = modes[randomInt(0, modes.length - 1)];
+            }
+
+            let qData;
+            
+            if (mode === 'visual') {
+                // Giữ tỉ lệ 70% Core (Tam giác đều, Vuông, Lục giác đều) - 30% Expanded
+                const isCore = Math.random() < 0.7;
+                qData = generateVisualQuestion(isCore);
+            } 
+            else if (mode === 'realworld') {
+                // Thực tế
+                qData = generateRealWorldQuestion();
+            } 
+            else if (mode === 'property') {
+                // Giữ tỉ lệ 70% Core - 30% Expanded
+                const isCore = Math.random() < 0.7;
+                qData = generatePropertyQuestion(isCore);
+            }
+            
+            return qData;
+        }
+
+        function generateNewQuestion(skipStats = false) {
+            state.isAnswered = false;
+            
+            // UI Reset
+            document.getElementById('feedback-inline').className = "hidden";
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "ml-auto bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center shadow-sm";
+            
+            document.getElementById('explanation-area').classList.add('hidden');
+            document.getElementById('explanation-area').innerHTML = '';
+            
+            const visualArea = document.getElementById('visual-area');
+            
+            // Get Data
+            const q = getQuestionData();
+            state.currentQuestion = q; 
+
+            // Find correct index
+            const correctIndex = q.options.indexOf(q.correct);
+            state.currentQuestion.correctIndex = correctIndex;
+
+            // Render Badge & Question
+            document.getElementById('badge-topic').innerText = q.categoryLabel || 'Tổng hợp';
+            document.getElementById('question-text').innerHTML = q.question;
+            
+            // Show SVG if exists
+            if (q.svg) {
+                visualArea.classList.remove('hidden');
+                visualArea.innerHTML = q.svg;
+            } else {
+                visualArea.classList.add('hidden');
+            }
+
+            // Options
+            const optionsHtml = q.options.map((opt, index) => `
+                <button onclick="checkAnswer(this, ${index})" 
+                    class="option-card w-full text-left p-4 rounded-xl border-2 border-gray-100 bg-pink-50 hover:border-pink-300 hover:bg-pink-100 text-gray-700 font-semibold relative overflow-hidden group">
+                    <span class="inline-block w-8 h-8 rounded-full bg-white text-center leading-8 mr-3 text-pink-600 font-bold shadow-sm group-hover:bg-pink-600 group-hover:text-white transition">
+                        ${String.fromCharCode(65 + index)}
+                    </span>
+                    ${opt}
+                </button>
+            `).join('');
+            document.getElementById('options-grid').innerHTML = optionsHtml;
+        }
+
+        function checkAnswer(btn, selectedIndex) {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const isCorrect = selectedIndex === state.currentQuestion.correctIndex;
+            const inlineFeedback = document.getElementById('feedback-inline');
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+
+            // Disable buttons
+            const allBtns = document.querySelectorAll('.option-card');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-75');
+            });
+
+            // Highlight Correct
+            const correctBtn = allBtns[state.currentQuestion.correctIndex];
+            correctBtn.classList.remove('bg-pink-50', 'border-gray-100', 'hover:border-pink-300', 'hover:bg-pink-100', 'opacity-75');
+            correctBtn.classList.add('bg-green-100', 'border-green-500', 'text-green-800', 'opacity-100', 'border-2');
+            const correctSpan = correctBtn.querySelector('span');
+            correctSpan.classList.remove('text-pink-600', 'bg-white');
+            correctSpan.classList.add('bg-green-600', 'text-white');
+
+            if (isCorrect) {
+                state.streak++;
+                state.correct++;
+                
+                btn.classList.add('bg-green-500', 'text-white');
+                btn.querySelector('span').classList.remove('bg-green-600', 'text-white');
+                btn.querySelector('span').classList.add('bg-white', 'text-green-600');
+                btn.classList.add('pop');
+
+                inlineFeedback.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>';
+                inlineFeedback.className = "text-lg font-bold block pl-2 animate-bounce";
+            } else {
+                state.streak = 0;
+                state.wrong++;
+
+                btn.classList.remove('bg-pink-50', 'border-gray-100');
+                btn.classList.add('bg-red-500', 'border-red-600', 'text-white', 'shake', 'opacity-100');
+                btn.querySelector('span').classList.remove('text-pink-600', 'bg-white');
+                btn.querySelector('span').classList.add('text-red-600', 'bg-white');
+
+                inlineFeedback.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>';
+                inlineFeedback.className = "text-lg font-bold block pl-2";
+
+                // Setup Modal
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Chưa chính xác";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerText = `Đáp án đúng là: ${state.currentQuestion.correct}`;
+                
+                // Show modal
+                setTimeout(() => { overlay.classList.remove('hidden'); }, 400);
+            }
+
+            // Show explanation
+            const explArea = document.getElementById('explanation-area');
+            explArea.innerHTML = `<p class="font-bold text-pink-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+
+            // Modal detail
+            detail.innerHTML = state.currentQuestion.explanation;
+
+            renderStats();
+
+            // Update Next Btn
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Tiếp theo <i class="fas fa-arrow-right ml-2"></i>';
+            btnNext.className = "ml-auto bg-pink-600 text-white px-6 py-2 rounded-full font-bold hover:bg-pink-700 transition flex items-center shadow-lg transform scale-105";
+        }
+
+        function renderStats() {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span class="text-3xl font-extrabold ${state.streak > 2 ? 'streak-fire' : 'text-pink-900'}">
+                        ${state.streak > 2 ? '<i class="fas fa-fire"></i> ' : ''}${state.streak}
+                    </span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span class="text-xl font-bold text-green-600">${state.correct}</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span class="text-xl font-bold text-red-500">${state.wrong}</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span class="text-xl font-bold text-gray-400">${state.skipped}</span>
+                </div>
+            `;
+        }
+
+        function handleNextClick() {
+            if (!state.isAnswered) {
+                state.streak = 0;
+                state.skipped++;
+                renderStats();
+            }
+            generateNewQuestion();
+        }
+
+        function closeModal() {
+            document.getElementById('feedback-overlay').classList.add('hidden');
+        }
+
+        // Init
+        initCategoryButtons();
+        renderStats();
+        generateNewQuestion();
+
+    </script>
+</body>
+</html>

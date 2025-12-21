@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Chinh Phục Toán 6 HK1 - Câu 4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff; /* Blue background */
+        }
+        
+        .option-card {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        .option-card:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .option-card:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animations from old tool synced */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-6 px-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-blue-800 mb-2 uppercase drop-shadow-sm">
+            <i class="fas fa-calculator mr-2"></i>Ôn tập Chinh Phục Toán 6 HK1 - Câu 4
+        </h1>
+        <p class="text-blue-600 font-medium">Chủ đề: Ý nghĩa của số nguyên âm trong thực tiễn</p>
+    </header>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-4xl flex flex-col gap-6">
+        
+        <!-- Control Panel (Category Selection) -->
+        <div class="bg-white rounded-xl shadow-md p-4">
+            <p class="text-sm text-gray-500 mb-3 font-bold text-center uppercase">Chọn chủ đề ôn tập</p>
+            <div class="flex flex-wrap justify-center gap-2" id="category-buttons">
+                <!-- Buttons injected by JS -->
+            </div>
+        </div>
+
+        <!-- Stats Board (Synced Style) -->
+        <div class="bg-white rounded-xl shadow-md p-4 grid grid-cols-4 gap-2 text-center select-none" id="stats-container">
+            <!-- Stats injected by JS -->
+        </div>
+
+        <!-- Question Area -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-[300px] border-b-4 border-blue-600">
+            
+            <!-- Question Badge -->
+            <div class="absolute top-0 left-0 bg-blue-100 text-blue-800 px-4 py-1 rounded-br-xl text-xs font-bold uppercase z-10" id="badge-topic">
+                Tổng hợp
+            </div>
+
+            <div id="question-container" class="p-6 md:p-8 pt-10">
+                <!-- Loading State -->
+                <div id="loading" class="hidden flex flex-col items-center justify-center h-40">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                    <p class="mt-2 text-gray-500">Đang tạo câu hỏi...</p>
+                </div>
+
+                <!-- Content -->
+                <div id="quiz-content" class="fade-in">
+                    <h2 id="question-text" class="text-xl md:text-2xl font-bold text-gray-800 mb-8 leading-relaxed text-center">
+                        Nhấn nút bắt đầu để làm bài!
+                    </h2>
+
+                    <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Options injected here -->
+                    </div>
+
+                    <!-- Khu vực hiển thị giải thích inline (MỚI) -->
+                    <div id="explanation-area" class="hidden mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in">
+                        <!-- Nội dung giải thích sẽ được JS thêm vào đây -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer / Controls -->
+            <div class="bg-gray-50 p-4 border-t border-gray-100 flex items-center justify-between">
+                <div id="feedback-inline" class="text-lg font-bold hidden pl-2"></div>
+                <button id="btn-next" onclick="handleNextClick()" class="ml-auto bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center shadow-sm">
+                    Bỏ qua <i class="fas fa-forward ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
+
+    <!-- Feedback Modal (Overlay for detailed explanation) -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-blue-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-blue-500 font-bold uppercase mb-1">Giải thích:</p>
+                <p id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></p>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA SOURCE (70% Core Content) ---
+        const referenceQuestions = [
+            // 1. NHIỆT ĐỘ
+            {
+                type: 'nhietdo',
+                question: "Vào mùa đông, nhiệt độ trung bình của Bắc Cực khoảng -40°C, còn nhiệt độ trung bình của Nam Cực khoảng -60°C. Nơi nào lạnh hơn?",
+                options: ["Nam Cực", "Bắc Cực", "Cả hai nơi lạnh như nhau", "Không có nơi nào lạnh hơn"],
+                correct: 0,
+                explanation: "Vì -60 < -40 nên -60°C lạnh hơn -40°C. Do đó Nam Cực lạnh hơn."
+            },
+            {
+                type: 'nhietdo',
+                question: "Nếu 20°C biểu diễn 20 độ trên 0°C thì -5°C biểu diễn điều gì?",
+                options: ["5°C dưới 0°C", "-5°C trên 0°C", "-5°C dưới 0°C", "5°C trên 0°C"],
+                correct: 0,
+                explanation: "Số nguyên âm trong nhiệt độ dùng để chỉ nhiệt độ dưới 0°C. Do đó -5°C là 5 độ dưới 0°C."
+            },
+            {
+                type: 'nhietdo',
+                question: "Trong các cách diễn đạt sau về nhiệt độ ngăn đá tủ lạnh, cách ghi nào là ĐÚNG với quy ước toán học?",
+                options: ["-5°C", "05°C (để chỉ dưới 0)", "5°C dưới 0", "Cả A và C đều chấp nhận được về mặt ngữ nghĩa"],
+                correct: 3,
+                explanation: "Cách ghi số học chính xác là -5°C. Tuy nhiên trong văn nói có thể dùng '5 độ dưới 0'."
+            },
+            {
+                type: 'nhietdo',
+                question: "Tìm lỗi SAI trong cách biểu diễn sau: 'Nhiệt độ ngăn đá là 5 độ dưới 0°C nên được viết là 05°C'.",
+                options: ["Sai, phải viết là -5°C", "Sai, phải viết là +5°C", "Đúng, không có lỗi sai", "Sai, phải viết là 50°C"],
+                correct: 0,
+                explanation: "Nhiệt độ dưới 0°C phải sử dụng dấu trừ (-) đằng trước."
+            },
+            
+            // 2. ĐỘ CAO / ĐỘ SÂU
+            {
+                type: 'docao',
+                question: "Phát biểu nào sau đây là SAI về việc dùng số nguyên để biểu diễn độ cao thực tế?",
+                options: ["Đỉnh núi Bạch Mộc Lương Tử cao -3046m", "Đáy sông Sài Gòn có độ cao -20m", "Đỉnh Phan-xi-păng cao 3143m", "Thềm lục địa sâu 60m có độ cao -60m"],
+                correct: 0,
+                explanation: "Độ cao của núi so với mực nước biển là dương. Phải viết là 3046m, không được dùng số âm."
+            },
+            {
+                type: 'docao',
+                question: "Tìm cách biểu diễn SAI trong các câu sau:",
+                options: ["Đỉnh Phan-xi-păng cao -3143m", "Đáy sông Sài Gòn ở độ cao -20m", "Mực nước biển là 0m", "Máy bay đang bay ở độ cao 5000m"],
+                correct: 0,
+                explanation: "Đỉnh núi cao hơn mực nước biển nên phải biểu diễn bằng số nguyên dương (+3143 hoặc 3143)."
+            },
+            {
+                type: 'docao',
+                question: "Câu nào dưới đây biểu diễn đúng các số liệu: 'Đỉnh Phan-xi-păng cao 3143m, đáy sông Sài Gòn sâu 20m'?",
+                options: ["+3143 và -20", "-3143 và +20", "+3143 và +20", "-3143 và -20"],
+                correct: 0,
+                explanation: "Độ cao trên mực nước biển là dương (+), độ sâu dưới mực nước biển là âm (-)."
+            },
+            {
+                type: 'docao',
+                question: "Nhận định nào sau đây là SAI?",
+                options: ["Độ cao đáy vịnh Cam Ranh là 32m", "Độ cao đáy vịnh Cam Ranh là -32m", "Vịnh Cam Ranh sâu 32m", "Mực nước biển làm mốc 0"],
+                correct: 0,
+                explanation: "Nếu nói về 'Độ cao' của đáy (dưới mặt nước) thì phải dùng số âm (-32m). Nếu nói 'Sâu' thì dùng số dương (sâu 32m). Cách viết 'Độ cao... là 32m' là sai nghĩa."
+            },
+
+            // 3. LỊCH SỬ (NĂM)
+            {
+                type: 'lichsu',
+                question: "Archimedes sinh năm 287 trước Công nguyên và mất năm 212 trước Công nguyên. Số nguyên biểu thị năm sinh và năm mất của ông lần lượt là:",
+                options: ["-287 và -212", "287 và 212", "-287 và 212", "287 và -212"],
+                correct: 0,
+                explanation: "Năm trước Công nguyên (TCN) được biểu diễn bằng số nguyên âm."
+            },
+            {
+                type: 'lichsu',
+                question: "Tìm lỗi SAI trong biểu diễn năm sinh của nhà toán học Lương Thế Vinh (sinh năm 1441 sau Công nguyên):",
+                options: ["Viết là -1441", "Viết là 1441", "Viết là +1441", "Ông sinh vào thế kỷ 15"],
+                correct: 0,
+                explanation: "Năm sau Công nguyên là số dương. Viết -1441 là sai vì nó nghĩa là năm 1441 TCN."
+            },
+            {
+                type: 'lichsu',
+                question: "Nhà toán học Thales sinh năm 624 TCN. Cách biểu diễn nào sau đây là SAI?",
+                options: ["+624", "-624", "624 trước Công nguyên", "Năm âm 624"],
+                correct: 0,
+                explanation: "Năm TCN phải biểu diễn bằng số âm. Viết +624 là sai."
+            },
+            {
+                type: 'lichsu',
+                question: "Nhà toán học Pythagore sinh năm 570 TCN. Số nguyên biểu diễn năm sinh của ông là:",
+                options: ["-570", "570", "-570 TCN", "570 SCN"],
+                correct: 0,
+                explanation: "Năm 570 TCN tương ứng với số nguyên -570."
+            },
+            {
+                type: 'lichsu',
+                question: "Thế vận hội đầu tiên diễn ra năm 776 trước Công nguyên. Số nguyên chỉ năm này là:",
+                options: ["-776", "776", "0", "-767"],
+                correct: 0,
+                explanation: "Trước Công nguyên tương ứng với số âm."
+            },
+
+            // 4. TÀI CHÍNH / LỢI NHUẬN
+            {
+                type: 'taichinh',
+                question: "Cửa hàng quần áo tổng kết thấy 'lời 423 triệu'. Số nguyên biểu diễn kết quả kinh doanh này là:",
+                options: ["423 triệu", "-423 triệu", "0 triệu", "423 nghìn"],
+                correct: 0,
+                explanation: "Tiền lời (lợi nhuận dương) được biểu diễn bằng số dương."
+            },
+            {
+                type: 'taichinh',
+                question: "Mẹ Lan rút 3.000.000 đồng từ thẻ ATM. Số nguyên biểu diễn biến động số dư trong tài khoản là:",
+                options: ["-3.000.000", "3.000.000", "-300.000", "+3.000.000"],
+                correct: 0,
+                explanation: "Rút tiền (tiền đi ra khỏi tài khoản) biểu diễn bằng số âm."
+            },
+             {
+                type: 'taichinh',
+                question: "Một công ty báo cáo lỗ 50 triệu đồng. Số nguyên biểu diễn lợi nhuận của công ty là:",
+                options: ["-50 triệu", "50 triệu", "+50 triệu", "Không xác định"],
+                correct: 0,
+                explanation: "Lỗ (ngược lại với lãi) được biểu diễn bằng số nguyên âm."
+            }
+        ];
+
+        // --- PROCEDURAL GENERATORS (30% Expanded Content) ---
+        const generators = {
+            nhietdo: () => {
+                // Tỷ lệ xuất hiện: 40% hỏi ý nghĩa, 60% hỏi so sánh địa điểm (phát triển thêm)
+                const type = Math.random() < 0.4 ? 'meaning' : 'compare';
+
+                if (type === 'meaning') {
+                    const temp = randomInt(2, 35);
+                    const val = -temp; 
+                    return {
+                        type: 'nhietdo',
+                        question: `Bản tin thời tiết thông báo nhiệt độ tại một thành phố là <b>${val}°C</b>. Điều này có nghĩa là:`,
+                        options: [
+                            `Nhiệt độ là ${temp} độ dưới 0°C`,
+                            `Nhiệt độ là ${temp} độ trên 0°C`,
+                            `Nhiệt độ là ${val} độ trên 0°C`, 
+                            `Nhiệt độ là 0°C trừ đi ${val} độ`
+                        ],
+                        correct: 0,
+                        explanation: `Số nguyên âm (ví dụ ${val}) dùng để chỉ nhiệt độ dưới mốc 0°C. Do đó ${val}°C nghĩa là ${temp} độ dưới 0°C.`
+                    };
+                } else {
+                    // Dữ liệu địa điểm phong phú
+                    const places = [
+                        { name: "Ngăn đá tủ lạnh", tMin: -18, tMax: -10 },
+                        { name: "Bắc Cực", tMin: -40, tMax: -20 },
+                        { name: "Đỉnh Everest (đêm)", tMin: -30, tMax: -15 },
+                        { name: "Thành phố Moscow (Nga)", tMin: -25, tMax: -5 },
+                        { name: "Sapa (mùa đông)", tMin: -2, tMax: 5 },
+                        { name: "Hà Nội (mùa đông)", tMin: 10, tMax: 20 },
+                        { name: "Sa mạc Sahara (đêm)", tMin: -5, tMax: 5 },
+                        { name: "Thành phố Tokyo", tMin: -5, tMax: 8 }
+                    ];
+
+                    // Chọn 2 địa điểm ngẫu nhiên
+                    let idx1 = randomInt(0, places.length - 1);
+                    let idx2 = randomInt(0, places.length - 1);
+                    while (idx1 === idx2) idx2 = randomInt(0, places.length - 1);
+
+                    const p1 = places[idx1];
+                    const p2 = places[idx2];
+
+                    // Sinh nhiệt độ cụ thể cho từng nơi
+                    const t1 = randomInt(p1.tMin, p1.tMax);
+                    let t2 = randomInt(p2.tMin, p2.tMax);
+                    
+                    // Đảm bảo nhiệt độ khác nhau để so sánh
+                    while (t1 === t2) t2 = randomInt(p2.tMin, p2.tMax);
+
+                    const isAskColder = Math.random() < 0.5; // true: hỏi lạnh hơn, false: hỏi ấm hơn
+                    
+                    // Tạo câu hỏi
+                    const qText = `Nhiệt độ tại <b>${p1.name}</b> đo được là ${t1}°C. Nhiệt độ tại <b>${p2.name}</b> là ${t2}°C. Theo bạn, nơi nào ${isAskColder ? '<b>lạnh hơn</b>' : '<b>ấm hơn</b>'}?`;
+
+                    // Xác định đáp án
+                    let correctIndex;
+                    let reason = "";
+                    
+                    if (isAskColder) {
+                        // Lạnh hơn = nhiệt độ thấp hơn (nhỏ hơn)
+                        if (t1 < t2) {
+                            correctIndex = 0; // p1
+                            reason = `Vì ${t1} < ${t2} nên nhiệt độ tại ${p1.name} thấp hơn. Nhiệt độ càng thấp thì càng lạnh.`;
+                        } else {
+                            correctIndex = 1; // p2
+                            reason = `Vì ${t2} < ${t1} nên nhiệt độ tại ${p2.name} thấp hơn. Nhiệt độ càng thấp thì càng lạnh.`;
+                        }
+                    } else {
+                        // Ấm hơn = nhiệt độ cao hơn (lớn hơn)
+                        if (t1 > t2) {
+                            correctIndex = 0; // p1
+                            reason = `Vì ${t1} > ${t2} nên nhiệt độ tại ${p1.name} cao hơn (ấm hơn).`;
+                        } else {
+                            correctIndex = 1; // p2
+                            reason = `Vì ${t2} > ${t1} nên nhiệt độ tại ${p2.name} cao hơn (ấm hơn).`;
+                        }
+                    }
+
+                    return {
+                        type: 'nhietdo',
+                        question: qText,
+                        options: [
+                            p1.name,
+                            p2.name,
+                            "Cả hai nơi như nhau",
+                            "Chưa đủ dữ kiện để so sánh"
+                        ],
+                        correct: correctIndex,
+                        explanation: `So sánh hai số nguyên: ${t1} và ${t2}.<br>${reason}`
+                    };
+                }
+            },
+            docao: () => {
+                const items = [
+                    { name: "Tàu ngầm", verb: "lặn ở độ sâu", val: Math.floor(Math.random() * 500) + 100 },
+                    { name: "Thợ lặn", verb: "lặn sâu", val: Math.floor(Math.random() * 30) + 10 },
+                    { name: "Rạn san hô", verb: "nằm ở độ sâu", val: Math.floor(Math.random() * 20) + 5 }
+                ];
+                const item = items[Math.floor(Math.random() * items.length)];
+                return {
+                    type: 'docao',
+                    question: `Một ${item.name.toLowerCase()} đang ${item.verb} ${item.val}m so với mực nước biển. Số nguyên biểu diễn độ cao là:`,
+                    options: [`-${item.val}`, `+${item.val}`, `${item.val}`, `0`],
+                    correct: 0,
+                    explanation: "Độ sâu dưới mực nước biển được biểu diễn bằng số nguyên âm."
+                };
+            },
+            lichsu: () => {
+                const year = Math.floor(Math.random() * 900) + 100;
+                return {
+                    type: 'lichsu',
+                    question: `Một sự kiện lịch sử diễn ra vào năm ${year} trước Công nguyên. Số nguyên biểu diễn năm đó là:`,
+                    options: [`-${year}`, `${year}`, `+${year}`, `1-${year}`],
+                    correct: 0,
+                    explanation: "Năm trước Công nguyên (TCN) được quy ước là số nguyên âm."
+                };
+            },
+            taichinh: () => {
+                const money = (Math.floor(Math.random() * 50) + 1) * 100000;
+                const isDebt = Math.random() > 0.5;
+                if (isDebt) {
+                    return {
+                        type: 'taichinh',
+                        question: `Ông An đang nợ ngân hàng ${money.toLocaleString('vi-VN')} đồng. Số nguyên biểu diễn số tiền của ông An là:`,
+                        options: [`-${money.toLocaleString('vi-VN')}`, `${money.toLocaleString('vi-VN')}`, `+${money.toLocaleString('vi-VN')}`, `0`],
+                        correct: 0,
+                        explanation: "Khoản nợ được biểu diễn bằng số nguyên âm."
+                    };
+                } else {
+                     return {
+                        type: 'taichinh',
+                        question: `Kinh doanh thua lỗ ${money.toLocaleString('vi-VN')} đồng. Số nguyên biểu diễn lợi nhuận là:`,
+                        options: [`-${money.toLocaleString('vi-VN')}`, `${money.toLocaleString('vi-VN')}`, `+${money.toLocaleString('vi-VN')}`, `~${money.toLocaleString('vi-VN')}`],
+                        correct: 0,
+                        explanation: "Thua lỗ (lợi nhuận âm) được biểu diễn bằng dấu trừ."
+                    };
+                }
+            },
+            khac: () => {
+                // Expanded logic for 'khac' to include Elevator, Vision, Football
+                const subType = Math.random();
+                
+                if (subType < 0.33) {
+                    // 1. Thang máy: Phép toán di chuyển
+                    const start = randomInt(5, 15); // Tầng bắt đầu (5-15)
+                    const down = randomInt(start + 1, start + 5); // Đi xuống nhiều hơn tầng hiện tại để ra âm
+                    const end = start - down;
+                    
+                    return {
+                        type: 'khac',
+                        question: `Thang máy đang ở tầng <b>${start}</b>, sau đó đi xuống <b>${down}</b> tầng. Vị trí của thang máy lúc này được biểu diễn bởi số nguyên nào? (Biết tầng G là 0)`,
+                        options: [
+                            `${end}`, 
+                            `+${end}`, 
+                            `Tầng ${Math.abs(end)}`, 
+                            `${start + down}`
+                        ],
+                        correct: 0,
+                        explanation: `Vị trí mới = Vị trí cũ - Số tầng đi xuống = ${start} - ${down} = ${end}. (Số âm biểu thị tầng hầm)`
+                    };
+                } else if (subType < 0.66) {
+                    // 2. Độ cận thị (Mắt)
+                    const diop = (randomInt(1, 4) + (Math.random() < 0.5 ? 0.5 : 0)).toFixed(1); // Ví dụ 2.5, 3.0
+                    return {
+                        type: 'khac',
+                        question: `Bạn Lan đi khám mắt và bác sĩ kết luận bạn bị <b>cận thị ${diop} độ</b>. Trong y học, độ cận thị của Lan được biểu diễn bằng số:`,
+                        options: [
+                            `-${diop} diop`, 
+                            `+${diop} diop`, 
+                            `${diop} diop`, 
+                            `0 diop`
+                        ],
+                        correct: 0,
+                        explanation: "Trong quy ước y học: Độ cận thị được biểu diễn bằng số nguyên âm (-), độ viễn thị là số dương (+)."
+                    };
+                } else {
+                    // 3. Hiệu số bàn thắng (Bóng đá)
+                    const banThang = randomInt(0, 3);
+                    const banThua = randomInt(banThang + 2, banThang + 5); // Thua nhiều hơn thắng để ra hiệu số âm
+                    const hieuSo = banThang - banThua;
+                    
+                    return {
+                        type: 'khac',
+                        question: `Kết thúc vòng bảng, đội bóng A ghi được <b>${banThang}</b> bàn thắng nhưng bị thủng lưới <b>${banThua}</b> bàn. Hiệu số bàn thắng - thua của đội A là:`,
+                        options: [
+                            `${hieuSo}`, 
+                            `+${hieuSo}`, 
+                            `${Math.abs(hieuSo)}`, 
+                            `0`
+                        ],
+                        correct: 0,
+                        explanation: `Hiệu số = Bàn thắng - Bàn thua = ${banThang} - ${banThua} = ${hieuSo}.`
+                    };
+                }
+            }
+        };
+
+        // --- APP STATE ---
+        const state = {
+            currentCategory: 'all',
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        // --- CORE FUNCTIONS ---
+        
+        // Thêm hàm randomInt tiện dụng
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderStats() {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span class="text-3xl font-extrabold ${state.streak > 2 ? 'streak-fire' : 'text-blue-900'}">
+                        ${state.streak > 2 ? '<i class="fas fa-fire"></i> ' : ''}${state.streak}
+                    </span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span class="text-xl font-bold text-green-600">${state.correct}</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span class="text-xl font-bold text-red-500">${state.wrong}</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span class="text-xl font-bold text-gray-400">${state.skipped}</span>
+                </div>
+            `;
+        }
+
+        function getQuestion(category) {
+            const useReference = Math.random() < 0.6; // Giảm tỉ lệ lấy câu hỏi tĩnh xuống chút để tăng tính đa dạng
+            let pool = [];
+            
+            if (useReference) {
+                if (category === 'all') pool = referenceQuestions;
+                else pool = referenceQuestions.filter(q => q.type === category);
+            }
+
+            if (useReference && pool.length > 0) {
+                const q = pool[Math.floor(Math.random() * pool.length)];
+                return JSON.parse(JSON.stringify(q));
+            }
+
+            let generatorType = category;
+            if (category === 'all') {
+                const keys = Object.keys(generators);
+                generatorType = keys[Math.floor(Math.random() * keys.length)];
+            }
+            
+            // Fallback nếu generatorType không tồn tại (ví dụ 'all' random ra cái chưa có)
+            return generators[generatorType] ? generators[generatorType]() : generators['nhietdo']();
+        }
+
+        function initCategoryButtons() {
+            const categories = [
+                { id: 'all', label: 'Tổng hợp', icon: 'fa-layer-group', color: 'bg-indigo-600' },
+                { id: 'nhietdo', label: 'Nhiệt độ', icon: 'fa-temperature-low', color: 'bg-blue-500' },
+                { id: 'docao', label: 'Độ cao/Sâu', icon: 'fa-mountain', color: 'bg-emerald-500' },
+                { id: 'lichsu', label: 'Lịch sử', icon: 'fa-hourglass-half', color: 'bg-amber-600' },
+                { id: 'taichinh', label: 'Tài chính', icon: 'fa-coins', color: 'bg-rose-500' },
+                { id: 'khac', label: 'Thực tế khác', icon: 'fa-globe-asia', color: 'bg-purple-600' } // Nút mới
+            ];
+
+            const container = document.getElementById('category-buttons');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="changeCategory('${cat.id}')" 
+                    class="category-btn ${cat.id === 'all' ? 'ring-2 ring-offset-2 ring-blue-400' : ''} 
+                           flex items-center gap-2 px-3 py-2 rounded-lg text-white text-sm font-bold shadow-md 
+                           ${cat.color} hover:opacity-90 transition-all">
+                    <i class="fas ${cat.icon}"></i> ${cat.label}
+                </button>
+            `).join('');
+        }
+
+        function changeCategory(id) {
+            state.currentCategory = id;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-400');
+            });
+            event.currentTarget.classList.add('ring-2', 'ring-offset-2', 'ring-blue-400');
+            generateNewQuestion(true); // Skip stats logic when changing category
+        }
+
+        function generateNewQuestion(skipStats = false) {
+            state.isAnswered = false;
+            
+            // Reset UI
+            document.getElementById('feedback-inline').className = "hidden";
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "ml-auto bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center shadow-sm";
+            
+            // Ẩn vùng giải thích inline khi sang câu mới
+            const explArea = document.getElementById('explanation-area');
+            explArea.classList.add('hidden');
+            explArea.innerHTML = '';
+
+            // Get Question
+            const mapName = {
+                'all': 'Tổng hợp', 'nhietdo': 'Nhiệt độ', 'docao': 'Độ cao/Sâu', 
+                'lichsu': 'Lịch sử', 'taichinh': 'Tài chính', 'khac': 'Thực tế khác'
+            };
+            
+            const q = getQuestion(state.currentCategory);
+            const correctAnswerText = q.options[q.correct];
+            let shuffledOptions = [...q.options];
+            shuffleArray(shuffledOptions);
+            const newCorrectIndex = shuffledOptions.indexOf(correctAnswerText);
+            
+            state.currentQuestion = {
+                ...q,
+                options: shuffledOptions,
+                correct: newCorrectIndex,
+                originalType: q.type
+            };
+
+            // Render
+            document.getElementById('badge-topic').innerText = mapName[state.currentQuestion.originalType || state.currentCategory] || 'Tổng hợp';
+            document.getElementById('question-text').innerHTML = state.currentQuestion.question; // Changed to innerHTML to support bold tags
+            
+            const optionsHtml = state.currentQuestion.options.map((opt, index) => `
+                <button onclick="checkAnswer(this, ${index})" 
+                    class="option-card w-full text-left p-4 rounded-xl border-2 border-gray-100 bg-blue-50 hover:border-blue-300 hover:bg-blue-100 text-gray-700 font-semibold relative overflow-hidden group">
+                    <span class="inline-block w-8 h-8 rounded-full bg-white text-center leading-8 mr-3 text-blue-600 font-bold shadow-sm group-hover:bg-blue-600 group-hover:text-white transition">
+                        ${String.fromCharCode(65 + index)}
+                    </span>
+                    ${opt}
+                </button>
+            `).join('');
+            
+            document.getElementById('options-grid').innerHTML = optionsHtml;
+        }
+
+        function checkAnswer(btn, selectedIndex) {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const isCorrect = selectedIndex === state.currentQuestion.correct;
+            const inlineFeedback = document.getElementById('feedback-inline');
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+
+            // Disable all buttons
+            const allBtns = document.querySelectorAll('.option-card');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-75');
+            });
+
+            // 1. LUÔN LUÔN TÔ ĐẬM ĐÁP ÁN ĐÚNG (Dù chọn đúng hay sai)
+            const correctBtn = allBtns[state.currentQuestion.correct];
+            correctBtn.classList.remove('bg-blue-50', 'border-gray-100', 'hover:border-blue-300', 'hover:bg-blue-100', 'opacity-75');
+            correctBtn.classList.add('bg-green-100', 'border-green-500', 'text-green-800', 'opacity-100', 'border-2');
+            
+            const correctSpan = correctBtn.querySelector('span');
+            correctSpan.classList.remove('text-blue-600', 'bg-white', 'group-hover:bg-blue-600', 'group-hover:text-white');
+            correctSpan.classList.add('bg-green-600', 'text-white');
+
+
+            if (isCorrect) {
+                state.score++;
+                state.streak++;
+                state.correct++;
+                
+                // Nếu chọn đúng, tô đậm hơn chút để user biết mình chọn đúng
+                btn.classList.add('bg-green-500', 'text-white');
+                btn.querySelector('span').classList.remove('bg-green-600', 'text-white');
+                btn.querySelector('span').classList.add('bg-white', 'text-green-600');
+                btn.classList.add('pop');
+
+                // Inline Feedback
+                inlineFeedback.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>';
+                inlineFeedback.className = "text-lg font-bold block pl-2 animate-bounce";
+                
+                icon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+                title.innerText = "Tuyệt vời!";
+                title.className = "text-2xl font-bold mb-2 text-green-600";
+                msg.innerText = "Đáp án chính xác.";
+            } else {
+                state.streak = 0;
+                state.wrong++;
+
+                // Styles cho câu sai
+                btn.classList.remove('bg-blue-50', 'border-gray-100');
+                btn.classList.add('bg-red-500', 'border-red-600', 'text-white', 'shake', 'opacity-100');
+                btn.querySelector('span').classList.remove('text-blue-600', 'bg-white');
+                btn.querySelector('span').classList.add('text-red-600', 'bg-white');
+
+                // Inline Feedback
+                inlineFeedback.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>';
+                inlineFeedback.className = "text-lg font-bold block pl-2";
+
+                // Setup Modal for wrong answer
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Chưa chính xác";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerText = `Đáp án đúng là: ${state.currentQuestion.options[state.currentQuestion.correct]}`;
+            }
+
+            // Fill Modal Details
+            detail.innerHTML = state.currentQuestion.explanation;
+
+            // HIỂN THỊ GIẢI THÍCH INLINE (Sau khi đóng modal user sẽ thấy cái này)
+            const explArea = document.getElementById('explanation-area');
+            explArea.innerHTML = `<p class="font-bold text-blue-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích chi tiết:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+
+            // Update Stats
+            renderStats();
+
+            // Update Next Button
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Tiếp theo <i class="fas fa-arrow-right ml-2"></i>';
+            btnNext.className = "ml-auto bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 transition flex items-center shadow-lg transform scale-105";
+            
+            // Show modal immediately if wrong
+            if (!isCorrect) {
+                setTimeout(() => { overlay.classList.remove('hidden'); }, 400);
+            }
+        }
+
+        function handleNextClick() {
+            if (!state.isAnswered) {
+                // Skip Logic
+                state.streak = 0;
+                state.skipped++;
+                renderStats();
+                generateNewQuestion();
+            } else {
+                // Đã trả lời, bấm Next để qua câu mới
+                generateNewQuestion();
+            }
+        }
+
+        // Thay đổi tên hàm và logic để chỉ đóng modal
+        function closeModal() {
+            document.getElementById('feedback-overlay').classList.add('hidden');
+        }
+
+        // Initialize
+        initCategoryButtons();
+        renderStats();
+        generateNewQuestion();
+
+    </script>
+</body>
+</html>

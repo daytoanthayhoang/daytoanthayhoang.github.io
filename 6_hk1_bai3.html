@@ -3,531 +3,672 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toán 6 - Tính Tổng Số Nguyên Trong Khoảng</title>
+    <title>Ôn tập Chinh Phục Toán 6 HK1 - Bài 3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f0fdf4;
-            background-image: radial-gradient(#86efac 1px, transparent 1px);
-            background-size: 24px 24px;
+            background-color: #ecfdf5; /* Greenish tint for variety */
+            background-image: radial-gradient(#6ee7b7 1px, transparent 1px);
+            background-size: 20px 20px;
         }
         .chalkboard {
-            background-color: #1e3a8a; /* Xanh bảng đậm hơn chút cho khác biệt */
+            background-color: #1a4731; /* Dark Green Chalkboard */
             color: #ecf0f1;
-            border: 8px solid #7c2d12; /* Viền gỗ */
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            border: 8px solid #5d4037;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            overflow: hidden;
         }
-        .math-font {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .btn-mode {
-            transition: all 0.2s;
-            border-bottom: 4px solid transparent;
-        }
-        .btn-mode:active {
-            transform: translateY(2px);
-            border-bottom-width: 0;
-        }
-        .mode-active {
-            background-color: #2563eb !important; /* blue-600 */
-            color: white !important;
-            border-bottom: 4px solid #1e40af !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        .chalkboard::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMTAgMTBRNDAgNDAgMTAgNzAiIHN0cm9rZT0id2hpdGUiIG9wYWNpdHk9IjAuMDUiIGZpbGw9Im5vbmUiLz4KPC9zdmc+');
+            opacity: 0.1;
+            pointer-events: none;
         }
         .step-item {
             opacity: 0;
             transform: translateY(-10px);
-            animation: slideDown 0.4s forwards;
+            animation: slideDown 0.3s forwards;
         }
         @keyframes slideDown {
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Custom scrollbar */
-        #steps-container::-webkit-scrollbar { width: 8px; }
-        #steps-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        #steps-container::-webkit-scrollbar-thumb { background: #60a5fa; border-radius: 4px; }
-        #steps-container::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+        #steps-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #steps-container::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        #steps-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        #steps-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .input-group:focus-within label {
+            color: #059669; /* Emerald 600 */
+        }
+        .math-font {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+        }
 
-        .number-line-point {
+        /* --- STYLES FOR STATS --- */
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+        .stats-box {
             transition: all 0.3s ease;
         }
-        .highlight-range {
-            stroke: rgba(251, 191, 36, 0.3);
-            stroke-width: 14;
-            stroke-linecap: round;
+        .stats-box:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-2 md:p-6">
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
 
-    <div class="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-200">
+    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-emerald-200">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 md:p-6 text-center relative shadow-lg">
-            <h1 class="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider drop-shadow-md">
-                <i class="fas fa-calculator mr-3"></i>Luyện Thi Toán 6 - TÍNH TỔNG SỐ NGUYÊN
+        <div class="bg-emerald-600 p-4 text-center relative shadow-lg">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
+                <i class="fas fa-layer-group mr-2"></i>Ôn tập Chinh Phục Toán 6 HK1 - Bài 3
             </h1>
-            <p class="text-blue-100 mt-2 text-sm md:text-base font-semibold">Dạng bài: Tìm x và tính tổng các số nguyên x</p>
-            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white font-bold border border-white/30 shadow-sm">
-                Điểm: <span id="score" class="text-yellow-300 text-xl">0</span>
-            </div>
+            <p class="text-emerald-100 font-medium text-sm md:text-base">Chủ đề: Tập hợp số nguyên & Tính tổng dãy số</p>
         </div>
 
-        <div class="p-4 md:p-6 space-y-6">
+        <div class="p-4 md:p-6 space-y-4">
             
-            <!-- Mode Selection -->
-            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 shadow-inner">
-                <label class="block text-gray-700 font-bold mb-3 text-sm uppercase tracking-wide flex items-center">
-                    <i class="fas fa-filter text-blue-600 mr-2"></i>Chọn dạng bài:
-                </label>
-                
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="setMode('zero')" id="btn-zero" class="btn-mode flex-1 min-w-[120px] bg-yellow-100 border border-yellow-300 text-yellow-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-yellow-200">
-                        <i class="fas fa-arrows-alt-h mr-1"></i> Qua Gốc 0
-                    </button>
-                    
-                    <button onclick="setMode('boundary')" id="btn-boundary" class="btn-mode flex-1 min-w-[120px] bg-purple-100 border border-purple-300 text-purple-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-purple-200">
-                        <i class="fas fa-less-than-equal mr-1"></i> Có Dấu Bằng
-                    </button>
-
-                    <button onclick="setMode('wide')" id="btn-wide" class="btn-mode flex-1 min-w-[120px] bg-red-100 border border-red-300 text-red-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-red-200">
-                        <i class="fas fa-expand-arrows-alt mr-1"></i> Khoảng Rộng
-                    </button>
+            <!-- STATS BOARD -->
+            <div class="bg-white rounded-xl shadow-md p-3 grid grid-cols-4 gap-2 text-center select-none border border-gray-100" id="stats-container">
+                <div class="flex flex-col items-center stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span id="stat-streak" class="text-2xl md:text-3xl font-extrabold text-emerald-900">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span id="stat-correct" class="text-xl md:text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span id="stat-wrong" class="text-xl md:text-2xl font-bold text-red-500">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span id="stat-skipped" class="text-xl md:text-2xl font-bold text-gray-400">0</span>
                 </div>
             </div>
-
-            <!-- Question Area -->
+            
+            <!-- Main Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Left: Question Board -->
-                <div class="flex flex-col h-full">
-                    <div class="chalkboard p-4 md:p-6 min-h-[350px] w-full">
-                        <div class="absolute top-4 left-4 text-gray-400 text-xs font-mono border border-gray-500 px-2 py-1 rounded">
-                            <i class="fas fa-tag mr-1"></i><span id="question-type-label">...</span>
+                
+                <!-- Left Column: Chalkboard & Inputs -->
+                <div class="flex flex-col gap-4">
+                    <!-- Chalkboard -->
+                    <div class="chalkboard p-6 min-h-[300px] md:min-h-[350px] relative">
+                        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs font-mono uppercase tracking-widest opacity-60">
+                            Đề bài
                         </div>
                         
-                        <!-- Content Area -->
-                        <div id="question-content" class="w-full h-full flex flex-col justify-center items-center space-y-6">
-                            <div class="text-lg text-blue-200 text-center">Cho số nguyên <span class="math-font font-bold text-yellow-300">x</span> thoả mãn:</div>
-                            
-                            <!-- Math Display -->
-                            <div id="math-display" class="text-3xl md:text-5xl font-bold tracking-wider math-font text-center text-white">
-                                Loading...
+                        <div class="space-y-6 font-mono text-xl md:text-2xl w-full px-2 md:px-4">
+                            <!-- Question Statement -->
+                            <div class="text-center border-b border-gray-600 pb-4">
+                                <p class="text-emerald-200 text-lg font-sans mb-2">Cho <span class="math-font">x</span> là số nguyên thoả mãn:</p>
+                                <p id="q-condition" class="text-white font-bold text-3xl tracking-wide math-font py-2">Loading...</p>
                             </div>
 
-                            <div class="text-base text-gray-300 text-center space-y-1">
-                                <p>a) Viết tập hợp A các số nguyên x.</p>
-                                <p>b) Tính tổng S của các số nguyên x đó.</p>
+                            <!-- Tasks -->
+                            <div class="space-y-4">
+                                <div class="flex flex-col">
+                                    <div class="flex items-start">
+                                        <span class="text-yellow-400 font-bold mr-2 w-6 shrink-0">a)</span>
+                                        <span class="text-white text-lg font-sans leading-tight">Viết tập hợp A bằng cách liệt kê các số nguyên x.</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col">
+                                    <div class="flex items-start">
+                                        <span class="text-yellow-400 font-bold mr-2 w-6 shrink-0">b)</span>
+                                        <span class="text-white text-lg font-sans leading-tight">Tính tổng S của các số nguyên x trên.</span>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- Visualization (SVG Number Line) -->
-                            <div id="visual-container" class="w-full flex justify-center mt-2">
-                                <!-- SVG will be injected here -->
+                    <!-- Input Area -->
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 shadow-inner">
+                        <div class="text-center mb-3 text-emerald-800 text-sm font-bold uppercase">Nhập kết quả của bạn</div>
+                        
+                        <!-- Row 1: Min and Max of Set A -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="input-group">
+                                <label class="block text-gray-500 font-bold text-xs uppercase mb-1 text-center">Số nhỏ nhất trong A</label>
+                                <input type="tel" id="ans-min" placeholder="?" 
+                                    class="w-full text-center font-bold p-2 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none transition-colors">
+                            </div>
+                            <div class="input-group">
+                                <label class="block text-gray-500 font-bold text-xs uppercase mb-1 text-center">Số lớn nhất trong A</label>
+                                <input type="tel" id="ans-max" placeholder="?" 
+                                    class="w-full text-center font-bold p-2 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none transition-colors">
                             </div>
                         </div>
 
-                        <div class="text-gray-400 text-sm mt-auto border-t border-gray-600 pt-4 w-full text-center absolute bottom-4 left-0 px-6">
-                            <i class="fas fa-info-circle mr-1"></i> <span id="input-hint">Tính giá trị cuối cùng của tổng S</span>
+                        <!-- Row 2: Sum S -->
+                        <div class="grid grid-cols-1 mb-4">
+                            <div class="input-group">
+                                <label class="block text-gray-500 font-bold text-xs uppercase mb-1 text-center">Tổng S =</label>
+                                <input type="tel" id="ans-sum" placeholder="?" 
+                                    class="w-full text-center font-bold text-xl p-2 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none transition-colors">
+                            </div>
                         </div>
+
+                        <!-- Difficulty Toggle -->
+                        <div class="flex items-center justify-end mt-2 mb-4">
+                            <label class="inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
+                                <div class="relative w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                <span class="ms-2 text-sm font-bold text-gray-600 peer-checked:text-red-600 transition-colors">
+                                    <i class="fas fa-bomb mr-1"></i>Đề Khó / Phát triển
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <div class="flex gap-3">
+                            <button onclick="nextQuestion()" class="flex-1 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                <i class="fas fa-sync-alt"></i> Bài mới
+                            </button>
+                            <button onclick="checkAnswer()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i> Kiểm tra
+                            </button>
+                        </div>
+
+                        <!-- Feedback Area -->
+                        <div id="feedback" class="hidden mt-3 text-center p-3 rounded-lg text-sm font-bold transition-all"></div>
                     </div>
                 </div>
 
-                <!-- Right: Step-by-step & Hint Area -->
-                <div class="bg-white rounded-2xl border-2 border-dashed border-blue-300 p-5 flex flex-col h-full shadow-sm max-h-[600px]">
-                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-                        <h3 class="font-bold text-gray-700 flex items-center">
-                            <span class="bg-blue-100 text-blue-700 p-1.5 rounded-lg mr-2"><i class="fas fa-chalkboard-teacher"></i></span>
-                            Hướng dẫn giải
-                        </h3>
-                        <button onclick="showNextStep()" id="btn-show-step" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center">
-                            <i class="fas fa-lightbulb mr-2"></i> Gợi ý
-                        </button>
+                <!-- Right Column: Step-by-step -->
+                <div class="flex flex-col h-[550px] lg:h-[600px] bg-white rounded-xl border-2 border-dashed border-gray-300 p-4 relative shadow-sm">
+                    <!-- HEADER WITH BUTTON -->
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 shrink-0">
+                        <div class="flex items-center gap-2 flex-grow">
+                            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide whitespace-nowrap">
+                                <i class="fas fa-file-invoice text-emerald-500 mr-1"></i>Trình bày bài thi
+                            </h3>
+                            <!-- Button -->
+                            <button onclick="showNextStep()" id="btn-show-step" 
+                                class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed ml-2">
+                                <span>Gợi ý</span> <i class="fas fa-chevron-right text-[10px]"></i>
+                            </button>
+                        </div>
+                        <span id="step-counter" class="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded ml-2">0/0</span>
+                    </div>
+
+                    <!-- Rule Hint Area -->
+                    <div id="rule-area" class="hidden mb-3 bg-yellow-50 text-yellow-900 text-sm p-3 rounded-lg border-l-4 border-yellow-400 shadow-sm transition-all duration-300 shrink-0">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                        <span id="rule-content" class="font-medium"></span>
                     </div>
                     
-                    <!-- Steps Container -->
-                    <div id="steps-container" class="flex-grow space-y-3 overflow-y-auto pr-2 math-font text-sm md:text-base text-gray-800">
-                        <!-- Steps will appear here -->
+                    <!-- Scrollable Steps -->
+                    <div id="steps-container" class="flex-grow overflow-y-auto bg-gray-50 p-3 rounded-lg shadow-inner border border-gray-100 scroll-smooth">
+                        <div class="text-gray-400 italic text-sm text-center mt-20 flex flex-col items-center">
+                            <i class="fas fa-pencil-ruler text-4xl mb-3 opacity-20"></i>
+                            <span>Bấm "Gợi ý" để xem từng bước giải mẫu</span>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Controls -->
-            <div class="flex flex-col md:flex-row gap-4 justify-center items-center pt-2">
-                <div class="relative w-full md:w-1/3">
-                    <span class="absolute left-4 top-1/2 transform -translate-y-1/2 font-bold text-gray-400">S = </span>
-                    <input type="number" id="user-answer" placeholder="..." autocomplete="off"
-                        class="w-full text-center text-xl font-bold p-3 pl-10 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all placeholder-gray-300"
-                        onkeydown="if(event.key === 'Enter') checkAnswer()">
-                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs hidden md:block">
-                        ENTER
-                    </div>
-                </div>
-                
-                <button onclick="checkAnswer()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all shadow-lg transform hover:-translate-y-1 active:translate-y-0 flex items-center justify-center min-w-[140px]">
-                    <i class="fas fa-check mr-2"></i> Kiểm tra
-                </button>
-                
-                <button onclick="nextQuestion()" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl text-lg transition-colors flex items-center justify-center">
-                    <i class="fas fa-forward mr-2"></i> Câu khác
-                </button>
-            </div>
-
-            <!-- Result Feedback -->
-            <div id="feedback" class="hidden transform transition-all duration-300 ease-out origin-top"></div>
 
         </div>
     </div>
 
-    <script>
-        // --- State ---
-        let currentQuestion = {};
-        let score = 0;
-        let isAnswered = false;
-        let currentMode = 'zero';
-        let stepIndex = 0;
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
 
-        // --- Utility ---
+    <script>
+        // --- Configuration & Utils ---
+        const state = {
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0
+        };
+
+        let currentData = {
+            min: 0,
+            max: 0,
+            sum: 0,
+            allSteps: []
+        };
+        let isAnswered = false;
+        let stepIndex = 0;
+        let usedHint = false;
+
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // --- SVG Drawing Helper ---
-        function createNumberLineSVG(minRange, maxRange, startX, endX) {
-            // Hiển thị rộng hơn khoảng thực tế một chút
-            const displayMin = Math.min(minRange, startX) - 1;
-            const displayMax = Math.max(maxRange, endX) + 1;
-            const range = displayMax - displayMin;
-            
-            const width = 600;
-            const height = 80;
-            const padding = 40;
-            const stepSize = (width - 2 * padding) / range;
-            
-            let ticks = '';
-            let labels = '';
-            
-            // Highlight line
-            const hStart = padding + (startX - displayMin) * stepSize;
-            const hEnd = padding + (endX - displayMin) * stepSize;
-            const highlightLine = `<line x1="${hStart}" y1="${height/2}" x2="${hEnd}" y2="${height/2}" class="highlight-range" />`;
-
-            for (let i = displayMin; i <= displayMax; i++) {
-                const x = padding + (i - displayMin) * stepSize;
-                const isZero = i === 0;
-                const tickHeight = isZero ? 16 : 8;
-                const strokeWidth = isZero ? 2 : 1;
-                
-                ticks += `<line x1="${x}" y1="${height/2 - tickHeight/2}" x2="${x}" y2="${height/2 + tickHeight/2}" stroke="white" stroke-width="${strokeWidth}" />`;
-                
-                // Show labels sparsely if range is huge
-                if (range < 20 || i % 5 === 0 || i === startX || i === endX || i === 0) {
-                    labels += `<text x="${x}" y="${height/2 + 25}" fill="${isZero ? '#fbbf24' : '#9ca3af'}" font-size="12" text-anchor="middle" font-family="monospace" font-weight="${isZero ? 'bold' : 'normal'}">${i}</text>`;
-                }
-            }
-
-            // Boundary points
-            // Draw points for all integers in range to visualize the set
-            let points = '';
-            for(let i = startX; i <= endX; i++) {
-                 const x = padding + (i - displayMin) * stepSize;
-                 points += `<circle cx="${x}" cy="${height/2}" r="4" fill="#60a5fa" stroke="none" class="number-line-point"/>`;
-            }
-
-            return `
-                <svg width="100%" viewBox="0 0 ${width} ${height}" class="overflow-visible">
-                    ${highlightLine}
-                    <line x1="${padding - 10}" y1="${height/2}" x2="${width - padding + 10}" y2="${height/2}" stroke="white" stroke-width="2" marker-end="url(#arrowhead)" />
-                    <defs>
-                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="white" />
-                        </marker>
-                    </defs>
-                    ${ticks}
-                    ${labels}
-                    ${points}
-                </svg>
-            `;
+        function fmt(num) {
+            return num < 0 ? `(${num})` : `${num}`;
         }
 
-        // --- Logic Generation ---
+        // --- Core Logic ---
 
         function generateProblem() {
-            let minVal, maxVal; // The constraints in problem text (a and b)
-            let op1, op2; // < or <=
-            let actualStart, actualEnd; // The actual range of integers [start, end]
+            const isHard = document.getElementById('mode-hard').checked;
             
-            // Mode selection logic
-            if (currentMode === 'zero') {
-                // Range crosses zero. Usually -a < x < a+1 or similar to have neat cancellation
-                // Example: -5 < x < 5  => -4 ... 4 => sum 0
-                // Example: -5 < x < 4  => -4 ... 3 => sum -4
-                let center = getRandomInt(-2, 2); 
-                let spread = getRandomInt(3, 6);
-                minVal = center - spread; 
-                maxVal = center + spread + getRandomInt(-1, 1); // slight asymmetry
-                op1 = '<'; op2 = '<';
-                actualStart = minVal + 1;
-                actualEnd = maxVal - 1;
-            } else if (currentMode === 'boundary') {
-                // Mix of < and <=
-                minVal = getRandomInt(-8, -2);
-                maxVal = getRandomInt(2, 8);
-                let type = getRandomInt(0, 3);
-                // 0: <= <=, 1: < <=, 2: <= <
-                if (type === 0) { op1 = '≤'; op2 = '≤'; actualStart = minVal; actualEnd = maxVal; }
-                else if (type === 1) { op1 = '<'; op2 = '≤'; actualStart = minVal + 1; actualEnd = maxVal; }
-                else { op1 = '≤'; op2 = '<'; actualStart = minVal; actualEnd = maxVal - 1; }
+            // 1. Determine Base Magnitude
+            // Normal: 5 to 15. Hard: 50 to 2022.
+            let base = isHard ? getRandomInt(50, 2022) : getRandomInt(5, 15);
+
+            // 2. Determine Scenario (Probability Distribution)
+            const p = Math.random();
+            let leftOverCount = 0;
+
+            if (p < 0.30) {
+                // 30%: Symmetric (0 leftovers, sum = 0)
+                leftOverCount = 0;
+            } else if (p < 0.60) {
+                // 30%: Offset 1-2 (1 or 2 leftovers)
+                leftOverCount = getRandomInt(1, 2);
+            } else if (p < 0.80) {
+                // 20%: Offset 3-4 (3 or 4 leftovers)
+                leftOverCount = getRandomInt(3, 4);
             } else {
-                // Wide range, requires grouping logic, not just listing
-                let start = getRandomInt(-20, -10);
-                let count = getRandomInt(15, 25);
-                minVal = start;
-                maxVal = start + count;
-                op1 = '<'; op2 = '<';
-                actualStart = minVal + 1;
-                actualEnd = maxVal - 1;
-            }
-
-            // Ensure valid range
-            if (actualStart > actualEnd) { return generateProblem(); }
-
-            // Calculate Set A and Sum S
-            let setA = [];
-            let sumS = 0;
-            for (let i = actualStart; i <= actualEnd; i++) {
-                setA.push(i);
-                sumS += i;
-            }
-
-            // Build Steps
-            let steps = [];
-            
-            // Step 1: Listing A
-            let setString = "";
-            if (setA.length > 10) {
-                setString = `{${setA[0]}; ${setA[1]}; ...; ${setA[setA.length-1]}}`;
-            } else {
-                setString = `{${setA.join('; ')}}`;
-            }
-            steps.push(`<div class="font-bold text-blue-600">a) Viết tập hợp A:</div>`);
-            steps.push(`Vì ${minVal} ${op1} x ${op2} ${maxVal} nên x thuộc:`);
-            steps.push(`<div class="bg-white border p-2 rounded text-center font-bold text-lg">${setString}</div>`);
-
-            // Step 2: Set up Sum
-            steps.push(`<div class="font-bold text-blue-600 mt-2">b) Tính tổng S:</div>`);
-            steps.push(`Liệt kê các số hạng:`);
-            let sumExp = "";
-            if (setA.length > 8) {
-                sumExp = `S = (${setA[0]}) + ... + (${setA[setA.length-1]})`;
-            } else {
-                sumExp = "S = " + setA.map(n => n < 0 ? `(${n})` : n).join(" + ");
-            }
-            steps.push(`<div class="text-sm">${sumExp}</div>`);
-
-            // Step 3: Grouping (The Core Algorithm)
-            // Strategy: Find symmetric range [-k, k] that sums to 0.
-            // Find intersection of [actualStart, actualEnd] with [-infinity, infinity] in terms of symmetry.
-            let maxAbs = Math.max(Math.abs(actualStart), Math.abs(actualEnd));
-            let pairs = [];
-            let leftovers = [];
-            
-            // Naive matching for visualization steps
-            // Check if 0 is in range
-            let hasZero = (actualStart <= 0 && actualEnd >= 0);
-            
-            // Find symmetric pairs
-            let processed = new Set();
-            let stepGroupStr = "S = ";
-            
-            // Determine the largest symmetric range [ -k ... k ] contained in [actualStart, actualEnd]
-            // If range is -4 to 3. Symmetric part is -3 to 3. Leftover -4.
-            // If range is -2 to 5. Symmetric part is -2 to 2. Leftover 3, 4, 5.
-            
-            let symLimit = Math.min(Math.abs(actualStart), Math.abs(actualEnd));
-            let symmetricSumPart = "";
-            let leftoverPart = "";
-            let leftoverSum = 0;
-
-            // Check if signs are mixed
-            if (actualStart < 0 && actualEnd > 0) {
-                // Mixed signs: we can group opposites
-                // Range of pairs is [-symLimit, symLimit]
-                let pairStr = "";
-                if (symLimit > 0) {
-                    pairStr = `[(${-symLimit}) + ${symLimit}] + ... + 0`;
+                // 20%: Many leftovers
+                // If hard, many can be large. If normal, limit to reasonable.
+                if (isHard) {
+                    leftOverCount = getRandomInt(5, 50);
                 } else {
-                    pairStr = "0";
+                    // In normal mode, 'many' shouldn't exceed base too much or it looks weird
+                    leftOverCount = getRandomInt(5, Math.max(6, base));
                 }
-                
-                // Identify leftovers
-                let leftOversArr = [];
-                // Check left side
-                for(let i = actualStart; i < -symLimit; i++) leftOversArr.push(i);
-                // Check right side
-                for(let i = symLimit + 1; i <= actualEnd; i++) leftOversArr.push(i);
-                
-                leftoverSum = leftOversArr.reduce((a,b)=>a+b, 0);
-                let leftoverStr = leftOversArr.map(n => n < 0 ? `(${n})` : n).join(" + ");
-                
-                steps.push(`Góm các số đối nhau có tổng bằng 0:`);
-                steps.push(`Các cặp số từ ${-symLimit} đến ${symLimit} có tổng bằng 0.`);
-                
-                let formula = "";
-                if (leftoverStr) {
-                    formula = `S = (${leftoverStr}) + [ Tổng các cặp đối nhau ]`;
-                    steps.push(`<div class="bg-yellow-50 p-2 rounded border border-yellow-200">
-                        ${formula}<br>
-                        S = ${leftoverSum} + 0
-                    </div>`);
-                } else {
-                     steps.push(`Tất cả các số đều có đôi hoặc là 0.<br>S = 0`);
-                }
-            } else {
-                // All same sign (no cancellation)
-                steps.push(`Các số đều cùng dấu, ta cộng bình thường (hoặc nhóm số tròn chục nếu có).`);
-                // Simple calc display
-                steps.push(`S = ${sumS}`);
             }
 
-            // Final
-            steps.push(`<div class="font-bold text-xl text-red-600 border-t pt-2 mt-2">Kết quả: S = ${sumS}</div>`);
+            // 3. Construct Real Integer Range [realMin, realMax]
+            // We start with a symmetric core [-base, base] and extend one side.
+            let realMin, realMax;
+            
+            // Randomly decide direction of extension (more positive or more negative)
+            const extendRight = Math.random() < 0.5;
+
+            if (leftOverCount === 0) {
+                // Symmetric
+                realMin = -base;
+                realMax = base;
+            } else {
+                if (extendRight) {
+                    // Core: [-base, base]. Add leftovers to right: base+1 ...
+                    realMin = -base;
+                    realMax = base + leftOverCount;
+                } else {
+                    // Core: [-base, base]. Add leftovers to left: ... -base-1
+                    realMin = -(base + leftOverCount);
+                    realMax = base;
+                }
+            }
+
+            // 4. Determine Operators and Display Bounds
+            // 0: < (Strict), 1: <= (Inclusive)
+            let lowerOp = Math.random() < 0.5 ? 0 : 1; 
+            let upperOp = Math.random() < 0.5 ? 0 : 1;
+
+            // Calculate Display Bounds from Real Integers
+            // If condition is x > LB (lowerOp=0), then realMin = LB + 1 => LB = realMin - 1
+            // If condition is x >= LB (lowerOp=1), then realMin = LB => LB = realMin
+            let lowerBound = lowerOp === 0 ? realMin - 1 : realMin;
+
+            // If condition is x < UB (upperOp=0), then realMax = UB - 1 => UB = realMax + 1
+            // If condition is x <= UB (upperOp=1), then realMax = UB => UB = realMax
+            let upperBound = upperOp === 0 ? realMax + 1 : realMax;
+
+            // 5. Calculate Sum
+            // Sum of arithmetic progression: n * (a1 + an) / 2
+            let n = realMax - realMin + 1;
+            let totalSum = (n * (realMin + realMax)) / 2;
+
+            // Display String
+            const symLower = lowerOp === 0 ? '<' : '≤';
+            const symUpper = upperOp === 0 ? '<' : '≤';
+            const displayCondition = `${lowerBound} ${symLower} x ${symUpper} ${upperBound}`;
 
             return {
-                label: "Tìm x & Tính Tổng",
-                display: `${minVal} ${op1} <span class="text-yellow-300">x</span> ${op2} ${maxVal}`,
-                visual: createNumberLineSVG(minVal, maxVal, actualStart, actualEnd),
-                answer: sumS,
-                hintInput: "Nhập tổng S (kết quả câu b)",
-                steps: steps
+                display: displayCondition,
+                realMin: realMin,
+                realMax: realMax,
+                totalSum: totalSum,
+                steps: generateSteps(realMin, realMax, totalSum, n)
             };
         }
 
+        function generateSteps(min, max, sum, count) {
+            let steps = [];
 
-        // --- UI Controller ---
+            // --- STEP 1: LIỆT KÊ (PART A) ---
+            steps.push({ type: 'header', text: 'a) Viết tập hợp A', rule: 'Chú ý dấu " < " (không lấy) và " ≤ " (có lấy).' });
+            
+            let listStr = "A = { ";
+            // Logic for short vs long lists
+            // Threshold: if count > 12, use ellipsis
+            if (count <= 12) {
+                let arr = [];
+                for(let i = min; i <= max; i++) arr.push(i);
+                listStr += arr.join('; ') + " }";
+            } else {
+                // Format: min; min+1; min+2; ... ; -1; 0; 1; ...; max-1; max
+                // Simplified standard format usually shows start and end clearly
+                // Example: {-30; -29; ...; 29; 30}
+                // Better: Show enough to see pattern.
+                // If crossing 0: {min; min+1; ...; -1; 0; 1; ...; max-1; max}
+                // If all neg/pos: {min; min+1; ...; max-1; max}
+                
+                if (min < 0 && max > 0) {
+                    // Crossing zero
+                    listStr += `${min}; ${min+1}; ...; -1; 0; 1; ...; ${max-1}; ${max} }`;
+                } else {
+                    listStr += `${min}; ${min+1}; ...; ${max-1}; ${max} }`;
+                }
+            }
+            steps.push({ type: 'step', text: listStr, isLast: true });
 
-        function setMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.btn-mode').forEach(btn => btn.classList.remove('mode-active'));
-            document.getElementById(`btn-${mode}`).classList.add('mode-active');
-            nextQuestion();
+
+            // --- STEP 2: TÍNH TỔNG (PART B) ---
+            steps.push({ type: 'header', text: 'b) Tính tổng S', rule: 'Nhóm các cặp số đối nhau (có tổng bằng 0).' });
+
+            // Step 2.1: Write Sum Expression
+            let sumExpr = "S = ";
+            if (count <= 12) {
+                let arr = [];
+                for(let i = min; i <= max; i++) arr.push(fmt(i));
+                sumExpr += arr.join(' + ');
+            } else {
+                if (min < 0 && max > 0) {
+                    sumExpr += `${fmt(min)} + ${fmt(min+1)} + ... + (-1) + 0 + 1 + ... + ${max-1} + ${max}`;
+                } else {
+                    sumExpr += `${fmt(min)} + ${fmt(min+1)} + ... + ${max-1} + ${max}`;
+                }
+            }
+            steps.push({ type: 'step', text: sumExpr });
+
+            // Step 2.2: Grouping (The Smart Part)
+            // Logic: Find the intersection range [-k, k] that cancels out.
+            // Example: -5 to 3. Intersection is [-3, 3]. Leftover: -5, -4.
+            // Example: -4 to 6. Intersection is [-4, 4]. Leftover: 5, 6.
+            
+            let cancelLimit = Math.min(Math.abs(min), Math.abs(max));
+            // If range doesn't cross 0 (e.g. 2 to 5), no cancellation.
+            let crossesZero = (min < 0 && max > 0);
+
+            if (crossesZero) {
+                let groupStr = "S = ";
+                let leftovers = [];
+                let groupDisplay = "";
+
+                if (Math.abs(min) > Math.abs(max)) {
+                    // More negatives. Leftovers on the left.
+                    // Range [min, -cancelLimit - 1] are leftovers.
+                    // Pairs are [-cancelLimit, max] i.e. [-max, max]
+                    for(let i = min; i < -max; i++) {
+                        leftovers.push(fmt(i));
+                    }
+                    // Show one pair group sample
+                    groupDisplay = ` + [(${fmt(-max)}) + ${max}] + ... + 0`;
+                } else if (Math.abs(max) > Math.abs(min)) {
+                    // More positives. Leftovers on the right.
+                    // Pairs are [min, -min]
+                    for(let i = -min + 1; i <= max; i++) {
+                        leftovers.push(fmt(i));
+                    }
+                    groupDisplay = `[${fmt(min)} + ${fmt(-min)}] + ... + 0 + `;
+                } else {
+                    // Perfectly symmetric
+                    groupDisplay = `[${fmt(min)} + ${max}] + ... + 0`;
+                }
+
+                if (leftovers.length > 0) {
+                     if (Math.abs(min) > Math.abs(max)) {
+                         groupStr += leftovers.join('+') + groupDisplay;
+                     } else {
+                         groupStr += groupDisplay + leftovers.join('+');
+                     }
+                } else {
+                    groupStr += groupDisplay;
+                }
+                
+                steps.push({ type: 'step', text: groupStr });
+
+                // Step 2.3: Simplify to zeros
+                let zeroStr = "S = ";
+                if (leftovers.length > 0) {
+                    // Calculate sum of leftovers
+                    let leftoverSum = leftovers.reduce((acc, val) => acc + parseInt(val.replace('(','').replace(')','')), 0);
+                    
+                    if (Math.abs(min) > Math.abs(max)) {
+                         zeroStr += `${leftoverSum} + 0`;
+                    } else {
+                         zeroStr += `0 + ${leftoverSum}`;
+                    }
+                } else {
+                    zeroStr += "0";
+                }
+                steps.push({ type: 'step', text: zeroStr });
+            } else {
+                // No zero crossing, just simple sum or formula (but grade 6 usually lists pairs or associative)
+                // If range is large and no zero crossing, they might just use formula.
+                // Or if small, just add.
+                // Let's assume for this tool, if not crossing zero, we just show final answer or simple addition
+                if (count < 5) {
+                    steps.push({ type: 'step', text: `S = ${sum}` }); // Trivial
+                } else {
+                    steps.push({ type: 'step', text: `(Dùng tính chất giao hoán và kết hợp)` });
+                }
+            }
+
+            // Final
+            steps.push({ type: 'step', text: `S = ${sum}`, isLast: true });
+
+            return steps;
+        }
+
+
+        // --- UI Functions ---
+
+        function renderStats() {
+            const streakEl = document.getElementById('stat-streak');
+            streakEl.textContent = state.streak;
+            if (state.streak > 2) {
+                streakEl.classList.add('streak-fire');
+            } else {
+                streakEl.classList.remove('streak-fire');
+            }
+
+            document.getElementById('stat-correct').textContent = state.correct;
+            document.getElementById('stat-wrong').textContent = state.wrong;
+            document.getElementById('stat-skipped').textContent = state.skipped;
         }
 
         function nextQuestion() {
+            if (!isAnswered && document.getElementById('q-condition').innerText !== 'Loading...') {
+                state.skipped++;
+                state.streak = 0;
+                renderStats();
+            }
+
             // Reset UI
             document.getElementById('feedback').classList.add('hidden');
-            document.getElementById('user-answer').value = '';
-            document.getElementById('user-answer').disabled = false;
-            document.getElementById('user-answer').focus();
+            document.getElementById('rule-area').classList.add('hidden');
             
-            // Reset Steps
-            stepIndex = 0;
-            const stepsContainer = document.getElementById('steps-container');
-            stepsContainer.innerHTML = ''; 
-            
-            const btnStep = document.getElementById('btn-show-step');
-            btnStep.disabled = false;
-            btnStep.innerHTML = '<i class="fas fa-lightbulb mr-2"></i> Gợi ý';
-            btnStep.className = 'bg-indigo-500 hover:bg-indigo-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center';
+            ['ans-min', 'ans-max', 'ans-sum'].forEach(id => {
+                const el = document.getElementById(id);
+                el.value = '';
+                el.disabled = false;
+                el.classList.remove('border-emerald-500', 'border-red-500', 'bg-emerald-50', 'bg-red-50');
+            });
             
             isAnswered = false;
+            stepIndex = 0;
+            usedHint = false;
+            
+            const stepsContainer = document.getElementById('steps-container');
+            stepsContainer.innerHTML = `<div class="text-gray-400 italic text-sm text-center mt-20 flex flex-col items-center"><i class="fas fa-pencil-ruler text-4xl mb-3 opacity-20"></i><span>Bấm "Gợi ý" để xem từng bước giải mẫu</span></div>`;
+            
+            const btnStep = document.getElementById('btn-show-step');
+            btnStep.innerHTML = '<span>Gợi ý</span> <i class="fas fa-chevron-right text-[10px]"></i>';
+            btnStep.disabled = false;
 
-            // Generate
-            currentQuestion = generateProblem();
+            // Gen Data
+            const data = generateProblem();
+            currentData = {
+                min: data.realMin,
+                max: data.realMax,
+                sum: data.totalSum,
+                allSteps: data.steps
+            };
 
-            // Update DOM
-            document.getElementById('math-display').innerHTML = currentQuestion.display;
-            document.getElementById('visual-container').innerHTML = currentQuestion.visual;
-            document.getElementById('question-type-label').textContent = currentQuestion.label;
+            document.getElementById('q-condition').innerHTML = data.display;
+            document.getElementById('step-counter').textContent = `0/${currentData.allSteps.length}`;
         }
 
         function showNextStep() {
-            const container = document.getElementById('steps-container');
+            usedHint = true;
             
-            if (stepIndex < currentQuestion.steps.length) {
-                const stepDiv = document.createElement('div');
-                stepDiv.className = 'step-item bg-white p-3 rounded-lg border-l-4 border-blue-400 shadow-sm mb-2';
+            const container = document.getElementById('steps-container');
+            const ruleArea = document.getElementById('rule-area');
+            const ruleContent = document.getElementById('rule-content');
+            
+            if (stepIndex === 0) container.innerHTML = '';
+
+            if (stepIndex < currentData.allSteps.length) {
+                const item = currentData.allSteps[stepIndex];
                 
-                if (stepIndex === currentQuestion.steps.length - 1) {
-                     stepDiv.className = 'step-item bg-green-50 p-3 rounded-lg border-l-4 border-green-500 font-bold text-green-800 shadow-sm';
+                if (item.type === 'header') {
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = "mt-4 mb-2 text-xs font-bold text-gray-500 uppercase border-b border-gray-300 pb-1 flex items-center";
+                    headerDiv.innerHTML = `<i class="fas fa-caret-right mr-1"></i> ${item.text}`;
+                    container.appendChild(headerDiv);
+
+                    if (item.rule) {
+                        ruleContent.textContent = item.rule;
+                        ruleArea.classList.remove('hidden');
+                        ruleArea.classList.remove('animate-pulse');
+                        void ruleArea.offsetWidth; // Trigger reflow
+                        ruleArea.classList.add('animate-pulse');
+                    }
+                } else {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'step-item bg-white p-3 rounded border-l-4 shadow-sm mb-3 text-base font-mono';
+                    
+                    if (item.isLast) {
+                        stepDiv.classList.add('border-emerald-500', 'bg-emerald-50');
+                        stepDiv.innerHTML = `<span class="text-emerald-700 font-bold">${item.text}</span>`;
+                    } else {
+                        stepDiv.classList.add('border-blue-400');
+                        stepDiv.textContent = item.text;
+                    }
+                    container.appendChild(stepDiv);
                 }
-                
-                stepDiv.innerHTML = currentQuestion.steps[stepIndex];
-                container.appendChild(stepDiv);
-                
-                container.scrollTop = container.scrollHeight;
+
+                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
                 stepIndex++;
+                document.getElementById('step-counter').textContent = `${stepIndex}/${currentData.allSteps.length}`;
             }
 
-            // Button State
-            if (stepIndex >= currentQuestion.steps.length) {
+            if (stepIndex >= currentData.allSteps.length) {
                 const btn = document.getElementById('btn-show-step');
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-check mr-1"></i> Xong';
-                btn.className = 'bg-gray-400 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg cursor-not-allowed flex items-center';
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> <span>Hết</span>';
             }
         }
 
         function checkAnswer() {
             if (isAnswered) return;
-
-            const input = document.getElementById('user-answer');
-            const feedback = document.getElementById('feedback');
-            let rawVal = input.value.trim();
-
-            if (rawVal === "") {
-                alert("Hãy nhập kết quả tổng S!");
-                return;
-            }
-
-            isAnswered = true;
-            input.disabled = true;
-            let userVal = parseInt(rawVal);
             
-            if (userVal === currentQuestion.answer) {
-                score += 10;
-                document.getElementById('score').textContent = score;
-                feedback.innerHTML = `
-                    <div class="text-green-700 font-bold text-xl mb-1 flex items-center justify-center animate-bounce">
-                        <i class="fas fa-check-circle mr-2 text-3xl"></i> Chính xác!
-                    </div>
-                    <div class="text-green-600">S = ${currentQuestion.answer}</div>
-                `;
-                feedback.className = "text-center mt-4 p-4 rounded-xl bg-green-100 border-2 border-green-300 shadow-lg";
-                while(stepIndex < currentQuestion.steps.length) showNextStep();
-                
+            const iMin = document.getElementById('ans-min');
+            const iMax = document.getElementById('ans-max');
+            const iSum = document.getElementById('ans-sum');
+            
+            const vMin = parseInt(iMin.value);
+            const vMax = parseInt(iMax.value);
+            const vSum = parseInt(iSum.value);
+            
+            let correctCount = 0;
+
+            // Check Min
+            if (vMin === currentData.min) {
+                correctCount++;
+                iMin.classList.add('border-emerald-500', 'bg-emerald-50');
             } else {
-                feedback.innerHTML = `
-                    <div class="text-red-600 font-bold text-xl mb-1 flex items-center justify-center">
-                        <i class="fas fa-times-circle mr-2 text-3xl"></i> Sai rồi!
-                    </div>
-                    <div class="text-gray-700 mb-2">Đáp án đúng: <strong class="text-xl text-red-600">S = ${currentQuestion.answer}</strong></div>
-                `;
-                feedback.className = "text-center mt-4 p-4 rounded-xl bg-red-50 border-2 border-red-200 shadow-lg";
-                
-                // Auto show steps slowly
-                let intv = setInterval(() => {
-                    if(stepIndex < currentQuestion.steps.length) showNextStep();
-                    else clearInterval(intv);
-                }, 800);
+                iMin.classList.add('border-red-500', 'bg-red-50');
             }
-            feedback.classList.remove('hidden');
+
+            // Check Max
+            if (vMax === currentData.max) {
+                correctCount++;
+                iMax.classList.add('border-emerald-500', 'bg-emerald-50');
+            } else {
+                iMax.classList.add('border-red-500', 'bg-red-50');
+            }
+
+            // Check Sum
+            if (vSum === currentData.sum) {
+                correctCount++;
+                iSum.classList.add('border-emerald-500', 'bg-emerald-50');
+            } else {
+                iSum.classList.add('border-red-500', 'bg-red-50');
+            }
+
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800', 'bg-blue-100', 'text-blue-800');
+
+            if (correctCount === 3) {
+                if (!usedHint) {
+                    state.correct++;
+                    state.streak++;
+                    feedback.innerHTML = '<i class="fas fa-crown"></i> Xuất sắc! Bạn đúng cả 3 ý.';
+                    feedback.classList.add('bg-emerald-100', 'text-emerald-800');
+                } else {
+                    feedback.innerHTML = '<i class="fas fa-check"></i> Chính xác! (Không tính điểm vì đã xem gợi ý)';
+                    feedback.classList.add('bg-blue-100', 'text-blue-800');
+                }
+                
+                renderStats();
+                
+                // Auto-play remaining steps
+                const reveal = setInterval(() => {
+                    if(stepIndex < currentData.allSteps.length) showNextStep();
+                    else clearInterval(reveal);
+                }, 100);
+                isAnswered = true;
+            } else {
+                state.wrong++;
+                state.streak = 0;
+                renderStats();
+
+                feedback.textContent = `Bạn đúng ${correctCount}/3 ý. Kiểm tra kỹ đầu mút của tập hợp nhé!`;
+                feedback.classList.add('bg-red-100', 'text-red-800');
+            }
         }
 
-        // Init
-        window.onload = () => {
-            setMode('zero');
-        };
+        window.onload = nextQuestion;
+
     </script>
 </body>
 </html>

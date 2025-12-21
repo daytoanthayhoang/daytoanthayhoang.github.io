@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toán 6 - Bài 4: Tìm x, y & Biểu thức</title>
+    <title>Ôn tập Chinh Phục Toán 6 HK1 - Bài 4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -58,22 +58,57 @@
         .input-group:focus-within label {
             color: #4f46e5;
         }
+
+        /* --- STYLES FOR STATS --- */
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+        .stats-box {
+            transition: all 0.3s ease;
+        }
+        .stats-box:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-2 md:p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
 
     <div class="max-w-6xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-blue-200">
         <!-- Header -->
         <div class="bg-indigo-600 p-4 text-center relative shadow-lg">
             <h1 class="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
-                <i class="fas fa-shapes mr-2"></i>ÔN TẬP BÀI 4: CỘNG TRỪ SỐ NGUYÊN
+                <i class="fas fa-shapes mr-2"></i>Ôn tập Chinh Phục Toán 6 HK1 - Bài 4
             </h1>
-            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-white font-bold text-sm border border-white/30">
-                Điểm: <span id="score" class="text-yellow-300 text-lg">0</span>
-            </div>
+		<p class="text-white font-medium">Chủ đề: Tìm số nguyên x,y và Tính giá trị biểu thức</p>
+
         </div>
 
-        <div class="p-4 md:p-6 space-y-6">
+        <div class="p-4 md:p-6 space-y-4">
+            
+            <!-- STATS BOARD -->
+            <div class="bg-white rounded-xl shadow-md p-3 grid grid-cols-4 gap-2 text-center select-none border border-gray-100" id="stats-container">
+                <div class="flex flex-col items-center stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span id="stat-streak" class="text-2xl md:text-3xl font-extrabold text-indigo-900">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span id="stat-correct" class="text-xl md:text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span id="stat-wrong" class="text-xl md:text-2xl font-bold text-red-500">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span id="stat-skipped" class="text-xl md:text-2xl font-bold text-gray-400">0</span>
+                </div>
+            </div>
             
             <!-- Main Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -119,25 +154,36 @@
                             <!-- Input X -->
                             <div class="input-group">
                                 <label class="block text-gray-500 font-bold text-xs uppercase mb-1 text-center">x =</label>
-                                <input type="number" id="ans-x" placeholder="?" 
+                                <input type="tel" id="ans-x" placeholder="?" 
                                     class="w-full text-center font-bold p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors">
                             </div>
                             <!-- Input Y -->
                             <div class="input-group">
                                 <label class="block text-gray-500 font-bold text-xs uppercase mb-1 text-center">y =</label>
-                                <input type="number" id="ans-y" placeholder="?" 
+                                <input type="tel" id="ans-y" placeholder="?" 
                                     class="w-full text-center font-bold p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors">
                             </div>
                             <!-- Input Expr -->
                             <div class="input-group">
                                 <label id="label-expr" class="block text-gray-500 font-bold text-xs uppercase mb-1 text-center">KQ =</label>
-                                <input type="number" id="ans-expr" placeholder="?" 
+                                <input type="tel" id="ans-expr" placeholder="?" 
                                     class="w-full text-center font-bold p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors">
                             </div>
                         </div>
+
+                        <!-- Difficulty Toggle -->
+                        <div class="flex items-center justify-end mt-4 mb-2">
+                            <label class="inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                <span class="ms-2 text-sm font-bold text-gray-600 peer-checked:text-red-600 transition-colors">
+                                    <i class="fas fa-skull-crossbones mr-1"></i>Chế độ khó
+                                </span>
+                            </label>
+                        </div>
                         
                         <!-- Buttons -->
-                        <div class="flex gap-3 mt-4">
+                        <div class="flex gap-3">
                             <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                                 <i class="fas fa-sync-alt"></i> Bài mới
                             </button>
@@ -152,13 +198,12 @@
                 </div>
 
                 <!-- Right Column: Step-by-step -->
-                <!-- FIX: Added fixed height (h-[550px]) to ensure internal scrolling works correctly -->
                 <div class="flex flex-col h-[500px] lg:h-[550px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-4 relative">
                     <!-- HEADER WITH BUTTON -->
                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 shrink-0">
                         <div class="flex items-center gap-2 flex-grow">
                             <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide whitespace-nowrap">
-                                <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>Hướng dẫn
+                                <i class="fas fa-file-alt text-blue-500 mr-1"></i>Trình bày bài thi
                             </h3>
                             <!-- Button -->
                             <button onclick="showNextStep()" id="btn-show-step" 
@@ -169,17 +214,17 @@
                         <span id="step-counter" class="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded ml-2">0/0</span>
                     </div>
 
-                    <!-- Fixed Rule Hint Area -->
+                    <!-- Fixed Rule Hint Area (Separated from Presentation) -->
                     <div id="rule-area" class="hidden mb-3 bg-yellow-50 text-yellow-900 text-sm p-3 rounded-lg border-l-4 border-yellow-400 shadow-sm transition-all duration-300 shrink-0">
                         <i class="fas fa-info-circle mr-2 text-yellow-600"></i>
                         <span id="rule-content" class="font-medium"></span>
                     </div>
                     
-                    <!-- Scrollable Steps -->
+                    <!-- Scrollable Steps (The "Exam Paper") -->
                     <div id="steps-container" class="flex-grow overflow-y-auto bg-white p-3 rounded-lg shadow-inner border border-gray-100 scroll-smooth">
                         <div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center">
-                            <i class="fas fa-chalkboard-teacher text-3xl mb-2 opacity-30"></i>
-                            <span>Bấm "Gợi ý tiếp" để xem hướng dẫn</span>
+                            <i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i>
+                            <span>Bấm "Gợi ý tiếp" để xem bài làm mẫu</span>
                         </div>
                     </div>
                 </div>
@@ -188,17 +233,29 @@
         </div>
     </div>
 
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
+
     <script>
         // --- Configuration & Utils ---
+        const state = {
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0
+        };
+
         let currentData = {
             ansX: 0,
             ansY: 0,
             ansExpr: 0,
             allSteps: []
         };
-        let score = 0;
         let isAnswered = false;
         let stepIndex = 0;
+        let usedHint = false;
 
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -207,13 +264,32 @@
         function fmt(num) {
             return num < 0 ? `(${num})` : `${num}`;
         }
+        
+        // Helper to find divisors for "Hard Mode 60%"
+        function getDivisors(n) {
+            if (n === 0) return [1, -1, 2, -2, 3, -3]; 
+            let divs = [];
+            let abs = Math.abs(n);
+            // We search divisors in a reasonable range [2, 10] for difficulty balance
+            for (let i = 2; i <= 10; i++) {
+                if (abs % i === 0) {
+                    divs.push(i);
+                    divs.push(-i);
+                }
+            }
+            return divs;
+        }
 
         // --- Core Logic ---
 
         function generateProblem() {
             const findX = generateFindVar('x');
             const findY = generateFindVar('y');
-            const expr = generateExpression(findX.answer, findY.answer);
+            
+            // Check difficulty mode
+            const isHard = document.getElementById('mode-hard').checked;
+            
+            const expr = generateExpression(findX.answer, findY.answer, isHard);
 
             return {
                 findX: findX,
@@ -272,49 +348,302 @@
             };
         }
 
-        function generateExpression(xVal, yVal) {
+        function generateExpression(xVal, yVal, isHard = false) {
             const names = ['A', 'B', 'C', 'H', 'K', 'M', 'N', 'P', 'Q'];
             const name = names[getRandomInt(0, names.length - 1)];
-            
-            let a = getRandomInt(-9, 9);
-            while(a === 0) a = getRandomInt(-9, 9);
-            let b = getRandomInt(-9, 9);
-            while(b === 0) b = getRandomInt(-9, 9);
-            let c = getRandomInt(-15, 15);
 
-            const term1 = `${a === 1 ? '' : (a === -1 ? '-' : a)}x`;
-            const term2 = `${b < 0 ? '-' : '+'} ${Math.abs(b) === 1 ? '' : Math.abs(b)}y`;
-            const term3 = c !== 0 ? `${c < 0 ? '-' : '+'} ${Math.abs(c)}` : '';
-            
-            const exprDisplay = `${term1} ${term2} ${term3}`;
-            const fullExprName = `${name} = ${exprDisplay}`;
+            if (isHard) {
+                // HARD MODE: 40% Super Complex, 60% Mixed Operations (Mult/Div)
+                const hardRand = Math.random();
+                
+                if (hardRand < 0.4) {
+                    // --- 40%: SUPER COMPLEX TYPES (Product, Parentheses, Division of Sum) ---
+                    const hardType = getRandomInt(1, 3);
+                    
+                    // Case 1: Product (x + a)(y + b)
+                    if (hardType === 1) {
+                        let a = getRandomInt(-10, 10);
+                        let b = getRandomInt(-10, 10);
+                        
+                        const term1 = `(x ${a < 0 ? '- ' + Math.abs(a) : '+ ' + a})`;
+                        const term2 = `(y ${b < 0 ? '- ' + Math.abs(b) : '+ ' + b})`;
+                        const fullExprName = `${name} = ${term1}.${term2}`;
+                        
+                        const val1 = xVal + a;
+                        const val2 = yVal + b;
+                        const total = val1 * val2;
 
-            const total = (a * xVal) + (b * yVal) + c;
+                        const subStep = `${name} = (${xVal} ${a < 0 ? '- ' + Math.abs(a) : '+ ' + a}).(${yVal} ${b < 0 ? '- ' + Math.abs(b) : '+ ' + b})`;
+                        const calcStep = `${name} = ${fmt(val1)} . ${fmt(val2)}`;
 
-            let sub1 = `${a}.(${xVal})`;
-            let sub2 = `${b < 0 ? '-' : '+'} ${Math.abs(b)}.(${yVal})`;
-            let sub3 = c !== 0 ? `${c < 0 ? '-' : '+'} ${Math.abs(c)}` : '';
+                        return {
+                            name: name,
+                            display: fullExprName,
+                            answer: total,
+                            rule: "Thực hiện phép tính trong ngoặc trước, ngoài ngoặc sau.",
+                            steps: [
+                                `Với x = ${xVal}, y = ${yVal}, biểu thức:`,
+                                fullExprName,
+                                subStep,
+                                calcStep,
+                                `${name} = ${total}`
+                            ]
+                        };
+                    }
+                    // Case 2: Parentheses & Multiplication k(x + y) + m
+                    else if (hardType === 2) {
+                        let k = getRandomInt(2, 5) * (Math.random() < 0.5 ? 1 : -1);
+                        let m = getRandomInt(-20, 20);
+                        let op = Math.random() < 0.5 ? '+' : '-';
+                        
+                        const termMain = `${k}.(x ${op} y)`;
+                        const termM = m !== 0 ? (m < 0 ? `- ${Math.abs(m)}` : `+ ${m}`) : '';
+                        
+                        const fullExprName = `${name} = ${termMain} ${termM}`;
+                        
+                        const innerVal = op === '+' ? (xVal + yVal) : (xVal - yVal);
+                        const prodVal = k * innerVal;
+                        const total = prodVal + m;
 
-            const subStep = `${name} = ${sub1} ${sub2} ${sub3}`;
-            const val1 = a * xVal;
-            const val2 = b * yVal;
-            const calcStep = `${name} = ${val1} ${val2 < 0 ? '- ' + Math.abs(val2) : '+ ' + val2} ${c !== 0 ? (c < 0 ? '- ' + Math.abs(c) : '+ ' + c) : ''}`;
+                        const subStep = `${name} = ${k}.(${xVal} ${op} ${fmt(yVal)}) ${termM}`;
+                        const calcStep1 = `${name} = ${k}.${fmt(innerVal)} ${termM}`;
+                        const calcStep2 = `${name} = ${fmt(prodVal)} ${termM}`;
 
-            const steps = [
-                `Với x = ${xVal}, y = ${yVal}, biểu thức:`,
-                fullExprName,
-                subStep,
-                calcStep,
-                `${name} = ${total}`
-            ];
+                        return {
+                            name: name,
+                            display: fullExprName,
+                            answer: total,
+                            rule: "Trong ngoặc trước, nhân chia trước, cộng trừ sau.",
+                            steps: [
+                                `Với x = ${xVal}, y = ${yVal}, biểu thức:`,
+                                fullExprName,
+                                subStep,
+                                calcStep1,
+                                calcStep2,
+                                `${name} = ${total}`
+                            ]
+                        };
+                    }
+                    // Case 3: Division (x + a) : k
+                    else {
+                        let k = getRandomInt(2, 5); 
+                        if (Math.random() < 0.3) k = -k;
+                        let remainder = xVal % k;
+                        let correction = (remainder === 0) ? 0 : (k - remainder);
+                        let a = correction + (getRandomInt(-2, 2) * k); 
+                        if (a === 0) a = k;
+                        let b = getRandomInt(-10, 10); 
 
-            return {
-                name: name,
-                display: fullExprName,
-                answer: total,
-                rule: "Thay giá trị x, y vào biểu thức. Giữ nguyên dấu, đặt số vào ngoặc.",
-                steps: steps
-            };
+                        const termDiv = `(x ${a < 0 ? '- ' + Math.abs(a) : '+ ' + a}) : ${k < 0 ? '('+k+')' : k}`;
+                        const termB = b !== 0 ? (b < 0 ? `- ${Math.abs(b)}` : `+ ${b}`) : '';
+                        
+                        const fullExprName = `${name} = ${termDiv} ${termB}`;
+                        
+                        const numerator = xVal + a;
+                        const divisionResult = numerator / k;
+                        const total = divisionResult + b;
+
+                        const subStep = `${name} = (${xVal} ${a < 0 ? '- ' + Math.abs(a) : '+ ' + a}) : ${k < 0 ? '('+k+')' : k} ${termB}`;
+                        const calcStep1 = `${name} = ${fmt(numerator)} : ${k < 0 ? '('+k+')' : k} ${termB}`;
+                        const calcStep2 = `${name} = ${fmt(divisionResult)} ${termB}`;
+
+                        return {
+                            name: name,
+                            display: fullExprName,
+                            answer: total,
+                            rule: "Thực hiện trong ngoặc trước, rồi đến phép chia, cuối cùng cộng/trừ.",
+                            steps: [
+                                `Với x = ${xVal}, y = ${yVal}, biểu thức:`,
+                                fullExprName,
+                                subStep,
+                                calcStep1,
+                                calcStep2,
+                                `${name} = ${total}`
+                            ]
+                        };
+                    }
+                } else {
+                    // --- 60%: MIXED OPERATIONS (Mult & Div) a(*/:)x +/- b(*/:)y +/- c ---
+                    // Generates terms like: x:2 - 3y + 5
+                    
+                    // 1. Term X: Multiply or Divide?
+                    let termX_type = Math.random() < 0.5 ? 'mul' : 'div';
+                    let valX = 0;
+                    let displayX = "";
+                    let subX = "";
+                    let a = 0;
+
+                    // Try division for X if possible
+                    if (termX_type === 'div') {
+                        let divs = getDivisors(xVal);
+                        if (divs.length > 0) {
+                            a = divs[getRandomInt(0, divs.length-1)];
+                            valX = xVal / a;
+                            displayX = `x : ${a < 0 ? '('+a+')' : a}`;
+                            subX = `${fmt(xVal)} : ${a < 0 ? '('+a+')' : a}`;
+                        } else {
+                            termX_type = 'mul'; // Fallback
+                        }
+                    }
+                    if (termX_type === 'mul') {
+                        a = getRandomInt(-9, 9);
+                        if(a===0) a=1;
+                        valX = a * xVal;
+                        // Display Logic for ax
+                        if (a === 1) displayX = "x";
+                        else if (a === -1) displayX = "-x";
+                        else displayX = `${a}x`;
+                        
+                        // Sub Logic
+                        if (Math.abs(a) === 1) subX = (a === -1 ? '-' : '') + `(${xVal})`;
+                        else subX = `${a}.(${xVal})`;
+                    }
+
+                    // 2. Term Y: Multiply or Divide?
+                    let termY_type = Math.random() < 0.5 ? 'mul' : 'div';
+                    let valY = 0;
+                    let displayY = ""; // This will be appended, need to handle sign
+                    let subY = "";
+                    let b = 0;
+
+                    if (termY_type === 'div') {
+                        let divs = getDivisors(yVal);
+                        if (divs.length > 0) {
+                            b = divs[getRandomInt(0, divs.length-1)];
+                            valY = yVal / b;
+                            // Sign handling is tricky. We'll add the value, display handles the operator.
+                            // If b is negative, x : (-2).
+                            // Let's treat the expression as TermX + TermY + C
+                            // displayY should be absolute part prefixed by sign
+                        } else {
+                            termY_type = 'mul';
+                        }
+                    }
+                    if (termY_type === 'mul') {
+                        b = getRandomInt(-9, 9);
+                        if(b===0) b=1;
+                        valY = b * yVal;
+                    }
+
+                    // 3. Constant C
+                    let c = getRandomInt(-15, 15);
+
+                    // --- Assembly ---
+                    let total = valX + valY + c;
+                    
+                    // Construct Full Strings
+                    // Term Y part for display
+                    let opY = valY >= 0 ? '+' : '-'; // This is sign of the VALUE, not the op. Wait.
+                    // Better approach: Construct term string based on B, then attach.
+                    
+                    let termYStr = "";
+                    if (termY_type === 'div') {
+                         // e.g. + y:2 or - y:2?
+                         // Let's make it simpler: always + y : b, and b carries sign?
+                         // Or + y : abs(b) or - y : abs(b).
+                         // Let's decide sign of operation randomly
+                         let signOp = Math.random() < 0.5 ? 1 : -1;
+                         b = Math.abs(b) * signOp; // b now has sign
+                         valY = yVal / b; // Re-calc valY
+                         
+                         let signChar = b > 0 ? '+' : '-'; // operator
+                         termYStr = `${signChar} y:${Math.abs(b)}`;
+                         
+                         // Re-calc sub string
+                         subY = `${signChar} ${fmt(yVal)}:${Math.abs(b)}`;
+                    } else {
+                        // Mul
+                        // b*y. 
+                        let signChar = b < 0 ? '-' : '+';
+                        let absB = Math.abs(b);
+                        if (absB === 1) termYStr = `${signChar} y`;
+                        else termYStr = `${signChar} ${absB}y`;
+
+                        if (absB === 1) subY = `${signChar} (${yVal})`;
+                        else subY = `${signChar} ${absB}.(${yVal})`;
+                    }
+
+                    // Term C part
+                    let termCStr = c !== 0 ? (c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`) : '';
+
+                    const fullExprName = `${name} = ${displayX} ${termYStr} ${termCStr}`;
+                    const subStep = `${name} = ${subX} ${subY} ${termCStr}`;
+                    
+                    // Calc step: Show results of mult/div
+                    // valX result, valY result, c
+                    // e.g. = 10 - 5 + 2
+                    let calcYStr = valY < 0 ? `- ${Math.abs(valY)}` : `+ ${valY}`;
+                    // If valY came from division, it might be -5.
+                    
+                    const calcStep = `${name} = ${valX} ${valY < 0 ? '- ' + Math.abs(valY) : '+ ' + valY} ${c !== 0 ? (c < 0 ? '- ' + Math.abs(c) : '+ ' + c) : ''}`;
+
+                    return {
+                        name: name,
+                        display: fullExprName,
+                        answer: total,
+                        rule: "Nhân chia trước, cộng trừ sau. Chú ý dấu của số hạng.",
+                        steps: [
+                            `Với x = ${xVal}, y = ${yVal}, biểu thức:`,
+                            fullExprName,
+                            subStep,
+                            calcStep,
+                            `${name} = ${total}`
+                        ]
+                    };
+                }
+
+            } else {
+                // NORMAL MODE (Original ax + by + c - Pure Multiplication)
+                
+                let a = getRandomInt(-9, 9);
+                while(a === 0) a = getRandomInt(-9, 9);
+                let b = getRandomInt(-9, 9);
+                while(b === 0) b = getRandomInt(-9, 9);
+                let c = getRandomInt(-15, 15);
+    
+                const term1 = `${a === 1 ? '' : (a === -1 ? '-' : a)}x`;
+                const term2 = `${b < 0 ? '-' : '+'} ${Math.abs(b) === 1 ? '' : Math.abs(b)}y`;
+                const term3 = c !== 0 ? `${c < 0 ? '-' : '+'} ${Math.abs(c)}` : '';
+                
+                const exprDisplay = `${term1} ${term2} ${term3}`;
+                const fullExprName = `${name} = ${exprDisplay}`;
+    
+                const total = (a * xVal) + (b * yVal) + c;
+    
+                let sub1 = "";
+                if (Math.abs(a) === 1) sub1 = (a === -1 ? '-' : '') + `(${xVal})`;
+                else sub1 = `${a}.(${xVal})`;
+    
+                let sub2 = "";
+                let absB = Math.abs(b);
+                let signB = b < 0 ? '-' : '+';
+                if (absB === 1) sub2 = `${signB} (${yVal})`;
+                else sub2 = `${signB} ${absB}.(${yVal})`;
+    
+                let sub3 = c !== 0 ? `${c < 0 ? '-' : '+'} ${Math.abs(c)}` : '';
+    
+                const subStep = `${name} = ${sub1} ${sub2} ${sub3}`;
+                
+                const val1 = a * xVal;
+                const val2 = b * yVal;
+                const calcStep = `${name} = ${val1} ${val2 < 0 ? '- ' + Math.abs(val2) : '+ ' + val2} ${c !== 0 ? (c < 0 ? '- ' + Math.abs(c) : '+ ' + c) : ''}`;
+    
+                const steps = [
+                    `Với x = ${xVal}, y = ${yVal}, biểu thức:`,
+                    fullExprName,
+                    subStep,
+                    calcStep,
+                    `${name} = ${total}`
+                ];
+    
+                return {
+                    name: name,
+                    display: fullExprName,
+                    answer: total,
+                    rule: "Thay giá trị x, y vào biểu thức. Giữ nguyên dấu, đặt số vào ngoặc.",
+                    steps: steps
+                };
+            }
         }
 
         function buildSteps(xData, yData, exprData) {
@@ -332,7 +661,28 @@
 
         // --- Main UI Functions ---
 
+        function renderStats() {
+            const streakEl = document.getElementById('stat-streak');
+            streakEl.textContent = state.streak;
+            if (state.streak > 2) {
+                streakEl.innerHTML = `<i class="fas fa-fire"></i> ${state.streak}`;
+                streakEl.classList.add('streak-fire');
+            } else {
+                streakEl.classList.remove('streak-fire');
+            }
+
+            document.getElementById('stat-correct').textContent = state.correct;
+            document.getElementById('stat-wrong').textContent = state.wrong;
+            document.getElementById('stat-skipped').textContent = state.skipped;
+        }
+
         function nextQuestion() {
+            if (!isAnswered && document.getElementById('q-x-text').innerText !== 'Loading...') {
+                state.skipped++;
+                state.streak = 0;
+                renderStats();
+            }
+
             document.getElementById('feedback').classList.add('hidden');
             document.getElementById('rule-area').classList.add('hidden');
             
@@ -345,9 +695,10 @@
             
             isAnswered = false;
             stepIndex = 0;
+            usedHint = false; // Reset hint usage
             
             const stepsContainer = document.getElementById('steps-container');
-            stepsContainer.innerHTML = `<div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center"><i class="fas fa-chalkboard-teacher text-3xl mb-2 opacity-30"></i><span>Bấm "Gợi ý tiếp" để xem hướng dẫn</span></div>`;
+            stepsContainer.innerHTML = `<div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center"><i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i><span>Bấm "Gợi ý tiếp" để xem bài làm mẫu</span></div>`;
             
             const btnStep = document.getElementById('btn-show-step');
             btnStep.innerHTML = '<span>Gợi ý tiếp</span> <i class="fas fa-arrow-right text-[10px]"></i>';
@@ -370,6 +721,8 @@
         }
 
         function showNextStep() {
+            usedHint = true; // Mark hint as used
+            
             const container = document.getElementById('steps-container');
             const ruleArea = document.getElementById('rule-area');
             const ruleContent = document.getElementById('rule-content');
@@ -378,7 +731,7 @@
 
             if (stepIndex < currentData.allSteps.length) {
                 const item = currentData.allSteps[stepIndex];
-                let newElement = null; // To track what we added
+                let newElement = null; 
                 
                 if (item.type === 'header') {
                     const headerDiv = document.createElement('div');
@@ -387,6 +740,7 @@
                     container.appendChild(headerDiv);
                     newElement = headerDiv;
 
+                    // Show Hint in the Rule Area
                     if (item.rule) {
                         ruleContent.textContent = item.rule;
                         ruleArea.classList.remove('hidden');
@@ -409,9 +763,11 @@
                     newElement = stepDiv;
                 }
 
-                // Auto Scroll to the new element
                 if (newElement) {
-                    newElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    container.scrollTo({
+                        top: container.scrollHeight,
+                        behavior: 'smooth'
+                    });
                 }
 
                 stepIndex++;
@@ -463,13 +819,20 @@
             }
 
             const feedback = document.getElementById('feedback');
-            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800');
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800', 'bg-blue-100', 'text-blue-800');
 
             if (correctCount === 3) {
-                score += 10;
-                document.getElementById('score').textContent = score;
-                feedback.innerHTML = '<i class="fas fa-crown"></i> Xuất sắc! Bạn đúng cả 3 câu.';
-                feedback.classList.add('bg-green-100', 'text-green-800');
+                if (!usedHint) {
+                    state.correct++;
+                    state.streak++;
+                    feedback.innerHTML = '<i class="fas fa-crown"></i> Xuất sắc! Bạn đúng cả 3 câu.';
+                    feedback.classList.add('bg-green-100', 'text-green-800');
+                } else {
+                    feedback.innerHTML = '<i class="fas fa-check"></i> Chính xác! (Không tính điểm vì đã xem gợi ý)';
+                    feedback.classList.add('bg-blue-100', 'text-blue-800');
+                }
+                
+                renderStats();
                 
                 const reveal = setInterval(() => {
                     if(stepIndex < currentData.allSteps.length) showNextStep();
@@ -477,6 +840,10 @@
                 }, 100);
                 isAnswered = true;
             } else {
+                state.wrong++;
+                state.streak = 0;
+                renderStats();
+
                 feedback.textContent = `Bạn đúng ${correctCount}/3 câu. Kiểm tra lại nhé!`;
                 feedback.classList.add(correctCount === 0 ? 'bg-red-100' : 'bg-yellow-100', correctCount === 0 ? 'text-red-800' : 'text-yellow-800');
             }

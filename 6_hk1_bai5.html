@@ -3,183 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luyện Thi Toán 6 - Tìm X (Quy tắc Tìm Thành Phần)</title>
+    <title>Ôn tập Toán 6 HK1 - Bài 5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #fdf4f0; /* Warm tint */
-            background-image: radial-gradient(#fed7aa 1px, transparent 1px);
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
             background-size: 20px 20px;
         }
         .chalkboard {
-            background-color: #262626; /* Neutral Dark */
+            background-color: #2c3e50;
             color: #ecf0f1;
-            border: 8px solid #78350f; /* Wood color */
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 8px solid #854d0e;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
+            min-height: 280px;
         }
-        .btn-mode {
-            transition: all 0.2s;
-            border-bottom: 4px solid transparent;
-        }
-        .btn-mode:active {
-            transform: translateY(2px);
-            border-bottom-width: 0;
-        }
-        .mode-active {
-            background-color: #ea580c !important; /* orange-600 */
-            color: white !important;
-            border-bottom: 4px solid #9a3412 !important; /* orange-800 */
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        .chalkboard::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMTAgMTBRNDAgNDAgMTAgNzAiIHN0cm9rZT0id2hpdGUiIG9wYWNpdHk9IjAuMDUiIGZpbGw9Im5vbmUiLz4KPC9zdmc+');
+            opacity: 0.1;
+            pointer-events: none;
         }
         .step-item {
             opacity: 0;
             transform: translateY(-10px);
-            animation: slideDown 0.4s forwards;
+            animation: slideDown 0.3s forwards;
         }
         @keyframes slideDown {
             to { opacity: 1; transform: translateY(0); }
         }
         #steps-container::-webkit-scrollbar { width: 8px; }
         #steps-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        #steps-container::-webkit-scrollbar-thumb { background: #fdba74; border-radius: 4px; }
-        #steps-container::-webkit-scrollbar-thumb:hover { background: #fb923c; }
+        #steps-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        #steps-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .btn-mode {
+            transition: all 0.2s;
+        }
+        .btn-mode.active {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #3730a3;
+        }
+        .btn-mode:not(.active):hover {
+            background-color: #e0e7ff;
+        }
+        
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-2 md:p-6">
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
 
-    <div class="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-orange-200">
+    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-indigo-200">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-orange-600 to-red-500 p-4 md:p-6 text-center relative shadow-lg">
-            <h1 class="text-2xl md:text-4xl font-extrabold text-white uppercase tracking-wider drop-shadow-md">
-                <i class="fas fa-calculator mr-3"></i>Luyện Thi Toán 6 - CHINH PHỤC BÀI 5
+        <div class="bg-indigo-600 p-4 text-center relative shadow-lg">
+            <h1 class="text-xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
+                <i class="fas fa-shapes mr-2"></i>Ôn tập Chinh Phục Toán 6 HK1 - Bài 5
             </h1>
-            <p class="text-orange-50 mt-2 text-sm md:text-base font-semibold">TÌM SỐ NGUYÊN X Dạng Ước Bội VÀ Dạng TÌM X 2-3 BƯỚC - daytoanthayhoang.github.io</p>
-            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white font-bold border border-white/30 shadow-sm">
-                Điểm: <span id="score" class="text-yellow-300 text-xl">0</span>
-            </div>
+            <p class="text-indigo-100 text-sm md:text-base font-medium mt-1">Chủ đề: Quan hệ chia hết & Tìm x nâng cao</p>
         </div>
 
-        <div class="p-4 md:p-6 space-y-6">
+        <div class="p-4 md:p-6 space-y-4">
             
-            <!-- Mode Selection -->
-            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 shadow-inner">
-                <label class="block text-gray-700 font-bold mb-3 text-sm uppercase tracking-wide flex items-center">
-                    <i class="fas fa-shapes text-orange-600 mr-2"></i>Chọn dạng bài:
-                </label>
-                
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="setMode('exam_mix')" id="btn-exam_mix" class="btn-mode flex-1 min-w-[140px] bg-red-100 border border-red-300 text-red-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-red-200">
-                        <i class="fas fa-random mr-1"></i> Tổng hợp Đề
-                    </button>
-                    
-                    <button onclick="setMode('divisibility')" id="btn-divisibility" class="btn-mode flex-1 min-w-[140px] bg-purple-100 border border-purple-300 text-purple-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-purple-200">
-                        <i class="fas fa-divide mr-1"></i> Dạng Ước
-                    </button>
-
-                    <button onclick="setMode('basic')" id="btn-basic" class="btn-mode flex-1 min-w-[120px] bg-blue-100 border border-blue-300 text-blue-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-blue-200">
-                        Cơ bản (1 bước)
-                    </button>
-                    
-                    <button onclick="setMode('advanced_2')" id="btn-advanced_2" class="btn-mode flex-1 min-w-[120px] bg-green-100 border border-green-300 text-green-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-green-200">
-                        2 Bước
-                    </button>
-
-                    <button onclick="setMode('advanced_3')" id="btn-advanced_3" class="btn-mode flex-1 min-w-[120px] bg-teal-100 border border-teal-300 text-teal-800 py-3 px-4 rounded-xl font-bold text-sm hover:bg-teal-200">
-                        3 Bước
-                    </button>
+            <!-- STATS BOARD -->
+            <div class="bg-white rounded-xl shadow-md p-3 grid grid-cols-4 gap-2 text-center select-none border border-gray-100" id="stats-container">
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span id="stat-streak" class="text-2xl md:text-3xl font-extrabold text-indigo-900">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span id="stat-correct" class="text-xl md:text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span id="stat-wrong" class="text-xl md:text-2xl font-bold text-red-500">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span id="stat-skipped" class="text-xl md:text-2xl font-bold text-gray-400">0</span>
                 </div>
             </div>
-
-            <!-- Question Area -->
+            
+            <!-- Main Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Left: Question Board -->
-                <div class="flex flex-col h-full">
-                    <div class="chalkboard p-6 md:p-8 min-h-[300px]">
-                        <div class="absolute top-4 left-4 text-gray-400 text-xs font-mono border border-gray-600 px-2 py-1 rounded">
-                            <i class="fas fa-tag mr-1"></i><span id="question-type-label">...</span>
+                
+                <!-- Left Column -->
+                <div class="flex flex-col gap-4">
+                    
+                    <!-- Settings Area -->
+                    <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex flex-col gap-2">
+                        <label class="block text-indigo-800 font-bold text-xs uppercase text-center"><i class="fas fa-sliders-h mr-1"></i> Chọn dạng bài</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="changeMode('mix')" id="btn-mode-mix" class="btn-mode active text-xs md:text-sm font-bold py-2 px-1 rounded border border-indigo-200 text-indigo-700 bg-white">Tổng hợp</button>
+                            <button onclick="changeMode('div')" id="btn-mode-div" class="btn-mode text-xs md:text-sm font-bold py-2 px-1 rounded border border-indigo-200 text-indigo-700 bg-white">Dạng Ước</button>
+                            <button onclick="changeMode('calc')" id="btn-mode-calc" class="btn-mode text-xs md:text-sm font-bold py-2 px-1 rounded border border-indigo-200 text-indigo-700 bg-white">Tìm x (2-3 bước)</button>
                         </div>
                         
-                        <!-- Using innerHTML to render HTML content (fractions, special chars) -->
-                        <div id="question-text" class="text-3xl md:text-4xl font-bold tracking-widest mb-6 font-mono leading-relaxed text-center">
-                            Loading...
+                        <!-- Hard Mode Toggle -->
+                        <div class="flex items-center justify-end mt-1 pt-2 border-t border-indigo-200">
+                            <label class="inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
+                                <div class="relative w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                <span class="ms-2 text-sm font-bold text-gray-600 peer-checked:text-red-600 transition-colors flex items-center">
+                                    <i class="fas fa-skull-crossbones mr-1"></i> Chế độ Khó
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Chalkboard -->
+                    <div class="chalkboard p-6 relative">
+                        <div class="absolute top-3 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs font-mono uppercase tracking-widest opacity-60 bg-black/20 px-2 rounded">
+                            Đề bài
                         </div>
                         
-                        <div class="text-gray-400 text-sm mt-auto border-t border-gray-600 pt-4 w-full text-center">
-                            <i class="fas fa-info-circle mr-1"></i> <span id="input-hint">Kết quả là số nguyên</span>
+                        <div class="w-full text-center">
+                             <div class="text-blue-200 text-lg font-sans mb-4"><i class="fas fa-question-circle mr-2"></i>Tìm số nguyên x, biết:</div>
+                             <div id="question-display" class="font-mono text-3xl md:text-4xl text-white font-bold tracking-wide leading-relaxed">
+                                 Loading...
+                             </div>
                         </div>
+                        
+                        <div id="div-hint-text" class="text-yellow-400/80 text-sm mt-6 text-center italic hidden">
+                            (Gợi ý: Nhập các giá trị tìm được cách nhau bởi dấu chấm phẩy ";")
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-inner">
+                        <div class="mb-4">
+                            <label class="block text-gray-500 font-bold text-xs uppercase mb-1 ml-1">Kết quả của bạn:</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">x &in; {</span>
+                                <input type="text" id="ans-input" placeholder="Ví dụ: -2; 5" autocomplete="off"
+                                    class="w-full pl-12 pr-12 py-3 text-lg font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors text-gray-700"
+                                    onkeydown="if(event.key === 'Enter') checkAnswer()">
+                                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">}</span>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex gap-3">
+                            <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-sync-alt"></i> Bài khác
+                            </button>
+                            <button onclick="checkAnswer()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i> Kiểm tra
+                            </button>
+                        </div>
+
+                        <!-- Feedback Area -->
+                        <div id="feedback" class="hidden mt-3 text-center p-3 rounded-lg text-sm font-bold border-2"></div>
                     </div>
                 </div>
 
-                <!-- Right: Step-by-step & Hint Area -->
-                <div class="bg-white rounded-2xl border-2 border-dashed border-orange-300 p-5 flex flex-col h-full shadow-sm">
-                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-                        <h3 class="font-bold text-gray-700 flex items-center">
-                            <span class="bg-orange-100 text-orange-700 p-1.5 rounded-lg mr-2"><i class="fas fa-list-ol"></i></span>
-                            Hướng dẫn giải
-                        </h3>
-                        <button onclick="showNextStep()" id="btn-show-step" class="bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center">
-                            <i class="fas fa-lightbulb mr-2"></i> Gợi ý
-                        </button>
+                <!-- Right Column: Step-by-step -->
+                <div class="flex flex-col h-[500px] lg:h-[600px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-4 relative">
+                    <!-- HEADER WITH BUTTON -->
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 shrink-0">
+                        <div class="flex items-center gap-2 flex-grow">
+                            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide whitespace-nowrap">
+                                <i class="fas fa-file-alt text-indigo-500 mr-1"></i>Trình bày bài thi
+                            </h3>
+                            <button onclick="showNextStep()" id="btn-show-step" 
+                                class="bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed ml-2">
+                                <i class="fas fa-lightbulb text-yellow-300"></i> <span>Gợi ý</span>
+                            </button>
+                        </div>
+                        <span id="step-counter" class="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded ml-2">0/0</span>
                     </div>
-                    
-                    <!-- Rule Hint Box -->
-                    <div id="rule-hint" class="hidden mb-3 text-sm bg-yellow-50 text-yellow-800 p-3 rounded-xl border border-yellow-200 flex items-start">
-                        <i class="fas fa-star text-yellow-500 mt-1 mr-2 flex-shrink-0"></i>
+
+                    <!-- Fixed Rule Hint Area -->
+                    <div id="rule-area" class="hidden mb-3 bg-yellow-50 text-yellow-900 text-sm p-3 rounded-lg border-l-4 border-yellow-400 shadow-sm transition-all duration-300 shrink-0">
+                        <i class="fas fa-info-circle mr-2 text-yellow-600"></i>
                         <span id="rule-content" class="font-medium"></span>
                     </div>
-
-                    <!-- Steps Container -->
-                    <div id="steps-container" class="flex-grow space-y-3 overflow-y-auto max-h-[250px] text-gray-800 font-mono text-base pr-2">
-                        <!-- Steps will appear here -->
+                    
+                    <!-- Scrollable Steps -->
+                    <div id="steps-container" class="flex-grow overflow-y-auto bg-white p-3 rounded-lg shadow-inner border border-gray-100 scroll-smooth">
+                        <div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center select-none">
+                            <i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i>
+                            <span>Bấm "Gợi ý" để xem từng bước giải</span>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Controls -->
-            <div class="flex flex-col md:flex-row gap-4 justify-center items-center pt-2">
-                <div class="relative w-full md:w-1/3">
-                    <input type="text" id="user-answer" placeholder="Nhập x..." autocomplete="off"
-                        class="w-full text-center text-2xl font-bold p-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-100 focus:outline-none transition-all placeholder-gray-300"
-                        onkeydown="if(event.key === 'Enter') checkAnswer()">
-                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs hidden md:block">
-                        ENTER
-                    </div>
-                </div>
-                
-                <button onclick="checkAnswer()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all shadow-lg transform hover:-translate-y-1 active:translate-y-0 flex items-center justify-center min-w-[140px]">
-                    <i class="fas fa-check mr-2"></i> Kiểm tra
-                </button>
-                
-                <button onclick="nextQuestion()" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl text-lg transition-colors flex items-center justify-center">
-                    <i class="fas fa-forward mr-2"></i> Câu khác
-                </button>
-            </div>
-
-            <!-- Result Feedback -->
-            <div id="feedback" class="hidden transform transition-all duration-300 ease-out origin-top"></div>
 
         </div>
     </div>
 
-    <script>
-        // --- State ---
-        let currentQuestion = {};
-        let score = 0;
-        let isAnswered = false;
-        let currentMode = 'exam_mix';
-        let stepIndex = 0;
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
 
-        // --- Utility ---
+    <script>
+        // --- State Management ---
+        const state = {
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0
+        };
+
+        let currentMode = 'mix'; // mix, div, calc
+        let currentProblem = null;
+        let isAnswered = false;
+        let stepIndex = 0;
+        let usedHint = false;
+
+        // --- Utils ---
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
@@ -187,485 +238,519 @@
         function fmt(num) {
             return num < 0 ? `(${num})` : `${num}`;
         }
+
+        // Hàm sinh hệ số x theo tỉ lệ yêu cầu
+        function getCoefX() {
+            const r = Math.random();
+            if (r < 0.25) return 1;          // 25% hệ số 1
+            if (r < 0.50) return -1;         // 25% hệ số -1
+            if (r < 0.80) return -1 * getRandomInt(2, 5); // 30% hệ số âm
+            return getRandomInt(2, 5);       // 20% hệ số dương
+        }
         
-        function fmtDisplayOp(op, num) {
-            // Helper to show "+ -5" as "- 5"
-            if (op === '+') return num < 0 ? `- ${Math.abs(num)}` : `+ ${num}`;
-            if (op === '-') return num < 0 ? `+ ${Math.abs(num)}` : `- ${num}`;
-            return '';
+        // Helper hiển thị số hạng x: k=1 -> 'x', k=-1 -> '-x', k=2 -> '2x'
+        function fmtTermX(k) {
+            if (k === 1) return 'x';
+            if (k === -1) return '-x';
+            return `${k}x`;
         }
 
-        // --- Logic: 1. Divisibility (Dạng Ước) ---
-        // Support: x+b, x-b, b-x, b+x
-        function generateDivisibility() {
-            const targets = [-10, -4, -5, -6, -9, 5, 7, -25, -16, -2, 10, 12, -12];
-            const a = targets[getRandomInt(0, targets.length - 1)];
-            const b = getRandomInt(1, 9); // Keep b positive for easier reading in templates like b-x
-            
-            // Types: 0: x+b, 1: x-b, 2: b-x
-            const type = getRandomInt(0, 2); 
-            
-            let expressionDisplay = "";
-            let logicText = "";
-            let answers = [];
-            let tableRows = "";
-            
-            // Helper to get divisors
-            let divisors = [];
-            let absA = Math.abs(a);
-            for(let i=1; i<=absA; i++) {
-                if(absA % i === 0) { divisors.push(i); divisors.push(-i); }
+        function getDivisors(n) {
+            n = Math.abs(n);
+            let divs = [];
+            for (let i = 1; i <= n; i++) {
+                if (n % i === 0) {
+                    divs.push(i);
+                    divs.push(-i);
+                }
             }
-            divisors.sort((u,v) => u - v);
-
-            if (type === 0) { 
-                // x + b
-                expressionDisplay = `x + ${b}`;
-                answers = divisors.map(d => d - b);
-                logicText = `x + ${b} = Ư(${a})`;
-                tableRows = divisors.map((d, i) => `x + ${b} = ${d} &rArr; x = ${answers[i]}`).join('<br>');
-            } else if (type === 1) { 
-                // x - b
-                expressionDisplay = `x - ${b}`;
-                answers = divisors.map(d => d + b);
-                logicText = `x - ${b} = Ư(${a})`;
-                tableRows = divisors.map((d, i) => `x - ${b} = ${d} &rArr; x = ${answers[i]}`).join('<br>');
-            } else { 
-                // b - x
-                expressionDisplay = `${b} - x`;
-                // b - x = d => x = b - d
-                answers = divisors.map(d => b - d);
-                logicText = `${b} - x = Ư(${a})`;
-                tableRows = divisors.map((d, i) => `${b} - x = ${d} &rArr; x = ${answers[i]}`).join('<br>');
-            }
-
-            return {
-                label: "Dạng Ước",
-                display: `<div class="text-3xl">${a} <span class="mx-2">⋮</span> (${expressionDisplay})</div>`,
-                answer: answers.sort((x, y) => x - y),
-                hintInput: "Nhập các giá trị x, cách nhau bởi dấu phẩy",
-                hintRule: `Nếu a chia hết cho B thì B là Ước của a.`,
-                steps: [
-                    `Vì ${a} <span class="mx-1">⋮</span> (${expressionDisplay}) nên (${expressionDisplay}) &in; Ư(${a})`,
-                    `Tìm các ước của ${a}:<br>Ư(${a}) = { ${divisors.join('; ')} }`,
-                    `Ta có bảng giá trị:<br><div class="pl-4 border-l-2 border-gray-300 mt-1 text-sm bg-gray-50 p-2 rounded">${tableRows}</div>`,
-                    `Vậy x &in; { ${answers.join('; ')} }`
-                ]
-            };
+            return divs.sort((a,b) => a - b);
         }
 
-        // --- Logic: 2. Basic Find X (Using Component Rules) ---
-        // Rules: Số hạng, Số bị trừ (SBT), Số trừ (ST), Thừa số, Số bị chia (SBC), Số chia (SC)
-        
-        const basicGenerators = {
-            add: () => { 
-                const x = getRandomInt(-20, 20);
-                const a = getRandomInt(-20, 20);
-                const b = x + a;
-                // Display: x + a = b
-                return {
-                    display: `x ${fmtDisplayOp('+', a)} = ${b}`,
-                    answer: [x],
-                    hintRule: "Muốn tìm Số hạng chưa biết, ta lấy Tổng trừ đi Số hạng đã biết.",
-                    steps: [`x = ${b} - ${fmt(a)}`, `x = ${x}`]
-                };
-            },
-            sub_x: () => { 
-                const x = getRandomInt(-20, 20);
-                const a = getRandomInt(1, 20); // Keep 'a' positive for standard "x - 5" look
-                const b = x - a;
-                // Display: x - a = b
-                return {
-                    display: `x - ${a} = ${b}`,
-                    answer: [x],
-                    hintRule: "Muốn tìm Số Bị Trừ, ta lấy Hiệu cộng với Số Trừ.",
-                    steps: [`x = ${b} + ${a}`, `x = ${x}`]
-                };
-            },
-            sub_a: () => { 
-                const x = getRandomInt(-20, 20);
-                const a = getRandomInt(-20, 20);
-                const b = a - x;
-                // Display: a - x = b
-                return {
-                    display: `${a} - x = ${b}`,
-                    answer: [x],
-                    hintRule: "Muốn tìm Số Trừ, ta lấy Số Bị Trừ trừ đi Hiệu.",
-                    steps: [`x = ${a} - ${fmt(b)}`, `x = ${x}`]
-                };
-            },
-            mul: () => { 
-                const x = getRandomInt(-15, 15);
-                let a = getRandomInt(-10, 10);
-                while(a === 0 || a === 1) a = getRandomInt(-10, 10);
-                const b = x * a;
-                // Display: x . a = b (or a.x = b)
-                // Randomize position of x
-                if (Math.random() > 0.5) {
-                    return {
-                        display: `x . ${fmt(a)} = ${b}`,
-                        answer: [x],
-                        hintRule: "Muốn tìm Thừa Số chưa biết, ta lấy Tích chia cho Thừa Số đã biết.",
-                        steps: [`x = ${b} : ${fmt(a)}`, `x = ${x}`]
-                    };
-                } else {
-                     return {
-                        display: `${a} . x = ${b}`, // Common notation: 5x = 10
-                        answer: [x],
-                        hintRule: "Muốn tìm Thừa Số chưa biết, ta lấy Tích chia cho Thừa Số đã biết.",
-                        steps: [`x = ${b} : ${fmt(a)}`, `x = ${x}`]
-                    };
-                }
-            },
-            div_x: () => { 
-                const a = getRandomInt(-10, 10) || 2; 
-                const b = getRandomInt(-15, 15);
-                const x = a * b;
-                return {
-                    display: `x : ${fmt(a)} = ${b}`,
-                    answer: [x],
-                    hintRule: "Muốn tìm Số Bị Chia, ta lấy Thương nhân với Số Chia.",
-                    steps: [`x = ${b} . ${fmt(a)}`, `x = ${x}`]
-                };
-            },
-            div_a: () => { 
-                const x = getRandomInt(-10, 10) || 2; 
-                const b = getRandomInt(-15, 15) || 2; 
-                if (x === 0) x = 2; // Prevent div by zero
-                const a = x * b;
-                return {
-                    display: `${a} : x = ${b}`,
-                    answer: [x],
-                    hintRule: "Muốn tìm Số Chia, ta lấy Số Bị Chia chia cho Thương.",
-                    steps: [`x = ${a} : ${fmt(b)}`, `x = ${x}`]
-                };
-            }
-        };
-
-        // --- Logic: 3. Advanced 2 Steps (From user code) ---
-        function generateAdvanced2() {
-            const types = ['ax_plus_b', 'a_mul_x_plus_b', 'x_plus_b_div_a'];
-            const type = types[getRandomInt(0, types.length - 1)];
-            const x = getRandomInt(-20, 20);
-
-            if (type === 'ax_plus_b') {
-                // a.x + b = c  (Finding Component First)
-                let a = getRandomInt(-9, 9) || 2;
-                let b = getRandomInt(-20, 20);
-                let ax = a * x;
-                let c = ax + b;
-                
-                // Determine operator for display
-                let op = b >= 0 ? '+' : '-';
-                let absB = Math.abs(b);
-                let display = `${a}x ${op} ${absB} = ${c}`;
-                
-                // Step 1: Find ax (Unknown term)
-                let step1, rule;
-                if (op === '+') {
-                    // ax + b = c -> ax = c - b
-                    rule = "Bước 1: Tìm số hạng chứa x (ax). Bước 2: Tìm x (Thừa số).";
-                    step1 = `${a}x = ${c} - ${absB}`;
-                } else {
-                    // ax - b = c -> ax = c + b
-                    rule = "Bước 1: Tìm Số Bị Trừ chứa x (ax). Bước 2: Tìm x.";
-                    step1 = `${a}x = ${c} + ${absB}`;
-                }
-
-                return {
-                    label: "Tìm X 2 Bước",
-                    display: display,
-                    answer: [x],
-                    hintRule: rule,
-                    steps: [
-                        step1,
-                        `${a}x = ${ax}`,
-                        `x = ${ax} : ${a}`,
-                        `x = ${x}`
-                    ]
-                };
-            } else if (type === 'a_mul_x_plus_b') {
-                // a.(x + b) = c (Finding Factor First)
-                let a = getRandomInt(-9, 9) || 2;
-                let b = getRandomInt(-15, 15);
-                let x_plus_b = x + b;
-                let c = a * x_plus_b;
-                
-                let op = b >= 0 ? '+' : '-';
-                let absB = Math.abs(b);
-                
-                return {
-                    label: "Tìm X 2 Bước",
-                    display: `${a} . (x ${op} ${absB}) = ${c}`,
-                    answer: [x],
-                    hintRule: "Bước 1: Tìm thừa số chứa ngoặc (x " + op + " " + absB + ").",
-                    steps: [
-                        `x ${op} ${absB} = ${c} : ${fmt(a)}`,
-                        `x ${op} ${absB} = ${x_plus_b}`,
-                        // Step 2: Depends on op
-                        (op === '+' ? `x = ${x_plus_b} - ${absB}` : `x = ${x_plus_b} + ${absB}`),
-                        `x = ${x}`
-                    ]
-                };
+        // --- Logic: Quan hệ chia hết (Bài 5a) ---
+        function generateDivisibility(forceExam = true) {
+            const examNumbers = [5, -10, 7, -5, -4, -9, 9, -6, -2, -12, -25, -16];
+            let target;
+            if (forceExam || Math.random() < 0.8) {
+                target = examNumbers[getRandomInt(0, examNumbers.length - 1)];
             } else {
-                // (x + b) : a = c (Finding SBC First)
-                let a = getRandomInt(-9, 9) || 2;
-                let b = getRandomInt(-15, 15);
-                let c = getRandomInt(-10, 10);
-                let x_plus_b = c * a;
-                let real_x = x_plus_b - b; // Re-calc x to ensure integer
-                
-                let op = b >= 0 ? '+' : '-';
-                let absB = Math.abs(b);
-                
-                return {
-                    label: "Tìm X 2 Bước",
-                    display: `(x ${op} ${absB}) : ${fmt(a)} = ${c}`,
-                    answer: [real_x],
-                    hintRule: "Bước 1: Tìm Số Bị Chia là cả ngoặc.",
-                    steps: [
-                        `x ${op} ${absB} = ${c} . ${fmt(a)}`,
-                        `x ${op} ${absB} = ${x_plus_b}`,
-                        (op === '+' ? `x = ${x_plus_b} - ${absB}` : `x = ${x_plus_b} + ${absB}`),
-                        `x = ${real_x}`
-                    ]
-                };
+                target = getRandomInt(2, 15) * (Math.random() < 0.5 ? 1 : -1);
             }
-        }
 
-        // --- Logic: 4. Advanced 3 Steps (From user code) ---
-        function generateAdvanced3() {
-            // Forms: (ax + b) : c = d  OR  c . (ax + b) = d
-            const x = getRandomInt(-15, 15);
-            const a = getRandomInt(-5, 5) || 2;
-            const b = getRandomInt(-20, 20);
-            const inner = a * x + b;
+            const typeProb = Math.random();
+            const k = getRandomInt(1, 9);
             
-            let c, d, displayStr;
-            let steps = [];
-            let rule = "Bài toán 3 lớp: Tìm ngoặc -> Tìm số hạng chứa x -> Tìm x";
-
-            // Randomly choose Div or Mul container
-            const isDiv = Math.random() > 0.5;
-
-            // Form 1: Container is Division: (ax + b) : c = d
-            if (isDiv && inner !== 0) {
-                 // Ensure divisibility for nice numbers
-                let divisors = [];
-                for(let i=1; i<=Math.abs(inner); i++) {
-                    if(inner % i === 0) divisors.push(i);
-                }
+            let displayExpr, innerExpr, answers;
+            let divisors = getDivisors(target);
+            let divStr = `{ ${divisors.join('; ')} }`;
+            let solveSteps = [];
+            
+            if (typeProb < 0.33) {
+                // Dạng 1: A chia hết cho x - k
+                displayExpr = `${target} &#8942; (x - ${k})`;
+                innerExpr = `x - ${k}`;
+                answers = divisors.map(d => d + k);
                 
-                if (divisors.length > 0) {
-                    c = divisors[getRandomInt(0, divisors.length-1)] * (Math.random() > 0.5 ? 1 : -1);
-                    d = inner / c;
-                    
-                    let opB = b >= 0 ? '+' : '-';
-                    let absB = Math.abs(b);
+                let tableRows = divisors.map((d, i) => {
+                    return `<div class="flex justify-between border-b border-gray-100 last:border-0 py-1">
+                                <span>x - ${k} = ${d}</span>
+                                <span>&rArr; x = ${answers[i]}</span>
+                            </div>`;
+                }).join('');
 
-                    displayStr = `(${a}x ${opB} ${absB}) : ${fmt(c)} = ${d}`;
-                    
-                    steps = [
-                        `${a}x ${opB} ${absB} = ${d} . ${fmt(c)}`,
-                        `${a}x ${opB} ${absB} = ${inner}`,
-                        (opB === '+' ? `${a}x = ${inner} - ${absB}` : `${a}x = ${inner} + ${absB}`),
-                        `${a}x = ${a*x}`,
-                        `x = ${a*x} : ${fmt(a)}`,
-                        `x = ${x}`
-                    ];
-                } else {
-                     // Fallback to Mul if no divisors found easy
-                     return generateAdvanced2();
-                }
+                solveSteps = [
+                    { text: `Vì ${target} &#8942; (${innerExpr}) nên (${innerExpr}) &in; Ư(${target})`, rule: `Nếu a chia hết cho b thì b là ước của a.` },
+                    { text: `Ta có: Ư(${target}) = ${divStr}` },
+                    { text: `Suy ra: (${innerExpr}) &in; ${divStr}` },
+                    { text: `Ta có bảng giá trị:<br><div class="bg-indigo-50 p-2 rounded mt-1 text-sm font-mono">${tableRows}</div>`, rule: "Tìm x bằng cách: Số bị trừ = Hiệu + Số trừ" },
+                    { text: `Vậy x &in; { ${answers.sort((a,b)=>a-b).join('; ')} }`, isResult: true }
+                ];
+
+            } else if (typeProb < 0.66) {
+                // Dạng 2: A chia hết cho x + k
+                displayExpr = `${target} &#8942; (x + ${k})`;
+                innerExpr = `x + ${k}`;
+                answers = divisors.map(d => d - k);
+                
+                let tableRows = divisors.map((d, i) => {
+                    return `<div class="flex justify-between border-b border-gray-100 last:border-0 py-1">
+                                <span>x + ${k} = ${d}</span>
+                                <span>&rArr; x = ${answers[i]}</span>
+                            </div>`;
+                }).join('');
+
+                solveSteps = [
+                    { text: `Vì ${target} &#8942; (${innerExpr}) nên (${innerExpr}) &in; Ư(${target})`, rule: `Nếu a chia hết cho b thì b là ước của a.` },
+                    { text: `Ta có: Ư(${target}) = ${divStr}` },
+                    { text: `Suy ra: (${innerExpr}) &in; ${divStr}` },
+                    { text: `Ta có bảng giá trị:<br><div class="bg-indigo-50 p-2 rounded mt-1 text-sm font-mono">${tableRows}</div>`, rule: "Tìm x bằng cách: Số hạng = Tổng - Số hạng kia" },
+                    { text: `Vậy x &in; { ${answers.sort((a,b)=>a-b).join('; ')} }`, isResult: true }
+                ];
             } else {
-                // Form 2: Container is Multiplication: c . (ax + b) = d
-                c = getRandomInt(2, 5) * (Math.random() > 0.5 ? 1 : -1);
-                d = inner * c;
+                // Dạng 3: A chia hết cho k - x
+                displayExpr = `${target} &#8942; (${k} - x)`;
+                innerExpr = `${k} - x`;
+                answers = divisors.map(d => k - d);
                 
-                let opB = b >= 0 ? '+' : '-';
-                let absB = Math.abs(b);
-                
-                displayStr = `${c} . (${a}x ${opB} ${absB}) = ${d}`;
-                
-                steps = [
-                    `${a}x ${opB} ${absB} = ${d} : ${fmt(c)}`,
-                    `${a}x ${opB} ${absB} = ${inner}`,
-                    (opB === '+' ? `${a}x = ${inner} - ${absB}` : `${a}x = ${inner} + ${absB}`),
-                    `${a}x = ${a*x}`,
-                    `x = ${a*x} : ${fmt(a)}`,
-                    `x = ${x}`
+                let tableRows = divisors.map((d, i) => {
+                    return `<div class="flex justify-between border-b border-gray-100 last:border-0 py-1">
+                                <span>${k} - x = ${d}</span>
+                                <span>&rArr; x = ${answers[i]}</span>
+                            </div>`;
+                }).join('');
+
+                solveSteps = [
+                    { text: `Vì ${target} &#8942; (${innerExpr}) nên (${innerExpr}) &in; Ư(${target})`, rule: `Nếu a chia hết cho b thì b là ước của a.` },
+                    { text: `Ta có: Ư(${target}) = ${divStr}` },
+                    { text: `Suy ra: (${innerExpr}) &in; ${divStr}` },
+                    { text: `Ta có bảng giá trị:<br><div class="bg-indigo-50 p-2 rounded mt-1 text-sm font-mono">${tableRows}</div>`, rule: "Tìm x bằng cách: Số trừ = Số bị trừ - Hiệu" },
+                    { text: `Vậy x &in; { ${answers.sort((a,b)=>a-b).join('; ')} }`, isResult: true }
                 ];
             }
 
             return {
-                label: "Tìm X 3 Bước",
+                type: 'div',
+                display: displayExpr,
+                answers: answers.sort((a,b) => a-b),
+                steps: solveSteps
+            };
+        }
+
+        // --- Logic: Tìm x nâng cao (Bài 5b) ---
+        function generateCalc(forceHard) {
+            const stepsType = Math.random() < 0.5 ? 2 : 3; 
+            let steps = [];
+            let displayStr = "";
+            let answer = 0;
+            let scale = forceHard ? 2 : 1; 
+            
+            // Hàm sinh hệ số k theo tỉ lệ đã định
+            const k = getCoefX(); 
+            const termX = fmtTermX(k);
+
+            if (stepsType === 2) {
+                // --- DẠNG 2 BƯỚC ---
+                const subType = getRandomInt(1, 3);
+                
+                if (subType === 1) { // a(kx+b) = c
+                    let a = getRandomInt(2, 5 + scale) * (Math.random() < 0.5 ? 1 : -1);
+                    let b = getRandomInt(1, 10 + 5*scale) * (Math.random() < 0.5 ? 1 : -1);
+                    
+                    // Chọn x sao cho kx+b chia hết và hợp lý
+                    let x = getRandomInt(-10, 10);
+                    let inner = k * x + b; // Giá trị trong ngoặc
+                    let c = a * inner;
+                    answer = x;
+                    
+                    let opB = b >= 0 ? '+' : '-';
+                    let absB = Math.abs(b);
+                    
+                    displayStr = `${a} . (${termX} ${opB} ${absB}) = ${c}`;
+                    
+                    steps.push({ text: `${termX} ${opB} ${absB} = ${c} : ${fmt(a)}`, rule: "Tìm thừa số chưa biết (cả ngoặc)" });
+                    steps.push({ text: `${termX} ${opB} ${absB} = ${inner}` });
+                    
+                    // Bước tiếp theo: Tìm kx
+                    if (opB === '+') steps.push({ text: `${termX} = ${inner} - ${absB}`, rule: "Tìm số hạng chưa biết" });
+                    else steps.push({ text: `${termX} = ${inner} + ${absB}`, rule: "Tìm số bị trừ" });
+                    
+                    steps.push({ text: `${termX} = ${k*x}` });
+                    
+                    // Bước cuối: Tìm x (nếu k != 1)
+                    if (k !== 1) {
+                         steps.push({ text: `x = ${k*x} : ${fmt(k)}`, rule: "Tìm x (Thừa số)" });
+                    }
+                    steps.push({ text: `x = ${answer}`, isResult: true });
+                } 
+                else if (subType === 2) { // kx + b = c  (Thay a cũ bằng k mới)
+                    // k đã có.
+                    let x = getRandomInt(-10, 10);
+                    let kx = k * x;
+                    let b = getRandomInt(1, 20 + 10*scale);
+                    let op = Math.random() < 0.5 ? '+' : '-';
+                    let c = op === '+' ? (kx + b) : (kx - b);
+                    answer = x;
+                    
+                    displayStr = `${termX} ${op} ${b} = ${c}`;
+                    
+                    if(op === '+') steps.push({ text: `${termX} = ${c} - ${b}`, rule: "Chuyển vế đổi dấu: + thành -" });
+                    else steps.push({ text: `${termX} = ${c} + ${b}`, rule: "Chuyển vế đổi dấu: - thành +" });
+                    
+                    steps.push({ text: `${termX} = ${kx}` });
+                    
+                    if (k !== 1) {
+                        steps.push({ text: `x = ${kx} : ${fmt(k)}`, rule: "Tìm thừa số x" });
+                    }
+                    steps.push({ text: `x = ${answer}`, isResult: true });
+                }
+                else { // (kx+b):a = c
+                    let a = getRandomInt(2, 5 + scale) * (Math.random() < 0.5 ? 1 : -1);
+                    let b = getRandomInt(1, 10 + 5*scale) * (Math.random() < 0.5 ? 1 : -1);
+                    let c = getRandomInt(1, 10);
+                    let inner = c * a; // giá trị kx+b
+                    
+                    // Cần x nguyên => kx = inner - b => x = (inner - b)/k
+                    // Do k sinh ngẫu nhiên, ta cần chỉnh lại bài toán để x nguyên.
+                    // Cách làm: Chọn x trước, tính ngược lại.
+                    let x = getRandomInt(-10, 10);
+                    let kx = k * x;
+                    inner = kx + b;
+                    // Bây giờ inner có thể ko chia hết cho a, ta cần điều chỉnh c hoặc a.
+                    // Để đơn giản, ta giữ kx+b, tính c và a sao cho (kx+b) chia hết cho a là OK.
+                    // Nhưng logic ban đầu là (kx+b):a = c.
+                    // Ta buộc a phải là ước của (kx+b).
+                    // Nếu (kx+b) = 0 thì a tùy ý. Nếu khác 0, tìm ước.
+                    if (inner === 0) inner = a * c; // Fallback nếu x xui làm inner=0
+                    
+                    // Recalculate to ensure integrity
+                    // Chiến thuật: Chọn x, k, b -> tính kx+b. Chọn a là ước của nó. Tính c.
+                    // k, x, b đã có.
+                    let numerator = k*x + b;
+                    if (numerator === 0) { b++; numerator = k*x + b; } // Avoid 0 for divisor check ease
+                    
+                    let divs = getDivisors(numerator);
+                    // Lọc a phù hợp (ko quá lớn, ko là 1, -1)
+                    divs = divs.filter(d => Math.abs(d) > 1 && Math.abs(d) <= 20);
+                    if (divs.length === 0) a = 1; 
+                    else a = divs[getRandomInt(0, divs.length-1)];
+                    
+                    c = numerator / a;
+                    answer = x;
+                    
+                    let opB = b >= 0 ? '+' : '-';
+                    let absB = Math.abs(b);
+                    
+                    displayStr = `(${termX} ${opB} ${absB}) : ${fmt(a)} = ${c}`;
+                    
+                    steps.push({ text: `${termX} ${opB} ${absB} = ${c} . ${fmt(a)}`, rule: "Tìm Số bị chia (cả ngoặc)" });
+                    steps.push({ text: `${termX} ${opB} ${absB} = ${numerator}` });
+                    
+                    if (opB === '+') steps.push({ text: `${termX} = ${numerator} - ${absB}` });
+                    else steps.push({ text: `${termX} = ${numerator} + ${absB}` });
+                    
+                    steps.push({ text: `${termX} = ${k*x}` });
+                    
+                    if (k !== 1) steps.push({ text: `x = ${k*x} : ${fmt(k)}` });
+                    steps.push({ text: `x = ${answer}`, isResult: true });
+                }
+            } else {
+                // --- DẠNG 3 BƯỚC ---
+                const subType = getRandomInt(1, 2);
+                
+                if (subType === 1 || forceHard) { // a - b(kx+h) = c
+                    let b = getRandomInt(2, 5) * (forceHard ? 1 : (Math.random()<0.5?1:-1)); 
+                    let h = getRandomInt(1, 10) * (Math.random() < 0.5 ? 1 : -1);
+                    
+                    // Chọn x trước
+                    let x = getRandomInt(-10, 10);
+                    let inner = k*x + h; // Giá trị (kx+h)
+                    let middleTerm = b * inner;
+                    
+                    let a = getRandomInt(20, 50 * scale);
+                    let c = a - middleTerm;
+                    answer = x;
+                    
+                    let opH = h >= 0 ? '+' : '-';
+                    let absH = Math.abs(h);
+                    
+                    displayStr = `${a} - ${b > 0 && b!==1 ? b : '('+b+')'}.(${termX} ${opH} ${absH}) = ${c}`;
+                    // Nếu b=1 thì ko cần viết. Ở đây b >= 2 (hoặc âm).
+                    // display logic fix:
+                    let bDisp = b;
+                    if (b > 0) bDisp = b === 1 ? '' : b;
+                    else bDisp = b === -1 ? '-' : `(${b})`;
+                    // Tuy nhiên logic tính toán ở trên a - b(...) = c ngầm hiểu b là số dương trong phép trừ,
+                    // hoặc là cộng nếu b âm. Để khớp với "Tìm số trừ", ta nên để b dương.
+                    // Nếu forceHard, b dương.
+                    // Code cũ: a - b(...) với b ngẫu nhiên.
+                    // Fix: Hiển thị đúng dấu.
+                    
+                    // Ta dùng logic: A - B.C = D => B.C = A - D.
+                    // Nên hiển thị dạng: a - b.(...) = c
+                    let bVal = Math.abs(b);
+                    displayStr = `${a} - ${bVal}.(${termX} ${opH} ${absH}) = ${c}`;
+                    
+                    steps.push({ text: `${bVal}.(${termX} ${opH} ${absH}) = ${a} - ${c}`, rule: "Tìm Số trừ (cụm nhân): Lấy SBT - Hiệu" });
+                    steps.push({ text: `${bVal}.(${termX} ${opH} ${absH}) = ${middleTerm}` }); // middleTerm ở đây thực ra là bVal * inner.
+                    // Cần recalculate middleTerm theo bVal (dương)
+                    let realMiddle = bVal * inner;
+                    // Kiểm tra lại logic sinh đề:
+                    // Đề: a - bVal * inner = c.
+                    // => c được tính từ a - bVal * inner. Đúng.
+                    
+                    steps.push({ text: `${termX} ${opH} ${absH} = ${realMiddle} : ${bVal}`, rule: "Tìm thừa số chưa biết (cả ngoặc)" });
+                    steps.push({ text: `${termX} ${opH} ${absH} = ${inner}` });
+                    
+                    if(opH === '+') steps.push({ text: `${termX} = ${inner} - ${absH}` });
+                    else steps.push({ text: `${termX} = ${inner} + ${absH}` });
+                    
+                    steps.push({ text: `${termX} = ${k*x}` });
+                    if (k !== 1) steps.push({ text: `x = ${k*x} : ${fmt(k)}` });
+                    steps.push({ text: `x = ${answer}`, isResult: true });
+                    
+                } else { // (ax + b) : c = d  ---> chuyển thành (kx + b) : c = d
+                    // k đã có
+                    let c = getRandomInt(2, 6) * (Math.random() < 0.5 ? 1 : -1);
+                    let d = getRandomInt(1, 10) * (Math.random() < 0.5 ? 1 : -1);
+                    let divident = c * d; // (kx+b)
+                    
+                    // Chọn x, tính b
+                    let x = getRandomInt(-10, 10);
+                    let kx = k * x;
+                    let b = divident - kx;
+                    
+                    answer = x;
+                    
+                    let opB = b >= 0 ? '+' : '-';
+                    let absB = Math.abs(b);
+                    
+                    displayStr = `(${termX} ${opB} ${absB}) : ${fmt(c)} = ${d}`;
+                    
+                    steps.push({ text: `${termX} ${opB} ${absB} = ${d} . ${fmt(c)}`, rule: "Tìm Số bị chia (cả ngoặc)" });
+                    steps.push({ text: `${termX} ${opB} ${absB} = ${divident}` });
+                    
+                    if(opB === '+') steps.push({ text: `${termX} = ${divident} - ${absB}`, rule: "Chuyển vế: + thành -" });
+                    else steps.push({ text: `${termX} = ${divident} + ${absB}`, rule: "Chuyển vế: - thành +" });
+                    
+                    steps.push({ text: `${termX} = ${kx}` });
+                    if (k !== 1) steps.push({ text: `x = ${kx} : ${fmt(k)}` });
+                    steps.push({ text: `x = ${answer}`, isResult: true });
+                }
+            }
+
+            return {
+                type: 'calc',
                 display: displayStr,
-                answer: [x],
-                hintRule: rule,
+                answers: [answer],
                 steps: steps
             };
         }
 
+        function generateProblem() {
+            const isHard = document.getElementById('mode-hard').checked;
+            let data;
+            
+            if (currentMode === 'div') {
+                data = generateDivisibility(false); 
+            } else if (currentMode === 'calc') {
+                data = generateCalc(isHard);
+            } else {
+                if (Math.random() < 0.5) data = generateDivisibility(true); 
+                else data = generateCalc(isHard);
+            }
+            return data;
+        }
 
-        // --- UI Controller ---
+        // --- UI Interactions ---
 
-        function setMode(mode) {
+        function changeMode(mode) {
             currentMode = mode;
-            document.querySelectorAll('.btn-mode').forEach(btn => btn.classList.remove('mode-active'));
-            document.getElementById(`btn-${mode}`).classList.add('mode-active');
+            ['mix', 'div', 'calc'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m === mode) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
             nextQuestion();
         }
 
-        function nextQuestion() {
-            // Reset UI
-            document.getElementById('feedback').classList.add('hidden');
-            document.getElementById('user-answer').value = '';
-            document.getElementById('user-answer').disabled = false;
-            document.getElementById('user-answer').focus();
-            document.getElementById('rule-hint').classList.add('hidden');
-            
-            // Reset Steps
-            stepIndex = 0;
-            const stepsContainer = document.getElementById('steps-container');
-            stepsContainer.innerHTML = ''; 
-            
-            const btnStep = document.getElementById('btn-show-step');
-            btnStep.disabled = false;
-            btnStep.innerHTML = '<i class="fas fa-lightbulb mr-2"></i> Gợi ý';
-            btnStep.className = 'bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center';
-            
-            isAnswered = false;
-
-            // Generator Routing
-            if (currentMode === 'divisibility') {
-                currentQuestion = generateDivisibility();
-            } else if (currentMode === 'basic') {
-                const keys = Object.keys(basicGenerators);
-                const key = keys[getRandomInt(0, keys.length - 1)];
-                currentQuestion = basicGenerators[key]();
-                currentQuestion.label = "Cơ bản";
-            } else if (currentMode === 'advanced_2') {
-                currentQuestion = generateAdvanced2();
-            } else if (currentMode === 'advanced_3') {
-                currentQuestion = generateAdvanced3();
+        function renderStats() {
+            const streakEl = document.getElementById('stat-streak');
+            streakEl.textContent = state.streak;
+            if (state.streak > 2) {
+                streakEl.innerHTML = `<i class="fas fa-fire"></i> ${state.streak}`;
+                streakEl.classList.add('streak-fire');
             } else {
-                // Exam Mix: 30% Div, 20% Basic, 30% Adv2, 20% Adv3
-                const r = Math.random();
-                if (r < 0.3) currentQuestion = generateDivisibility();
-                else if (r < 0.5) {
-                    const keys = Object.keys(basicGenerators);
-                    const key = keys[getRandomInt(0, keys.length - 1)];
-                    currentQuestion = basicGenerators[key]();
-                    currentQuestion.label = "Cơ bản";
-                }
-                else if (r < 0.8) currentQuestion = generateAdvanced2();
-                else currentQuestion = generateAdvanced3();
+                streakEl.classList.remove('streak-fire');
+            }
+            document.getElementById('stat-correct').textContent = state.correct;
+            document.getElementById('stat-wrong').textContent = state.wrong;
+            document.getElementById('stat-skipped').textContent = state.skipped;
+        }
+
+        function nextQuestion() {
+            if (!isAnswered && document.getElementById('question-display').innerText !== 'Loading...') {
+                state.skipped++;
+                state.streak = 0;
+                renderStats();
             }
 
-            // Update DOM
-            document.getElementById('question-text').innerHTML = currentQuestion.display;
-            document.getElementById('input-hint').textContent = currentQuestion.hintInput || "Kết quả là số nguyên";
-            document.getElementById('question-type-label').textContent = currentQuestion.label || "Bài tập";
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('ans-input').value = '';
+            document.getElementById('ans-input').disabled = false;
+            document.getElementById('ans-input').classList.remove('border-green-500', 'border-red-500', 'bg-green-50', 'bg-red-50');
+            document.getElementById('rule-area').classList.add('hidden');
+            
+            isAnswered = false;
+            stepIndex = 0;
+            usedHint = false;
+            
+            const stepsContainer = document.getElementById('steps-container');
+            stepsContainer.innerHTML = `<div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center select-none"><i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i><span>Bấm "Gợi ý" để xem từng bước giải</span></div>`;
+            
+            const btnStep = document.getElementById('btn-show-step');
+            btnStep.innerHTML = '<i class="fas fa-lightbulb text-yellow-300"></i> <span>Gợi ý</span>';
+            btnStep.disabled = false;
+            btnStep.className = 'bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 ml-2';
+
+            currentProblem = generateProblem();
+            
+            document.getElementById('question-display').innerHTML = currentProblem.display;
+            document.getElementById('step-counter').textContent = `0/${currentProblem.steps.length}`;
+            
+            if (currentProblem.type === 'div') {
+                document.getElementById('div-hint-text').classList.remove('hidden');
+            } else {
+                document.getElementById('div-hint-text').classList.add('hidden');
+            }
         }
 
         function showNextStep() {
+            usedHint = true;
             const container = document.getElementById('steps-container');
+            const ruleArea = document.getElementById('rule-area');
+            const ruleContent = document.getElementById('rule-content');
             
-            // Show Rule first
-            if (stepIndex === 0 && currentQuestion.hintRule) {
-                document.getElementById('rule-content').textContent = currentQuestion.hintRule;
-                document.getElementById('rule-hint').classList.remove('hidden');
-            }
+            if (stepIndex === 0) container.innerHTML = '';
 
-            if (stepIndex < currentQuestion.steps.length) {
+            if (stepIndex < currentProblem.steps.length) {
+                const item = currentProblem.steps[stepIndex];
+                
                 const stepDiv = document.createElement('div');
-                stepDiv.className = 'step-item bg-orange-50 p-3 rounded-lg border-l-4 border-orange-400 font-bold shadow-sm text-lg';
+                stepDiv.className = 'step-item bg-white p-3 rounded border-l-4 shadow-sm mb-3 text-base font-mono leading-relaxed';
                 
-                // Color formatting for last step (Answer)
-                if (stepIndex === currentQuestion.steps.length - 1) {
-                     stepDiv.className = 'step-item bg-green-50 p-3 rounded-lg border-l-4 border-green-500 font-bold text-green-800 shadow-sm text-lg';
+                if (item.isResult) {
+                    stepDiv.classList.add('border-green-500', 'bg-green-50');
+                    stepDiv.innerHTML = `<span class="text-green-700 font-bold"><i class="fas fa-flag-checkered mr-2"></i>${item.text}</span>`;
+                } else {
+                    stepDiv.classList.add('border-indigo-400');
+                    stepDiv.innerHTML = item.text;
                 }
-                
-                // Add step index label
-                stepDiv.innerHTML = `<span class="text-xs uppercase text-gray-400 block mb-1">Bước ${stepIndex + 1}</span> ${currentQuestion.steps[stepIndex]}`;
                 container.appendChild(stepDiv);
-                
-                container.scrollTop = container.scrollHeight;
+
+                if (item.rule) {
+                    ruleContent.textContent = item.rule;
+                    ruleArea.classList.remove('hidden');
+                    ruleArea.classList.remove('animate-pulse');
+                    void ruleArea.offsetWidth; 
+                    ruleArea.classList.add('animate-pulse');
+                }
+
+                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
                 stepIndex++;
+                document.getElementById('step-counter').textContent = `${stepIndex}/${currentProblem.steps.length}`;
             }
 
-            // Button State
-            if (stepIndex >= currentQuestion.steps.length) {
+            if (stepIndex >= currentProblem.steps.length) {
                 const btn = document.getElementById('btn-show-step');
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-check mr-1"></i> Xong';
-                btn.className = 'bg-gray-400 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg cursor-not-allowed flex items-center';
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> <span>Hết</span>';
+                btn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+                btn.classList.remove('hover:bg-indigo-700');
             }
         }
 
         function checkAnswer() {
             if (isAnswered) return;
-
-            const input = document.getElementById('user-answer');
-            const feedback = document.getElementById('feedback');
-            const rawVal = input.value.trim();
-
+            
+            const inputEl = document.getElementById('ans-input');
+            const rawVal = inputEl.value.trim();
+            
             if (!rawVal) {
-                alert("Bạn chưa nhập đáp án!");
+                alert("Vui lòng nhập đáp án!");
                 return;
             }
 
-            // Handle multi-value answers
-            let userValues = rawVal.split(/[ ,;]+/).filter(v => v !== '').map(v => parseInt(v));
-            if (userValues.some(isNaN)) {
-                alert("Vui lòng chỉ nhập số nguyên!");
+            let userValues = rawVal.split(/[,;]+/).map(v => parseInt(v.trim())).filter(n => !isNaN(n));
+            
+            if (userValues.length === 0) {
+                alert("Vui lòng nhập số hợp lệ!");
                 return;
             }
 
-            isAnswered = true;
-            input.disabled = true;
-
-            // Check correctness
-            const correctSet = new Set(currentQuestion.answer);
+            const correctSet = new Set(currentProblem.answers);
             const userSet = new Set(userValues);
-            let isCorrect = (correctSet.size === userSet.size) && [...correctSet].every(val => userSet.has(val));
+            
+            let isCorrect = (correctSet.size === userSet.size) && [...userSet].every(v => correctSet.has(v));
+
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'border-green-300', 'bg-red-100', 'text-red-800', 'border-red-300', 'bg-blue-100', 'text-blue-800', 'border-blue-300');
 
             if (isCorrect) {
-                score += 10;
-                document.getElementById('score').textContent = score;
-                feedback.innerHTML = `
-                    <div class="text-green-700 font-bold text-xl mb-1 flex items-center justify-center animate-bounce">
-                        <i class="fas fa-check-circle mr-2 text-3xl"></i> Chính xác!
-                    </div>
-                    <div class="text-green-600">Đáp án: ${currentQuestion.answer.join('; ')}</div>
-                `;
-                feedback.className = "text-center mt-4 p-4 rounded-xl bg-green-100 border-2 border-green-300 shadow-lg";
+                inputEl.classList.add('border-green-500', 'bg-green-50');
+                inputEl.classList.remove('border-gray-300');
                 
-                // Reveal all steps
-                while(stepIndex < currentQuestion.steps.length) showNextStep();
+                if (!usedHint) {
+                    state.correct++;
+                    state.streak++;
+                    feedback.innerHTML = '<i class="fas fa-crown text-xl mb-1"></i><br>Xuất sắc! Đáp án chính xác.';
+                    feedback.classList.add('bg-green-100', 'text-green-800', 'border-green-300');
+                } else {
+                    feedback.innerHTML = '<i class="fas fa-check text-xl mb-1"></i><br>Đúng rồi! (Bạn đã xem gợi ý)';
+                    feedback.classList.add('bg-blue-100', 'text-blue-800', 'border-blue-300');
+                }
+                
+                const reveal = setInterval(() => {
+                    if(stepIndex < currentProblem.steps.length) showNextStep();
+                    else clearInterval(reveal);
+                }, 150);
                 
             } else {
-                feedback.innerHTML = `
-                    <div class="text-red-600 font-bold text-xl mb-1 flex items-center justify-center">
-                        <i class="fas fa-times-circle mr-2 text-3xl"></i> Sai rồi!
-                    </div>
-                    <div class="text-gray-700 mb-2">Đáp án đúng: <strong class="text-xl text-red-600">${currentQuestion.answer.join('; ')}</strong></div>
-                `;
-                feedback.className = "text-center mt-4 p-4 rounded-xl bg-red-50 border-2 border-red-200 shadow-lg";
+                state.wrong++;
+                state.streak = 0;
+                inputEl.classList.add('border-red-500', 'bg-red-50');
+                inputEl.classList.remove('border-gray-300');
                 
-                // Auto reveal steps
-                let intv = setInterval(() => {
-                    if(stepIndex < currentQuestion.steps.length) showNextStep();
-                    else clearInterval(intv);
-                }, 800);
+                feedback.innerHTML = `<i class="fas fa-times-circle text-xl mb-1"></i><br>Chưa đúng. Đáp án là: ${currentProblem.answers.join('; ')}`;
+                feedback.classList.add('bg-red-100', 'text-red-800', 'border-red-300');
             }
-            feedback.classList.remove('hidden');
+            
+            renderStats();
+            isAnswered = true;
+            inputEl.disabled = true;
         }
 
-        // Init
-        window.onload = () => {
-            setMode('exam_mix');
-        };
+        window.onload = nextQuestion;
+
     </script>
 </body>
 </html>
