@@ -163,7 +163,7 @@
                         <!-- Difficulty Toggle -->
                         <div class="flex items-center justify-between mb-4 border-t border-gray-200 pt-2">
                              <div class="text-xs text-gray-500 italic">
-                                *Chế độ khó = Toán nghịch/Phức tạp
+                                *Chế độ khó = Bài toán tổng hợp/Nhiều bước
                             </div>
                             <label class="inline-flex items-center cursor-pointer select-none">
                                 <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
@@ -293,40 +293,42 @@
                         answer: totalProfit,
                         unit: "đồng",
                         steps: [
-                            { type: 'header', text: 'Tóm tắt', rule: 'Lãi (+), Lỗ (-).' },
-                            { type: 'step', text: `Giai đoạn 1: ${days1} . ${formatMoney(profitPerDay1)}` },
-                            { type: 'step', text: `Giai đoạn 2: ${days2} . (${formatMoney(profitPerDay2)})` },
-                            { type: 'header', text: 'Giải', rule: '⚠️ Mẹo: Viết phép tính trước, ra kết quả, rồi mới viết câu trả lời.' },
-                            { type: 'step', text: `Phép tính tổng lợi nhuận:` },
-                            { type: 'step', text: `${days1}.${formatMoney(profitPerDay1)} + ${days2}.(${formatMoney(profitPerDay2)})` },
+                            { type: 'header', text: 'Bước 1: Quy đổi ra số nguyên', rule: 'Mẹo: Hãy dùng số âm cho khoản Lỗ để cộng đại số.' },
+                            { type: 'step', text: `Lãi ${formatMoney(profitPerDay1)} đ => +${formatMoney(profitPerDay1)}` },
+                            { type: 'step', text: `Lỗ ${formatMoney(lossPerDay2)} đ => -${formatMoney(lossPerDay2)}` },
+                            { type: 'header', text: 'Bước 2: Thiết lập phép tính', rule: 'Viết biểu thức trước rồi mới tính ra kết quả.' },
+                            { type: 'step', text: `Tổng lợi nhuận = (Ngày đầu x Lãi) + (Ngày sau x Lỗ)` },
+                            { type: 'step', text: `Biểu thức: ${days1}.${formatMoney(profitPerDay1)} + ${days2}.(${formatMoney(profitPerDay2)})` },
+                            { type: 'header', text: 'Bước 3: Tính toán & Kết luận' },
                             { type: 'step', text: `= ${formatMoney(days1 * profitPerDay1)} + (${formatMoney(days2 * profitPerDay2)})` },
                             { type: 'step', text: `= ${formatMoney(totalProfit)} (đồng)`, isLast: true },
                             { type: 'step', text: `Kết luận: ${totalProfit >= 0 ? 'Lãi' : 'Lỗ'} ${formatMoney(Math.abs(totalProfit))} đồng.` }
                         ]
                     };
                 } else {
-                    // HARD: Find Profit of Period 2 given Total
-                    const days1 = getRandomInt(5, 10);
-                    const profit1 = getRandomInt(2, 5) * 1000000; // Period 1 profit (Total)
+                    // HARD: Capital Management
+                    const startCapital = getRandomInt(10, 50) * 1000000;
+                    const importCost = getRandomInt(5, 15) * 1000000; 
+                    const revenue = getRandomInt(8, 20) * 1000000;   
+                    const rent = getRandomInt(2, 5) * 1000000;        
                     
-                    const days2 = getRandomInt(5, 10);
-                    const profit2 = -getRandomInt(1, 3) * 1000000; // Period 2 profit (Total) - hidden
-                    
-                    const finalProfit = profit1 + profit2;
+                    const finalCapital = startCapital - importCost + revenue - rent;
 
                     return {
-                        question: `Cửa hàng ${item} của ${name} có tổng kết sau 2 tháng là lãi ${formatMoney(finalProfit)} đồng. Biết tháng 1 cửa hàng lãi ${formatMoney(profit1)} đồng. Hỏi tháng 2 cửa hàng lãi hay lỗ bao nhiêu tiền?`,
-                        answer: profit2,
+                        question: `Chị ${name} mở cửa hàng với vốn ban đầu ${formatMoney(startCapital)}đ. Trong tháng đầu: nhập hàng hết ${formatMoney(importCost)}đ, doanh thu bán được ${formatMoney(revenue)}đ, trả tiền thuê mặt bằng ${formatMoney(rent)}đ. Hỏi sau tháng đầu, số tiền trong quỹ của chị ${name} là bao nhiêu?`,
+                        answer: finalCapital,
                         unit: "đồng",
                         steps: [
-                            { type: 'header', text: 'Phân tích (Toán nghịch)', rule: 'Tổng = Tháng 1 + Tháng 2 => Tháng 2 = Tổng - Tháng 1' },
-                            { type: 'step', text: `Lợi nhuận tổng: ${formatMoney(finalProfit)}` },
-                            { type: 'step', text: `Lợi nhuận tháng 1: ${formatMoney(profit1)}` },
-                            { type: 'header', text: 'Giải', rule: '⚠️ Cẩn thận khi thực hiện phép trừ số nguyên.' },
-                            { type: 'step', text: `Lợi nhuận tháng 2 là:` },
-                            { type: 'step', text: `${finalProfit} - ${profit1}` },
-                            { type: 'step', text: `= ${formatMoney(profit2)} (đồng)`, isLast: true },
-                            { type: 'step', text: `Kết luận: Tháng 2 lỗ ${formatMoney(Math.abs(profit2))} đồng.` }
+                            { type: 'header', text: 'Bước 1: Xác định dấu', rule: 'Chi phí là số âm (-), Thu nhập là số dương (+).' },
+                            { type: 'step', text: `Nhập hàng: -${formatMoney(importCost)}` },
+                            { type: 'step', text: `Doanh thu: +${formatMoney(revenue)}` },
+                            { type: 'step', text: `Thuê mặt bằng: -${formatMoney(rent)}` },
+                            { type: 'header', text: 'Bước 2: Viết biểu thức cộng', rule: 'Sai lầm thường gặp: Dùng phép trừ số học gây nhầm lẫn. Hãy cộng các số nguyên.' },
+                            { type: 'step', text: `Quỹ = Vốn + (Doanh thu) + (Chi phí)` },
+                            { type: 'step', text: `${formatMoney(startCapital)} + (${formatMoney(revenue)}) + (-${formatMoney(importCost)}) + (-${formatMoney(rent)})` },
+                            { type: 'header', text: 'Bước 3: Tính toán' },
+                            { type: 'step', text: `= ${formatMoney(startCapital)} + ${formatMoney(revenue)} - ${formatMoney(importCost)} - ${formatMoney(rent)}` },
+                            { type: 'step', text: `= ${formatMoney(finalCapital)} (đồng)`, isLast: true }
                         ]
                     };
                 }
@@ -346,31 +348,38 @@
                         answer: finalTemp,
                         unit: "°C",
                         steps: [
-                            { type: 'header', text: 'Phân tích', rule: 'Nhiệt độ giảm => Trừ bớt' },
-                            { type: 'step', text: `Giảm tổng cộng: ${time} . ${rate} = ${time * rate}°C` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Nhiệt độ lúc sau là:` },
-                            { type: 'step', text: `${startTemp} - ${time * rate} = ${finalTemp} (°C)`, isLast: true }
+                            { type: 'header', text: 'Bước 1: Quy đổi sự thay đổi', rule: 'Giảm x độ nghĩa là cộng thêm (-x) độ.' },
+                            { type: 'step', text: `Mức giảm mỗi phút: -${rate}°C` },
+                            { type: 'step', text: `Tổng giảm trong ${time} phút: ${time} . (-${rate}) = -${time * rate}°C` },
+                            { type: 'header', text: 'Bước 2: Phép tính nhiệt độ', rule: 'Nhiệt độ sau = Nhiệt độ đầu + (Sự thay đổi)' },
+                            { type: 'step', text: `${startTemp} + (-${time * rate})` },
+                            { type: 'header', text: 'Bước 3: Kết quả' },
+                            { type: 'step', text: `= ${startTemp} - ${time * rate}` },
+                            { type: 'step', text: `= ${finalTemp} (°C)`, isLast: true }
                         ]
                     };
                 } else {
-                    // HARD: Find Time
-                    const startTemp = getRandomInt(25, 30);
-                    const rate = getRandomInt(2, 4);
-                    const time = getRandomInt(10, 20); 
-                    const finalTemp = startTemp - (rate * time); 
+                    // HARD: Multi-step Change (Finding Start)
+                    const drop1 = getRandomInt(3, 8);
+                    const rise1 = getRandomInt(5, 12);
+                    const drop2 = getRandomInt(2, 6);
+                    const startTemp = getRandomInt(20, 30);
+                    const finalTemp = startTemp - drop1 + rise1 - drop2;
 
                     return {
-                        question: `Một kho lạnh đang ở ${startTemp}°C. Máy làm lạnh giảm được ${rate}°C mỗi phút. Hỏi sau bao lâu nhiệt độ đạt ${finalTemp}°C?`,
-                        answer: time,
-                        unit: "phút",
+                        question: `Một phòng thí nghiệm điều chỉnh nhiệt độ. Giai đoạn 1 giảm ${drop1}°C, giai đoạn 2 tăng ${rise1}°C, giai đoạn 3 giảm thêm ${drop2}°C. Cuối cùng nhiệt độ đo được là ${finalTemp}°C. Hỏi nhiệt độ ban đầu là bao nhiêu?`,
+                        answer: startTemp,
+                        unit: "°C",
                         steps: [
-                            { type: 'header', text: 'Phân tích (Toán nghịch)', rule: 'Tìm độ chênh lệch nhiệt độ trước, sau đó chia cho tốc độ.' },
-                            { type: 'step', text: `Nhiệt độ cần giảm là:` },
-                            { type: 'step', text: `${startTemp} - (${finalTemp}) = ${startTemp - finalTemp} (°C)` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Thời gian cần thiết là:` },
-                            { type: 'step', text: `${startTemp - finalTemp} : ${rate} = ${time} (phút)`, isLast: true }
+                            { type: 'header', text: 'Bước 1: Tư duy ngược (Tính lùi)', rule: 'Để tìm nhiệt độ ban đầu, ta lấy nhiệt độ cuối TRỪ ngược lại các sự thay đổi.' },
+                            { type: 'step', text: `Nhiệt độ cuối cùng: ${finalTemp}°C` },
+                            { type: 'step', text: `Các thay đổi: Giảm ${drop1} (-${drop1}), Tăng ${rise1} (+${rise1}), Giảm ${drop2} (-${drop2}).` },
+                            { type: 'header', text: 'Bước 2: Thiết lập phép tính', rule: 'Lưu ý: Trừ cho số âm thành cộng số dương.' },
+                            { type: 'step', text: `Ban đầu = Cuối - (Các thay đổi)` },
+                            { type: 'step', text: `${finalTemp} - (-${drop2}) - (+${rise1}) - (-${drop1})` },
+                            { type: 'header', text: 'Bước 3: Tính toán' },
+                            { type: 'step', text: `= ${finalTemp} + ${drop2} - ${rise1} + ${drop1}` },
+                            { type: 'step', text: `= ${startTemp} (°C)`, isLast: true }
                         ]
                     };
                 }
@@ -379,7 +388,6 @@
             // --- TYPE 3: SCORES (Điểm số) ---
             if (type === 'score') {
                 if (!isHard) {
-                    // NORMAL: Calculate Total Score
                     const correct = getRandomInt(10, 20);
                     const wrong = getRandomInt(2, 5);
                     const ptsCorrect = 10;
@@ -391,34 +399,40 @@
                         answer: score,
                         unit: "điểm",
                         steps: [
-                            { type: 'header', text: 'Tóm tắt', rule: 'Điểm = (Đúng x 10) + (Sai x -5)' },
-                            { type: 'step', text: `Điểm câu đúng: ${correct} . 10 = ${correct*10}` },
-                            { type: 'step', text: `Điểm câu sai: ${wrong} . (-5) = ${wrong*ptsWrong}` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Tổng điểm của An:` },
-                            { type: 'step', text: `${correct*10} + (${wrong*ptsWrong}) = ${score} (điểm)`, isLast: true }
+                            { type: 'header', text: 'Bước 1: Xác định giá trị', rule: 'Điểm sai là số âm. Hãy dùng phép nhân số nguyên.' },
+                            { type: 'step', text: `Điểm từ câu đúng: ${correct} . (+10)` },
+                            { type: 'step', text: `Điểm từ câu sai: ${wrong} . (-5)` },
+                            { type: 'header', text: 'Bước 2: Phép tính tổng' },
+                            { type: 'step', text: `Tổng = (${correct}.10) + (${wrong}.(-5))` },
+                            { type: 'step', text: `= ${correct*10} + (${wrong*ptsWrong})` },
+                            { type: 'header', text: 'Bước 3: Kết luận' },
+                            { type: 'step', text: `= ${score} (điểm)`, isLast: true }
                         ]
                     };
                 } else {
-                    // HARD: Find Wrong Answers given Total Score
-                    const correct = getRandomInt(15, 20);
-                    const wrong = getRandomInt(1, 6);
+                    const correctA = getRandomInt(10, 15);
+                    const wrongA = getRandomInt(2, 5);
+                    const correctB = getRandomInt(10, 15);
+                    const wrongB = getRandomInt(2, 5);
                     const ptsCorrect = 5;
                     const ptsWrong = -2;
-                    const totalScore = (correct * ptsCorrect) + (wrong * ptsWrong);
+                    const scoreA = correctA * ptsCorrect + wrongA * ptsWrong;
+                    const scoreB = correctB * ptsCorrect + wrongB * ptsWrong;
+                    const diff = scoreA - scoreB;
 
                     return {
-                        question: `Trong cuộc thi: Đúng +${ptsCorrect}đ, Sai trừ ${Math.abs(ptsWrong)}đ (tức ${ptsWrong}đ). Bạn Bình trả lời đúng ${correct} câu và nhận được tổng ${totalScore} điểm. Hỏi Bình đã trả lời sai bao nhiêu câu?`,
-                        answer: wrong,
-                        unit: "câu",
+                        question: `Hai bạn thi đấu (Đúng +${ptsCorrect}đ, Sai ${ptsWrong}đ). Bạn A: ${correctA} đúng, ${wrongA} sai. Bạn B: ${correctB} đúng, ${wrongB} sai. Hỏi điểm của bạn A hơn bạn B bao nhiêu điểm?`,
+                        answer: diff,
+                        unit: "điểm",
                         steps: [
-                            { type: 'header', text: 'Phân tích (Toán nghịch)', rule: 'Tính điểm từ các câu đúng trước. Phần còn thiếu là do bị trừ điểm.' },
-                            { type: 'step', text: `Số điểm nhận từ ${correct} câu đúng: ${correct} . ${ptsCorrect} = ${correct*ptsCorrect} đ` },
-                            { type: 'step', text: `Số điểm bị mất do sai: Tổng - Điểm Đúng` },
-                            { type: 'step', text: `${totalScore} - ${correct*ptsCorrect} = ${totalScore - (correct*ptsCorrect)} đ` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Số câu trả lời sai là:` },
-                            { type: 'step', text: `${totalScore - (correct*ptsCorrect)} : (${ptsWrong}) = ${wrong} (câu)`, isLast: true }
+                            { type: 'header', text: 'Bước 1: Tính điểm từng người', rule: 'Cẩn thận: Sai là cộng với số âm.' },
+                            { type: 'step', text: `A = ${correctA}.5 + ${wrongA}.(-2) = ${scoreA}` },
+                            { type: 'step', text: `B = ${correctB}.5 + ${wrongB}.(-2) = ${scoreB}` },
+                            { type: 'header', text: 'Bước 2: Thiết lập hiệu số', rule: 'Hơn kém nhau = Phép trừ đại số (A - B).' },
+                            { type: 'step', text: `Hiệu = ${scoreA} - ${scoreB}` },
+                            { type: 'header', text: 'Bước 3: Tính toán' },
+                            { type: 'step', text: `= ${diff} (điểm)`, isLast: true },
+                            { type: 'step', text: `(Nếu ra số âm nghĩa là A thấp điểm hơn B)` }
                         ]
                     };
                 }
@@ -427,7 +441,6 @@
             // --- TYPE 4: HEIGHT (Độ cao) ---
             if (type === 'height') {
                 if (!isHard) {
-                    // NORMAL: Calculate Final Height
                     const startH = getRandomInt(200, 500); 
                     const move1 = -getRandomInt(50, 100); 
                     const move2 = getRandomInt(20, 50);  
@@ -438,49 +451,46 @@
                         answer: finalH,
                         unit: "mét",
                         steps: [
-                            { type: 'header', text: 'Quy ước', rule: 'Hạ xuống (-), Bay lên (+)' },
-                            { type: 'step', text: `Ban đầu: ${startH}` },
-                            { type: 'step', text: `Hạ xuống: ${move1}` },
-                            { type: 'step', text: `Bay lên: +${move2}` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Độ cao cuối cùng:` },
-                            { type: 'step', text: `${startH} - ${Math.abs(move1)} + ${move2} = ${finalH} (m)`, isLast: true }
+                            { type: 'header', text: 'Bước 1: Quy đổi chuyển động', rule: 'Hạ xuống = Cộng số âm. Bay lên = Cộng số dương.' },
+                            { type: 'step', text: `Hạ ${Math.abs(move1)}m => +(${move1})` },
+                            { type: 'step', text: `Lên ${move2}m => +(${move2})` },
+                            { type: 'header', text: 'Bước 2: Phép tính cộng' },
+                            { type: 'step', text: `${startH} + (${move1}) + ${move2}` },
+                            { type: 'header', text: 'Bước 3: Kết quả' },
+                            { type: 'step', text: `= ${startH - Math.abs(move1)} + ${move2}` },
+                            { type: 'step', text: `= ${finalH} (m)`, isLast: true }
                         ]
                     };
                 } else {
-                    // HARD: Find First Movement (Submarine)
-                    const startH = -getRandomInt(20, 40); 
-                    const move1 = -getRandomInt(10, 20); 
-                    const move2 = getRandomInt(30, 50); 
-                    const finalH = startH + move1 + move2;
+                    const posA = -getRandomInt(10, 50); 
+                    const posC = -getRandomInt(60, 120); 
+                    const dist = posA - posC; 
 
                     return {
-                        question: `Tàu ngầm đang ở độ sâu ${Math.abs(startH)}m (độ cao ${startH}m). Tàu lặn xuống thêm một đoạn, sau đó nổi lên ${move2}m thì dừng ở độ cao ${finalH}m. Hỏi tàu đã lặn xuống bao nhiêu mét?`,
-                        answer: Math.abs(move1), 
+                        question: `Tàu ngầm A đang ở độ cao ${posA}m (tức sâu ${Math.abs(posA)}m). Tàu ngầm B đang ở độ cao ${posC}m (tức sâu ${Math.abs(posC)}m). Hỏi tàu A nằm cao hơn tàu B bao nhiêu mét?`,
+                        answer: dist,
                         unit: "mét",
                         steps: [
-                            { type: 'header', text: 'Phân tích (Toán nghịch)', rule: 'Start + Move1 + Move2 = Final => Move1 = Final - Start - Move2' },
-                            { type: 'step', text: `Gọi độ cao lặn thêm là x (số âm)` },
-                            { type: 'step', text: `Ta có: ${startH} + x + ${move2} = ${finalH}` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Giá trị đại số của lần di chuyển đầu:` },
-                            { type: 'step', text: `x = ${finalH} - ${startH} - ${move2} = ${move1}` },
-                            { type: 'step', text: `Vậy tàu đã lặn xuống:`, isLast: true },
-                            { type: 'step', text: `|${move1}| = ${Math.abs(move1)} mét` }
+                            { type: 'header', text: 'Bước 1: Xác định tọa độ', rule: 'Độ sâu là số âm.' },
+                            { type: 'step', text: `Tàu A: ${posA}` },
+                            { type: 'step', text: `Tàu B: ${posC}` },
+                            { type: 'header', text: 'Bước 2: Thiết lập phép trừ', rule: 'Khoảng cách đại số = Vị trí trên - Vị trí dưới.' },
+                            { type: 'step', text: `Khoảng cách = ${posA} - (${posC})` },
+                            { type: 'header', text: 'Bước 3: Tính toán' },
+                            { type: 'step', text: `Trừ số âm thành cộng số dương: ${posA} + ${Math.abs(posC)}` },
+                            { type: 'step', text: `= ${dist} (mét)`, isLast: true }
                         ]
                     };
                 }
             }
 
-            // --- TYPE 5: ELEVATOR (Thang máy) - NEW ---
+            // --- TYPE 5: ELEVATOR (Thang máy) ---
             if (type === 'elevator') {
                 if (!isHard) {
-                    // NORMAL: Find Final Floor
-                    const startF = getRandomInt(0, 5); // Start at G or low floor
-                    const move1 = getRandomInt(5, 10); // Go up
-                    const move2 = -getRandomInt(2, 8); // Go down
+                    const startF = getRandomInt(0, 5); 
+                    const move1 = getRandomInt(5, 10); 
+                    const move2 = -getRandomInt(2, 8); 
                     const finalF = startF + move1 + move2;
-                    
                     const floorName = (f) => f === 0 ? "trệt (0)" : (f < 0 ? `hầm B${Math.abs(f)}` : `tầng ${f}`);
 
                     return {
@@ -488,48 +498,45 @@
                         answer: finalF,
                         unit: "tầng",
                         steps: [
-                            { type: 'header', text: 'Quy ước', rule: 'Đi lên (+), Đi xuống (-). Tầng hầm là số âm.' },
+                            { type: 'header', text: 'Bước 1: Số hóa hành trình', rule: 'Đi xuống là cộng với số nguyên âm.' },
                             { type: 'step', text: `Vị trí đầu: ${startF}` },
-                            { type: 'step', text: `Đi lên: +${move1}` },
-                            { type: 'step', text: `Đi xuống: ${move2}` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Tầng cuối cùng là:` },
-                            { type: 'step', text: `${startF} + ${move1} + (${move2}) = ${finalF}`, isLast: true },
-                            { type: 'step', text: `Kết luận: Thang máy ở ${floorName(finalF)}.` }
+                            { type: 'step', text: `Đi xuống ${Math.abs(move2)} => +(${move2})` },
+                            { type: 'header', text: 'Bước 2: Biểu thức cộng' },
+                            { type: 'step', text: `${startF} + ${move1} + (${move2})` },
+                            { type: 'header', text: 'Bước 3: Kết quả' },
+                            { type: 'step', text: `= ${finalF} (${floorName(finalF)})`, isLast: true }
                         ]
                     };
                 } else {
-                    // HARD: Find Movement
-                    const startF = getRandomInt(1, 3);
-                    const finalF = getRandomInt(8, 12);
-                    const move1 = -getRandomInt(1, 3); // Initial move down (e.g. to basement)
-                    const move2 = finalF - (startF + move1); // Calculate required move up
-                    
+                    const startF = getRandomInt(1, 5);
+                    const move1 = getRandomInt(3, 6); // Up
+                    const move2 = -getRandomInt(6, 10); // Down deep
+                    const finalF = getRandomInt(5, 10); // Ends high
+                    const move3 = finalF - (startF + move1 + move2);
+
                     return {
-                        question: `Thang máy đang ở tầng ${startF}. Đầu tiên nó đi xuống ${Math.abs(move1)} tầng. Hỏi sau đó nó phải đi lên bao nhiêu tầng để dừng lại đúng ở tầng ${finalF}?`,
-                        answer: move2,
+                        question: `Thang máy bắt đầu từ tầng ${startF}. Đi lên ${move1} tầng, rồi đi xuống ${Math.abs(move2)} tầng. Sau đó nó đi lên thêm một đoạn nữa thì dừng lại ở tầng ${finalF}. Hỏi đoạn đi lên cuối cùng dài bao nhiêu tầng?`,
+                        answer: move3,
                         unit: "tầng",
                         steps: [
-                            { type: 'header', text: 'Phân tích', rule: 'Vị trí cuối = Vị trí đầu + Di chuyển 1 + Di chuyển 2' },
-                            { type: 'step', text: `Vị trí sau lần 1: ${startF} + (${move1}) = ${startF + move1}` },
-                            { type: 'step', text: `Gọi số tầng cần đi lên là x` },
-                            { type: 'step', text: `Ta có: ${startF + move1} + x = ${finalF}` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Số tầng cần đi lên là:` },
-                            { type: 'step', text: `x = ${finalF} - (${startF + move1}) = ${move2}`, isLast: true }
+                            { type: 'header', text: 'Bước 1: Tính vị trí tạm thời', rule: 'Tính vị trí của thang máy trước khi đi đoạn cuối.' },
+                            { type: 'step', text: `Vị trí sau 2 lượt đi đầu: ${startF} + ${move1} + (${move2}) = ${startF + move1 + move2}` },
+                            { type: 'header', text: 'Bước 2: Tìm phần còn thiếu', rule: 'Đoạn đi thêm = Đích đến - Vị trí hiện tại' },
+                            { type: 'step', text: `Đích đến: ${finalF}` },
+                            { type: 'step', text: `Đoạn cần đi: ${finalF} - (${startF + move1 + move2})` },
+                            { type: 'header', text: 'Bước 3: Kết quả' },
+                            { type: 'step', text: `= ${move3} (tầng)`, isLast: true }
                         ]
                     };
                 }
             }
 
-            // --- TYPE 6: HISTORY (Lịch sử) - NEW ---
+            // --- TYPE 6: HISTORY (Lịch sử) ---
             if (type === 'history') {
                 if (!isHard) {
-                    // NORMAL: Calculate Age / Duration
                     const birthYear = -getRandomInt(50, 300); // TCN
                     const age = getRandomInt(40, 80);
                     const deathYear = birthYear + age;
-                    
                     const formatYear = (y) => y < 0 ? `${Math.abs(y)} TCN` : `${y} SCN`;
 
                     return {
@@ -537,40 +544,42 @@
                         answer: deathYear,
                         unit: "năm",
                         steps: [
-                            { type: 'header', text: 'Quy ước thời gian', rule: 'Năm TCN là số âm. Năm mất = Năm sinh + Tuổi thọ.' },
-                            { type: 'step', text: `Năm sinh: ${birthYear} (${Math.abs(birthYear)} TCN)` },
-                            { type: 'step', text: `Tuổi thọ: ${age}` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Năm ông mất là:` },
-                            { type: 'step', text: `${birthYear} + ${age} = ${deathYear}`, isLast: true },
-                            { type: 'step', text: `Kết luận: Ông mất năm ${formatYear(deathYear)}.` }
+                            { type: 'header', text: 'Bước 1: Quy ước số âm', rule: 'Năm TCN là số âm.' },
+                            { type: 'step', text: `Năm sinh: ${birthYear}` },
+                            { type: 'header', text: 'Bước 2: Phép tính cộng', rule: 'Thời điểm mất = Thời điểm sinh + Thời gian sống.' },
+                            { type: 'step', text: `${birthYear} + ${age}` },
+                            { type: 'header', text: 'Bước 3: Kết luận' },
+                            { type: 'step', text: `= ${deathYear}`, isLast: true },
+                            { type: 'step', text: `Nghĩa là năm ${formatYear(deathYear)}` }
                         ]
                     };
                 } else {
-                    // HARD: Calculate Distance between eras
-                    const year1 = -getRandomInt(100, 500); // TCN
-                    const year2 = getRandomInt(1000, 2024); // SCN
-                    const dist = year2 - year1;
+                    const birthA = -getRandomInt(200, 500);
+                    const ageA = getRandomInt(50, 90);
+                    const diedA = birthA + ageA;
+                    const birthB = -getRandomInt(50, 100);
+                    const ageB = getRandomInt(30, 80);
+                    const diedB = birthB + ageB;
+                    const diff = ageA - ageB;
 
                     return {
-                        question: `Đền Parthenon (Hy Lạp) được hoàn thành năm ${Math.abs(year1)} TCN. Đến năm ${year2} SCN, ngôi đền đã tồn tại được bao nhiêu năm? (Giả sử tính theo trục số nguyên).`,
-                        answer: dist,
-                        unit: "năm",
+                        question: `Ông A sinh năm ${Math.abs(birthA)} TCN, mất năm ${diedA < 0 ? Math.abs(diedA) + ' TCN' : diedA + ' SCN'}. Ông B sinh năm ${Math.abs(birthB)} TCN, mất năm ${diedB < 0 ? Math.abs(diedB) + ' TCN' : diedB + ' SCN'}. Hỏi ông A sống thọ hơn ông B bao nhiêu tuổi?`,
+                        answer: diff,
+                        unit: "tuổi",
                         steps: [
-                            { type: 'header', text: 'Phân tích', rule: 'Khoảng cách thời gian = Năm sau - Năm trước.' },
-                            { type: 'step', text: `Mốc thời gian 1: ${year1} (${Math.abs(year1)} TCN)` },
-                            { type: 'step', text: `Mốc thời gian 2: ${year2}` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Thời gian tồn tại là:` },
-                            { type: 'step', text: `${year2} - (${year1})` },
-                            { type: 'step', text: `= ${year2} + ${Math.abs(year1)}` },
-                            { type: 'step', text: `= ${dist} (năm)`, isLast: true }
+                            { type: 'header', text: 'Bước 1: Tính tuổi từng người', rule: 'Tuổi = Năm mất - Năm sinh (Chú ý trừ số âm).' },
+                            { type: 'step', text: `Tuổi A = ${diedA} - (${birthA}) = ${ageA}` },
+                            { type: 'step', text: `Tuổi B = ${diedB} - (${birthB}) = ${ageB}` },
+                            { type: 'header', text: 'Bước 2: Tính hiệu', rule: 'Chênh lệch = Tuổi A - Tuổi B' },
+                            { type: 'step', text: `${ageA} - ${ageB}` },
+                            { type: 'header', text: 'Bước 3: Kết quả' },
+                            { type: 'step', text: `= ${diff} (tuổi)`, isLast: true }
                         ]
                     };
                 }
             }
 
-            // --- TYPE 7: TIME ZONES (Múi giờ) - NEW ---
+            // --- TYPE 7: TIME ZONES (Múi giờ) ---
             if (type === 'timezone') {
                 const cities = [
                     { name: "Hà Nội", zone: 7 },
@@ -590,13 +599,9 @@
                 while (dest.name === origin.name) dest = cities[getRandomInt(0, cities.length - 1)];
 
                 if (!isHard) {
-                    // NORMAL: Calc Dest Time
-                    // Formula: T_dest = T_origin + (Z_dest - Z_origin)
-                    const timeOrigin = getRandomInt(6, 18); // Avoid too weird hours for simplicity in normal mode? No, let's use all.
+                    const timeOrigin = getRandomInt(6, 18);
                     const diff = dest.zone - origin.zone;
                     let timeDestRaw = timeOrigin + diff;
-                    
-                    // Normalize to 0-23 for answer, but keep raw for explanation
                     let timeDest = timeDestRaw;
                     let dayShift = "";
                     if (timeDestRaw >= 24) {
@@ -612,44 +617,46 @@
                         answer: timeDest,
                         unit: "giờ",
                         steps: [
-                            { type: 'header', text: 'Phân tích', rule: 'Giờ đến = Giờ đi + (Múi đến - Múi đi)' },
-                            { type: 'step', text: `Chênh lệch múi giờ: ${dest.zone} - ${origin.zone} = ${diff} (giờ)` },
-                            { type: 'header', text: 'Giải', rule: '⚠️ Nếu kết quả < 0 (cộng thêm 24h), nếu > 24 (trừ đi 24h).' },
-                            { type: 'step', text: `Thực hiện phép tính:` },
+                            { type: 'header', text: 'Bước 1: Tính chênh lệch múi', rule: 'Hiệu múi = Múi đích - Múi nguồn' },
+                            { type: 'step', text: `${dest.zone} - ${origin.zone} = ${diff}` },
+                            { type: 'header', text: 'Bước 2: Phép tính giờ', rule: 'Giờ đích = Giờ nguồn + Hiệu múi' },
                             { type: 'step', text: `${timeOrigin} + (${diff}) = ${timeDestRaw}` },
+                            { type: 'header', text: 'Bước 3: Xử lý qua ngày' },
                             ...(timeDestRaw !== timeDest ? [
-                                { type: 'step', text: `Vì ${timeDestRaw} ${timeDestRaw < 0 ? '< 0' : '> 24'} nên ta quy đổi:` },
-                                { type: 'step', text: `${timeDestRaw < 0 ? `${timeDestRaw} + 24` : `${timeDestRaw} - 24`} = ${timeDest} (giờ)` }
-                            ] : []),
-                            { type: 'step', text: `Kết luận: ${dest.name} đang là ${timeDest} giờ ${dayShift}.`, isLast: true }
+                                { type: 'step', text: `Vì ${timeDestRaw} không thuộc 0-24h nên ta điều chỉnh.` },
+                                { type: 'step', text: `= ${timeDest} giờ (${dayShift})`, isLast: true }
+                            ] : [
+                                { type: 'step', text: `= ${timeDest} giờ`, isLast: true }
+                            ])
                         ]
                     };
                 } else {
-                    // HARD: Find Zone of Dest
-                    // T_dest = T_origin + (Z_dest - Z_origin) => Z_dest = Z_origin + (T_dest - T_origin)
-                    // But we must be careful with day shifts implicitly.
-                    // Let's keep it simple: No day shift in Hard mode to avoid confusion, or explicit shift stated.
-                    // Let's assume same day for Hard mode to isolate the "Find Zone" logic.
-                    
-                    const timeOrigin = getRandomInt(10, 14);
-                    const diff = dest.zone - origin.zone;
-                    const timeDest = timeOrigin + diff; // Assume this is valid 0-23 for simplicity in "Find Zone" logic
-                    
-                    // If timeDest is weird, regenerate
-                    if (timeDest < 0 || timeDest > 23) return generateProblem(); // Retry for valid same-day params
+                    const departTime = getRandomInt(8, 14); 
+                    const duration = getRandomInt(5, 12);
+                    const diffZone = dest.zone - origin.zone;
+                    let arrivalLocalRaw = departTime + diffZone + duration;
+                    let arrivalLocal = arrivalLocalRaw;
+                    let arrivalDayText = "cùng ngày";
+                    if (arrivalLocalRaw >= 24) {
+                        arrivalLocal = arrivalLocalRaw - 24;
+                        arrivalDayText = "ngày hôm sau";
+                    } else if (arrivalLocalRaw < 0) {
+                        arrivalLocal = arrivalLocalRaw + 24;
+                        arrivalDayText = "ngày hôm trước";
+                    }
 
                     return {
-                        question: `Biết ${origin.name} thuộc múi giờ ${formatZone(origin.zone)}. Khi ${origin.name} là ${timeOrigin} giờ thì ${dest.name} là ${timeDest} giờ (cùng ngày). Hỏi ${dest.name} thuộc múi giờ nào?`,
-                        answer: dest.zone,
-                        unit: "GMT",
+                        question: `Máy bay cất cánh từ ${origin.name} (múi giờ ${formatZone(origin.zone)}) lúc ${departTime} giờ. Máy bay hạ cánh tại ${dest.name} (múi giờ ${formatZone(dest.zone)}) lúc ${arrivalLocal} giờ ${arrivalDayText}. Hỏi thời gian bay là bao nhiêu tiếng?`,
+                        answer: duration,
+                        unit: "tiếng",
                         steps: [
-                            { type: 'header', text: 'Phân tích (Toán nghịch)', rule: 'Múi đến = Múi đi + (Giờ đến - Giờ đi)' },
-                            { type: 'step', text: `Chênh lệch thời gian: ${timeDest} - ${timeOrigin} = ${timeDest - timeOrigin} (giờ)` },
-                            { type: 'header', text: 'Giải' },
-                            { type: 'step', text: `Múi giờ của ${dest.name} là:` },
-                            { type: 'step', text: `${origin.zone} + (${timeDest - timeOrigin})` },
-                            { type: 'step', text: `= ${dest.zone}`, isLast: true },
-                            { type: 'step', text: `Kết luận: Múi giờ ${formatZone(dest.zone)}` }
+                            { type: 'header', text: 'Bước 1: Đổi về cùng hệ quy chiếu', rule: 'Tính giờ đến giả định nếu không bay (tức giờ tại nơi đến lúc máy bay đi).' },
+                            { type: 'step', text: `Giờ ${dest.name} lúc cất cánh: ${departTime} + (${dest.zone} - ${origin.zone}) = ${departTime + diffZone}` },
+                            { type: 'header', text: 'Bước 2: Phép tính thời gian bay', rule: 'Thời gian bay = Giờ Hạ cánh - Giờ Cất cánh (tại cùng địa điểm).' },
+                            { type: 'step', text: `Quy đổi giờ hạ cánh thực tế (nếu qua ngày): ${arrivalLocalRaw}` },
+                            { type: 'step', text: `Phép trừ: ${arrivalLocalRaw} - (${departTime + diffZone})` },
+                            { type: 'header', text: 'Bước 3: Kết quả' },
+                            { type: 'step', text: `= ${duration} (tiếng)`, isLast: true }
                         ]
                     };
                 }
@@ -777,7 +784,7 @@
             const userVal = parseInt(inputEl.value);
             
             const feedback = document.getElementById('feedback');
-            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800');
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800', 'bg-yellow-100', 'text-yellow-800');
 
             if (isNaN(userVal)) {
                  feedback.textContent = "Vui lòng nhập một số!";

@@ -3,36 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ôn tập Toán 6 HK1 - Bài 6b & 7 (Full Shapes)</title>
+    <title>Ôn tập Toán 6 Thực Tế (CTST) - Chế Độ Siêu Khó</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #ecfdf5; /* Green-50 */
-            background-image: radial-gradient(#6ee7b7 1px, transparent 1px);
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#86efac 1px, transparent 1px);
             background-size: 24px 24px;
         }
         .chalkboard {
-            background-color: #064e3b; /* Green-900 */
-            color: #d1fae5;
-            border: 8px solid #78350f; /* Wood color */
-            border-radius: 10px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            background-color: #14532d;
+            color: #dcfce7;
+            border: 8px solid #713f12;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
         }
         .chalkboard::before {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMTAgMTBRNDAgNDAgMTAgNzAiIHN0cm9rZT0id2hpdGUiIG9wYWNpdHk9IjAuMDUiIGZpbGw9Im5vbmUiLz4KPC9zdmc+');
-            opacity: 0.15;
+            opacity: 0.1;
             pointer-events: none;
         }
         .step-item {
@@ -43,33 +44,31 @@
         @keyframes slideDown {
             to { opacity: 1; transform: translateY(0); }
         }
-        #steps-container::-webkit-scrollbar { width: 8px; }
-        #steps-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        #steps-container::-webkit-scrollbar-thumb { background: #6ee7b7; border-radius: 4px; }
-        #steps-container::-webkit-scrollbar-thumb:hover { background: #34d399; }
+        #steps-container::-webkit-scrollbar { width: 6px; }
+        #steps-container::-webkit-scrollbar-track { background: #f3f4f6; }
+        #steps-container::-webkit-scrollbar-thumb { background: #10b981; border-radius: 3px; }
         
-        .streak-fire { color: #ea580c; animation: burn 0.5s infinite alternate; }
-        @keyframes burn {
-            from { text-shadow: 0 0 2px #fdba74, 0 -2px 4px #fb923c; }
-            to { text-shadow: 0 0 4px #fdba74, 0 -4px 8px #ea580c; }
+        /* SVG Styles */
+        .shape-svg {
+            max-height: 180px;
+            max-width: 100%;
+            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.25));
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
         }
-        select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23065f46' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        /* MathJax overrides */
-        mjx-container { font-size: 110% !important; }
+        .shape-path { fill: #d6d3d1; stroke: #fff; stroke-width: 1.5; } 
+        .shape-garden { fill: #4ade80; stroke: #fff; stroke-width: 1.5; } 
+        .shape-house { fill: #fde047; stroke: #fff; stroke-width: 1.5; } 
+        .shape-window { fill: #60a5fa; stroke: #fff; stroke-width: 1; }
+        .shape-water { fill: #3b82f6; stroke: #fff; stroke-width: 1.5; }
+        .shape-brick { fill: #f87171; stroke: #fff; stroke-width: 1; }
+        .dim-text { fill: white; font-size: 11px; font-family: monospace; font-weight: bold; text-shadow: 1px 1px 2px black; }
 
-        /* LOADING OVERLAY STYLES */
+        /* Loading */
         #loading-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #ecfdf5;
+            background-color: #f0fdf4;
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -78,134 +77,113 @@
             transition: opacity 0.5s ease-out;
         }
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #d1fae5;
-            border-top: 5px solid #059669; /* Emerald-600 */
+            width: 40px;
+            height: 40px;
+            border: 4px solid #bbf7d0;
+            border-top: 4px solid #16a34a;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
-
-    <!-- MathJax Configuration & Loading -->
+    
     <script>
-        // Cấu hình MathJax để xử lý loading screen
         window.MathJax = {
             startup: {
                 pageReady: () => {
-                    // 1. Chạy logic sinh câu hỏi
                     if (window.nextQuestion) window.nextQuestion();
-                    
-                    // 2. Để MathJax xử lý hiển thị công thức (return promise)
                     return MathJax.startup.defaultPageReady().then(() => {
-                        // 3. Ẩn màn hình chờ khi xong
                         const overlay = document.getElementById('loading-overlay');
-                        if (overlay) {
-                            overlay.style.opacity = '0';
-                            setTimeout(() => overlay.remove(), 500);
-                        }
+                        if (overlay) { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 500); }
                     });
                 }
             }
         };
-
-        // Fallback: Nếu MathJax lỗi hoặc load quá lâu (5s), tự động ẩn overlay
         setTimeout(() => {
             const overlay = document.getElementById('loading-overlay');
             if (overlay && document.body.contains(overlay)) {
-                console.warn("MathJax taking too long, forcing display.");
-                if (window.nextQuestion && document.getElementById('problem-text').innerText.includes("Đang tải")) {
-                    window.nextQuestion();
-                }
+                if (window.nextQuestion) window.nextQuestion();
                 overlay.style.opacity = '0';
                 setTimeout(() => overlay.remove(), 500);
             }
-        }, 5000);
+        }, 3000);
     </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
 
-    <!-- LOADING OVERLAY -->
     <div id="loading-overlay">
-        <div class="spinner"></div>
+        <div class="spinner mb-4"></div>
         <div class="text-emerald-800 font-bold text-lg animate-pulse text-center px-4">
-            <i class="fas fa-shapes mr-2"></i>Đang tải thư viện Toán học...<br>
-            <span class="text-sm font-normal text-emerald-600">(Vui lòng đợi giây lát)</span>
+            Đang khởi tạo các bài toán thách thức...
         </div>
     </div>
 
     <div class="max-w-7xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-emerald-600">
         <!-- Header -->
         <div class="bg-emerald-700 p-4 text-center relative shadow-lg">
-            <h1 class="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
-                <i class="fas fa-ruler-combined mr-2"></i>Ôn tập Toán 6 HK1 - Bài 6b & 7
+            <h1 class="text-xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
+                <i class="fas fa-calculator mr-2"></i>Ôn tập Toán 6 Thực Tế (Advanced)
             </h1>
-            <p class="text-emerald-100 font-medium text-sm md:text-base">Chủ đề: Hình học thực tế & Bài toán ngược (Full Shapes)</p>
+            <p class="text-emerald-100 font-medium text-xs md:text-sm mt-1">Chủ đề: Bài toán ngược đa bước (Chi phí &rarr; Diện tích)</p>
         </div>
 
-        <div class="p-4 md:p-6 space-y-4">
+        <div class="p-3 md:p-6 space-y-4">
             
             <!-- STATS BOARD -->
-            <div class="bg-emerald-50 rounded-xl shadow-inner p-3 grid grid-cols-4 gap-2 text-center select-none border border-emerald-100" id="stats-container">
-                <div class="flex flex-col items-center transform transition hover:scale-105">
-                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
-                    <span id="stat-streak" class="text-2xl md:text-3xl font-extrabold text-orange-600">0</span>
+            <div class="bg-emerald-50 rounded-xl shadow-inner p-2 md:p-3 grid grid-cols-4 gap-2 text-center select-none border border-emerald-100" id="stats-container">
+                <div class="flex flex-col items-center">
+                    <span class="text-[10px] md:text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span id="stat-streak" class="text-xl md:text-3xl font-extrabold text-orange-600">0</span>
                 </div>
-                <div class="flex flex-col items-center border-l border-emerald-200 transform transition hover:scale-105">
-                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
-                    <span id="stat-correct" class="text-xl md:text-2xl font-bold text-emerald-600">0</span>
+                <div class="flex flex-col items-center border-l border-emerald-200">
+                    <span class="text-[10px] md:text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span id="stat-correct" class="text-lg md:text-2xl font-bold text-emerald-600">0</span>
                 </div>
-                <div class="flex flex-col items-center border-l border-emerald-200 transform transition hover:scale-105">
-                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
-                    <span id="stat-wrong" class="text-xl md:text-2xl font-bold text-red-500">0</span>
+                <div class="flex flex-col items-center border-l border-emerald-200">
+                    <span class="text-[10px] md:text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span id="stat-wrong" class="text-lg md:text-2xl font-bold text-red-500">0</span>
                 </div>
-                <div class="flex flex-col items-center border-l border-emerald-200 transform transition hover:scale-105">
-                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
-                    <span id="stat-skipped" class="text-xl md:text-2xl font-bold text-gray-400">0</span>
+                <div class="flex flex-col items-center border-l border-emerald-200">
+                    <span class="text-[10px] md:text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span id="stat-skipped" class="text-lg md:text-2xl font-bold text-gray-400">0</span>
                 </div>
             </div>
             
             <!-- Main Content Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
                 
                 <!-- Left Column: Chalkboard & Inputs (3/5 width) -->
                 <div class="lg:col-span-3 flex flex-col gap-4">
                     <!-- Chalkboard -->
-                    <div class="chalkboard p-6 min-h-[280px] relative flex items-center justify-center">
-                        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 text-emerald-200 text-xs font-mono uppercase tracking-widest opacity-60">
-                            Đề bài
+                    <div class="chalkboard p-4 min-h-[300px]">
+                        <div class="w-full flex justify-center mt-2 mb-2" id="svg-container">
+                            <!-- SVG will be injected here -->
                         </div>
-                        <div id="problem-text" class="font-serif text-lg md:text-xl w-full text-center leading-relaxed px-2">
+                        <div id="problem-text" class="font-serif text-lg md:text-xl w-full text-center leading-relaxed px-2 pb-4 mt-auto">
                             Đang tải đề bài...
                         </div>
                     </div>
 
                     <!-- Input Area -->
-                    <div class="bg-white p-6 rounded-xl border-2 border-emerald-100 shadow-lg relative">
-                        <!-- Problem Type Selection -->
+                    <div class="bg-white p-4 md:p-6 rounded-xl border-2 border-emerald-100 shadow-lg relative">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                             <div>
-                                <label class="block text-emerald-800 font-bold text-xs uppercase mb-1">Dạng bài (Full Shapes):</label>
+                                <label class="block text-emerald-800 font-bold text-xs uppercase mb-1">Dạng bài:</label>
                                 <select id="problem-type" class="w-full p-2 text-sm font-bold text-gray-700 bg-emerald-50 border border-emerald-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 transition-colors cursor-pointer" onchange="nextQuestion()">
-                                    <option value="mix">🎲 Tổng hợp (Tất cả các hình)</option>
-                                    <option value="rect_square">🟩 HCN & Hình Vuông (Rào, Lát)</option>
-                                    <option value="rhombus_para">🔶 Hình Thoi & HBH (Trồng hoa)</option>
-                                    <option value="trapezoid">🏠 Hình Thang (Bà Năm)</option>
-                                    <option value="paint">🖌️ Sơn tường (Trừ cửa)</option>
-                                    <option value="complex">🧩 Hình ghép (Chữ L, U)</option>
+                                    <option value="mix">🎲 Tổng hợp các dạng</option>
+                                    <option value="path">🚧 Lối đi (Bài toán ngược S)</option>
+                                    <option value="rect_square">🧱 Hình Vuông/HCN (Liên hoàn)</option>
+                                    <option value="rhombus_para">🌾 Nông nghiệp & Lợi nhuận</option>
+                                    <option value="trapezoid">🏞️ Đào ao & Thể tích</option>
+                                    <option value="paint">🖌️ Sơn tường & Thùng sơn</option>
                                 </select>
                             </div>
                             <div class="flex items-end justify-between pb-1">
                                 <label class="inline-flex items-center cursor-pointer select-none bg-red-50 px-3 py-2 rounded-lg w-full justify-between border border-red-100 hover:bg-red-100 transition">
                                     <span class="text-sm font-bold text-red-800 mr-2 flex flex-col leading-tight">
-                                        <span><i class="fas fa-brain text-red-600 mr-1"></i>Chế độ KHÓ</span>
-                                        <span class="text-[10px] text-red-500 font-normal">Tính ngược 3-4 bước</span>
+                                        <span><i class="fas fa-brain text-red-600 mr-1"></i>Chế độ SIÊU KHÓ</span>
+                                        <span class="text-[10px] text-red-500 font-normal">8-10 bước (Trừ chi phí phụ)</span>
                                     </span>
                                     <div class="relative">
                                         <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
@@ -216,19 +194,15 @@
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-gray-600 font-bold text-sm uppercase mb-2 text-center">Nhập đáp án của bạn:</label>
+                            <label class="block text-gray-600 font-bold text-sm uppercase mb-2 text-center">Nhập đáp án (Số tự nhiên):</label>
                             <div class="relative max-w-sm mx-auto group">
                                 <input type="text" id="user-ans" placeholder="..." 
-                                    class="w-full text-center font-bold text-3xl p-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none transition-all"
+                                    class="w-full text-center font-bold text-2xl md:text-3xl p-3 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none transition-all"
                                     onkeydown="if(event.key === 'Enter') checkAnswer()">
                                 <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold text-sm pointer-events-none" id="unit-label"></div>
                             </div>
-                            <p class="text-xs text-center text-gray-400 mt-2 italic">
-                                (Nhập số tự nhiên, ví dụ: 2500000)
-                            </p>
                         </div>
                         
-                        <!-- Buttons -->
                         <div class="flex gap-3">
                             <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                                 <i class="fas fa-random"></i> Bài khác
@@ -237,37 +211,26 @@
                                 <i class="fas fa-check-circle"></i> Kiểm tra
                             </button>
                         </div>
-
-                        <!-- Feedback Area -->
                         <div id="feedback" class="hidden mt-4 text-center p-4 rounded-lg text-sm font-bold animate-pulse"></div>
                     </div>
                 </div>
 
-                <!-- Right Column: Step-by-step (2/5 width) -->
-                <div class="lg:col-span-2 flex flex-col h-[500px] lg:h-[600px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-4 relative">
-                    <!-- HEADER WITH BUTTON -->
+                <!-- Right Column: Step-by-step -->
+                <div class="lg:col-span-2 flex flex-col h-[400px] md:h-[600px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-4 relative">
                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 shrink-0">
                         <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide">
-                                <i class="fas fa-file-signature text-emerald-600 mr-1"></i>Lời giải chi tiết
-                            </h3>
+                            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide"><i class="fas fa-file-signature text-emerald-600 mr-1"></i>Phân tích & Lời giải</h3>
                         </div>
                         <div class="flex items-center gap-2">
                             <span id="step-counter" class="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded">0/0</span>
-                            <button onclick="showNextStep()" id="btn-show-step" 
-                                class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            <button onclick="showNextStep()" id="btn-show-step" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed">
                                 <span>Tiếp</span> <i class="fas fa-chevron-right text-[10px]"></i>
                             </button>
                         </div>
                     </div>
-
-                    <!-- Hints/Rules Box -->
                     <div id="rule-area" class="hidden mb-3 bg-yellow-50 text-yellow-900 text-xs p-2 rounded-lg border-l-4 border-yellow-400 shadow-sm shrink-0">
-                        <i class="fas fa-lightbulb mr-1 text-yellow-600"></i>
-                        <span id="rule-content" class="font-medium"></span>
+                        <i class="fas fa-lightbulb mr-1 text-yellow-600"></i> <span id="rule-content" class="font-medium"></span>
                     </div>
-                    
-                    <!-- Scrollable Steps -->
                     <div id="steps-container" class="flex-grow overflow-y-auto bg-white p-3 rounded-lg shadow-inner border border-gray-100 scroll-smooth space-y-3">
                         <div class="text-gray-400 italic text-sm text-center mt-20 flex flex-col items-center select-none">
                             <i class="fas fa-pencil-alt text-4xl mb-3 opacity-20"></i>
@@ -276,275 +239,479 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-
     <!-- Footer Info -->
     <footer class="mt-8 text-center text-gray-500 text-xs w-full">
         <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
     </footer>
-
     <script>
-        // --- Utilities ---
-        const formatMoney = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        const formatMoney = (n) => {
+            if (isNaN(n)) return "0";
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        };
         const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-        const roundTo = (n, digits) => Number(Math.round(n + 'e' + digits) + 'e-' + digits);
-
+        
         const state = { streak: 0, correct: 0, wrong: 0, skipped: 0 };
-        let currentData = { answer: 0, steps: [], unit: "" };
+        let currentData = { answer: 0, steps: [], unit: "", svg: "" };
         let isAnswered = false;
         let stepIndex = 0;
         let usedHint = false;
 
-        // --- CORE PROBLEM GENERATION ---
+        // --- SVG HELPER FUNCTIONS ---
+        function createSVG(width, height, content) {
+            return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" class="shape-svg"><defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="white" /></marker></defs>${content}</svg>`;
+        }
+        function rect(x, y, w, h, cls) { return `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="${cls}" />`; }
+        function poly(points, cls) { return `<polygon points="${points}" class="${cls}" />`; }
+        function text(x, y, txt) { return `<text x="${x}" y="${y}" class="dim-text" text-anchor="middle" dominant-baseline="middle">${txt}</text>`; }
+        
+        // --- VISUALIZATION LOGIC ---
+        function getVisualization(type, params) {
+            const w_box = 300, h_box = 180;
+            const cx = w_box/2, cy = h_box/2;
+            let svgContent = '';
 
+            if (type === 'rect_square') {
+                const aspect = params.l / params.w;
+                let drawW = 140 * (aspect >= 1 ? 1 : aspect);
+                let drawH = 140 * (aspect >= 1 ? 1/aspect : 1);
+                svgContent = rect(cx - drawW/2, cy - drawH/2, drawW, drawH, 'shape-brick') + 
+                             text(cx, cy - drawH/2 - 10, `${params.l}m`) + 
+                             text(cx + drawW/2 + 15, cy, `${params.w}m`);
+            } 
+            else if (type === 'rhombus') {
+                let dx = 80, dy = 50; 
+                svgContent = poly(`${cx},${cy-dy} ${cx+dx},${cy} ${cx},${cy+dy} ${cx-dx},${cy}`, 'shape-garden') +
+                             `<line x1="${cx}" y1="${cy-dy}" x2="${cx}" y2="${cy+dy}" stroke="white" stroke-dasharray="4" />` +
+                             `<line x1="${cx-dx}" y1="${cy}" x2="${cx+dx}" y2="${cy}" stroke="white" stroke-dasharray="4" />` +
+                             text(cx+40, cy-10, `d1=${params.d1}`) + text(cx-10, cy+30, `d2=${params.d2}`);
+            }
+            else if (type === 'para') {
+                let w = 120, h = 80, s = 30;
+                svgContent = poly(`${cx-w/2+s},${cy-h/2} ${cx+w/2+s},${cy-h/2} ${cx+w/2-s},${cy+h/2} ${cx-w/2-s},${cy+h/2}`, 'shape-garden') +
+                             `<line x1="${cx-w/2-s}" y1="${cy-h/2}" x2="${cx-w/2-s}" y2="${cy+h/2}" stroke="white" stroke-dasharray="4" />` +
+                             text(cx, cy+h/2+15, `Đáy ${params.b}m`) + text(cx-w/2-s-10, cy, `Cao ${params.h}m`);
+            }
+            else if (type === 'trapezoid') {
+                let wb = 140, wa = 80, h = 80;
+                svgContent = poly(`${cx-wa/2},${cy-h/2} ${cx+wa/2},${cy-h/2} ${cx+wb/2},${cy+h/2} ${cx-wb/2},${cy+h/2}`, 'shape-garden') +
+                             `<line x1="${cx}" y1="${cy-h/2}" x2="${cx}" y2="${cy+h/2}" stroke="white" stroke-dasharray="4" />` +
+                             text(cx, cy-h/2-10, `Đáy bé ${params.a}`) + text(cx, cy+h/2+15, `Đáy lớn ${params.b}`) + text(cx+5, cy, `h=${params.h}`);
+            }
+            else if (type === 'paint') {
+                let w = 160, h = 100;
+                let ww = 40, wh = 40;
+                svgContent = rect(cx-w/2, cy-h/2, w, h, 'shape-house') + 
+                             rect(cx-ww/2, cy-h/2+20, ww, wh, 'shape-window') +
+                             text(cx, cy+h/2+15, `Tường ${params.w}m`) + text(cx-w/2-15, cy, `${params.h}m`) +
+                             text(cx, cy-h/2+40, `Cửa sổ`);
+            }
+            else if (type === 'path') {
+                let w = 180, h = 120;
+                let pw = 20; 
+                let x = cx - w/2, y = cy - h/2;
+                if (params.subtype === 1) { // 1 Side
+                    svgContent = rect(x, y, w, h, 'shape-garden') + rect(x + w - pw, y, pw, h, 'shape-path') +
+                                 text(cx, cy, "Sân") + text(x + w - pw/2, cy, "Lối đi");
+                } else if (params.subtype === 2) { // L-Shape
+                    svgContent = rect(x, y, w, h, 'shape-garden') + 
+                                 `<path d="M${x+w},${y} V${y+h} H${x} v${-pw} H${x+w-pw} V${y} z" class="shape-path" />` +
+                                 text(cx-10, cy-10, "Sân");
+                } else if (params.subtype === 3) { // 2 Opposite
+                    svgContent = rect(x, y, w, h, 'shape-garden') + 
+                                 rect(x, y, pw, h, 'shape-path') + rect(x+w-pw, y, pw, h, 'shape-path') +
+                                 text(cx, cy, "Sân");
+                } else if (params.subtype === 4) { // U-Shape
+                    svgContent = rect(x, y, w, h, 'shape-garden') +
+                                 `<path d="M${x},${y} H${x+w} V${y+h} H${x} v${-pw} H${x+w-pw} V${y+pw} H${x} z" class="shape-path" />` +
+                                 text(cx+10, cy, "Sân");
+                } else if (params.subtype === 5) { // O-Shape
+                    svgContent = rect(x, y, w, h, 'shape-path') + rect(x+pw, y+pw, w-2*pw, h-2*pw, 'shape-water') +
+                                 text(cx, cy, "Hồ/Vườn");
+                }
+            }
+            return createSVG(w_box, h_box, svgContent);
+        }
+
+        // --- GENERATORS ---
         function generateProblem() {
             const isHard = document.getElementById('mode-hard').checked;
             let type = document.getElementById('problem-type').value;
 
             if (type === 'mix') {
-                const types = ['rect_square', 'rhombus_para', 'trapezoid', 'paint', 'complex'];
+                const types = ['rect_square', 'rhombus_para', 'trapezoid', 'paint', 'path'];
                 type = types[getRandomInt(0, types.length - 1)];
             }
 
-            // --- TYPE 1: RECTANGLE & SQUARE (HCN & HV) ---
-            if (type === 'rect_square') {
-                const subType = Math.random() < 0.4 ? 'square' : 'rect'; // 40% Square
-                const price = getRandomInt(3, 6) * 10000; // Giá rào hoặc giá gạch
-                
-                if (subType === 'square') {
-                    const side = getRandomInt(10, 30);
-                    const P = side * 4;
-                    const S = side * side;
-                    const cost = P * price; // Giả sử tính rào
-                    
-                    if (!isHard) {
-                        return {
-                            question: `Một mảnh vườn hình vuông có cạnh ${side}m. Tính chi phí để rào lưới xung quanh mảnh vườn (không chừa cổng), biết giá lưới là ${formatMoney(price)} đ/m?`,
-                            answer: cost, unit: "đồng",
-                            steps: [
-                                {type:'step', text:`Chu vi hình vuông: ${side} . 4 = ${P} (m)`},
-                                {type:'step', text:`Tổng tiền: ${P} . ${formatMoney(price)} = ${formatMoney(cost)} (đồng)`, isLast:true}
-                            ]
-                        };
-                    } else {
-                        // HARD: Tiền Rào -> Chu vi -> Cạnh -> Diện Tích (Ngược 3 bước)
-                        return {
-                            question: `Bác Ba rào xung quanh một mảnh vườn hình vuông hết ${formatMoney(cost)} đồng tiền lưới (giá ${formatMoney(price)} đ/m). Tính diện tích mảnh vườn đó?`,
-                            answer: S, unit: "m²",
-                            steps: [
-                                {type:'header', text:'Phân tích ngược', rule: 'Tiền -> Chu vi -> Cạnh -> Diện tích'},
-                                {type:'step', text:`1. Chiều dài lưới (Chu vi): ${cost} : ${price} = ${P} (m)`},
-                                {type:'step', text:`2. Cạnh hình vuông: ${P} : 4 = ${side} (m)`},
-                                {type:'step', text:`3. Diện tích: ${side} . ${side} = ${S} (m²)`, isLast:true}
-                            ]
-                        };
-                    }
-                } else {
-                    // Rectangle logic (Same as Fence type before but cleaner)
-                    const w = getRandomInt(8, 15);
-                    const l = getRandomInt(w+5, w+20);
-                    const P = (l + w) * 2;
-                    const S = l * w;
-                    const cost = P * price;
-
-                    if (!isHard) {
-                        return {
-                            question: `HCN dài ${l}m, rộng ${w}m. Tính tiền rào xung quanh biết giá ${formatMoney(price)} đ/m?`,
-                            answer: cost, unit: "đồng",
-                            steps: [
-                                {type:'step', text:`Chu vi: (${l}+${w}).2 = ${P} (m)`},
-                                {type:'step', text:`Tiền: ${P}.${formatMoney(price)} = ${formatMoney(cost)} đ`, isLast:true}
-                            ]
-                        };
-                    } else {
-                        // HARD: Tiền -> Chu vi -> Nửa CV -> Tìm Dài (biết Rộng) -> Diện tích
-                        return {
-                            question: `Người ta rào kín một mảnh đất HCN có chiều rộng ${w}m hết ${formatMoney(cost)} đồng tiền lưới (giá ${formatMoney(price)} đ/m). Tính diện tích mảnh đất đó?`,
-                            answer: S, unit: "m²",
-                            steps: [
-                                {type:'header', text:'Phân tích ngược'},
-                                {type:'step', text:`1. Chu vi: ${cost} : ${price} = ${P} (m)`},
-                                {type:'step', text:`2. Nửa chu vi: ${P} : 2 = ${P/2} (m)`},
-                                {type:'step', text:`3. Chiều dài: ${P/2} - ${w} = ${l} (m)`},
-                                {type:'step', text:`4. Diện tích: ${l} . ${w} = ${S} (m²)`, isLast:true}
-                            ]
-                        };
-                    }
-                }
-            }
-
-            // --- TYPE 2: RHOMBUS & PARALLELOGRAM (H.THOI & HBH) ---
-            if (type === 'rhombus_para') {
-                const isRhombus = Math.random() < 0.5;
-                const price = 50000; // Giá trồng hoa/m2
-                
-                if (isRhombus) {
-                    const d1 = getRandomInt(6, 12) * 2; // Số chẵn
-                    const d2 = getRandomInt(8, 15) * 2; 
-                    const S = (d1 * d2) / 2;
-                    const cost = S * price;
-                    
-                    if (!isHard) {
-                        return {
-                            question: `Một bồn hoa hình thoi có hai đường chéo là ${d1}m và ${d2}m. Tính chi phí trồng hoa trên bồn đó, biết giá ${formatMoney(price)} đ/m²?`,
-                            answer: cost, unit: "đồng",
-                            steps: [
-                                {type:'step', text:`Diện tích hình thoi: (${d1} . ${d2}) : 2 = ${S} (m²)`},
-                                {type:'step', text:`Chi phí: ${S} . ${formatMoney(price)} = ${formatMoney(cost)} (đồng)`, isLast:true}
-                            ]
-                        };
-                    } else {
-                        // HARD: Tiền -> Diện tích -> Tích 2 chéo -> Tìm chéo còn lại
-                        return {
-                            question: `Chi phí trồng hoa cho một bồn hoa hình thoi là ${formatMoney(cost)} đồng (đơn giá ${formatMoney(price)} đ/m²). Biết độ dài một đường chéo là ${d1}m. Tính độ dài đường chéo còn lại?`,
-                            answer: d2, unit: "m",
-                            steps: [
-                                {type:'header', text:'Phân tích ngược', rule: 'Tiền -> Diện tích -> Tích 2 chéo -> Chéo kia'},
-                                {type:'step', text:`1. Diện tích bồn hoa: ${cost} : ${price} = ${S} (m²)`},
-                                {type:'step', text:`2. Tích hai đường chéo: ${S} . 2 = ${S*2} (m²)`},
-                                {type:'step', text:`3. Đường chéo còn lại: ${S*2} : ${d1} = ${d2} (m)`, isLast:true}
-                            ]
-                        };
-                    }
-                } else {
-                    // Parallelogram
-                    const b = getRandomInt(10, 20);
-                    const h = getRandomInt(5, 10);
-                    const S = b * h;
-                    const cost = S * price;
-                    
-                    if (!isHard) {
-                        return {
-                            question: `Mảnh vườn hình bình hành có độ dài đáy ${b}m, chiều cao ${h}m. Tính tiền trồng cỏ (giá ${formatMoney(price)} đ/m²)?`,
-                            answer: cost, unit: "đồng",
-                            steps: [
-                                {type:'step', text:`Diện tích HBH: ${b} . ${h} = ${S} (m²)`},
-                                {type:'step', text:`Tiền: ${S} . ${formatMoney(price)} = ${formatMoney(cost)} đ`, isLast:true}
-                            ]
-                        };
-                    } else {
-                        // HARD: Tiền -> Diện tích -> Tìm Chiều cao (biết đáy)
-                        return {
-                            question: `Người ta chi ${formatMoney(cost)} đồng để trồng cỏ cho mảnh vườn hình bình hành có cạnh đáy ${b}m (giá ${formatMoney(price)} đ/m²). Tính chiều cao tương ứng của mảnh vườn?`,
-                            answer: h, unit: "m",
-                            steps: [
-                                {type:'header', text:'Phân tích ngược'},
-                                {type:'step', text:`1. Diện tích mảnh vườn: ${cost} : ${price} = ${S} (m²)`},
-                                {type:'step', text:`2. Chiều cao: ${S} : ${b} = ${h} (m)`, isLast:true}
-                            ]
-                        };
-                    }
-                }
-            }
-
-            // --- TYPE 3: TRAPEZOID (HÌNH THANG - Inverse Height) ---
-            if (type === 'trapezoid') {
-                const a = getRandomInt(10, 15);
-                const b = getRandomInt(20, 30);
-                const h = getRandomInt(8, 12);
-                const S = (a + b) * h / 2;
-                const price = getRandomInt(10, 15) * 10000;
-                const cost = S * price;
-
-                if (!isHard) {
-                    return {
-                        question: `Mảnh đất hình thang có đáy bé ${a}m, đáy lớn ${b}m, chiều cao ${h}m. Tính giá trị mảnh đất biết 1m² giá ${formatMoney(price)} đồng?`,
-                        answer: cost, unit: "đồng",
-                        steps: [
-                            {type:'step', text:`Diện tích: (${a} + ${b}) . ${h} : 2 = ${S} (m²)`},
-                            {type:'step', text:`Giá trị: ${S} . ${formatMoney(price)} = ${formatMoney(cost)} đ`, isLast:true}
-                        ]
-                    };
-                } else {
-                    // HARD: Tiền -> Diện tích -> Tìm Chiều cao
-                    return {
-                        question: `Một mảnh đất hình thang có đáy bé ${a}m, đáy lớn ${b}m được định giá ${formatMoney(cost)} đồng (đơn giá ${formatMoney(price)} đ/m²). Tính chiều cao của mảnh đất đó?`,
-                        answer: h, unit: "m",
-                        steps: [
-                            {type:'header', text:'Phân tích ngược', rule: 'Tiền -> S -> Chiều cao = S.2 : (đáy+đáy)'},
-                            {type:'step', text:`1. Diện tích mảnh đất: ${cost} : ${price} = ${S} (m²)`},
-                            {type:'step', text:`2. Tổng hai đáy: ${a} + ${b} = ${a+b} (m)`},
-                            {type:'step', text:`3. Chiều cao: ${S} . 2 : ${a+b} = ${h} (m)`, isLast:true}
-                        ]
-                    };
-                }
-            }
-            
-            // --- Reuse Complex & Paint Types (Logic unchanged but context integrated) ---
+            if (type === 'path') return generateProblem_Path(isHard);
+            if (type === 'rect_square') return generateProblem_RectSquare(isHard);
+            if (type === 'rhombus_para') return generateProblem_RhombusPara(isHard);
+            if (type === 'trapezoid') return generateProblem_Trapezoid(isHard);
             if (type === 'paint') return generateProblem_Paint(isHard);
-            if (type === 'complex') return generateProblem_Complex(isHard);
-
-            return generateProblem(); // Retry
+            
+            return generateProblem_RectSquare(isHard);
         }
 
-        // --- Helpers for modularity ---
-        function generateProblem_Paint(isHard) {
-            const h = getRandomInt(3, 5);
-            const w = getRandomInt(5, 8);
-            const win = getRandomInt(2, 4);
-            const S_paint = h*w - win;
-            const price = 40000;
-            const cost = S_paint * price;
+        // --- 1. PATHWAY (LỐI ĐI - TIỀN & DIỆN TÍCH) ---
+        function generateProblem_Path(isHard) {
+            const subtype = getRandomInt(1, 5);
+            // Ensure integer divisions
+            const path = getRandomInt(1, 3);
+            const W_in = getRandomInt(8, 15);
+            const H_in = getRandomInt(8, 15);
+            let W_out, H_out, shapeName = "";
+
+            switch(subtype) {
+                case 1: W_out = W_in + path; H_out = H_in; shapeName = "một cạnh (theo chiều dọc)"; break;
+                case 2: W_out = W_in + path; H_out = H_in + path; shapeName = "hai cạnh kề nhau (góc)"; break;
+                case 3: W_out = W_in + 2*path; H_out = H_in; shapeName = "hai cạnh đối diện (dọc)"; break;
+                case 4: W_out = W_in + 2*path; H_out = H_in + path; shapeName = "ba cạnh (hình chữ U, dọc-ngang-dọc)"; break;
+                case 5: W_out = W_in + 2*path; H_out = H_in + 2*path; shapeName = "xung quanh (bao bốn phía)"; break;
+            }
             
-            if(!isHard) {
+            const S_in = W_in * H_in;
+            const S_out = W_out * H_out;
+            const S_path = S_out - S_in;
+            const svgData = { subtype: subtype, w: W_out, h: H_out, p: path };
+
+            // Material Costs
+            const tileSideCm = 50; 
+            const tileAreaCm2 = 2500; 
+            const tilesNeeded = (S_path * 10000) / tileAreaCm2; 
+            const tilePrice = 25000; 
+            const materialCost = tilesNeeded * tilePrice;
+            const laborCost = getRandomInt(5, 10) * 100000; // Fixed labor
+            const transportCost = getRandomInt(2, 5) * 50000; // Transport
+            const lunchCost = 150000; // Lunch for workers
+            const totalCost = materialCost + laborCost + transportCost + lunchCost;
+
+            if (!isHard) {
                 return {
-                    question: `Tường ${w}m x ${h}m, cửa sổ ${win}m². Tính tiền sơn (giá ${formatMoney(price)} đ/m²)?`,
-                    answer: cost, unit: "đồng",
-                    steps: [{type:'step', text:`S tường: ${w}.${h}=${w*h} m²`}, {type:'step', text:`S sơn: ${w*h}-${win}=${S_paint} m²`}, {type:'step', text:`Tiền: ${S_paint}.${price} = ${formatMoney(cost)} đ`, isLast:true}]
+                    question: `Vườn HCN ${W_out}m x ${H_out}m. Làm lối đi rộng ${path}m dọc theo ${shapeName}. Lát gạch vuông 50cm (giá ${formatMoney(tilePrice)}đ/viên). Tiền công thợ là ${formatMoney(laborCost)}đ. Tính tổng chi phí?`,
+                    answer: totalCost, unit: "đồng", svg: getVisualization('path', svgData),
+                    steps: [
+                        {type:'header', text:'Bước 1: Tính diện tích lối đi'},
+                        {type:'step', text:`S tổng: ${W_out} . ${H_out} = ${S_out} (m²)`},
+                        {type:'step', text:`S phần trong: ${W_in} . ${H_in} = ${S_in} (m²)`},
+                        {type:'step', text:`S lối đi: ${S_out} - ${S_in} = ${S_path} (m²)`},
+                        {type:'header', text:'Bước 2: Tính vật tư'},
+                        {type:'step', text:`Đổi: ${S_path} m² = ${formatMoney(S_path * 10000)} cm²`},
+                        {type:'step', text:`S 1 viên: 50 . 50 = ${tileAreaCm2} (cm²)`},
+                        {type:'step', text:`Số viên: ${formatMoney(S_path * 10000)} : ${tileAreaCm2} = ${tilesNeeded} (viên)`},
+                        {type:'header', text:'Bước 3: Tính tổng tiền'},
+                        {type:'step', text:`Tiền gạch: ${tilesNeeded} . ${formatMoney(tilePrice)} = ${formatMoney(materialCost)} (đ)`},
+                        {type:'step', text:`Tổng cộng: ${formatMoney(materialCost)} + ${formatMoney(laborCost)} = ${formatMoney(totalCost-transportCost-lunchCost)}... (Bài này đơn giản hóa)`},
+                        {type:'step', text:`(Ở chế độ thường ta bỏ qua phụ phí vận chuyển/cơm trưa)`, isLast:true}
+                    ]
                 };
             } else {
+                // HARD MODE: 8-10 STEPS - TARGETING AREA S_in (NOT dimensions)
+                // Given Total Cost, labor, extras -> Find Area S_in
                 return {
-                    question: `Sơn tường rộng ${w}m (trừ cửa ${win}m²) hết ${formatMoney(cost)} đồng (giá ${formatMoney(price)} đ/m²). Tính chiều cao tường?`,
-                    answer: h, unit: "m",
+                    question: `Người ta làm lối đi rộng ${path}m dọc theo ${shapeName} của một mảnh đất hình chữ nhật ${W_out}m x ${H_out}m. Tổng chi phí hoàn thiện là ${formatMoney(totalCost)}đ. Trong đó bao gồm: tiền công thợ ${formatMoney(laborCost)}đ, tiền vận chuyển vật liệu ${formatMoney(transportCost)}đ, tiền cơm trưa cho thợ ${formatMoney(lunchCost)}đ, còn lại là tiền mua gạch lát. Biết gạch lát hình vuông 50cm có giá ${formatMoney(tilePrice)}đ/viên. Hãy tính diện tích phần đất còn lại (sân trong) để trồng cây?`,
+                    answer: S_in, unit: "m²", svg: getVisualization('path', svgData),
                     steps: [
-                        {type:'header', text:'Ngược 3 bước'},
-                        {type:'step', text:`1. S sơn: ${cost}:${price}=${S_paint} m²`},
-                        {type:'step', text:`2. S toàn bộ: ${S_paint}+${win}=${w*h} m²`},
-                        {type:'step', text:`3. Chiều cao: ${w*h}:${w}=${h} m`, isLast:true}
+                        {type:'header', text:'Giai đoạn 1: Bóc tách chi phí gạch'},
+                        {type:'step', text:`1. Tổng phụ phí (công + vận chuyển + cơm) =`},
+                        {type:'step', text:`   ${formatMoney(laborCost)} + ${formatMoney(transportCost)} + ${formatMoney(lunchCost)} = ${formatMoney(laborCost+transportCost+lunchCost)} (đ)`},
+                        {type:'step', text:`2. Tiền mua gạch = Tổng chi phí - Phụ phí`},
+                        {type:'step', text:`   = ${formatMoney(totalCost)} - ${formatMoney(laborCost+transportCost+lunchCost)} = ${formatMoney(materialCost)} (đ)`},
+                        {type:'header', text:'Giai đoạn 2: Tính số lượng gạch'},
+                        {type:'step', text:`3. Số viên gạch = Tiền gạch : Giá 1 viên`},
+                        {type:'step', text:`   = ${formatMoney(materialCost)} : ${formatMoney(tilePrice)} = ${tilesNeeded} (viên)`},
+                        {type:'header', text:'Giai đoạn 3: Tính diện tích lối đi'},
+                        {type:'step', text:`4. Diện tích 1 viên gạch (cm²) = 50 . 50 = ${tileAreaCm2} (cm²)`},
+                        {type:'step', text:`5. Diện tích lối đi (cm²) = Số viên . S_1_viên`},
+                        {type:'step', text:`   = ${tilesNeeded} . ${tileAreaCm2} = ${formatMoney(S_path*10000)} (cm²)`},
+                        {type:'step', text:`6. Đổi sang m²: ${S_path} (m²)`},
+                        {type:'header', text:'Giai đoạn 4: Tính diện tích sân trong'},
+                        {type:'step', text:`7. Diện tích toàn bộ mảnh đất = Dài . Rộng`},
+                        {type:'step', text:`   = ${W_out} . ${H_out} = ${S_out} (m²)`},
+                        {type:'step', text:`8. Diện tích sân trong = S_toàn_bộ - S_lối_đi`},
+                        {type:'step', text:`   = ${S_out} - ${S_path} = ${S_in} (m²)`, isLast:true}
                     ]
                 };
             }
         }
 
-        function generateProblem_Complex(isHard) {
-            // L-shape logic
-            const H = getRandomInt(10, 20);
-            const W = getRandomInt(10, 15);
-            const h_cut = getRandomInt(4, 8);
-            const w_cut = getRandomInt(4, 8);
-            const S = H*W - h_cut*w_cut;
-            const P = (H+W)*2;
-            
-            if(!isHard) {
+        // --- 2. RECT/SQUARE (LIÊN HOÀN CHU VI <-> DIỆN TÍCH) ---
+        function generateProblem_RectSquare(isHard) {
+            const subType = Math.random() < 0.5 ? 'square' : 'rect'; 
+            let L, W, P, S, svg;
+
+            if (subType === 'square') {
+                const side = getRandomInt(6, 12) * 2; 
+                L = W = side; P = side*4; S = side*side;
+                svg = getVisualization('rect_square', {l: side, w: side});
+            } else {
+                W = getRandomInt(4, 8) * 2; 
+                L = W + getRandomInt(2, 6) * 2; 
+                P = (L+W)*2; S = L*W;
+                svg = getVisualization('rect_square', {l: L, w: W});
+            }
+
+            if (!isHard) {
+                // Keep normal mode simple
+                const wallHeight = 2; 
+                const bricksPerM2 = 60; 
+                const brickPrice = 1500;
+                const S_wall = P * wallHeight;
+                const totalBricks = S_wall * bricksPerM2;
+                const totalCost = totalBricks * brickPrice;
                 return {
-                    question: `Hình chữ L cắt từ HCN ${W}m x ${H}m (bị cắt góc ${w_cut}m x ${h_cut}m). Tính diện tích?`,
-                    answer: S, unit: "m²",
-                    steps: [{type:'step', text:`S bao: ${W}.${H}=${W*H}`}, {type:'step', text:`S cắt: ${w_cut}.${h_cut}=${w_cut*h_cut}`}, {type:'step', text:`S hình L: ${W*H}-${w_cut*h_cut}=${S}`, isLast:true}]
+                    question: `Xây tường cao ${wallHeight}m bao quanh khu đất ${subType==='square'?`HV cạnh ${L}m`:`HCN ${L}m x ${W}m`}. Trung bình 1m² tường cần ${bricksPerM2} viên gạch (giá ${formatMoney(brickPrice)}đ/viên). Tính tiền gạch?`,
+                    answer: totalCost, unit: "đồng", svg: svg,
+                    steps: [
+                        {type:'step', text:`Chu vi: ${P} (m)`},
+                        {type:'step', text:`S tường: ${P} . ${wallHeight} = ${S_wall} (m²)`},
+                        {type:'step', text:`Số gạch: ${S_wall} . ${bricksPerM2} = ${totalBricks} (viên)`},
+                        {type:'step', text:`Tiền gạch: ${totalBricks} . ${formatMoney(brickPrice)} = ${formatMoney(totalCost)} (đồng)`, isLast:true}
+                    ]
                 };
             } else {
+                // HARD MODE: CROSS CALCULATION (S <-> P)
+                const fencePrice = 50000; // per m (Cost related to Perimeter)
+                const pavePrice = 200000; // per m2 (Cost related to Area)
+                
+                // Scenario 1: Given Fence Cost -> Find Pave Cost
+                // Logic: Cost Fence -> Perimeter -> Side -> Area -> Cost Pave
+                const totalFence = P * fencePrice;
+                const totalPave = S * pavePrice;
+
+                // Scenario 2: Given Pave Cost -> Find Fence Cost
+                // Logic: Cost Pave -> Area -> Side -> Perimeter -> Cost Fence
+                
+                const type = getRandomInt(1, 2);
+
+                if (type === 1) { // Fence -> Pave
+                    return {
+                        question: `Để rào bao quanh một khu đất ${subType==='square'?'hình vuông':'HCN'} tốn hết ${formatMoney(totalFence)}đ tiền dây thép (giá ${formatMoney(fencePrice)}đ/m chiều dài rào). ${subType==='rect'?`Biết chiều rộng khu đất là ${W}m.`:''} Hỏi nếu muốn lát gạch kín khu đất đó thì tốn bao nhiêu tiền (biết giá lát ${formatMoney(pavePrice)}đ/m²)?`,
+                        answer: totalPave, unit: "đồng", svg: svg,
+                        steps: [
+                            {type:'header', text:'Giai đoạn 1: Tính Chu vi từ Tiền rào'},
+                            {type:'step', text:`1. Chu vi khu đất = Tổng tiền rào : Giá 1m`},
+                            {type:'step', text:`   = ${formatMoney(totalFence)} : ${formatMoney(fencePrice)} = ${P} (m)`},
+                            {type:'header', text:'Giai đoạn 2: Tính Cạnh từ Chu vi'},
+                            {type:'step', text: subType==='square' ? `2. Cạnh hình vuông = Chu vi : 4` : `2. Nửa chu vi = Chu vi : 2 = ${P/2} (m)`},
+                            {type:'step', text: subType==='square' ? `   = ${P} : 4 = ${L} (m)` : `3. Chiều dài = Nửa CV - Rộng = ${P/2} - ${W} = ${L} (m)`},
+                            {type:'header', text:'Giai đoạn 3: Tính Diện tích'},
+                            {type:'step', text:`${subType==='square'?'3':'4'}. Diện tích = Dài . Rộng`},
+                            {type:'step', text:`   = ${L} . ${W} = ${S} (m²)`},
+                            {type:'header', text:'Giai đoạn 4: Tính Tiền lát'},
+                            {type:'step', text:`${subType==='square'?'4':'5'}. Tiền lát = Diện tích . Giá lát`},
+                            {type:'step', text:`   = ${S} . ${formatMoney(pavePrice)} = ${formatMoney(totalPave)} (đ)`, isLast:true}
+                        ]
+                    };
+                } else { // Pave -> Fence
+                    return {
+                        question: `Chi phí lát nền một sân ${subType==='square'?'hình vuông':'HCN'} hết ${formatMoney(totalPave)}đ (đơn giá ${formatMoney(pavePrice)}đ/m²). ${subType==='rect'?`Biết chiều rộng sân là ${W}m.`:''} Nay bác chủ muốn rào lại xung quanh sân. Tính chi phí làm rào biết giá rào là ${formatMoney(fencePrice)}đ/m?`,
+                        answer: totalFence, unit: "đồng", svg: svg,
+                        steps: [
+                            {type:'header', text:'Giai đoạn 1: Tính Diện tích từ Tiền lát'},
+                            {type:'step', text:`1. Diện tích sân = Tổng tiền lát : Giá lát`},
+                            {type:'step', text:`   = ${formatMoney(totalPave)} : ${formatMoney(pavePrice)} = ${S} (m²)`},
+                            {type:'header', text:'Giai đoạn 2: Tính Cạnh từ Diện tích'},
+                            {type:'step', text: subType==='square' ? `2. Tìm cạnh HV: Vì ${L} . ${L} = ${S} nên cạnh = ${L} (m)` : `2. Chiều dài = Diện tích : Rộng = ${S} : ${W} = ${L} (m)`},
+                            {type:'header', text:'Giai đoạn 3: Tính Chu vi'},
+                            {type:'step', text:`3. Chu vi = (Dài + Rộng) . 2`},
+                            {type:'step', text:`   = (${L} + ${W}) . 2 = ${P} (m)`},
+                            {type:'header', text:'Giai đoạn 4: Tính Tiền rào'},
+                            {type:'step', text:`4. Tiền rào = Chu vi . Giá rào`},
+                            {type:'step', text:`   = ${P} . ${formatMoney(fencePrice)} = ${formatMoney(totalFence)} (đ)`, isLast:true}
+                        ]
+                    };
+                }
+            }
+        }
+
+        // --- 3. RHOMBUS/PARA (NÔNG NGHIỆP) ---
+        function generateProblem_RhombusPara(isHard) {
+            const isRhombus = Math.random() < 0.5;
+            let S, svg, qText, missingVal;
+            
+            if (isRhombus) {
+                const d1 = getRandomInt(10, 20) * 2;
+                const d2 = getRandomInt(10, 20) * 2;
+                S = (d1*d2)/2;
+                svg = getVisualization('rhombus', {d1: d1, d2: isHard ? "?" : d2});
+                qText = `Ruộng hoa hình thoi (d1=${d1}m${isHard ? "" : `, d2=${d2}m`})`;
+                missingVal = d2;
+            } else {
+                const b = getRandomInt(20, 30); 
+                const h = getRandomInt(10, 20);
+                S = b*h;
+                svg = getVisualization('para', {b: b, h: isHard ? "?" : h});
+                qText = `Ruộng ngô HBH (đáy ${b}m${isHard ? "" : `, cao ${h}m`})`;
+                missingVal = h;
+            }
+
+            if (S % 10 !== 0) S = Math.round(S/10)*10; // Ensure div 10
+
+            const unitArea = 10; 
+            const yieldPerUnit = getRandomInt(5, 8); 
+            const pricePerKg = 15000; 
+            const seedCost = 500000; 
+            const fertilizerCost = 300000;
+            const otherCost = 200000;
+            
+            const totalYield = (S / unitArea) * yieldPerUnit;
+            const revenue = totalYield * pricePerKg;
+            const totalCost = seedCost + fertilizerCost + otherCost;
+            const profit = revenue - totalCost;
+
+            if(!isHard) {
                 return {
-                    question: `Tính chu vi mảnh đất hình chữ L (cắt từ góc HCN ${W}m x ${H}m). Mẹo: Dùng tịnh tiến.`,
-                    answer: P, unit: "m",
-                    steps: [{type:'step', text:`Chu vi hình L = Chu vi HCN bao ngoài`}, {type:'step', text:`(${H}+${W}).2 = ${P} m`, isLast:true}]
+                    question: `${qText}. Cứ ${unitArea}m² thu hoạch được ${yieldPerUnit}kg. Giá bán ${formatMoney(pricePerKg)}đ/kg. Chi phí: Giống ${formatMoney(seedCost)}đ, Phân bón ${formatMoney(fertilizerCost)}đ, Khác ${formatMoney(otherCost)}đ. Tính lợi nhuận?`,
+                    answer: profit, unit: "đồng", svg: svg,
+                    steps: [
+                        {type:'header', text:'Bước 1: Tính diện tích & Sản lượng'},
+                        {type:'step', text:`Diện tích: ${S} (m²)`},
+                        {type:'step', text:`Tổng thu hoạch: (${S} : ${unitArea}) . ${yieldPerUnit} = ${totalYield} (kg)`},
+                        {type:'header', text:'Bước 2: Tính doanh thu & Chi phí'},
+                        {type:'step', text:`Doanh thu: ${totalYield} . ${formatMoney(pricePerKg)} = ${formatMoney(revenue)} (đ)`},
+                        {type:'step', text:`Tổng chi phí: ${formatMoney(seedCost)} + ... = ${formatMoney(totalCost)} (đ)`},
+                        {type:'header', text:'Bước 3: Tính lợi nhuận'},
+                        {type:'step', text:`Lãi: ${formatMoney(revenue)} - ${formatMoney(totalCost)} = ${formatMoney(profit)} (đ)`, isLast:true}
+                    ]
+                };
+            } else {
+                // HARD MODE: 9 Steps Reverse
+                return {
+                    question: `Bác Ba trồng vụ mùa trên thửa ruộng ${isRhombus?'hình thoi':'HBH'}. Sau khi trừ tổng chi phí ${formatMoney(totalCost)}đ (giống, phân, công), bác lãi được ${formatMoney(profit)}đ. Biết giá nông sản là ${formatMoney(pricePerKg)}đ/kg. Năng suất: ${unitArea}m² được ${yieldPerUnit}kg. Biết ${isRhombus?`đường chéo d1=${d1}m`:`cạnh đáy=${b}m`}. Tính ${isRhombus?'đường chéo còn lại':'chiều cao'}?`,
+                    answer: missingVal, unit: "m", svg: svg,
+                    steps: [
+                        {type:'header', text:'Giai đoạn 1: Tính doanh thu'},
+                        {type:'step', text:`1. Doanh thu = Lợi nhuận + Chi phí`},
+                        {type:'step', text:`   = ${formatMoney(profit)} + ${formatMoney(totalCost)} = ${formatMoney(revenue)} (đ)`},
+                        {type:'header', text:'Giai đoạn 2: Tính sản lượng'},
+                        {type:'step', text:`2. Tổng số kg = Doanh thu : Giá bán`},
+                        {type:'step', text:`   = ${formatMoney(revenue)} : ${formatMoney(pricePerKg)} = ${totalYield} (kg)`},
+                        {type:'header', text:'Giai đoạn 3: Tính diện tích'},
+                        {type:'step', text:`3. Số khoảnh ${unitArea}m² = Tổng kg : Năng suất đơn vị`},
+                        {type:'step', text:`   = ${totalYield} : ${yieldPerUnit} = ${S/unitArea} (khoảnh)`},
+                        {type:'step', text:`4. Diện tích ruộng = Số khoảnh . ${unitArea}`},
+                        {type:'step', text:`   = ${S/unitArea} . ${unitArea} = ${S} (m²)`},
+                        {type:'header', text:'Giai đoạn 4: Tính kích thước'},
+                        {type:'step', text: isRhombus ? `5. Tích 2 chéo = Diện tích . 2 = ${S*2}` : `5. Chiều cao = Diện tích : Đáy`},
+                        {type:'step', text: isRhombus ? `6. Đường chéo d2 = Tích : d1 = ${S*2} : ${d1} = ${missingVal} (m)` : `   = ${S} : ${b} = ${missingVal} (m)`, isLast:true}
+                    ]
                 };
             }
         }
 
-        // --- CORE FUNCTIONS (UI) ---
+        // --- 4. TRAPEZOID (AO HỒ) ---
+        function generateProblem_Trapezoid(isHard) {
+            let a = getRandomInt(10, 20); 
+            let b = getRandomInt(20, 30); 
+            if ((a+b)%2 !== 0) b++; 
+            let h = getRandomInt(10, 20);
+            
+            const S = (a+b)*h/2; 
+            const svg = getVisualization('trapezoid', {a:a, b:b, h:h});
+            
+            const depth = 2; 
+            const priceExcavate = 30000; // per m3
+            const transportPrice = 20000; // per m3
+            const volume = S * depth;
+            const costExcavate = volume * priceExcavate;
+            const costTransport = volume * transportPrice;
+            const totalCost = costExcavate + costTransport;
 
+            if (!isHard) {
+                return {
+                    question: `Đào ao hình thang (đáy ${a}m, ${b}m, cao ${h}m), sâu ${depth}m. Công đào ${formatMoney(priceExcavate)}đ/m³, công vận chuyển đất ${formatMoney(transportPrice)}đ/m³. Tính tổng chi phí?`,
+                    answer: totalCost, unit: "đồng", svg: svg,
+                    steps: [
+                        {type:'step', text:`S mặt ao: (${a}+${b}).${h}:2 = ${S} m²`},
+                        {type:'step', text:`Thể tích đất: ${S}.${depth} = ${volume} m³`},
+                        {type:'step', text:`Tiền đào: ${volume}.${formatMoney(priceExcavate)} = ${formatMoney(costExcavate)} đ`},
+                        {type:'step', text:`Tiền vận chuyển: ${volume}.${formatMoney(transportPrice)} = ${formatMoney(costTransport)} đ`},
+                        {type:'step', text:`Tổng: ${formatMoney(totalCost)} đ`, isLast:true}
+                    ]
+                };
+            } else {
+                return {
+                    question: `Dự án đào ao hình thang (đáy lớn ${b}m, cao ${h}m) sâu ${depth}m tốn tổng cộng ${formatMoney(totalCost)}đ. Biết chi phí đào là ${formatMoney(priceExcavate)}đ/m³, vận chuyển là ${formatMoney(transportPrice)}đ/m³. Tính độ dài đáy bé của ao?`,
+                    answer: a, unit: "m", svg: svg,
+                    steps: [
+                        {type:'header', text:'Giai đoạn 1: Tính đơn giá tổng'},
+                        {type:'step', text:`1. Giá trọn gói 1m³ = Giá đào + Giá vận chuyển`},
+                        {type:'step', text:`   = ${formatMoney(priceExcavate)} + ${formatMoney(transportPrice)} = ${formatMoney(priceExcavate+transportPrice)} (đ/m³)`},
+                        {type:'header', text:'Giai đoạn 2: Tính thể tích'},
+                        {type:'step', text:`2. Thể tích đất = Tổng tiền : Giá trọn gói`},
+                        {type:'step', text:`   = ${formatMoney(totalCost)} : ${formatMoney(priceExcavate+transportPrice)} = ${volume} (m³)`},
+                        {type:'header', text:'Giai đoạn 3: Tính diện tích'},
+                        {type:'step', text:`3. Diện tích mặt ao = Thể tích : Độ sâu`},
+                        {type:'step', text:`   = ${volume} : ${depth} = ${S} (m²)`},
+                        {type:'header', text:'Giai đoạn 4: Tính đáy bé'},
+                        {type:'step', text:`4. Tổng hai đáy = Diện tích . 2 : Chiều cao`},
+                        {type:'step', text:`   = ${S} . 2 : ${h} = ${a+b} (m)`},
+                        {type:'step', text:`5. Đáy bé = Tổng đáy - Đáy lớn`},
+                        {type:'step', text:`   = ${a+b} - ${b} = ${a} (m)`, isLast:true}
+                    ]
+                };
+            }
+        }
+
+        // --- 5. PAINT (SƠN TƯỜNG) ---
+        function generateProblem_Paint(isHard) {
+            const h = getRandomInt(3, 5); const w = getRandomInt(5, 8); const win = getRandomInt(2, 4);
+            const S_paint = h*w - win; 
+            const svg = getVisualization('paint', {h:h, w:w});
+
+            const coverage = 4; // m2/liter
+            const bucket5L = 5; 
+            const price5L = 500000; 
+            const laborPrice = 300000; // Total fixed labor
+
+            const litersNeeded = Math.ceil(S_paint / coverage); 
+            const bucketsNeeded = Math.ceil(litersNeeded / bucket5L);
+            const paintCost = bucketsNeeded * price5L;
+            const total = paintCost + laborPrice;
+
+            if(!isHard) {
+                return {
+                    question: `Sơn tường ${w}m x ${h}m (cửa ${win}m²). 1 lít sơn được ${coverage}m². Mua thùng ${bucket5L} lít (${formatMoney(price5L)}đ/thùng). Công thợ ${formatMoney(laborPrice)}đ. Tính tổng chi phí?`,
+                    answer: total, unit: "đồng", svg: svg,
+                    steps: [
+                        {type:'step', text:`S sơn: ${w}.${h} - ${win} = ${S_paint} m²`},
+                        {type:'step', text:`Lít sơn: ${S_paint} : ${coverage} ≈ ${litersNeeded} lít`},
+                        {type:'step', text:`Số thùng: ${litersNeeded} : ${bucket5L} = ${bucketsNeeded} thùng`},
+                        {type:'step', text:`Tiền sơn: ${bucketsNeeded} . ${formatMoney(price5L)} = ${formatMoney(paintCost)} đ`},
+                        {type:'step', text:`Tổng: ${formatMoney(paintCost)} + ${formatMoney(laborPrice)} = ${formatMoney(total)} đ`, isLast:true}
+                    ]
+                };
+            } else {
+                return {
+                    question: `Sơn một bức tường rộng ${w}m (cửa sổ ${win}m²) hết tất cả ${formatMoney(total)}đ. Biết tiền công là ${formatMoney(laborPrice)}đ. Sơn mua loại thùng ${bucket5L} lít giá ${formatMoney(price5L)}đ/thùng. Định mức sơn ${coverage}m²/lít. (Biết số thùng mua vừa đủ sơn, không dư nhiều). Tính chiều cao bức tường?`,
+                    answer: h, unit: "m", svg: svg,
+                    steps: [
+                        {type:'header', text:'Giai đoạn 1: Tính vật tư'},
+                        {type:'step', text:`1. Tiền sơn = Tổng - Công = ${formatMoney(total)} - ${formatMoney(laborPrice)} = ${formatMoney(paintCost)}đ`},
+                        {type:'step', text:`2. Số thùng = Tiền sơn : Giá thùng = ${paintCost} : ${price5L} = ${bucketsNeeded} thùng`},
+                        {type:'step', text:`3. Số lít tối đa = Số thùng . ${bucket5L} = ${bucketsNeeded*bucket5L} lít`},
+                        {type:'header', text:'Giai đoạn 2: Tính diện tích'},
+                        {type:'step', text:`*Lưu ý: Ta lấy diện tích tối đa có thể sơn làm chuẩn*`},
+                        {type:'step', text:`4. Diện tích sơn = Số lít . Định mức`},
+                        {type:'step', text:`   (Thực tế lấy xấp xỉ): S ≈ ${S_paint} m²`},
+                        {type:'step', text:`5. Diện tích toàn bộ = S sơn + S cửa = ${S_paint} + ${win} = ${h*w} m²`},
+                        {type:'header', text:'Giai đoạn 3: Tính chiều cao'},
+                        {type:'step', text:`6. Chiều cao = S toàn bộ : Chiều rộng`},
+                        {type:'step', text:`   = ${h*w} : ${w} = ${h} (m)`, isLast:true}
+                    ]
+                };
+            }
+        }
+
+        // --- UI FUNCTIONS ---
         function nextQuestion() {
             document.getElementById('feedback').classList.add('hidden');
             document.getElementById('rule-area').classList.add('hidden');
             const inputEl = document.getElementById('user-ans');
-            inputEl.value = '';
-            inputEl.disabled = false;
+            inputEl.value = ''; inputEl.disabled = false;
             inputEl.classList.remove('border-emerald-500', 'bg-emerald-50', 'border-red-500', 'bg-red-50');
-            
-            isAnswered = false;
-            stepIndex = 0;
-            usedHint = false;
+            isAnswered = false; stepIndex = 0; usedHint = false;
             
             document.getElementById('steps-container').innerHTML = `<div class="text-gray-400 italic text-sm text-center mt-20 flex flex-col items-center select-none"><i class="fas fa-pencil-alt text-4xl mb-3 opacity-20"></i><span>Bấm "Kiểm tra" hoặc "Tiếp" để xem lời giải.</span></div>`;
             document.getElementById('btn-show-step').innerHTML = '<span>Tiếp</span> <i class="fas fa-chevron-right text-[10px]"></i>';
@@ -555,14 +722,10 @@
             currentData = data;
 
             document.getElementById('problem-text').innerHTML = data.question.replace(/\n/g, '<br>');
-            document.getElementById('unit-label').textContent = data.unit;
+            document.getElementById('svg-container').innerHTML = data.svg;
             document.getElementById('step-counter').textContent = `0/${currentData.steps.length}`;
-            
             inputEl.focus();
-            if (window.MathJax && MathJax.typesetPromise) {
-                 // Dùng typesetPromise để đảm bảo không bị lỗi khi gọi liên tục
-                 MathJax.typesetPromise(); 
-            }
+            if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
         }
 
         function showNextStep() {
@@ -577,16 +740,9 @@
                     div.className = "mt-3 mb-1 text-xs font-extrabold text-emerald-600 uppercase border-b border-emerald-200 pb-1";
                     div.innerHTML = `<i class="fas fa-caret-right"></i> ${item.text}`;
                     container.appendChild(div);
-                    if(item.rule) {
-                         const rule = document.getElementById('rule-area');
-                         document.getElementById('rule-content').textContent = item.rule;
-                         rule.classList.remove('hidden');
-                    }
                 } else {
                     const div = document.createElement('div');
-                    div.className = item.isLast 
-                        ? "step-item bg-emerald-50 p-3 rounded-lg border-l-4 shadow-md text-emerald-800 font-bold border-emerald-600"
-                        : "step-item bg-white p-3 rounded-lg border-l-4 shadow-sm text-gray-700 font-mono text-sm md:text-base border-emerald-400";
+                    div.className = item.isLast ? "step-item bg-emerald-50 p-3 rounded-lg border-l-4 shadow-md text-emerald-800 font-bold border-emerald-600" : "step-item bg-white p-3 rounded-lg border-l-4 shadow-sm text-gray-700 font-mono text-sm md:text-base border-emerald-400";
                     div.innerHTML = item.isLast ? `<i class="fas fa-check-square mr-2"></i>${item.text}` : item.text;
                     container.appendChild(div);
                 }
@@ -594,69 +750,40 @@
                 stepIndex++;
                 document.getElementById('step-counter').textContent = `${stepIndex}/${currentData.steps.length}`;
             }
-
             if (stepIndex >= currentData.steps.length) {
                 const btn = document.getElementById('btn-show-step');
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-flag-checkered"></i> <span>Hết</span>';
+                btn.disabled = true; btn.innerHTML = '<i class="fas fa-flag-checkered"></i> <span>Hết</span>';
             }
-            
-            // Re-render MathJax cho các bước giải mới
             if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
         }
 
         function checkAnswer() {
             if (isAnswered) return;
             const inputEl = document.getElementById('user-ans');
-            let rawVal = inputEl.value.replace(/\./g, '').replace(/,/g, '');
-            const userVal = parseFloat(rawVal);
+            const userVal = parseFloat(inputEl.value.replace(/\./g, '').replace(/,/g, ''));
             const feedback = document.getElementById('feedback');
             feedback.className = "mt-4 text-center p-4 rounded-lg text-sm font-bold animate-pulse"; 
 
-            if (isNaN(userVal)) {
-                 feedback.textContent = "⚠️ Vui lòng nhập số!";
-                 feedback.classList.add('bg-yellow-100', 'text-yellow-800');
-                 feedback.classList.remove('hidden');
-                 return;
-            }
+            if (isNaN(userVal)) { feedback.textContent = "⚠️ Vui lòng nhập số!"; feedback.classList.add('bg-yellow-100', 'text-yellow-800'); feedback.classList.remove('hidden'); return; }
 
             if (Math.abs(userVal - currentData.answer) < 0.1) {
-                if (!usedHint) {
-                    state.correct++;
-                    state.streak++;
-                    feedback.innerHTML = '<i class="fas fa-crown text-xl block mb-1"></i> Xuất sắc! Đáp án chính xác.';
-                    feedback.classList.add('bg-emerald-100', 'text-emerald-800');
-                } else {
-                    feedback.innerHTML = '<i class="fas fa-check text-xl block mb-1"></i> Chính xác! (Đã dùng gợi ý)';
-                    feedback.classList.add('bg-blue-100', 'text-blue-800');
-                }
-                inputEl.classList.add('border-emerald-500', 'bg-emerald-50');
-                inputEl.classList.remove('border-gray-300');
-                
-                const reveal = setInterval(() => {
-                    if(stepIndex < currentData.steps.length) showNextStep();
-                    else clearInterval(reveal);
-                }, 150);
+                if (!usedHint) { state.correct++; state.streak++; feedback.innerHTML = '<i class="fas fa-crown text-xl block mb-1"></i> Xuất sắc! Đáp án chính xác.'; feedback.classList.add('bg-emerald-100', 'text-emerald-800'); }
+                else { feedback.innerHTML = '<i class="fas fa-check text-xl block mb-1"></i> Chính xác! (Đã dùng gợi ý)'; feedback.classList.add('bg-blue-100', 'text-blue-800'); }
+                inputEl.classList.add('border-emerald-500', 'bg-emerald-50'); inputEl.classList.remove('border-gray-300');
+                const reveal = setInterval(() => { if(stepIndex < currentData.steps.length) showNextStep(); else clearInterval(reveal); }, 150);
                 isAnswered = true;
             } else {
-                state.wrong++;
-                state.streak = 0;
+                state.wrong++; state.streak = 0;
                 inputEl.classList.add('border-red-500', 'bg-red-50');
                 feedback.innerHTML = `<i class="fas fa-times-circle text-xl block mb-1"></i> Sai rồi! Đáp án đúng là <span class="text-lg text-red-600 bg-white px-2 rounded border border-red-200">${formatMoney(currentData.answer)}</span>`;
-                feedback.classList.add('bg-red-100', 'text-red-800');
-                feedback.classList.remove('hidden');
+                feedback.classList.add('bg-red-100', 'text-red-800'); feedback.classList.remove('hidden');
             }
             renderStats();
         }
-
         function renderStats() {
-            document.getElementById('stat-streak').textContent = state.streak;
-            document.getElementById('stat-correct').textContent = state.correct;
-            document.getElementById('stat-wrong').textContent = state.wrong;
-            document.getElementById('stat-skipped').textContent = state.skipped;
+            document.getElementById('stat-streak').textContent = state.streak; document.getElementById('stat-correct').textContent = state.correct;
+            document.getElementById('stat-wrong').textContent = state.wrong; document.getElementById('stat-skipped').textContent = state.skipped;
         }
-
-        // Không dùng window.onload nữa vì đã xử lý trong MathJax.startup.pageReady
     </script>
 </body>
 </html>
