@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Toán 7 HK1 - Bài 7 (Kẻ đường thẳng phụ)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- --- CẤU HÌNH TÀI LIỆU PDF --- -->
+    <script>
+        // Cấu hình file PDF tải về
+        const pdfConfig = {
+            isAvailable: true,  // true: Hiện nút tải | false: Ẩn nút
+            fileName: "7_hk1_bai7_dinhly.pdf" // Tên file PDF
+        };
+
+        // Hàm khởi tạo nút PDF
+        function initPdfButton() {
+            const container = document.getElementById('pdf-btn-container');
+            const link = document.getElementById('pdf-link');
+            
+            if (!container || !link) return;
+
+            if (pdfConfig.isAvailable) {
+                container.classList.remove('hidden');
+                link.href = pdfConfig.fileName;
+                // Nếu muốn browser tự động gợi ý tải về thay vì mở tab mới (tùy browser hỗ trợ)
+                link.download = pdfConfig.fileName; 
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .chalkboard {
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 1rem;
+        }
+        .step-item {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease-out;
+            border-left: 3px solid #3b82f6;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .step-item.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        canvas {
+            border-radius: 0.5rem;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+        .input-box:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        /* Animation cho nút nổi bật */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        .ring-animate::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            border-radius: inherit;
+            border: 2px solid #ef4444;
+            animation: pulse-ring 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <header class="mb-6 flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-blue-100 gap-4">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-4 w-full lg:w-auto">
+                <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg shadow-blue-200 shrink-0">
+                    <i class="fas fa-shapes"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800 leading-tight">Toán 7 - Bài 7</h1>
+                    <p class="text-slate-500 text-sm">Kỹ thuật kẻ đường thẳng phụ tính góc</p>
+                </div>
+            </div>
+            
+            <!-- Stats & PDF Button -->
+            <div class="flex flex-wrap justify-center items-center gap-3 w-full lg:w-auto">
+                
+                <!-- PDF Button (Highlight version) -->
+                <div id="pdf-btn-container" class="hidden relative">
+                    <!-- Ping animation dot -->
+                    <span class="absolute -top-1 -right-1 flex h-3 w-3 z-20 pointer-events-none">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+
+                    <a id="pdf-link" href="#" target="_blank" class="group relative flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-800 rounded-xl border-2 border-red-200 hover:border-red-300 transition-all active:scale-95 shadow-sm hover:shadow-md ring-animate">
+                        <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-red-500 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fas fa-file-pdf text-lg"></i>
+                        </div>
+                        <div class="flex flex-col text-left">
+                            <span class="text-[10px] uppercase font-black text-red-500 tracking-wider">BẮT BUỘC</span>
+                            <span class="text-sm font-bold leading-none">Tải tài liệu</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="h-8 w-px bg-slate-200 hidden md:block mx-1"></div>
+
+                <!-- Stats Counters -->
+                <div class="px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col items-center min-w-[70px]">
+                    <span class="text-[10px] text-emerald-600 font-bold uppercase">Liên tiếp</span>
+                    <span class="text-lg font-black text-emerald-600 leading-none" id="streak">0</span>
+                </div>
+                <div class="px-4 py-2 bg-blue-50 rounded-xl border border-blue-100 flex flex-col items-center min-w-[70px]">
+                    <span class="text-[10px] text-blue-600 font-bold uppercase">Đúng</span>
+                    <span class="text-lg font-black text-blue-600 leading-none" id="correct">0</span>
+                </div>
+                <div class="px-4 py-2 bg-red-50 rounded-xl border border-red-100 flex flex-col items-center min-w-[70px]">
+                    <span class="text-[10px] text-red-600 font-bold uppercase">Sai</span>
+                    <span class="text-lg font-black text-red-600 leading-none" id="wrong">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column: Problem & Drawing -->
+            <div class="space-y-6">
+                <!-- Question Card -->
+                <div class="chalkboard p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 z-0"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-4">
+                            <h2 class="font-bold text-lg text-slate-700 flex items-center gap-2">
+                                <i class="fas fa-question-circle text-blue-500"></i>
+                                Câu hỏi:
+                            </h2>
+                            <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-md font-bold">Dạng: Kẻ thêm hình</span>
+                        </div>
+                        
+                        <div id="problem-text" class="text-slate-700 mb-4 text-lg leading-relaxed font-medium">
+                            <!-- Math problem will be inserted here -->
+                        </div>
+
+                        <div class="flex justify-center my-4">
+                            <canvas id="geoCanvas" width="380" height="240" class="w-full max-w-[380px]"></canvas>
+                        </div>
+
+                        <!-- User Input -->
+                        <div class="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <label class="block text-slate-600 text-sm font-bold mb-2" for="user-answer">
+                                Nhập số đo góc <span id="target-angle-name">...</span> (độ):
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="number" id="user-answer" 
+                                    class="input-box flex-1 p-3 rounded-lg border border-gray-300 text-lg font-bold text-slate-700 bg-white"
+                                    placeholder="VD: 60">
+                                <button onclick="checkResult()" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-blue-200 transition-all active:scale-95">
+                                    Kiểm tra
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Area -->
+                        <div id="feedback" class="mt-4 hidden p-3 rounded-lg text-sm font-bold flex items-center gap-2"></div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex gap-3">
+                    <button onclick="toggleHint()" class="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-700 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-lightbulb"></i> Gợi ý
+                    </button>
+                    <button onclick="newProblem()" class="flex-1 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-600 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-redo"></i> Bài mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Solution & Hints -->
+            <div class="space-y-4">
+                
+                <!-- Hint Box (Initially Hidden) -->
+                <div id="hint-box" class="hidden chalkboard p-5 border-l-4 border-l-amber-400 bg-amber-50">
+                    <h3 class="font-bold text-amber-700 mb-2 flex items-center gap-2">
+                        <i class="fas fa-info-circle"></i> Hướng dẫn tư duy:
+                    </h3>
+                    <p class="text-slate-700 text-sm leading-relaxed mb-2">
+                        Để giải bài toán này, ta không thể tính trực tiếp ngay. Hãy sử dụng phương pháp <b>kẻ đường phụ</b>:
+                    </p>
+                    <ul class="list-disc list-inside text-slate-700 text-sm space-y-1 ml-2">
+                        <li>Qua điểm gãy khúc <span class="font-bold font-mono">B</span>, kẻ đường thẳng <span class="font-bold text-blue-600">zt</span> song song với cả <span class="font-mono">Ax</span> và <span class="font-mono">Cy</span>.</li>
+                        <li>Khi đó, góc lớn tại <span class="font-mono">B</span> sẽ được chia thành hai góc nhỏ.</li>
+                        <li>Sử dụng tính chất <b>hai góc so le trong</b> để tính từng góc nhỏ rồi suy ra kết quả.</li>
+                    </ul>
+                </div>
+
+                <!-- Solution Steps -->
+                <div id="solution-box" class="chalkboard p-6 min-h-[400px]">
+                    <h3 class="font-bold text-slate-700 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                        <i class="fas fa-graduation-cap text-green-600"></i>
+                        Lời giải chi tiết
+                    </h3>
+                    <div id="steps-container" class="space-y-4">
+                        <p class="text-slate-400 italic text-center mt-10">
+                            Hoàn thành bài tập hoặc xem gợi ý để hiện lời giải...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REMINDER MODAL -->
+    <div id="info-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 transition-transform duration-300" id="modal-content">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                    <i class="fas fa-exclamation text-3xl text-red-500"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-800 mb-2 uppercase">Lưu ý quan trọng!</h3>
+                <p class="text-slate-600 mb-6 leading-relaxed text-sm">
+                    Công cụ này chỉ hỗ trợ rèn luyện kỹ năng <b>tính toán nhanh</b>.<br>
+                    Để ôn tập đầy đủ các dạng bài tự luận, lý thuyết và cách trình bày, các em <b>BẮT BUỘC</b> phải tải tài liệu về xem.
+                </p>
+                <div class="flex flex-col gap-3">
+                    <button onclick="downloadPdfAndClose()" class="w-full py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-2 ring-animate relative overflow-hidden">
+                        <i class="fas fa-file-pdf animate-pulse"></i> TẢI TÀI LIỆU NGAY
+                    </button>
+                    <button onclick="closeModal()" class="w-full py-3 bg-gray-50 hover:bg-gray-100 text-slate-500 rounded-xl font-bold transition-all text-sm">
+                        Đã hiểu, tôi chỉ muốn tính toán
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl transform translate-x-full transition-transform duration-300 z-50 flex items-center gap-3">
+        <i class="fas fa-info-circle text-blue-400"></i>
+        <span id="toast-msg">Thông báo</span>
+    </div>
+
+    <script>
+        // --- Game State ---
+        let currentProblem = {};
+        let isAnswered = false;
+        let streak = 0;
+        let correctTotal = 0;
+        let wrongTotal = 0;
+        let hintUsed = false;
+
+        // --- Utils ---
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.innerText = msg;
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => toast.classList.add('translate-x-full'), 3000);
+        }
+
+        // --- Math Logic: Zigzag Parallel Lines Problem ---
+        function generateProblem() {
+            // Loại 1: Biết A, C tính B
+            // Loại 2: Biết A, B tính C
+            // Loại 3: Biết C, B tính A
+            const type = randomInt(1, 3);
+            
+            // Góc A và C thường là góc nhọn cho dễ vẽ và tính toán trong phạm vi cơ bản
+            const angleA = randomInt(25, 60); 
+            const angleC = randomInt(25, 60);
+            
+            // Góc B là tổng (do tính chất so le trong của đường kẻ phụ ở giữa)
+            const angleB = angleA + angleC; 
+
+            currentProblem = {
+                angleA: angleA,
+                angleC: angleC,
+                angleB: angleB,
+                type: type, // 1: find B, 2: find C, 3: find A
+                points: {
+                    A: {x: 50, y: 50},
+                    C: {x: 50, y: 200}, // X sẽ được tính lại khi vẽ
+                    B: {x: 200, y: 125}
+                }
+            };
+            
+            updateUI();
+            drawProblem(false); // False means don't draw auxiliary line yet
+        }
+
+        function updateUI() {
+            const pText = document.getElementById('problem-text');
+            const targetName = document.getElementById('target-angle-name');
+            const stepsDiv = document.getElementById('steps-container');
+            
+            // Reset UI states
+            document.getElementById('user-answer').value = '';
+            document.getElementById('feedback').className = 'mt-4 hidden p-3 rounded-lg text-sm font-bold flex items-center gap-2';
+            document.getElementById('hint-box').classList.add('hidden');
+            stepsDiv.innerHTML = '<p class="text-slate-400 italic text-center mt-10">Hoàn thành bài tập hoặc xem gợi ý để hiện lời giải...</p>';
+            isAnswered = false;
+            hintUsed = false;
+
+            // Generate content
+            let content = '';
+            if (currentProblem.type === 1) {
+                // Find B
+                content = `Cho hình vẽ bên. Biết $Ax \\parallel Cy$, $\\widehat{A} = ${currentProblem.angleA}^\\circ$ và $\\widehat{C} = ${currentProblem.angleC}^\\circ$. <br>Tính số đo góc $\\widehat{ABC}$?`;
+                targetName.innerText = "ABC";
+            } else if (currentProblem.type === 2) {
+                // Find C
+                content = `Cho hình vẽ bên. Biết $Ax \\parallel Cy$, $\\widehat{A} = ${currentProblem.angleA}^\\circ$ và $\\widehat{ABC} = ${currentProblem.angleB}^\\circ$. <br>Tính số đo góc $\\widehat{C}$?`;
+                targetName.innerText = "C";
+            } else {
+                // Find A
+                content = `Cho hình vẽ bên. Biết $Ax \\parallel Cy$, $\\widehat{C} = ${currentProblem.angleC}^\\circ$ và $\\widehat{ABC} = ${currentProblem.angleB}^\\circ$. <br>Tính số đo góc $\\widehat{A}$?`;
+                targetName.innerText = "A";
+            }
+
+            pText.innerHTML = content;
+            MathJax.typesetPromise();
+        }
+
+        // --- Canvas Drawing ---
+        function drawProblem(showAuxiliary = false) {
+            const canvas = document.getElementById('geoCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const p = currentProblem;
+            
+            const bx = 100; // Dời B sang trái xíu để có chỗ vẽ tia
+            const by = 125;
+            
+            // Tính tọa độ A (y=50)
+            const radA = p.angleA * Math.PI / 180;
+            const dxA = 75 / Math.tan(radA);
+            const ax = bx + dxA; 
+            const ay = 50;
+
+            // Tính tọa độ C (y=200)
+            const radC = p.angleC * Math.PI / 180;
+            const dxC = 75 / Math.tan(radC);
+            const cx = bx + dxC;
+            const cy = 200;
+
+            // --- Draw ---
+            
+            // 1. Đường song song Ax, Cy (vẽ dài ra)
+            ctx.beginPath();
+            ctx.strokeStyle = '#334155'; // Slate-700
+            ctx.lineWidth = 2;
+            
+            // Line a (qua A)
+            ctx.moveTo(ax - 50, ay); ctx.lineTo(360, ay);
+            ctx.font = "bold 16px Nunito"; ctx.fillStyle = "#1e293b";
+            ctx.fillText("x", 365, ay + 5);
+            ctx.fillText("A", ax, ay - 10);
+
+            // Line b (qua C)
+            ctx.moveTo(cx - 50, cy); ctx.lineTo(360, cy);
+            ctx.fillText("y", 365, cy + 5);
+            ctx.fillText("C", cx, cy + 20);
+
+            ctx.stroke();
+
+            // 2. Đường Zigzag A-B-C
+            ctx.beginPath();
+            ctx.strokeStyle = '#2563eb'; // Blue-600
+            ctx.lineWidth = 3;
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(bx, by);
+            ctx.lineTo(cx, cy);
+            ctx.stroke();
+            
+            // Điểm B
+            ctx.fillStyle = "#2563eb";
+            ctx.beginPath(); ctx.arc(bx, by, 3, 0, 2*Math.PI); ctx.fill();
+            ctx.fillStyle = "#1e293b";
+            ctx.fillText("B", bx - 20, by + 5);
+
+            // 3. Đường phụ (nếu cần)
+            if (showAuxiliary) {
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = '#ef4444'; // Red-500
+                ctx.lineWidth = 2;
+                ctx.moveTo(20, by);
+                ctx.lineTo(360, by);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillText("z", 25, by - 5);
+                ctx.fillText("t", 350, by - 5);
+            }
+
+            // 4. Vẽ cung góc và số đo
+            // Góc A (so le trong với B1)
+            drawAngle(ctx, ax, ay, bx, by, 360, ay, p.angleA.toString() + "°", p.type !== 3); 
+            
+            // Góc C (so le trong với B2)
+            drawAngle(ctx, cx, cy, bx, by, 360, cy, p.angleC.toString() + "°", p.type !== 2);
+            
+            // Góc B (Tổng)
+            if (p.type !== 1) { // Nếu tìm B (type 1) thì ẩn số
+               ctx.fillStyle = "#1e293b";
+               ctx.font = "bold 14px Nunito";
+               ctx.fillText(p.angleB + "°", bx + 15, by + 5);
+            } else {
+                ctx.fillStyle = "#ef4444";
+                ctx.font = "bold 16px Nunito";
+                ctx.fillText("?", bx + 15, by + 5);
+            }
+            
+            if (p.type === 3) {
+                 ctx.fillStyle = "#ef4444";
+                 ctx.font = "bold 16px Nunito";
+                 ctx.fillText("?", ax + 15, ay + 20);
+            }
+            if (p.type === 2) {
+                 ctx.fillStyle = "#ef4444";
+                 ctx.font = "bold 16px Nunito";
+                 ctx.fillText("?", cx + 15, cy - 10);
+            }
+
+        }
+
+        function drawAngle(ctx, x1, y1, x2, y2, x3, y3, text, showText = true) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#059669';
+            ctx.lineWidth = 1.5;
+            ctx.arc(x1, y1, 20, 0, 2 * Math.PI); 
+            if (showText) {
+                ctx.fillStyle = "#059669";
+                ctx.font = "14px Nunito";
+                ctx.fillText(text, x1 < 200 ? x1 + 10 : x1 - 30, y1 < 125 ? y1 + 30 : y1 - 20); 
+            }
+        }
+
+        // --- Checking Logic ---
+        function checkResult() {
+            if (isAnswered) return;
+
+            const userInp = parseFloat(document.getElementById('user-answer').value);
+            const fb = document.getElementById('feedback');
+            const finalInp = document.getElementById('user-answer');
+            
+            let correctAnswer;
+            if (currentProblem.type === 1) correctAnswer = currentProblem.angleB;
+            else if (currentProblem.type === 2) correctAnswer = currentProblem.angleC;
+            else correctAnswer = currentProblem.angleA;
+
+            if (isNaN(userInp)) {
+                showToast("Vui lòng nhập đáp án!", "warning");
+                return;
+            }
+
+            if (Math.abs(userInp - correctAnswer) < 0.5) {
+                // Correct
+                finalInp.classList.add('border-green-500', 'bg-green-50');
+                finalInp.classList.remove('border-gray-300');
+                
+                if (!hintUsed) {
+                    streak++;
+                    correctTotal++;
+                    fb.innerHTML = '<i class="fas fa-crown"></i> Xuất sắc! Đáp án chính xác.';
+                    fb.classList.add('bg-green-100', 'text-green-800');
+                    fb.classList.remove('hidden');
+                    updateStatsUI();
+                } else {
+                    fb.innerHTML = '<i class="fas fa-check"></i> Chính xác! (Không tính điểm vì đã xem hướng dẫn)';
+                    fb.classList.add('bg-blue-100', 'text-blue-800');
+                    fb.classList.remove('hidden');
+                }
+                
+                isAnswered = true;
+                showSolution();
+
+            } else {
+                // Wrong
+                finalInp.classList.remove('border-gray-300', 'border-green-500');
+                finalInp.classList.add('border-red-500', 'bg-red-50');
+                
+                fb.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> Sai rồi. Hãy thử lại hoặc xem hướng dẫn.`;
+                fb.classList.add('bg-red-100', 'text-red-700');
+                fb.classList.remove('hidden');
+                
+                if (!hintUsed) {
+                    streak = 0;
+                    wrongTotal++;
+                    updateStatsUI();
+                }
+            }
+        }
+
+        function toggleHint() {
+            const hintBox = document.getElementById('hint-box');
+            hintBox.classList.remove('hidden');
+            hintUsed = true;
+            drawProblem(true);
+        }
+
+        function updateStatsUI() {
+            document.getElementById('streak').innerText = streak;
+            document.getElementById('correct').innerText = correctTotal;
+            document.getElementById('wrong').innerText = wrongTotal;
+        }
+
+        function newProblem() {
+            document.getElementById('user-answer').classList.remove('border-red-500', 'bg-red-50', 'border-green-500', 'bg-green-50');
+            document.getElementById('user-answer').classList.add('border-gray-300', 'bg-white');
+            generateProblem();
+        }
+
+        function showSolution() {
+            drawProblem(true);
+
+            const stepsContainer = document.getElementById('steps-container');
+            stepsContainer.innerHTML = '';
+            
+            const p = currentProblem;
+            
+            let steps = [];
+
+            steps.push({
+                text: `Kẻ đường thẳng $zt$ qua $B$ sao cho $zt \\parallel Ax$. <br>Vì $Ax \\parallel Cy$ nên $zt \\parallel Cy$.`
+            });
+
+            steps.push({
+                text: `Vì $Ax \\parallel zt$ nên ta có: <br> $$\\widehat{ABz} = \\widehat{A} = ${p.angleA}^\\circ$$ (hai góc so le trong).`
+            });
+
+            if (p.type === 1) { // Find B
+                steps.push({
+                    text: `Vì $Cy \\parallel zt$ nên ta có: <br> $$\\widehat{CBz} = \\widehat{C} = ${p.angleC}^\\circ$$ (hai góc so le trong).`
+                });
+                steps.push({
+                    text: `Tia $Bz$ nằm giữa hai tia $BA$ và $BC$ nên: <br> $$\\widehat{ABC} = \\widehat{ABz} + \\widehat{CBz}$$ $$\\widehat{ABC} = ${p.angleA}^\\circ + ${p.angleC}^\\circ = ${p.angleB}^\\circ.$$`
+                });
+            } else if (p.type === 2) { // Find C
+                steps.push({
+                     text: `Tia $Bz$ nằm giữa hai tia $BA$ và $BC$ nên: <br> $$\\widehat{CBz} = \\widehat{ABC} - \\widehat{ABz} = ${p.angleB}^\\circ - ${p.angleA}^\\circ = ${p.angleC}^\\circ.$$`
+                });
+                steps.push({
+                    text: `Vì $Cy \\parallel zt$ nên: <br> $$\\widehat{C} = \\widehat{CBz} = ${p.angleC}^\\circ$$ (hai góc so le trong).`
+                });
+            } else { // Find A
+                steps = [];
+                steps.push({
+                    text: `Kẻ đường thẳng $zt$ qua $B$ sao cho $zt \\parallel Cy$. Suy ra $zt \\parallel Ax$.`
+                });
+                steps.push({
+                    text: `Vì $Cy \\parallel zt$ nên ta có: <br> $$\\widehat{CBz} = \\widehat{C} = ${p.angleC}^\\circ$$ (hai góc so le trong).`
+                });
+                steps.push({
+                    text: `Tia $Bz$ nằm giữa hai tia $BA$ và $BC$ nên: <br> $$\\widehat{ABz} = \\widehat{ABC} - \\widehat{CBz} = ${p.angleB}^\\circ - ${p.angleC}^\\circ = ${p.angleA}^\\circ.$$`
+                });
+                steps.push({
+                    text: `Vì $Ax \\parallel zt$ nên: <br> $$\\widehat{A} = \\widehat{ABz} = ${p.angleA}^\\circ$$ (hai góc so le trong).`
+                });
+            }
+
+            // Render steps
+            let delay = 0;
+            steps.forEach(step => {
+                const div = document.createElement('div');
+                div.className = 'step-item';
+                div.innerHTML = step.text;
+                stepsContainer.appendChild(div);
+                
+                setTimeout(() => {
+                    div.classList.add('show');
+                }, delay);
+                delay += 800; 
+            });
+
+            MathJax.typesetPromise();
+        }
+
+        // --- Modal Logic ---
+        function closeModal() {
+            const modal = document.getElementById('info-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function downloadPdfAndClose() {
+            const link = document.getElementById('pdf-link');
+            if(link) {
+                // Tự động click vào link download đã có
+                link.click();
+            }
+            closeModal();
+        }
+
+        // Init
+        window.onload = function() {
+            generateProblem();
+            initPdfButton();
+
+            // Show modal after delay
+            setTimeout(() => {
+                const modal = document.getElementById('info-modal');
+                const content = document.getElementById('modal-content');
+                if (modal && content) {
+                    modal.classList.remove('hidden');
+                    // Force reflow
+                    void modal.offsetWidth;
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
+            }, 600);
+        };
+
+    </script>
+</body>
+</html>
