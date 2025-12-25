@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ôn tập chinh phục Toán 7 HK1 - Bài 6 (Đường thẳng song song)</title>
+    <title>Ôn tập Toán 7 HK1 - Bài 6 (Đường thẳng song song)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -110,7 +110,7 @@
         <div class="bg-indigo-600 p-4 relative shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="text-center md:text-left">
                 <h1 class="text-xl md:text-2xl font-extrabold text-white uppercase tracking-wider">
-                    <i class="fas fa-shapes mr-2"></i>Ôn tập chinh phục Toán 7 HK1 - Bài 6
+                    <i class="fas fa-shapes mr-2"></i>Ôn tập Toán 7 HK1 - Bài 6
                 </h1>
                 <p class="text-blue-200 font-medium text-sm">Chủ đề: Đường thẳng song song & Tiên đề Euclid</p>
             </div>
@@ -187,13 +187,21 @@
                             </label>
                         </div>
 
-                        <!-- Answer Input -->
-                        <div class="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                        <!-- Answer Input Section -->
+                        <div id="input-section" class="bg-white p-4 rounded-lg border border-gray-200 mb-4 transition-all">
                             <label class="block text-gray-400 font-bold text-xs uppercase mb-2" id="label-final-req">Kết quả:</label>
                             <div class="flex items-center gap-2">
                                 <input type="number" id="ans-final" placeholder="Nhập số đo..." class="flex-grow text-center font-bold text-xl p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 outline-none transition-colors">
                                 <span id="unit-display" class="font-bold text-gray-500 bg-gray-100 p-2 rounded border border-gray-200 min-w-[60px] text-center">độ</span>
                             </div>
+                        </div>
+
+                        <!-- Info Box for Prove Mode -->
+                        <div id="prove-info" class="hidden bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4 text-center">
+                            <p class="text-blue-800 font-bold text-sm">
+                                <i class="fas fa-info-circle mr-1"></i> Đây là dạng bài tự luận.
+                            </p>
+                            <p class="text-blue-600 text-xs mt-1">Hãy suy nghĩ cách chứng minh, sau đó bấm "Hướng dẫn giải" để xem bài mẫu.</p>
                         </div>
                         
                         <!-- Buttons -->
@@ -201,7 +209,7 @@
                             <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                                 <i class="fas fa-sync-alt"></i> Bài mới
                             </button>
-                            <button onclick="checkAnswer()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                            <button id="btn-check" onclick="checkAnswer()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
                                 <i class="fas fa-check"></i> Kiểm tra
                             </button>
                         </div>
@@ -250,9 +258,9 @@
         </div>
     </div>
 
-    <!-- Footer Info -->
-    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
-        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full pb-4">
+        <p>© Công cụ hỗ trợ ôn tập Toán 7 - HK1</p>
     </footer>
 
     <script>
@@ -304,7 +312,6 @@
 
         // --- GEOMETRY ENGINE ---
 
-        // Map angle indices to their geometric properties
         const posMap = {
             1: "Góc trên bên trái",
             2: "Góc trên bên phải",
@@ -315,7 +322,6 @@
         const relations = {
             'soletrong': [[4, 2], [3, 1]], 
             'dongvi': [[1, 1], [2, 2], [3, 3], [4, 4]], 
-            'trongcungphia': [[4, 1], [3, 2]], 
             'doidinh': [[1, 3], [2, 4]], 
             'kebu': [[1, 2], [2, 3], [3, 4], [4, 1]] 
         };
@@ -323,14 +329,12 @@
         function getRelation(idxA, idxB) {
             if ((idxA === 4 && idxB === 2) || (idxA === 3 && idxB === 1)) return "soletrong";
             if (idxA === idxB) return "dongvi";
-            if ((idxA === 4 && idxB === 1) || (idxA === 3 && idxB === 2)) return "trongcungphia";
-            if ((idxA === 1 && idxB === 3) || (idxA === 2 && idxB === 4)) return "solengoai";
+            // Removed TCP check for pure relation, handled by logic
             return "unknown";
         }
 
         // IMPROVED GEOMETRY DRAWING WITH VECTOR MATH
         function drawGeometrySVG(angleA2, labelA, labelB, line1Name, line2Name) {
-            // angleA2: The true value of Top-Right Angle.
             
             const width = 300;
             const height = 220;
@@ -343,15 +347,11 @@
             let xTop, xBot;
 
             if (angleA2 < 90) {
-                // Shape / (Acute TR) -> Top is Right of Bot (Wait, no)
-                // If angle TR < 90, ray UP and ray RIGHT form acute.
-                // Vector UP is Top-Right. Line goes Bot-Left to Top-Right.
-                // So Top Point x > Bot Point x.
                 // Shape /
                 xTop = midX + s; 
                 xBot = midX - s;
             } else {
-                // Shape \ (Obtuse TR) -> Top is Left of Bot
+                // Shape \
                 xTop = midX - s;
                 xBot = midX + s;
             }
@@ -365,79 +365,48 @@
 
             // 2. Helper: Draw Arc and Label using Vector Bisectors
             const drawAngle = (cx, cy, idx, isTop) => {
-                const isActive = (isTop && idx === labelA) || (!isTop && idx === labelB);
+                const isActiveA = Array.isArray(labelA) ? labelA.includes(idx) : labelA === idx;
+                const isActiveB = Array.isArray(labelB) ? labelB.includes(idx) : labelB === idx;
+                const isActive = (isTop && isActiveA) || (!isTop && isActiveB);
+                
                 const color = isActive ? "#fbbf24" : "rgba(255,255,255,0.3)";
                 const textColor = isActive ? "#fbbf24" : "rgba(255,255,255,0.5)";
                 const textWeight = isActive ? "800" : "400";
                 
-                // Define Vectors for the two rays of the angle
-                // Line Vector (Top to Bot): V_line = (xBot-xTop, y2-y1)
-                // Horizontal Vector (Right): V_horz = (1, 0)
-                
-                let v1, v2; // Two vectors forming the angle
+                let v1, v2; 
                 const dx = xBot - xTop;
                 const dy = y2 - y1;
 
-                // Normalize helper
                 const norm = (v) => { const l = Math.sqrt(v.x*v.x + v.y*v.y); return {x:v.x/l, y:v.y/l}; };
 
-                if (idx === 1) { // TL: Left & Up
-                    v1 = {x:-1, y:0}; 
-                    v2 = {x:-dx, y:-dy}; // Vector Bot->Top
-                }
-                if (idx === 2) { // TR: Up & Right
-                    v1 = {x:-dx, y:-dy}; // Vector Bot->Top
-                    v2 = {x:1, y:0}; 
-                }
-                if (idx === 3) { // BR: Right & Down
-                    v1 = {x:1, y:0}; 
-                    v2 = {x:dx, y:dy}; // Vector Top->Bot
-                }
-                if (idx === 4) { // BL: Down & Left
-                    v1 = {x:dx, y:dy}; // Vector Top->Bot
-                    v2 = {x:-1, y:0}; 
-                }
+                if (idx === 1) { v1 = {x:-1, y:0}; v2 = {x:-dx, y:-dy}; }
+                if (idx === 2) { v1 = {x:-dx, y:-dy}; v2 = {x:1, y:0}; }
+                if (idx === 3) { v1 = {x:1, y:0}; v2 = {x:dx, y:dy}; }
+                if (idx === 4) { v1 = {x:dx, y:dy}; v2 = {x:-1, y:0}; }
                 
-                // Bisector = V1_norm + V2_norm
                 const nv1 = norm(v1);
                 const nv2 = norm(v2);
                 const bisect = {x: nv1.x + nv2.x, y: nv1.y + nv2.y};
                 
-                // Calculate Label Pos
                 const labelDist = 40;
-                // If bisect is 0 (180 deg), handle edge case? Won't happen here.
                 const nb = norm(bisect);
                 const lx = cx + nb.x * labelDist;
                 const ly = cy + nb.y * labelDist;
 
-                // Draw Arc (only if active)
                 let arcPath = "";
                 if (isActive) {
                     const r = 25;
                     const ang1 = Math.atan2(v1.y, v1.x);
                     const ang2 = Math.atan2(v2.y, v2.x);
                     
-                    // Arc drawing logic usually needs angles in order
-                    // We simply draw from ang1 to ang2. 
-                    // Need to check direction to ensure small angle (not reflex)
                     let diff = ang2 - ang1;
                     while (diff <= -Math.PI) diff += 2*Math.PI;
                     while (diff > Math.PI) diff -= 2*Math.PI;
                     
-                    // If diff is positive, sweep flag 1? 
-                    // Let's use simpler SVG arc command
                     const sx = cx + r * Math.cos(ang1);
                     const sy = cy + r * Math.sin(ang1);
                     const ex = cx + r * Math.cos(ang2);
                     const ey = cy + r * Math.sin(ang2);
-                    
-                    // Sweep flag: 0 if counter-clockwise (smaller), 1 if clockwise?
-                    // We want the interior angle (<180).
-                    const sweep = (diff > 0) ? 1 : 0; 
-                    // Wait, standard SVG A rx ry rot large sweep x y
-                    // Let's force it:
-                    
-                    // Alternative: Compute intermediate point to be sure
                     const mx = cx + r * nb.x;
                     const my = cy + r * nb.y;
                     
@@ -453,30 +422,25 @@
             };
 
             return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" class="geo-svg">
-                <!-- Lines -->
                 <line x1="20" y1="${y1}" x2="${width-20}" y2="${y1}" class="geo-line" />
                 <text x="${width-25}" y="${y1-10}" fill="white" font-size="16" font-style="italic" font-weight="bold">${line1Name}</text>
 
                 <line x1="20" y1="${y2}" x2="${width-20}" y2="${y2}" class="geo-line" />
                 <text x="${width-25}" y="${y2-10}" fill="white" font-size="16" font-style="italic" font-weight="bold">${line2Name}</text>
 
-                <!-- Transversal -->
                 <line x1="${extX_Top}" y1="${extY_Top}" x2="${extX_Bot}" y2="${extY_Bot}" class="geo-line" />
                 <text x="${extX_Top}" y="${extY_Top-5}" fill="white" font-size="14" font-style="italic">c</text>
 
-                <!-- Labels & Arcs A -->
                 ${drawAngle(xTop, y1, 1, true)}
                 ${drawAngle(xTop, y1, 2, true)}
                 ${drawAngle(xTop, y1, 3, true)}
                 ${drawAngle(xTop, y1, 4, true)}
 
-                <!-- Labels & Arcs B -->
                 ${drawAngle(xBot, y2, 1, false)}
                 ${drawAngle(xBot, y2, 2, false)}
                 ${drawAngle(xBot, y2, 3, false)}
                 ${drawAngle(xBot, y2, 4, false)}
 
-                <!-- Intersection Dots -->
                 <circle cx="${xTop}" cy="${y1}" r="3" class="geo-point" />
                 <circle cx="${xBot}" cy="${y2}" r="3" class="geo-point" />
             </svg>`;
@@ -488,29 +452,23 @@
             const typeSelect = document.getElementById('problem-type').value;
             const isHardMode = document.getElementById('mode-hard').checked;
 
-            // Randomize Line Names
             const linePairs = [['x', 'y'], ['a', 'b'], ['m', 'n'], ['u', 'v'], ['d', 'd\'']];
             const pair = linePairs[getRandomInt(0, linePairs.length-1)];
             const line1 = pair[0];
             const line2 = pair[1];
 
-            // 1. Determine Type: 50/50 Chance
             let type = typeSelect;
             if (type === 'random') {
                 type = Math.random() < 0.5 ? 'calc' : 'prove';
             }
 
-            // 2. Determine Complexity (Internal 50/50 split)
             let isComplex = Math.random() < 0.5; 
             if (isHardMode) isComplex = true;
 
-            // 3. Generate Angle Values
             let angleA2;
             if (isComplex || isHardMode) {
-                // Odd numbers
                 angleA2 = getRandomInt(35, 145); 
             } else {
-                // Nice numbers
                 const niceAngles = [40, 50, 60, 70, 80, 100, 110, 120, 130, 140];
                 angleA2 = niceAngles[getRandomInt(0, niceAngles.length - 1)];
             }
@@ -523,193 +481,296 @@
             };
             const anglesB = { ...anglesA }; 
 
-            // 4. Pick Source Angle A
-            const idxA = getRandomInt(1, 4);
-            const valA = anglesA[idxA];
-
-            // 5. Pick Target Angle B
-            let idxB;
-            let relation = "";
-
-            if (!isComplex) {
-                // EASY: Direct Relation
-                const easyRelations = ['soletrong', 'dongvi', 'trongcungphia'];
-                const targetRel = easyRelations[getRandomInt(0, 2)];
-                for (let b = 1; b <= 4; b++) {
-                    if (getRelation(idxA, b) === targetRel) {
-                        idxB = b;
-                        break;
-                    }
-                }
-                if (!idxB) idxB = (idxA % 4) + 1;
-            } else {
-                // HARD: Indirect
-                let attempts = 0;
-                do {
-                    idxB = getRandomInt(1, 4);
-                    relation = getRelation(idxA, idxB);
-                    attempts++;
-                } while ((relation === 'soletrong' || relation === 'dongvi' || relation === 'trongcungphia') && attempts < 20);
-            }
-
-            relation = getRelation(idxA, idxB);
-            const valB = anglesB[idxB];
-            
-            // SVG Generation
-            const svgContent = drawGeometrySVG(anglesA[2], idxA, idxB, line1, line2); 
-            document.getElementById('geo-canvas').innerHTML = svgContent;
-
-            // Problem Text & Solution
             let question = "";
             let steps = [];
             let finalAns = 0;
             let hint = "";
-            
-            // --- SCENARIO 1: CALC (Tính góc) ---
+            let labelA_SVG, labelB_SVG;
+
+            // --- SCENARIO 1: CALC ---
             if (type === 'calc') {
-                question = `Cho hình vẽ, biết $${line1} // ${line2}$.<br>Biết số đo góc $\\widehat{A_${idxA}} = ${valA}^\\circ$.<br>Tính số đo góc $\\widehat{B_${idxB}}$.`;
-                finalAns = valB;
+                const idxA = getRandomInt(1, 4);
+                const valA = anglesA[idxA];
+                labelA_SVG = [idxA];
+
+                let idxA_target = (idxA % 4) + 1; 
+                if (Math.random() < 0.4) idxA_target = (idxA + 2 > 4) ? idxA - 2 : idxA + 2; 
+                const valA_target = anglesA[idxA_target];
+                labelA_SVG.push(idxA_target);
+
+                const easyRelations = ['soletrong', 'dongvi'];
+                let relation = easyRelations[getRandomInt(0, 1)];
+                let idxB_target;
+                
+                for (let b = 1; b <= 4; b++) {
+                    if (getRelation(idxA, b) === relation) {
+                        idxB_target = b;
+                        break;
+                    }
+                }
+                if (!idxB_target) { 
+                    idxB_target = (idxA % 4) + 1;
+                    relation = "unknown";
+                }
+                const valB_target = anglesB[idxB_target];
+                labelB_SVG = [idxB_target];
+
+                question = `Cho hình vẽ. Giả sử $${line1} // ${line2}$ và $\\widehat{A_${idxA}} = ${valA}^\\circ$.<br>Tính số đo $\\widehat{A_${idxA_target}}$ và $\\widehat{B_${idxB_target}}$.`;
+                finalAns = valB_target;
+                document.getElementById('label-final-req').innerText = `Kết quả góc B${idxB_target}:`;
+
+                steps.push({ title: "Giải:", content: `` });
+
+                let relationA = (Math.abs(idxA - idxA_target) === 2) ? "đối đỉnh" : "kề bù";
+                let logicA = "";
+                if (relationA === "đối đỉnh") {
+                    logicA = `
+- Ta có: $\\quad \\widehat{A_${idxA_target}} = \\widehat{A_${idxA}}$ (đối đỉnh)
+$$ \\text { nên } \\quad \\widehat{A_${idxA_target}} = ${valA_target}^\\circ $$
+`;
+                } else {
+                    logicA = `
+- Ta có:
+$$
+\\begin{aligned}
+& \\widehat{A_${idxA}} + \\widehat{A_${idxA_target}} = 180^\\circ \\text{ (kề bù) } \\\\
+& ${valA}^\\circ + \\widehat{A_${idxA_target}} = 180^\\circ \\\\
+& \\widehat{A_${idxA_target}} = 180^\\circ - ${valA}^\\circ \\\\
+& \\widehat{A_${idxA_target}} = ${valA_target}^\\circ
+\\end{aligned}
+$$
+`;
+                }
+                steps.push({ title: `a)`, content: logicA });
+
+                let logicB = "";
+                let relNameB = (relation === 'soletrong') ? "so le trong" : "đồng vị";
+                
+                if (['soletrong', 'dongvi'].includes(relation)) {
+                    logicB = `
+- Ta có: $${line1} // ${line2}$ nên
+$$ \\widehat{B_${idxB_target}} = \\widehat{A_${idxA}} \\text { (2 góc ${relNameB}) } $$
+Suy ra $\\widehat{B_${idxB_target}} = ${valB_target}^\\circ$.
+`;
+                } else {
+                    const idxB_inter = idxA;
+                    const valB_inter = valA;
+                    
+                    let subStep1 = `
+- Ta có: $${line1} // ${line2}$ nên
+$$ \\widehat{B_${idxB_inter}} = \\widehat{A_${idxA}} \\text { (2 góc đồng vị) } $$
+Suy ra $\\widehat{B_${idxB_inter}} = ${valA}^\\circ$.
+`;
+                    let subStep2 = "";
+                    let relInter = (Math.abs(idxB_inter - idxB_target) === 2) ? "đối đỉnh" : "kề bù";
+                    
+                    if (idxB_inter === idxB_target) {
+                        logicB = subStep1 + `Suy ra $\\widehat{B_${idxB_target}} = ${valB_target}^\\circ$.`;
+                    } else if (relInter === "đối đỉnh") {
+                        subStep2 = `
+- Ta có: $\\quad \\widehat{B_${idxB_target}} = \\widehat{B_${idxB_inter}}$ (đối đỉnh)
+$$ \\text { nên } \\quad \\widehat{B_${idxB_target}} = ${valB_target}^\\circ $$`;
+                        logicB = subStep1 + subStep2;
+                    } else { 
+                        subStep2 = `
+- Ta lại có:
+$$
+\\begin{aligned}
+& \\widehat{B_${idxB_target}} + \\widehat{B_${idxB_inter}} = 180^\\circ \\text{ (kề bù) } \\\\
+& \\widehat{B_${idxB_target}} + ${valA}^\\circ = 180^\\circ \\\\
+& \\widehat{B_${idxB_target}} = 180^\\circ - ${valA}^\\circ \\\\
+& \\widehat{B_${idxB_target}} = ${valB_target}^\\circ
+\\end{aligned}
+$$`;
+                        logicB = subStep1 + subStep2;
+                    }
+                }
+                steps.push({ title: ``, content: logicB });
+                hint = `Áp dụng tính chất kề bù/đối đỉnh để tính góc A. Dùng tính chất song song để tính góc B.`;
+            }
+
+            // --- SCENARIO 2: PROVE (Updated Logic) ---
+            else {
+                // Randomly pick ANY pair A and B
+                const idxA = getRandomInt(1, 4);
+                const valA = anglesA[idxA];
+                labelA_SVG = [idxA];
+                
+                // Allow any B, calculate value based on parallel property
+                const idxB = getRandomInt(1, 4);
+                // Correct B val: If (idxA is odd and idxB is odd) OR (idxA even and idxB even) => Equal.
+                // Else => Supplementary.
+                const isTypeA = (idxA % 2 !== 0); // 1,3 are type 1 (equal to each other). 2,4 are type 2.
+                const isTypeB = (idxB % 2 !== 0);
+                
+                // Note on angle mapping:
+                // A1, A3 are Vert. A2, A4 are Vert.
+                // A1+A2=180.
+                // If parallel, B1=A1. B3=A3=A1.
+                // B2=A2. B4=A4=A2.
+                // So odd indices match odd indices. Even match even.
+                
+                let valB;
+                if (isTypeA === isTypeB) {
+                    valB = valA; // Equal
+                } else {
+                    valB = 180 - valA; // Supplementary
+                }
+                
+                labelB_SVG = [idxB];
+                
+                question = `Cho hình vẽ. Giả sử $\\widehat{A_${idxA}} = ${valA}^\\circ$ và $\\widehat{B_${idxB}} = ${valB}^\\circ$.<br>Chứng minh $${line1} // ${line2}$.`;
+                
+                finalAns = 0;
+                steps.push({ title: "Giải:", content: `` });
+
+                // --- Generate 2 Ways ---
+                
+                // Helper to create a proof step
+                const createProof = (methodTitle, targetIdx, isAtA) => {
+                    let logic = "";
+                    let bridgeRel = "";
+                    let finalRel = "";
+                    
+                    // We need to bridge to a standard relation (DongVi/SLT)
+                    // Standard relations between A and B:
+                    // DongVi: A1-B1, A2-B2, A3-B3, A4-B4. (Indices Equal)
+                    // SLT: A4-B2, A3-B1. (Standard interior).
+                    
+                    // Let's force bridge to be a DONG VI pair for simplicity in explanation if possible, or SLT.
+                    // If isAtA, we find A_bridge that is DongVi/SLT to B.
+                    // If isAtB, we find B_bridge that is DongVi/SLT to A.
+                    
+                    let sourceIdx = isAtA ? idxB : idxA; // The one we stay at
+                    let changingIdx = isAtA ? idxA : idxB; // The one we move
+                    let bridgeIdx;
+                    let targetRelationName; 
+                    
+                    // Strategy: 
+                    // 1. Try to find bridge that is DongVi.
+                    // Bridge index for DongVi is simply sourceIdx.
+                    // e.g. if we hold A fixed (source A), we want B_bridge = idxA.
+                    // e.g. if we hold B fixed (source B), we want A_bridge = idxB.
+                    
+                    // 2. Try to find bridge that is SoLeTrong.
+                    // SLT pairs: 4-2, 3-1. 
+                    // If source is 1, SLT bridge is 3. If 2 -> 4. If 3 -> 1. If 4 -> 2.
+                    // This covers all if we consider generalized SLT (or exterior).
+                    
+                    // Let's decide strategy for Way 1 and Way 2.
+                    // Way 1: Use Vertical/Linear Pair at B to move B -> B'. Then B' & A are Direct.
+                    // Way 2: Use Vertical/Linear Pair at A to move A -> A'. Then A' & B are Direct.
+                    
+                    let movingIdx, fixedIdx, bridgeVal, bridgeRelType, directRelType;
+                    
+                    if (!isAtA) { // Way 1: Move B. Fixed A.
+                        movingIdx = idxB; fixedIdx = idxA;
+                        // Target bridge at B that matches A directly.
+                        // Try DongVi first (bridge = idxA).
+                        bridgeIdx = idxA;
+                        directRelType = "đồng vị";
+                        // If bridgeIdx == movingIdx, it's already direct.
+                        if (bridgeIdx === movingIdx) {
+                            // If already DongVi, maybe switch to SLT target for variety?
+                            // SLT map: 1->3, 2->4, 3->1, 4->2.
+                            let sltIdx = (idxA === 1) ? 3 : (idxA === 2) ? 4 : (idxA === 3) ? 1 : 2;
+                            bridgeIdx = sltIdx;
+                            directRelType = "so le trong";
+                        }
+                    } else { // Way 2: Move A. Fixed B.
+                        movingIdx = idxA; fixedIdx = idxB;
+                        // Target bridge at A that matches B directly.
+                        // Try DongVi (bridge = idxB).
+                        bridgeIdx = idxB;
+                        directRelType = "đồng vị";
+                        if (bridgeIdx === movingIdx) {
+                            let sltIdx = (idxB === 1) ? 3 : (idxB === 2) ? 4 : (idxB === 3) ? 1 : 2;
+                            bridgeIdx = sltIdx;
+                            directRelType = "so le trong";
+                        }
+                    }
+                    
+                    // Calculate Relation between Moving and Bridge
+                    let bridgeAngleVal;
+                    if ((movingIdx % 2) === (bridgeIdx % 2)) {
+                        // Same parity (both odd or both even) -> Equal -> Vertical
+                        // Or same angle (handled above).
+                        bridgeRelType = "đối đỉnh";
+                        bridgeAngleVal = (isAtA ? valA : valB); 
+                    } else {
+                        // Different parity -> Supplementary -> Linear Pair
+                        bridgeRelType = "kề bù";
+                        bridgeAngleVal = 180 - (isAtA ? valA : valB);
+                    }
+                    
+                    // Generate Text
+                    let charMov = isAtA ? "A" : "B";
+                    let charFix = isAtA ? "B" : "A";
+                    let valMov = isAtA ? valA : valB;
+                    
+                    let stepHtml = `<div class="mb-2 underline font-bold">${methodTitle}</div>`;
+                    
+                    if (bridgeRelType === "đối đỉnh") {
+                        stepHtml += `
+- Ta có: $\\widehat{${charMov}_${bridgeIdx}} = \\widehat{${charMov}_${movingIdx}}$ (đối đỉnh)
+$$ \\text{Nên } \\widehat{${charMov}_${bridgeIdx}} = ${valMov}^\\circ $$`;
+                    } else {
+                        stepHtml += `
+- Ta có: $\\widehat{${charMov}_${movingIdx}} + \\widehat{${charMov}_${bridgeIdx}} = 180^\\circ$ (kề bù)
+$$
+\\begin{aligned}
+& ${valMov}^\\circ + \\widehat{${charMov}_${bridgeIdx}} = 180^\\circ \\\\
+& \\widehat{${charMov}_${bridgeIdx}} = 180^\\circ - ${valMov}^\\circ \\\\
+& \\widehat{${charMov}_${bridgeIdx}} = ${bridgeAngleVal}^\\circ
+\\end{aligned}
+$$`;
+                    }
+                    
+                    // Conclusion
+                    // Check if bridgeVal equals fixedVal (should match if parallel)
+                    let valFix = isAtA ? valB : valA;
+                    // Note: bridgeAngleVal is calculated from Moving. valFix is given.
+                    // They should match.
+                    
+                    stepHtml += `
+- Ta thấy: $\\widehat{${charMov}_${bridgeIdx}} = \\widehat{${charFix}_${fixedIdx}} \\left(= ${valFix}^\\circ\\right)$
+Mà hai góc này ở vị trí ${directRelType} nên $${line1} // ${line2}$.
+`;
+                    return stepHtml;
+                };
+
+                // Generate 2 ways
+                // Way 1: Transform B (Indirect at B)
+                let w1 = createProof("Cách 1 (Biến đổi góc B):", idxB, false);
+                
+                // Way 2: Transform A (Indirect at A)
+                let w2 = createProof("Cách 2 (Biến đổi góc A):", idxA, true);
+                
+                // Check if Direct Case to avoid redundancy
+                // If A and B are already SLT or DongVi, both ways might look similar or artificial.
+                // But the logic handles "If bridge == moving, switch to SLT" so it forces an indirect path even for direct start.
+                // Example: Start A1, B1 (Direct DV).
+                // W1: Move B1 -> B3 (Vert). B3 & A1 are SLT. (Valid proof).
+                // W2: Move A1 -> A3 (Vert). A3 & B1 are SLT. (Valid proof).
+                // This satisfies "Show 2 ways" perfectly.
 
                 steps.push({
-                    title: "Phân tích đề bài",
-                    content: `<div>- Giả thiết: $${line1} // ${line2}$.<br>- Đã biết: $\\widehat{A_${idxA}} = ${valA}^\\circ$.<br>- Cần tính: $\\widehat{B_${idxB}}$.</div>`
+                    title: "b)",
+                    content: w1 + "<br>" + w2
                 });
-
-                if (['soletrong', 'dongvi', 'trongcungphia'].includes(relation)) {
-                    let reasonName = "";
-                    let logicMath = "";
-                    let conclusion = "";
-
-                    if (relation === 'soletrong') {
-                        reasonName = "so le trong";
-                        logicMath = `$\\widehat{B_${idxB}} = \\widehat{A_${idxA}}$`;
-                        conclusion = `Vậy $\\widehat{B_${idxB}} = ${valB}^\\circ$.`;
-                    } else if (relation === 'dongvi') {
-                        reasonName = "đồng vị";
-                        logicMath = `$\\widehat{B_${idxB}} = \\widehat{A_${idxA}}$`;
-                        conclusion = `Vậy $\\widehat{B_${idxB}} = ${valB}^\\circ$.`;
-                    } else { // trongcungphia
-                        reasonName = "trong cùng phía";
-                        logicMath = `$\\widehat{A_${idxA}} + \\widehat{B_${idxB}} = 180^\\circ$`;
-                        conclusion = `$\\Rightarrow \\widehat{B_${idxB}} = 180^\\circ - ${valA}^\\circ = ${valB}^\\circ$.`;
-                    }
-
-                    steps.push({
-                        title: "Bước 1: Lập luận trực tiếp",
-                        content: `Vì $${line1} // ${line2}$ nên ta có cặp góc ${reasonName}:<br>${logicMath}`
-                    });
-                    steps.push({ title: "Kết luận", content: conclusion });
-                    hint = `Hai góc này ở vị trí ${reasonName}. Hãy nhớ tính chất của chúng.`;
-                } 
-                else {
-                    const idxB_temp = idxA; 
-                    const valB_temp = valA;
-
-                    steps.push({
-                        title: "Bước 1: Tính góc trung gian",
-                        content: `Góc cần tính không có quan hệ đặc biệt trực tiếp với $\\widehat{A_${idxA}}$.<br>Ta tính thông qua góc trung gian $\\widehat{B_${idxB_temp}}$ (đồng vị với $\\widehat{A_${idxA}}$).<br>Vì $${line1} // ${line2}$ nên $\\widehat{B_${idxB_temp}} = \\widehat{A_${idxA}} = ${valA}^\\circ$.`
-                    });
-
-                    let rel2 = (Math.abs(idxB - idxB_temp) === 2) ? "đối đỉnh" : "kề bù";
-
-                    if (rel2 === 'doidinh') {
-                         steps.push({
-                            title: "Bước 2: Sử dụng tính chất đối đỉnh",
-                            content: `Ta có $\\widehat{B_${idxB}}$ và $\\widehat{B_${idxB_temp}}$ là hai góc đối đỉnh.<br>$\\Rightarrow \\widehat{B_${idxB}} = \\widehat{B_${idxB_temp}} = ${valB}^\\circ$.`
-                        });
-                    } else {
-                         steps.push({
-                            title: "Bước 2: Sử dụng tính chất kề bù",
-                            content: `Ta có $\\widehat{B_${idxB}}$ và $\\widehat{B_${idxB_temp}}$ là hai góc kề bù (tổng $180^\\circ$).<br>$\\Rightarrow \\widehat{B_${idxB}} = 180^\\circ - \\widehat{B_${idxB_temp}}$<br>$\\Rightarrow \\widehat{B_${idxB}} = 180^\\circ - ${valB_temp}^\\circ = ${valB}^\\circ$.`
-                        });
-                    }
-                    steps.push({ title: "Kết luận", content: `Vậy $\\widehat{B_${idxB}} = ${valB}^\\circ$.` });
-                    hint = "Bài toán cần bước trung gian. Hãy thử tính góc đồng vị hoặc so le trong trước, sau đó suy ra góc cần tìm.";
-                }
-            }
-            // --- SCENARIO 2: PROVE (Chứng minh) ---
-            else {
-                // Dạng ngược: Cho 2 góc -> Chứng minh song song.
-                // Câu hỏi: Yêu cầu tính một giá trị để KẾT LUẬN.
                 
-                // Case A: Relation is TCP -> Sum is 180.
-                if (relation === 'trongcungphia') {
-                    question = `Cho hình vẽ. Biết $\\widehat{A_${idxA}} = ${valA}^\\circ$ và $\\widehat{B_${idxB}} = ${valB}^\\circ$.<br>Để chứng minh $${line1} // ${line2}$, ta cần tính tổng hai góc này.<br>Hỏi tổng $\\widehat{A_${idxA}} + \\widehat{B_${idxB}}$ bằng bao nhiêu?`;
-                    finalAns = 180;
-                    
-                    steps.push({
-                         title: "Bước 1: Nhận xét vị trí",
-                         content: `Góc $\\widehat{A_${idxA}}$ và $\\widehat{B_${idxB}}$ nằm ở vị trí <b>trong cùng phía</b>.`
-                    });
-                    steps.push({
-                         title: "Bước 2: Tính tổng",
-                         content: `Tổng số đo: $${valA}^\\circ + ${valB}^\\circ = 180^\\circ$.`
-                    });
-                    steps.push({
-                         title: "Kết luận",
-                         content: `Vì tổng hai góc trong cùng phía bằng $180^\\circ$ (bù nhau) nên suy ra $${line1} // ${line2}$.`
-                    });
-                    hint = "Hãy cộng hai góc lại. Nếu bằng 180 độ thì hai đường thẳng song song.";
-                } 
-                // Case B: Relation is SLT/DongVi -> Values are Equal.
-                else if (relation === 'soletrong' || relation === 'dongvi') {
-                    // Hỏi giá trị của một góc khác để kiểm chứng?
-                    // Hoặc đơn giản hỏi: "Góc B... phải có giá trị bao nhiêu để song song?" (như cũ)
-                    // NHƯNG user muốn "Cho số đo 2 góc bất kỳ".
-                    // Vậy đề bài: "Cho A=x, B=x. Chứng minh //."
-                    // Câu hỏi: "Để khẳng định chứng minh đúng, hãy cho biết cặp góc này ở vị trí nào và có tính chất gì? (Nhập giá trị góc A để xác nhận)".
-                    // Đổi mới: Hỏi giá trị của góc KỀ BÙ với B.
-                    
-                    const idxB_kebu = (idxB % 4) + 1; // Góc kề (sai số tí nhưng ok cho logic) - Wait, kề bù là 1-2, 3-4.
-                    let neighborIdx = (idxB === 1) ? 2 : (idxB === 2) ? 1 : (idxB === 3) ? 4 : 3;
-                    
-                    question = `Cho hình vẽ. Biết $\\widehat{A_${idxA}} = ${valA}^\\circ$ và $\\widehat{B_${idxB}} = ${valB}^\\circ$.<br>Để chứng minh $${line1} // ${line2}$, hãy tính số đo góc kề bù với $\\widehat{B_${idxB}}$ (tức là góc $\\widehat{B_${neighborIdx}}$)?`;
-                    finalAns = 180 - valB;
-                    
-                    let relName = (relation === 'soletrong') ? "so le trong" : "đồng vị";
-                    steps.push({
-                         title: "Bước 1: Nhận xét cặp góc đã cho",
-                         content: `Ta thấy $\\widehat{A_${idxA}} = \\widehat{B_${idxB}} = ${valA}^\\circ$.<br>Hai góc này ở vị trí <b>${relName}</b> và bằng nhau $\\Rightarrow ${line1} // ${line2}$.`
-                    });
-                    steps.push({
-                         title: "Bước 2: Tính toán yêu cầu",
-                         content: `Đề bài yêu cầu tính góc kề bù với $\\widehat{B_${idxB}}$.<br>$\\widehat{B_${neighborIdx}} = 180^\\circ - ${valB}^\\circ$.`
-                    });
-                    steps.push({
-                         title: "Kết luận",
-                         content: `Vậy $\\widehat{B_${neighborIdx}} = ${finalAns}^\\circ$.`
-                    });
-                    hint = "Đây là bài toán kiểm tra kiến thức tổng hợp. Hãy tính góc kề bù với góc B đã cho.";
-                }
-                // Case C: Indirect Relation (Hard)
-                else {
-                    // Given A_idxA, B_idxB. Prove Parallel.
-                    // Ask to calculate the Intermediate Angle (Dong Vi at B).
-                    const idxB_dongvi = idxA;
-                    question = `Cho hình vẽ. Biết $\\widehat{A_${idxA}} = ${valA}^\\circ$ và $\\widehat{B_${idxB}} = ${valB}^\\circ$.<br>Để chứng minh $${line1} // ${line2}$ bằng cách sử dụng góc trung gian, hãy tính số đo góc $\\widehat{B_${idxB_dongvi}}$ (đồng vị với $\\widehat{A_${idxA}}$).`;
-                    finalAns = valA;
-                    
-                    steps.push({
-                        title: "Bước 1: Phân tích",
-                        content: `Ta cần chứng minh $${line1} // ${line2}$. Một trong các cách là chỉ ra cặp góc đồng vị bằng nhau.`
-                    });
-                    steps.push({
-                        title: "Bước 2: Xác định góc so sánh",
-                        content: `Góc đồng vị với $\\widehat{A_${idxA}}$ chính là $\\widehat{B_${idxB_dongvi}}$.<br>Dựa vào các tính chất góc đối đỉnh/kề bù từ $\\widehat{B_${idxB}}$, ta tính được $\\widehat{B_${idxB_dongvi}} = ${valA}^\\circ$.`
-                    });
-                    steps.push({
-                        title: "Kết luận",
-                        content: `Ta thấy $\\widehat{B_${idxB_dongvi}} = \\widehat{A_${idxA}}$ (cùng bằng ${valA}^\\circ$).<br>Suy ra $${line1} // ${line2}$.<br>Đáp số cần điền: ${valA}$.`
-                    });
-                    hint = "Hãy tìm góc ở đỉnh B mà nằm ở vị trí đồng vị với góc A đã cho.";
-                }
+                hint = "Có thể dùng tính chất góc đối đỉnh hoặc kề bù để đưa về các cặp góc so le trong/đồng vị.";
             }
+            
+            const svgContent = drawGeometrySVG(anglesA[2], labelA_SVG, labelB_SVG, line1, line2); 
+            document.getElementById('geo-canvas').innerHTML = svgContent;
 
             return {
                 question,
                 steps,
                 finalAns,
-                hint
+                hint,
+                type
             };
         }
 
@@ -738,9 +799,23 @@
             document.getElementById('question-text').innerHTML = currentProblem.question;
             document.getElementById('hint-content').innerHTML = currentProblem.hint;
             
-            document.getElementById('ans-final').value = '';
-            document.getElementById('ans-final').className = "flex-grow text-center font-bold text-xl p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 outline-none transition-colors";
-            document.getElementById('ans-final').focus();
+            const inpSec = document.getElementById('input-section');
+            const infoSec = document.getElementById('prove-info');
+            const checkBtn = document.getElementById('btn-check');
+
+            if (currentProblem.type === 'prove') {
+                inpSec.classList.add('hidden');
+                infoSec.classList.remove('hidden');
+                checkBtn.classList.add('hidden'); 
+            } else {
+                inpSec.classList.remove('hidden');
+                infoSec.classList.add('hidden');
+                checkBtn.classList.remove('hidden');
+                
+                document.getElementById('ans-final').value = '';
+                document.getElementById('ans-final').className = "flex-grow text-center font-bold text-xl p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 outline-none transition-colors";
+                document.getElementById('ans-final').focus();
+            }
             
             MathJax.typesetPromise([document.getElementById('question-text'), document.getElementById('steps-container')]);
             updateStepCounter();
@@ -765,7 +840,12 @@
                 const isOdd = stepIndex % 2 !== 0;
                 s.className = `step-item p-3 rounded-lg shadow-sm text-sm border-l-4 font-medium mb-3 ${isOdd ? 'bg-indigo-50 border-indigo-400 text-indigo-900' : 'bg-white border-gray-300 text-gray-800'}`;
                 
-                s.innerHTML = `<div class="font-bold text-xs uppercase mb-1 opacity-70">${step.title}</div><div class="text-base">${step.content}</div>`;
+                let titleHtml = '';
+                if (step.title && step.title.length > 0 && step.title !== 'Giải:') {
+                    titleHtml = `<div class="font-bold text-xs uppercase mb-1 opacity-70">${step.title}</div>`;
+                }
+                
+                s.innerHTML = `${titleHtml}<div class="text-base">${step.content}</div>`;
                 
                 container.appendChild(s);
                 MathJax.typesetPromise([s]);
