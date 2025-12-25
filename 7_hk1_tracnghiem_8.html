@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập chinh phục Toán 7 HK1 - Câu 8: Tia Phân Giác</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            startup: {
+                typeset: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fff1f2; /* Rose-50 */
+        }
+
+        .btn-option {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-option:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mode-active {
+            background-color: #e11d48; /* rose-600 */
+            color: white;
+            border-color: #e11d48;
+        }
+
+        .mode-inactive {
+            background-color: white;
+            color: #374151;
+            border-color: #e5e7eb;
+        }
+        .mode-inactive:hover {
+            background-color: #ffe4e6; /* rose-100 */
+        }
+
+        /* Loading Overlay */
+        #question-loader {
+            position: absolute;
+            inset: 0;
+            background-color: white;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s ease-out;
+        }
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #e11d48; /* Rose-600 */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        .hidden-loader {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #main-content-wrapper {
+            opacity: 0;
+        }
+        #main-content-wrapper.content-visible {
+            opacity: 1;
+            transition: opacity 0.3s ease-in;
+        }
+
+        /* SVG Styles */
+        .geometry-svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+            border: 1px dashed #fda4af; /* Rose-300 */
+            border-radius: 8px;
+            background-color: #fff;
+            overflow: visible; 
+        }
+        .geo-line { stroke: #333; stroke-width: 2; stroke-linecap: round; }
+        .geo-text { font-size: 14px; font-weight: bold; fill: #1f2937; font-family: 'Nunito', sans-serif; paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; }
+        .geo-point { fill: #e11d48; }
+        
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-3xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-rose-800 mb-2 uppercase drop-shadow-sm">
+            <i class="fas fa-cut mr-2"></i>Ôn tập chinh phục Toán 7 HK1 - Câu 8
+        </h1>
+        <p class="text-rose-600 font-medium">Chủ đề: Nhận biết & Tính chất Tia Phân Giác</p>
+    </header>
+
+    <!-- Mode Selection -->
+    <div class="w-full max-w-3xl grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+        <button onclick="setMode('all')" id="btn-mode-all" class="mode-active py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform transform scale-105">
+            <i class="fas fa-random mb-1"></i> Tổng Hợp
+        </button>
+        <button onclick="setMode('visual')" id="btn-mode-visual" class="mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-eye mb-1"></i> Nhìn Hình
+        </button>
+        <button onclick="setMode('calc')" id="btn-mode-calc" class="mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-calculator mb-1"></i> Lý Thuyết & Tính
+        </button>
+        <button onclick="setMode('advanced')" id="btn-mode-advanced" class="mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-project-diagram mb-1"></i> Nâng Cao
+        </button>
+    </div>
+
+    <!-- Stats Board -->
+    <div class="w-full max-w-3xl bg-white rounded-xl shadow-md p-4 mb-6 grid grid-cols-4 gap-2 text-center select-none" id="stats-container"></div>
+
+    <!-- Question Card -->
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg border-b-4 border-rose-600 p-6 relative overflow-hidden" style="min-height: 400px;">
+        <div id="question-loader">
+            <div class="loader-spinner mb-3"></div>
+            <span class="text-rose-600 font-bold text-sm">Đang vẽ hình ngẫu nhiên...</span>
+        </div>
+        <div class="absolute top-0 left-0 bg-rose-100 text-rose-800 px-3 py-1 rounded-br-lg text-xs font-bold uppercase z-10" id="question-type-badge">
+            Dạng câu hỏi
+        </div>
+        <div id="main-content-wrapper" class="flex flex-col h-full justify-between pt-6">
+            <div class="mb-6 fade-in">
+                <div id="image-container" class="mb-4 flex justify-center hidden" style="min-height: 180px;"></div>
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-left leading-relaxed" id="question-text"></h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="options-container"></div>
+            <div id="explanation-area" class="hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in"></div>
+            <div class="mt-auto h-12 flex items-center justify-between">
+                <div id="feedback-msg" class="text-lg font-bold hidden pl-2"></div>
+                <button onclick="handleNextClick()" id="btn-next" class="bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-rose-100 transition flex items-center ml-auto shadow-sm">
+                    Bỏ qua <i class="fas fa-forward ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-rose-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-rose-500 font-bold uppercase mb-1">Giải thích chi tiết:</p>
+                <div id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></div>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-rose-600 text-white font-bold rounded-xl shadow-lg hover:bg-rose-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- UTILS & DATA ---
+        const state = { mode: 'all', streak: 0, correct: 0, wrong: 0, skipped: 0, currentQuestion: null, isAnswered: false };
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+        const toRad = deg => deg * Math.PI / 180;
+        const formatNum = (n) => n.toString().replace('.', ',');
+
+        // --- NAME GENERATOR ---
+        const generateLabels = (count) => {
+            const useUpperCase = Math.random() < 0.5;
+            const center = 'O'; 
+            let pool;
+            if (useUpperCase) {
+                pool = ['A', 'B', 'C', 'D', 'E', 'F', 'H', 'K', 'M', 'N', 'P', 'Q'];
+            } else {
+                pool = ['x', 'y', 'z', 't', 'm', 'n', 'u', 'v', 'a', 'b'];
+            }
+            pool = shuffleArray(pool).slice(0, count);
+            return { labels: pool, isUpper: useUpperCase, center: center };
+        };
+        
+        // Helpers for formatting without outer $ (raw) or with $
+        const formatAngleRaw = (r1, r2, center, isUpper) => isUpper ? `\\widehat{${r1}${center}${r2}}` : `\\widehat{${r1}${center}${r2}}`;
+        const formatAngle = (r1, r2, center, isUpper) => `$${formatAngleRaw(r1, r2, center, isUpper)}$`;
+        
+        const formatRayRaw = (r, center, isUpper) => isUpper ? `${center}${r}` : `${center}${r}`;
+        const formatRay = (r, center, isUpper) => `Tia $${formatRayRaw(r, center, isUpper)}$`;
+
+        // --- DRAWING HELPERS ---
+        const createSVG = (w, h) => `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" class="geometry-svg">`;
+        const drawLine = (x1, y1, x2, y2, color="#333", width=2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${width}" stroke-linecap="round"/>`;
+        const drawText = (x, y, text, color="#1f2937", size=14) => `<text x="${x}" y="${y}" fill="${color}" font-family="Nunito" font-weight="bold" font-size="${size}" text-anchor="middle" dominant-baseline="middle">${text}</text>`;
+        
+        const drawPoint = (x, y, label=null) => {
+            let s = `<circle cx="${x}" cy="${y}" r="3" fill="#e11d48"/>`;
+            if (label) s += drawText(x, y-15, label);
+            return s;
+        };
+
+        // Hàm vẽ tia (trả về {svg, pointSvg, textSvg} để tách lớp)
+        const drawSmartRayParts = (cx, cy, angleDeg, label, isUpper, length=100) => {
+            const rad = toRad(angleDeg);
+            const ex = cx + length * Math.cos(rad);
+            const ey = cy + length * Math.sin(rad); 
+            
+            let parts = { line: "", point: "", text: "" };
+
+            if (isUpper) {
+                // In hoa: Điểm nằm trên tia, tia kéo dài qua điểm
+                const extension = 25; 
+                const extX = cx + (length + extension) * Math.cos(rad);
+                const extY = cy + (length + extension) * Math.sin(rad);
+                
+                parts.line = drawLine(cx, cy, extX, extY, "#333");
+                parts.point = drawPoint(ex, ey);
+                
+                // Offset label vuông góc với tia để tránh bị đường thẳng đè lên
+                // Vector pháp tuyến (-sin, cos)
+                const offsetDist = 20;
+                const lx = ex + offsetDist * -Math.sin(rad);
+                const ly = ey + offsetDist * Math.cos(rad);
+                
+                parts.text = drawText(lx, ly, label); 
+            } else {
+                // In thường: Tên ở cuối tia
+                parts.line = drawLine(cx, cy, ex, ey, "#333");
+                const lx = ex + 15 * Math.cos(rad);
+                const ly = ey + 15 * Math.sin(rad);
+                parts.text = drawText(lx, ly, label);
+            }
+            return parts;
+        };
+
+        const drawAngleMark = (cx, cy, startDeg, endDeg, radius, color="#e11d48", type="none", label=null) => {
+            const x1 = cx + radius * Math.cos(toRad(startDeg));
+            const y1 = cy + radius * Math.sin(toRad(startDeg));
+            const x2 = cx + radius * Math.cos(toRad(endDeg));
+            const y2 = cy + radius * Math.sin(toRad(endDeg));
+            const largeArc = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
+            const sweep = endDeg > startDeg ? 1 : 0;
+            let svg = `<path d="M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} ${sweep} ${x2} ${y2}" fill="none" stroke="${color}" stroke-width="1.5" />`;
+            const midRad = toRad((startDeg + endDeg) / 2);
+            const mx = cx + radius * Math.cos(midRad);
+            const my = cy + radius * Math.sin(midRad);
+
+            if (type === "tick") {
+                const nx = -Math.sin(midRad), ny = Math.cos(midRad);
+                svg += `<line x1="${mx - 4*nx}" y1="${my - 4*ny}" x2="${mx + 4*nx}" y2="${my + 4*ny}" stroke="${color}" stroke-width="1.5" />`;
+            } else if (type === "double-tick") {
+                const nx = -Math.sin(midRad), ny = Math.cos(midRad);
+                svg += `<line x1="${mx - 4*nx}" y1="${my - 4*ny}" x2="${mx + 4*nx}" y2="${my + 4*ny}" stroke="${color}" stroke-width="1.5" />`;
+                svg += `<line x1="${mx - 4*nx + 3*Math.cos(midRad)}" y1="${my - 4*ny + 3*Math.sin(midRad)}" x2="${mx + 4*nx + 3*Math.cos(midRad)}" y2="${my + 4*ny + 3*Math.sin(midRad)}" stroke="${color}" stroke-width="1.5" />`;
+            } else if (type === "square") {
+                const size = 15;
+                const r1 = toRad(startDeg); const r2 = toRad(endDeg);
+                const p1x = cx + size * Math.cos(r1), p1y = cy + size * Math.sin(r1);
+                const p2x = cx + size * Math.cos(r2), p2y = cy + size * Math.sin(r2);
+                const p3x = p1x + p2x - cx, p3y = p1y + p2y - cy;
+                svg = `<polyline points="${p1x},${p1y} ${p3x},${p3y} ${p2x},${p2y}" fill="none" stroke="${color}" stroke-width="1.5"/>`;
+            }
+            if (label) svg += drawText(cx + (radius + 20) * Math.cos(midRad), cy + (radius + 20) * Math.sin(midRad), label, color, 12);
+            return svg;
+        };
+
+        // --- GENERATORS ---
+
+        // Helper để xây dựng SVG theo lớp (Layering)
+        // Lines -> Points -> Center Point -> Texts
+        const buildLayeredSVG = (W, H, partsList, centerPointSvg, marksSvg) => {
+            let svg = createSVG(W, H);
+            
+            // Layer 1: Marks (Góc)
+            svg += marksSvg || "";
+
+            // Layer 2: Lines (Tia)
+            partsList.forEach(p => svg += p.line);
+
+            // Layer 3: Points on rays
+            partsList.forEach(p => svg += p.point);
+
+            // Layer 4: Center Point (Vẽ sau cùng để đè lên các tia)
+            svg += centerPointSvg;
+
+            // Layer 5: Labels
+            partsList.forEach(p => svg += p.text);
+            
+            svg += `</svg>`;
+            return svg;
+        };
+
+        // 1. Dạng: 2 góc kề bù, 2 tia phân giác
+        const generateFlatBisectors = () => {
+            const {labels, isUpper, center} = generateLabels(5);
+            const [rayA, rayB, rayMid, rayBis1, rayBis2] = labels;
+            const W = 320, H = 220, CX = 160, CY = 180;
+            
+            let parts = [];
+            let marks = "";
+
+            parts.push(drawSmartRayParts(CX, CY, 180, rayA, isUpper, 120));
+            parts.push(drawSmartRayParts(CX, CY, 0, rayB, isUpper, 120));
+            
+            const midAngle = randomInt(50, 130);
+            parts.push(drawSmartRayParts(CX, CY, -midAngle, rayMid, isUpper, 110));
+            
+            const alpha = midAngle; 
+            const bisLeftDeg = 180 - (180 - alpha)/2; 
+            const bisRightDeg = alpha / 2; 
+            
+            parts.push(drawSmartRayParts(CX, CY, -bisLeftDeg, rayBis1, isUpper, 100));
+            parts.push(drawSmartRayParts(CX, CY, -bisRightDeg, rayBis2, isUpper, 100));
+            
+            marks += drawAngleMark(CX, CY, -180, -bisLeftDeg, 40, "green", "tick");
+            marks += drawAngleMark(CX, CY, -bisLeftDeg, -alpha, 40, "green", "tick");
+            marks += drawAngleMark(CX, CY, -alpha, -bisRightDeg, 50, "blue", "double-tick");
+            marks += drawAngleMark(CX, CY, -bisRightDeg, 0, 50, "blue", "double-tick");
+
+            const centerSvg = drawPoint(CX, CY, center, {dx:0, dy:20});
+            const svg = buildLayeredSVG(W, H, parts, centerSvg, marks);
+
+            const qType = randomInt(1, 2);
+            let q, corr, opts, expl;
+            const rBis1 = formatRay(rayBis1, center, isUpper);
+            const rBis2 = formatRay(rayBis2, center, isUpper);
+            const angLeftName = formatAngle(rayA, rayMid, center, isUpper);
+            const angRightName = formatAngle(rayMid, rayB, center, isUpper);
+
+            if (qType === 1) {
+                q = `Quan sát hình vẽ. ${rBis1} là tia phân giác của góc nào dưới đây?`;
+                corr = angLeftName;
+                opts = [angLeftName, angRightName, formatAngle(rayBis1, rayBis2, center, isUpper), formatAngle(rayA, rayB, center, isUpper)];
+                expl = `Dựa vào ký hiệu hai góc bằng nhau (1 gạch), ta thấy ${rBis1} chia góc ${angLeftName} thành hai phần bằng nhau.`;
+            } else {
+                q = `Góc ${angRightName} có tia phân giác là tia nào?`;
+                corr = rBis2;
+                opts = [rBis2, rBis1, formatRay(rayMid, center, isUpper), formatRay(rayA, center, isUpper)];
+                expl = `Quan sát hình, góc ${angRightName} được chia đôi bởi ${rBis2} (thể hiện qua ký hiệu 2 gạch giống nhau).`;
+            }
+            return { typeLabel: "Góc kề bù & Phân giác", text: q, correct: corr, options: shuffleArray(opts), explanation: expl, svg };
+        };
+
+        // 2. Dạng: Đường thẳng vuông góc
+        const generatePerpendicular = () => {
+            const {labels, isUpper, center} = generateLabels(4);
+            const [x, x_pr, y, y_pr] = labels; 
+            const W = 300, H = 300, CX = 150, CY = 150;
+            
+            let parts = [];
+            parts.push(drawSmartRayParts(CX, CY, 0, x, isUpper, 100));
+            parts.push(drawSmartRayParts(CX, CY, 180, x_pr, isUpper, 100));
+            parts.push(drawSmartRayParts(CX, CY, -90, y, isUpper, 100));
+            parts.push(drawSmartRayParts(CX, CY, 90, y_pr, isUpper, 100));
+            
+            const marks = drawAngleMark(CX, CY, -90, 0, 20, "red", "square");
+            const centerSvg = drawPoint(CX, CY, center, {dx:10, dy:10});
+            
+            const svg = buildLayeredSVG(W, H, parts, centerSvg, marks);
+
+            const rayY = formatRay(y, center, isUpper);
+            const flatAng = formatAngle(x, x_pr, center, isUpper);
+            const q = `Cho hai đường thẳng vuông góc như hình vẽ. ${rayY} là tia phân giác của góc bẹt nào dưới đây?`;
+            const corr = flatAng;
+            const wrong1 = formatAngle(x, y, center, isUpper);
+            const wrong2 = formatAngle(y, y_pr, center, isUpper);
+            const wrong3 = formatAngle(x, y_pr, center, isUpper);
+            const expl = `Góc bẹt ${flatAng} có số đo $180^\\circ$. Vì hai đường thẳng vuông góc nên ${rayY} tạo với hai tia ${formatRay(x, center, isUpper)} và ${formatRay(x_pr, center, isUpper)} các góc $90^\\circ$.`;
+
+            return { typeLabel: "Đường thẳng vuông góc", text: q, correct: corr, options: shuffleArray([corr, wrong1, wrong2, wrong3]), explanation: expl, svg };
+        };
+
+        // 3. Dạng: Tia đối của tia phân giác
+        const generateOppositeBisector = () => {
+            const {labels, isUpper, center} = generateLabels(4);
+            const [x, y, t, m] = labels;
+            const W = 320, H = 220, CX = 160, CY = 110;
+            
+            const rot = randomInt(-20, 20);
+            const ang = randomInt(50, 80) * 2;
+            const half = ang / 2;
+            
+            let parts = [];
+            parts.push(drawSmartRayParts(CX, CY, rot + 180 - half, x, isUpper, 100));
+            parts.push(drawSmartRayParts(CX, CY, rot + 180 + half, y, isUpper, 100));
+            parts.push(drawSmartRayParts(CX, CY, rot + 180, t, isUpper, 100));
+            parts.push(drawSmartRayParts(CX, CY, rot, m, isUpper, 100));
+            
+            let marks = "";
+            marks += drawAngleMark(CX, CY, rot + 180 - half, rot + 180, 40, "blue", "tick");
+            marks += drawAngleMark(CX, CY, rot + 180, rot + 180 + half, 40, "blue", "tick");
+
+            const centerSvg = drawPoint(CX, CY, center, {dx:0, dy:-20});
+            const svg = buildLayeredSVG(W, H, parts, centerSvg, marks);
+
+            const qType = randomInt(1, 2);
+            let q, corr, opts, expl;
+            const angXOy = formatAngle(x, y, center, isUpper);
+            const rOt = formatRay(t, center, isUpper);
+            const rOm = formatRay(m, center, isUpper);
+            const rOx = formatRay(x, center, isUpper);
+            
+            if (qType === 1) {
+                q = `Quan sát hình vẽ. Tia nào là tia phân giác của góc ${angXOy}?`;
+                corr = rOt;
+                opts = [rOt, rOm, rOx, formatRay(y, center, isUpper)];
+                expl = `Tia ${rOt} nằm giữa hai cạnh của góc ${angXOy} và tạo với hai cạnh đó hai góc bằng nhau (ký hiệu giống nhau). Tia ${rOm} là tia đối, không phải phân giác.`;
+            } else {
+                q = `Tia ${rOt} là tia phân giác của góc nào dưới đây?`;
+                corr = angXOy;
+                opts = [angXOy, formatAngle(x, m, center, isUpper), formatAngle(y, m, center, isUpper), formatAngle(x, t, center, isUpper)];
+                expl = `Dựa vào ký hiệu trên hình, ${rOt} chia đôi góc ${angXOy}.`;
+            }
+            return { typeLabel: "Tia đối & Phân giác", text: q, correct: corr, options: shuffleArray(opts), explanation: expl, svg };
+        };
+
+        // 4. GENERATOR: TÍNH TOÁN VÀ LÝ THUYẾT (UPDATED)
+        const generateCalcAndTheory = () => {
+             const {labels, isUpper, center} = generateLabels(3); 
+             const [x, y, z] = labels; 
+             
+             const mode = randomInt(1, 4); 
+             const W = 300, H = 200, CX = 150, CY = 150;
+             
+             const baseAngle = randomInt(40, 140);
+             const halfAngle = baseAngle / 2;
+             const rot = randomInt(190, 300); 
+
+             let parts = [];
+             parts.push(drawSmartRayParts(CX, CY, rot, x, isUpper, 100));
+             parts.push(drawSmartRayParts(CX, CY, rot + baseAngle, y, isUpper, 100));
+             parts.push(drawSmartRayParts(CX, CY, rot + halfAngle, z, isUpper, 100));
+             
+             let marks = "";
+             marks += drawAngleMark(CX, CY, rot, rot + halfAngle, 40, "blue", "tick");
+             marks += drawAngleMark(CX, CY, rot + halfAngle, rot + baseAngle, 40, "blue", "tick");
+
+             const centerSvg = drawPoint(CX, CY, center, {dx:0, dy:20});
+             const svg = buildLayeredSVG(W, H, parts, centerSvg, marks);
+
+             let q, corr, expl, opts;
+             const angBig = formatAngle(x, y, center, isUpper);
+             const angSmall1 = formatAngle(x, z, center, isUpper);
+             const angSmall2 = formatAngle(z, y, center, isUpper);
+             const rBis = formatRay(z, center, isUpper);
+             
+             const rawBig = formatAngleRaw(x, y, center, isUpper);
+             const rawSmall1 = formatAngleRaw(x, z, center, isUpper);
+             const rawSmall2 = formatAngleRaw(z, y, center, isUpper);
+
+             if (mode === 1) { 
+                 q = `Cho ${rBis} là tia phân giác của ${angBig}. Biết ${angBig} = $${formatNum(baseAngle)}^\\circ$. Số đo của ${angSmall1} là:`;
+                 corr = `$${formatNum(halfAngle)}^\\circ$`;
+                 opts = [`$${formatNum(halfAngle)}^\\circ$`, `$${formatNum(baseAngle)}^\\circ$`, `$${formatNum(baseAngle*2)}^\\circ$`, `$${formatNum(randomInt(10, 30))}^\\circ$`];
+                 expl = `Vì ${rBis} là tia phân giác nên ${angSmall1} = $\\frac{1}{2}$${angBig} = $${formatNum(halfAngle)}^\\circ$.`;
+             } else if (mode === 2) { 
+                 q = `Cho ${rBis} là tia phân giác của ${angBig} và ${angSmall1} = $${formatNum(halfAngle)}^\\circ$. Số đo ${angBig} là:`;
+                 corr = `$${formatNum(baseAngle)}^\\circ$`;
+                 opts = [`$${formatNum(baseAngle)}^\\circ$`, `$${formatNum(halfAngle)}^\\circ$`, `$90^\\circ$`, `$180^\\circ$`];
+                 expl = `${angBig} = $2 . ${angSmall1.replace(/\$/g,'')}$ = $${formatNum(baseAngle)}^\\circ$.`;
+             } else if (mode === 3) { 
+                 q = `Nếu ${rBis} là tia phân giác của ${angBig} thì công thức nào sau đây đúng?`;
+                 corr = `$${rawSmall1} = \\frac{1}{2}${rawBig}$`;
+                 const w1 = `$${rawSmall1} = ${rawBig}$`;
+                 const w2 = `$${rawSmall1} = 2${rawBig}$`;
+                 const w3 = `$${rawBig} = \\frac{1}{2}${rawSmall1}$`;
+                 opts = [corr, w1, w2, w3];
+                 expl = `Tính chất tia phân giác: Góc thành phần bằng một nửa góc toàn phần. ($${rawSmall1} = ${rawSmall2} = \\frac{1}{2}${rawBig}$)`;
+             } else { 
+                 q = `Nếu ${rBis} là tia phân giác của ${angBig} thì đẳng thức nào dưới đây đúng?`;
+                 corr = `$${rawBig} = 2${rawSmall1}$`;
+                 const w1 = `$${rawBig} = ${rawSmall1}$`;
+                 const w2 = `$${rawBig} = \\frac{1}{2}${rawSmall1}$`;
+                 const w3 = `$${rawSmall1} = 2${rawBig}$`;
+                 opts = [corr, w1, w2, w3];
+                 expl = `Tính chất tia phân giác: Góc toàn phần bằng 2 lần góc thành phần. ($${rawBig} = 2${rawSmall1} = 2${rawSmall2}$)`;
+             }
+             return { typeLabel: "Lý thuyết & Tính toán", text: q, correct: corr, options: shuffleArray(opts), explanation: expl, svg };
+        };
+
+        // --- MAIN LOGIC ---
+        const loadQuestion = () => {
+            const loader = document.getElementById('question-loader');
+            loader.classList.remove('hidden-loader');
+            const contentWrapper = document.getElementById('main-content-wrapper');
+            contentWrapper.classList.remove('content-visible');
+
+            state.isAnswered = false;
+            let qData;
+            let activeMode = state.mode;
+
+            if (activeMode === 'all') {
+                const r = Math.random();
+                if (r < 0.25) activeMode = 'visual';      
+                else if (r < 0.6) activeMode = 'calc';   
+                else activeMode = 'advanced';            
+            }
+
+            if (activeMode === 'advanced') {
+                const r = Math.random();
+                if (r < 0.33) qData = generateFlatBisectors();
+                else if (r < 0.66) qData = generatePerpendicular();
+                else qData = generateOppositeBisector();
+            } 
+            else if (activeMode === 'calc') {
+                qData = generateCalcAndTheory();
+            }
+            else {
+                qData = Math.random() < 0.5 ? generateFlatBisectors() : generateCalcAndTheory(); 
+            }
+
+            state.currentQuestion = qData;
+            document.getElementById('question-type-badge').innerText = qData.typeLabel;
+            document.getElementById('question-text').innerHTML = qData.text;
+            
+            const imgContainer = document.getElementById('image-container');
+            if (qData.svg) {
+                imgContainer.innerHTML = qData.svg;
+                imgContainer.classList.remove('hidden');
+            } else {
+                imgContainer.classList.add('hidden');
+            }
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option w-full bg-rose-50 hover:bg-rose-100 text-rose-900 border border-rose-200 p-4 rounded-xl text-lg font-semibold shadow-sm text-left flex items-center group";
+                btn.dataset.value = opt; 
+                const labels = ['A', 'B', 'C', 'D'];
+                btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-rose-200 text-center leading-8 mr-3 text-rose-800 font-bold shadow-sm group-hover:bg-rose-600 group-hover:text-white transition flex-shrink-0">${labels[index]}</span> <span>${opt}</span>`;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedback-msg').className = "hidden";
+            document.getElementById('explanation-area').className = "hidden";
+            document.getElementById('explanation-area').innerHTML = '';
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-rose-100 transition flex items-center ml-auto shadow-sm";
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([contentWrapper]).then(() => {
+                    setTimeout(() => {
+                        loader.classList.add('hidden-loader');
+                        contentWrapper.classList.add('content-visible');
+                    }, 150);
+                });
+            } else {
+                setTimeout(() => {
+                    loader.classList.add('hidden-loader');
+                    contentWrapper.classList.add('content-visible');
+                }, 200);
+            }
+        };
+
+        const checkAnswer = (selectedVal, btnElement) => {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+            const isCorrect = selectedVal == state.currentQuestion.correct;
+            const feedbackEl = document.getElementById('feedback-msg');
+            const explArea = document.getElementById('explanation-area');
+            
+            const allBtns = document.querySelectorAll('.btn-option');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-70');
+                if (b.dataset.value === state.currentQuestion.correct) {
+                    b.classList.remove('bg-rose-50', 'text-rose-900', 'border-rose-200', 'opacity-70');
+                    b.classList.add('bg-green-100', 'text-green-800', 'border-green-600', 'border-2', 'opacity-100');
+                    b.querySelector('span').classList.replace('bg-rose-200', 'bg-green-600');
+                    b.querySelector('span').classList.add('text-white');
+                }
+            });
+
+            if (isCorrect) {
+                btnElement.classList.add('bg-green-500', 'text-white', 'pop', 'opacity-100');
+                btnElement.querySelector('span').classList.replace('bg-rose-200', 'bg-white');
+                btnElement.querySelector('span').classList.replace('text-rose-800', 'text-green-600');
+                feedbackEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2 animate-bounce";
+                state.streak++; state.correct++;
+            } else {
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600', 'shake', 'opacity-100');
+                btnElement.querySelector('span').classList.replace('bg-rose-200', 'bg-white');
+                btnElement.querySelector('span').classList.replace('text-rose-800', 'text-red-600');
+                feedbackEl.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2";
+                state.streak = 0; state.wrong++;
+                showFeedbackModal(false);
+            }
+            renderStats();
+            explArea.innerHTML = `<p class="font-bold text-rose-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+            document.getElementById('explanation-area').className = "mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in";
+            
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = `Câu tiếp theo <i class="fas fa-arrow-right ml-2"></i>`;
+            btnNext.className = "bg-rose-600 text-white px-6 py-2 rounded-full font-bold hover:bg-rose-700 transition flex items-center ml-auto shadow-lg transform scale-105";
+            if (window.MathJax) MathJax.typesetPromise([explArea]);
+        };
+
+        const showFeedbackModal = (isSuccess) => {
+            const overlay = document.getElementById('feedback-overlay');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+            const icon = document.getElementById('feedback-icon');
+
+            if (!isSuccess) {
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Chưa chính xác";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerHTML = `Đáp án đúng là: <br><span class="text-green-600 font-bold text-xl mt-2 block">${state.currentQuestion.correct}</span>`;
+            }
+            detail.innerHTML = state.currentQuestion.explanation;
+            setTimeout(() => { 
+                overlay.classList.remove('hidden'); 
+                if (window.MathJax) MathJax.typesetPromise([overlay]);
+            }, 600);
+        };
+
+        const handleNextClick = (forceSkip = false) => {
+            if (!state.isAnswered && !forceSkip) {
+                state.streak = 0; state.skipped++; renderStats();
+            }
+            loadQuestion();
+        };
+
+        const renderStats = () => {
+            document.getElementById('stats-container').innerHTML = `
+                <div class="flex flex-col items-center"><span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span><span class="text-3xl font-extrabold ${state.streak > 2 ? 'text-rose-500 animate-pulse' : 'text-gray-800'}">${state.streak}</span></div>
+                <div class="flex flex-col items-center border-l"><span class="text-xs text-gray-500 uppercase font-bold">Đúng</span><span class="text-xl font-bold text-green-600">${state.correct}</span></div>
+                <div class="flex flex-col items-center border-l"><span class="text-xs text-gray-500 uppercase font-bold">Sai</span><span class="text-xl font-bold text-red-500">${state.wrong}</span></div>
+                <div class="flex flex-col items-center border-l"><span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span><span class="text-xl font-bold text-gray-400">${state.skipped}</span></div>
+            `;
+        };
+
+        const setMode = (mode) => {
+            state.mode = mode;
+            ['all', 'visual', 'calc', 'advanced'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m === mode) btn.className = "mode-active py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform transform scale-105";
+                else btn.className = "mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform";
+            });
+            handleNextClick(true);
+        };
+
+        const closeModal = () => document.getElementById('feedback-overlay').classList.add('hidden');
+        window.onload = () => { renderStats(); loadQuestion(); }
+    </script>
+</body>
+</html>

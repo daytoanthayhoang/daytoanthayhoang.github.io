@@ -3,24 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toán 7 - Bài 1: Làm tròn & Ước lượng</title>
+    <title>Ôn tập chinh phục Toán 7 HK1 - Bài 1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f0f4f8;
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
             background-size: 20px 20px;
         }
         .chalkboard {
-            background-color: #1e293b;
-            color: #f8fafc;
-            border: 10px solid #78350f;
-            border-radius: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border: 8px solid #854d0e;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .chalkboard::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMTAgMTBRNDAgNDAgMTAgNzAiIHN0cm9rZT0id2hpdGUiIG9wYWNpdHk9IjAuMDUiIGZpbGw9Im5vbmUiLz4KPC9zdmc+');
+            opacity: 0.1;
+            pointer-events: none;
         }
         .step-item {
             opacity: 0;
@@ -30,103 +41,100 @@
         @keyframes slideDown {
             to { opacity: 1; transform: translateY(0); }
         }
+        #steps-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #steps-container::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        #steps-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        #steps-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .input-group:focus-within label {
+            color: #4f46e5;
+        }
+
+        /* --- STYLES FOR STATS --- */
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+        .stats-box {
+            transition: all 0.3s ease;
+        }
+        .stats-box:hover {
+            transform: translateY(-2px);
+        }
+        
         .highlight-digit {
-            color: #ef4444; /* red-500 */
+            color: #ef4444; 
             text-decoration: underline;
             text-decoration-color: #ef4444;
             text-decoration-thickness: 3px;
             text-underline-offset: 3px;
             font-weight: 800;
-            font-size: 1.1em;
-        }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=text] { -moz-appearance: textfield; }
-        
-        /* Animation cho Streak */
-        @keyframes fire-pulse {
-            0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255, 165, 0, 0)); }
-            50% { transform: scale(1.2); filter: drop-shadow(0 0 10px rgba(255, 69, 0, 0.8)); }
-            100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255, 165, 0, 0)); }
-        }
-        .streak-active {
-            animation: fire-pulse 1s infinite;
-        }
-        .stats-disabled {
-            opacity: 0.5;
-            filter: grayscale(100%);
-            position: relative;
-        }
-        .stats-disabled::after {
-            content: '\f023'; /* FontAwesome Lock icon */
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #ef4444;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-2 md:p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
 
-    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-indigo-100">
+    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-blue-200">
         <!-- Header -->
-        <div class="bg-indigo-700 p-3 md:p-4 relative shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
-            <h1 class="text-lg md:text-xl font-extrabold text-white uppercase tracking-wider flex items-center">
-                <i class="fas fa-microchip mr-2 text-indigo-300"></i>
-                <span class="hidden md:inline">ÔN TẬP: </span>LÀM TRÒN & ƯỚC LƯỢNG
+        <div class="bg-indigo-600 p-4 text-center relative shadow-lg">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
+                <i class="fas fa-calculator mr-2"></i>Ôn tập chinh phục Toán 7 HK1 - Bài 1
             </h1>
-            
-            <!-- Stats Bar -->
-            <div id="stats-bar" class="flex items-center gap-3 bg-indigo-800/50 p-2 rounded-xl backdrop-blur-sm border border-indigo-500/30 transition-all duration-300">
-                <!-- Streak -->
-                <div class="flex items-center gap-1 bg-orange-500/20 px-3 py-1 rounded-lg border border-orange-500/30 group relative">
-                    <i class="fas fa-fire text-orange-400 text-xl transition-all" id="streak-icon"></i>
-                    <div class="flex flex-col items-center leading-none">
-                        <span class="text-[10px] text-orange-200 uppercase font-bold">Chuỗi</span>
-                        <span id="streak-count" class="text-orange-300 font-black text-lg">0</span>
-                    </div>
-                    <!-- Share Button (Hover/Click) -->
-                    <button onclick="shareStreak()" class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-white text-indigo-600 text-xs font-bold px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 hover:bg-gray-100">
-                        <i class="fas fa-share-alt mr-1"></i>Share
-                    </button>
-                </div>
-
-                <!-- Correct -->
-                <div class="flex items-center gap-2 px-3 border-r border-indigo-500/30">
-                    <i class="fas fa-check-circle text-emerald-400 text-lg"></i>
-                    <span id="correct-count" class="text-white font-bold text-lg">0</span>
-                </div>
-
-                <!-- Wrong -->
-                <div class="flex items-center gap-2 px-2">
-                    <i class="fas fa-times-circle text-rose-400 text-lg"></i>
-                    <span id="wrong-count" class="text-white font-bold text-lg">0</span>
-                </div>
-            </div>
+            <p class="text-white font-medium">Chủ đề: Số vô tỉ, Làm tròn số & Ước lượng</p>
         </div>
 
-        <div class="p-4 md:p-6 space-y-6">
+        <div class="p-4 md:p-6 space-y-4">
+            
+            <!-- STATS BOARD -->
+            <div class="bg-white rounded-xl shadow-md p-3 grid grid-cols-4 gap-2 text-center select-none border border-gray-100" id="stats-container">
+                <div class="flex flex-col items-center stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span id="stat-streak" class="text-2xl md:text-3xl font-extrabold text-indigo-900">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span id="stat-correct" class="text-xl md:text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span id="stat-wrong" class="text-xl md:text-2xl font-bold text-red-500">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span id="stat-skipped" class="text-xl md:text-2xl font-bold text-gray-400">0</span>
+                </div>
+            </div>
+            
+            <!-- Main Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
-                <!-- CỘT TRÁI: ĐỀ BÀI & NHẬP LIỆU -->
+                <!-- Left Column: Chalkboard & Inputs -->
                 <div class="flex flex-col gap-4">
-                    <div class="chalkboard p-6 min-h-[450px]">
-                        <div class="space-y-6 font-mono text-lg md:text-xl">
+                    <!-- Chalkboard -->
+                    <div class="chalkboard p-6 min-h-[450px] relative">
+                        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs font-mono uppercase tracking-widest opacity-60">
+                            Đề bài
+                        </div>
+                        
+                        <div class="space-y-6 font-mono text-lg md:text-xl w-full px-2">
                             <!-- Câu a -->
                             <div>
                                 <div class="flex items-center mb-1">
                                     <span class="text-yellow-400 font-bold mr-2">a)</span>
-                                    <span class="text-blue-200 text-base font-sans">Tính (làm tròn đến <span id="q-a-round-text" class="underline decoration-yellow-400">...</span>):</span>
+                                    <span class="text-blue-200 text-base font-sans">Tính (làm tròn đến <span id="q-a-round-text" class="text-yellow-300 font-bold underline">...</span>):</span>
                                 </div>
                                 <div class="pl-8 text-white tracking-wider">
                                     <span id="q-a1-disp">...</span> &approx; ? <br> <span id="q-a2-disp">...</span> &approx; ?
@@ -134,7 +142,7 @@
                             </div>
 
                             <!-- Câu b -->
-                            <div class="border-t border-slate-600 pt-4">
+                            <div class="border-t border-gray-600 pt-4">
                                 <div class="flex mb-1">
                                     <span class="text-yellow-400 font-bold mr-2 whitespace-nowrap">b)</span>
                                     <span class="text-blue-200 text-base font-sans" id="q-b-text">
@@ -147,7 +155,7 @@
                             </div>
 
                             <!-- Câu c -->
-                            <div class="border-t border-slate-600 pt-4">
+                            <div class="border-t border-gray-600 pt-4">
                                 <div class="flex items-center mb-1">
                                     <span class="text-yellow-400 font-bold mr-2">c)</span>
                                     <span class="text-blue-200 text-sm font-sans">Làm tròn mỗi số đến hàng cao nhất để ước lượng:</span>
@@ -160,26 +168,26 @@
                     </div>
 
                     <!-- NHẬP ĐÁP ÁN -->
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-inner">
                         <div class="space-y-4">
                             <!-- Input A -->
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="input-group">
                                     <label id="lbl-a1" class="block text-gray-500 font-bold text-[11px] uppercase mb-1 truncate">...</label>
-                                    <input type="text" id="ans-a1" placeholder="-7,68" class="w-full text-center font-bold p-2 border-2 rounded-lg focus:border-indigo-500 outline-none">
+                                    <input type="text" id="ans-a1" placeholder="-7,68" class="w-full text-center font-bold p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors">
                                 </div>
                                 <div class="input-group">
                                     <label id="lbl-a2" class="block text-gray-500 font-bold text-[11px] uppercase mb-1 truncate">...</label>
-                                    <input type="text" id="ans-a2" placeholder="38,14" class="w-full text-center font-bold p-2 border-2 rounded-lg focus:border-indigo-500 outline-none">
+                                    <input type="text" id="ans-a2" placeholder="38,14" class="w-full text-center font-bold p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors">
                                 </div>
                             </div>
                             <!-- Input B -->
                             <div class="input-group">
                                 <label id="lbl-b" class="block text-gray-500 font-bold text-[11px] uppercase mb-1 truncate">...</label>
-                                <input type="text" id="ans-b" placeholder="20 940 000" class="w-full text-center font-bold p-2 border-2 rounded-lg focus:border-indigo-500 outline-none">
+                                <input type="text" id="ans-b" placeholder="20 940 000" class="w-full text-center font-bold p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors">
                             </div>
                             <!-- Input C -->
-                            <div class="bg-white p-3 rounded-lg border border-slate-200">
+                            <div class="bg-white p-3 rounded-lg border border-gray-200">
                                 <span class="block text-gray-400 font-bold text-[10px] uppercase mb-2">Ước lượng: Nhập số đã làm tròn vào 2 ô đầu</span>
                                 <div class="grid grid-cols-7 gap-1 items-center">
                                     <input type="text" id="ans-c-p1" class="col-span-3 text-center font-bold p-2 border rounded-lg text-sm" placeholder="-60">
@@ -192,13 +200,24 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Difficulty Toggle -->
+                        <div class="flex items-center justify-end mt-4 mb-2">
+                            <label class="inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                <span class="ms-2 text-sm font-bold text-gray-600 peer-checked:text-red-600 transition-colors flex items-center">
+                                    <i class="fas fa-skull-crossbones mr-1"></i>Chế độ khó
+                                </span>
+                            </label>
+                        </div>
                         
-                        <div class="flex gap-3 mt-4">
-                            <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 font-bold py-2 rounded-lg transition-all text-gray-700">
-                                <i class="fas fa-sync-alt mr-1"></i> Bài mới
+                        <div class="flex gap-3">
+                            <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-sync-alt"></i> Bài mới
                             </button>
-                            <button onclick="checkAnswer()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg shadow-lg transition-all transform active:scale-95">
-                                <i class="fas fa-check mr-1"></i> Kiểm tra
+                            <button onclick="checkAnswer()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i> Kiểm tra
                             </button>
                         </div>
                         <div id="feedback" class="hidden mt-3 text-center p-2 rounded-lg text-sm font-bold"></div>
@@ -208,34 +227,46 @@
                     </div>
                 </div>
 
-                <!-- CỘT PHẢI: HƯỚNG DẪN GIẢI & TRÌNH BÀY -->
-                <div class="flex flex-col h-[550px] lg:h-[750px] bg-white rounded-xl border-2 border-dashed border-slate-300 p-4">
-                    <div class="flex justify-between items-center mb-3 pb-2 border-b">
-                        <h3 class="font-bold text-slate-700 text-sm uppercase">
-                            <i class="fas fa-chalkboard-teacher text-indigo-500 mr-1"></i>Hướng dẫn giải
-                        </h3>
-                        <button onclick="showNextStep()" id="btn-show-step" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all">
-                            Gợi ý tiếp <i class="fas fa-arrow-right ml-1"></i>
-                        </button>
+                <!-- Right Column: Step-by-step -->
+                <div class="flex flex-col h-[600px] lg:h-[750px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-4 relative">
+                    <!-- HEADER WITH BUTTON -->
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 shrink-0">
+                        <div class="flex items-center gap-2 flex-grow">
+                            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide whitespace-nowrap">
+                                <i class="fas fa-file-alt text-blue-500 mr-1"></i>Trình bày bài thi
+                            </h3>
+                            <!-- Button -->
+                            <button onclick="showNextStep()" id="btn-show-step" 
+                                class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed ml-2">
+                                <span>Gợi ý tiếp</span> <i class="fas fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                        <span id="step-counter" class="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded ml-2">0/0</span>
                     </div>
 
-                    <div id="rule-area" class="hidden mb-3 bg-amber-50 text-amber-900 text-xs p-3 rounded-lg border-l-4 border-amber-500 shadow-sm transition-all">
-                        <span id="rule-content"></span>
+                    <!-- Fixed Rule Hint Area -->
+                    <div id="rule-area" class="hidden mb-3 bg-yellow-50 text-yellow-900 text-sm p-3 rounded-lg border-l-4 border-yellow-400 shadow-sm transition-all duration-300 shrink-0">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                        <span id="rule-content" class="font-medium"></span>
                     </div>
                     
-                    <div id="steps-container" class="flex-grow overflow-y-auto space-y-4 p-1 pr-2">
-                        <div class="text-gray-400 italic text-sm text-center mt-20">Bấm "Gợi ý tiếp" để xem hướng dẫn chi tiết từng bước</div>
+                    <!-- Scrollable Steps -->
+                    <div id="steps-container" class="flex-grow overflow-y-auto bg-white p-3 rounded-lg shadow-inner border border-gray-100 scroll-smooth">
+                        <div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center">
+                            <i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i>
+                            <span>Bấm "Gợi ý tiếp" để xem bài làm mẫu</span>
+                        </div>
                     </div>
-                    <div id="step-counter" class="text-center text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-widest">Bước: 0/0</div>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-50 text-sm font-bold">
-        Copied!
-    </div>
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
 
     <script>
         // --- State ---
@@ -247,6 +278,7 @@
         let streak = 0;
         let correctTotal = 0;
         let wrongTotal = 0;
+        let skippedTotal = 0;
         let statsEnabled = true; // True = có tính điểm, False = đã dùng gợi ý, không tính
 
         // --- Utils Format ---
@@ -258,48 +290,29 @@
             return parts.join(',');
         }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.remove('opacity-0');
-            setTimeout(() => { toast.classList.add('opacity-0'); }, 2000);
-        }
-
-        function shareStreak() {
-            const msg = `🔥 Tôi đang có chuỗi ${streak} câu đúng liên tiếp môn Toán 7! Đố bạn vượt qua được đấy! 🚀 #Toan7 #ThuThachHocTap`;
-            navigator.clipboard.writeText(msg).then(() => {
-                showToast("Đã copy chuỗi thành tích!");
-            }).catch(err => {
-                showToast("Lỗi copy!");
-            });
-        }
-
         function updateStatsUI() {
-            const streakEl = document.getElementById('streak-count');
-            const streakIcon = document.getElementById('streak-icon');
-            const statsBar = document.getElementById('stats-bar');
+            const streakEl = document.getElementById('stat-streak');
             
             // Update Text
             streakEl.textContent = streak;
-            document.getElementById('correct-count').textContent = correctTotal;
-            document.getElementById('wrong-count').textContent = wrongTotal;
+            document.getElementById('stat-correct').textContent = correctTotal;
+            document.getElementById('stat-wrong').textContent = wrongTotal;
+            document.getElementById('stat-skipped').textContent = skippedTotal;
 
             // Visual State for Disabled
             if (!statsEnabled) {
-                statsBar.classList.add('stats-disabled');
                 document.getElementById('hint-warning').classList.remove('hidden');
             } else {
-                statsBar.classList.remove('stats-disabled');
                 document.getElementById('hint-warning').classList.add('hidden');
             }
 
             // Streak Animation
             if (streak > 2) {
-                streakIcon.classList.add('streak-active');
-                streakIcon.style.color = '#ff4500'; // Đỏ cam đậm
+                streakEl.classList.add('streak-fire');
+                streakEl.innerHTML = `<i class="fas fa-fire"></i> ${streak}`;
             } else {
-                streakIcon.classList.remove('streak-active');
-                streakIcon.style.color = ''; // Reset
+                streakEl.classList.remove('streak-fire');
+                streakEl.textContent = streak;
             }
         }
 
@@ -313,14 +326,6 @@
         // --- Generator Logic ---
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-        function generateRepeatingDec(isNegative) {
-            const int = getRandomInt(1, 100) * (isNegative ? -1 : 1);
-            const cycle = getRandomInt(1, 99);
-            const display = `${int},(${cycle})`;
-            const valStr = `${int}.${cycle}${cycle}${cycle}${cycle}`;
-            return { display, value: parseFloat(valStr) };
         }
 
         function roundToHighest(num) {
@@ -387,23 +392,42 @@
         }
 
         function generateProblem() {
+            const isHard = document.getElementById('mode-hard').checked;
+
             // --- Câu A ---
-            const isNegA = Math.random() < 0.4;
+            // Normal: 0.4 neg prob, 1-2 decimals
+            // Hard: 0.6 neg prob, 3-4 decimals, sometimes sqrt of decimal
+            const isNegA = Math.random() < (isHard ? 0.6 : 0.4);
             const randA = Math.random();
             let a_places, a_text;
             
-            if (randA < 0.7) {
-                const type = getRandomInt(0, 1);
-                a_places = type === 0 ? 1 : 2;
-                a_text = type === 0 ? "hàng phần mười" : "hàng phần trăm";
+            if (isHard) {
+                 if (randA < 0.5) {
+                    a_places = 3; a_text = "hàng phần nghìn";
+                 } else {
+                    a_places = 4; a_text = "hàng phần chục nghìn";
+                 }
             } else {
-                const type = getRandomInt(0, 1);
-                a_places = type === 0 ? 3 : 4;
-                a_text = type === 0 ? "hàng phần nghìn" : "hàng phần chục nghìn";
+                if (randA < 0.7) {
+                    const type = getRandomInt(0, 1);
+                    a_places = type === 0 ? 1 : 2;
+                    a_text = type === 0 ? "hàng phần mười" : "hàng phần trăm";
+                } else {
+                    const type = getRandomInt(0, 1);
+                    a_places = type === 0 ? 3 : 4;
+                    a_text = type === 0 ? "hàng phần nghìn" : "hàng phần chục nghìn";
+                }
             }
             
-            const a1_raw = getRandomInt(10, 150); 
-            const a2_raw = getRandomInt(100, 5000);
+            // In hard mode, occasionally use decimal radicand (e.g. sqrt(12.5))
+            let a1_raw, a2_raw;
+            if (isHard && Math.random() < 0.3) {
+                 a1_raw = parseFloat((getRandomInt(100, 2000)/10).toFixed(1)); // 10.0 - 200.0
+            } else {
+                 a1_raw = getRandomInt(10, 150); 
+            }
+            a2_raw = getRandomInt(100, isHard ? 9999 : 5000);
+
             const vA1 = Math.sqrt(a1_raw) * (isNegA ? -1 : 1);
             const vA2 = Math.sqrt(a2_raw); 
             const ansA1 = fmt(vA1, a_places);
@@ -414,10 +438,10 @@
             const displayA2 = getHighlighedDecimal(vA2_disp_val, a_places) + "...";
 
             // --- Câu B ---
-            const isNegB = Math.random() < 0.2;
+            // Hard: More negative context, tricky d (0.005, 5000)
+            const isNegB = Math.random() < (isHard ? 0.5 : 0.2);
             let d, b_round_unit, b_num;
             
-            // Random Context
             const contexts = [
                 { name: null, unit: '' },
                 { name: 'dân số', unit: 'người' },
@@ -425,28 +449,32 @@
                 { name: 'sản lượng', unit: 'tấn' },
                 { name: 'tổng doanh thu', unit: 'đồng' }
             ];
-            // 50% có context
             const ctxIdx = Math.random() < 0.5 ? 0 : getRandomInt(1, contexts.length - 1);
             const b_ctx = contexts[ctxIdx];
 
             const randD = Math.random();
-            if (randD < 0.2 && !b_ctx.unit) { // Chỉ số thập phân nếu không có context (để hợp lý hơn)
-                const d_opts = [0.05, 0.5, 0.005];
-                d = d_opts[getRandomInt(0, 2)];
+            if ((randD < 0.2 || (isHard && randD < 0.5)) && !b_ctx.unit) {
+                // Decimal d
+                const d_opts = isHard ? [0.005, 0.5, 0.05] : [0.05, 0.5];
+                d = d_opts[getRandomInt(0, d_opts.length - 1)];
                 b_round_unit = d * 2;
-                let decimals = Math.abs(Math.log10(b_round_unit)) + 2; 
+                
                 let base = getRandomInt(10, 9999);
                 let frac = getRandomInt(100, 9999);
                 b_num = parseFloat(`${base}.${frac}`);
                 if (isNegB) b_num *= -1;
             } else {
-                const d_opts = [50, 500, 5000, 50000, 500000];
+                // Integer d
+                let d_opts = [50, 500, 5000, 50000];
+                if (isHard) d_opts.push(5, 500000);
                 d = d_opts[getRandomInt(0, d_opts.length - 1)];
                 b_round_unit = d * 2;
+                
                 const minVal = b_round_unit * 10;
                 const maxVal = b_round_unit * 1000;
                 b_num = getRandomInt(minVal, maxVal) * (isNegB ? -1 : 1);
             }
+            
             let ansB_val = Math.round(b_num / b_round_unit) * b_round_unit;
             if (b_round_unit < 1) {
                 const decimalPoints = b_round_unit.toString().split('.')[1]?.length || 0;
@@ -456,8 +484,6 @@
             const displayB_Question = fmt(b_num);
             const displayB_Step = getHighlightedNumber(b_num, b_round_unit);
             
-            // Text hiển thị đề bài B
-            const questionB_Text = `Làm tròn ${b_ctx.name ? b_ctx.name + ' ' : ''}${displayB_Question}${b_ctx.unit ? ' ' + b_ctx.unit : ''} với độ chính xác d = ${d}`;
             const questionB_Html = `Làm tròn ${b_ctx.name ? b_ctx.name + ' ' : ''}<span id="q-b-num">${displayB_Question}</span>${b_ctx.unit ? ' ' + b_ctx.unit : ''} với độ chính xác d = <span id="q-b-d">${d}</span>`;
 
             let unitName = "";
@@ -476,29 +502,31 @@
             }
 
             // --- Câu C ---
-            const isComplex = Math.random() < 0.5; 
-            const isAddSub = Math.random() < 0.4;
+            // Hard: Prefer Multiplication, mixed signs
+            const isAddSub = Math.random() < (isHard ? 0.3 : 0.4);
             const op = isAddSub ? (Math.random() < 0.5 ? '+' : '-') : '.';
-            const magRand = Math.random();
+            const opCode = op === '.' ? '*' : op;
+            
             let minC, maxC, divC;
-            if (magRand < 0.1) { minC = 10000; maxC = 999999; divC = 100; } 
-            else if (magRand < 0.4) { minC = 1000; maxC = 9999; divC = 10; } 
-            else { minC = 100; maxC = 999; divC = 10; }
+            if (isHard) {
+                 minC = 1000; maxC = 99999; divC = 10; // Bigger/more complex numbers
+            } else {
+                 const magRand = Math.random();
+                 if (magRand < 0.1) { minC = 10000; maxC = 999999; divC = 100; } 
+                 else if (magRand < 0.4) { minC = 1000; maxC = 9999; divC = 10; } 
+                 else { minC = 100; maxC = 999; divC = 10; }
+            }
 
             let c1_obj, c2_obj;
-            if (isComplex) {
-                c1_obj = generateRepeatingDec(Math.random() < 0.5); 
-                let val2 = getRandomInt(minC, maxC) / divC;
-                if (Math.random() < 0.5) val2 *= -1;
-                c2_obj = { display: fmt(val2), value: val2 };
-            } else {
-                let val1 = getRandomInt(minC, maxC) / divC;
-                if (Math.random() < 0.5) val1 *= -1;
-                c1_obj = { display: fmt(val1), value: val1 };
-                let val2 = getRandomInt(Math.max(10, minC/10), maxC) / divC;
-                if (Math.random() < 0.5) val2 *= -1;
-                c2_obj = { display: fmt(val2), value: val2 };
-            }
+            // For hard mode, generate numbers that are good for multiplication but require distinct rounding
+            let val1 = getRandomInt(minC, maxC) / divC;
+            if (Math.random() < 0.5) val1 *= -1;
+            c1_obj = { display: fmt(val1), value: val1 };
+
+            let val2 = getRandomInt(Math.max(10, minC/10), maxC) / divC;
+            if (Math.random() < 0.5) val2 *= -1;
+            c2_obj = { display: fmt(val2), value: val2 };
+
             if (Math.abs(c1_obj.value) < 1) c1_obj.value = (c1_obj.value < 0 ? -1.5 : 1.5);
             if (Math.abs(c2_obj.value) < 1) c2_obj.value = (c2_obj.value < 0 ? -2.5 : 2.5);
 
@@ -506,10 +534,12 @@
             const c2_round_val = roundToHighest(c2_obj.value);
             const c1_disp_hl = highlightFirstSignificantDigit(c1_obj.display);
             const c2_disp_hl = highlightFirstSignificantDigit(c2_obj.display);
+            
             let ansC_val;
-            if (op === '+') ansC_val = c1_round_val + c2_round_val;
-            else if (op === '-') ansC_val = c1_round_val - c2_round_val;
+            if (opCode === '+') ansC_val = c1_round_val + c2_round_val;
+            else if (opCode === '-') ansC_val = c1_round_val - c2_round_val;
             else ansC_val = c1_round_val * c2_round_val;
+            
             const c1_round_str = fmt(c1_round_val);
             const c2_round_str = fmt(c2_round_val);
             const ansC_str = fmt(ansC_val);
@@ -524,12 +554,10 @@
                 { type: 'step', text: `b) Với d=${d}, số ${displayB_Step} ≈ <b>${ansB}</b>` },
             ];
 
-            // Thêm kết luận thực tế nếu có ngữ cảnh
             if (b_ctx.name) {
                 steps.push({ type: 'step', text: `Vậy ${b_ctx.name} xấp xỉ <b>${ansB} ${b_ctx.unit}</b>` });
             }
 
-            // Steps câu C
             steps.push({ type: 'header', text: 'c) Ước lượng phép tính', rule: 'Làm tròn mỗi số về hàng cao nhất. Quan sát chữ số đầu tiên khác 0 (được gạch chân đỏ).' });
             steps.push({ type: 'step', text: `${c1_disp_hl} ≈ ${c1_round_str}` });
             steps.push({ type: 'step', text: `${c2_disp_hl} ≈ ${c2_round_str}` });
@@ -547,6 +575,12 @@
 
         // --- Core Interaction ---
         function nextQuestion() {
+            if (!isAnswered && document.getElementById('q-a-round-text').innerText !== '...') {
+                skippedTotal++;
+                streak = 0;
+                updateStatsUI();
+            }
+
             currentData = generateProblem();
             stepIndex = 0;
             isAnswered = false;
@@ -555,6 +589,21 @@
             statsEnabled = true;
             updateStatsUI();
 
+            // Reset UI
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('rule-area').classList.add('hidden');
+            
+            const inputs = ['ans-a1', 'ans-a2', 'ans-b', 'ans-c-p1', 'ans-c-p2', 'ans-c-final'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                el.value = '';
+                el.disabled = false;
+                el.classList.remove('border-green-500', 'border-red-500', 'bg-green-50', 'bg-red-50', 'bg-emerald-50', 'border-emerald-500');
+                if (id === 'ans-c-final') el.classList.add('border-indigo-100');
+                else el.classList.add('border-gray-300');
+            });
+
+            // Display Chalkboard
             document.getElementById('q-a-round-text').textContent = currentData.a_text;
             document.getElementById('q-a1-disp').textContent = `${currentData.isNegA ? '-' : ''}√${currentData.a1_raw}`;
             document.getElementById('q-a2-disp').textContent = `√${currentData.a2_raw}`;
@@ -573,19 +622,7 @@
             
             document.getElementById('c-op-icon').innerHTML = currentData.op === '.' ? '<i class="fas fa-times"></i>' : `<i class="fas fa-${currentData.op === '+' ? 'plus' : 'minus'}"></i>`;
 
-            // Reset Input
-            ['ans-a1', 'ans-a2', 'ans-b', 'ans-c-p1', 'ans-c-p2', 'ans-c-final'].forEach(id => {
-                const el = document.getElementById(id);
-                el.value = '';
-                el.className = el.id.includes('ans-c-') && id !== 'ans-c-final' 
-                    ? "col-span-3 text-center font-bold p-2 border rounded-lg text-sm bg-white border-gray-300" 
-                    : "w-full text-center font-bold p-2 border-2 rounded-lg focus:border-indigo-500 outline-none border-gray-300 bg-white";
-                if(id === 'ans-c-final') el.className = "flex-grow text-center font-bold p-2 border-2 rounded-lg focus:border-indigo-500 outline-none border-gray-300 bg-white";
-            });
-
-            document.getElementById('feedback').classList.add('hidden');
             document.getElementById('steps-container').innerHTML = '<div class="text-gray-400 italic text-sm text-center mt-20">Bấm "Gợi ý tiếp" để xem hướng dẫn chi tiết từng bước</div>';
-            document.getElementById('rule-area').classList.add('hidden');
             document.getElementById('btn-show-step').disabled = false;
             document.getElementById('btn-show-step').innerHTML = 'Gợi ý tiếp <i class="fas fa-arrow-right ml-1"></i>';
             updateStepCounter();
@@ -600,23 +637,29 @@
             disableStats();
 
             const container = document.getElementById('steps-container');
+            const ruleArea = document.getElementById('rule-area');
+            const ruleContent = document.getElementById('rule-content');
+
             if (stepIndex === 0) container.innerHTML = '';
 
             if (stepIndex < currentData.steps.length) {
                 const step = currentData.steps[stepIndex];
                 if (step.type === 'header') {
                     const h = document.createElement('div');
-                    h.className = "font-extrabold text-indigo-700 text-xs uppercase mt-5 mb-2 flex items-center gap-2 border-b-2 border-indigo-100 pb-1";
-                    h.innerHTML = `<i class="fas fa-terminal"></i> ${step.text}`;
+                    h.className = "mt-4 mb-2 text-xs font-bold text-gray-500 uppercase border-b border-gray-300 pb-1 flex items-center";
+                    h.innerHTML = `<i class="fas fa-caret-right mr-1"></i> ${step.text}`;
                     container.appendChild(h);
 
                     if (step.rule) {
-                        document.getElementById('rule-content').innerHTML = `<i class="fas fa-lightbulb mr-1 text-amber-600"></i> <b>Lưu ý:</b> ${step.rule}`;
-                        document.getElementById('rule-area').classList.remove('hidden');
+                        ruleContent.innerHTML = `<i class="fas fa-lightbulb mr-1 text-amber-600"></i> <b>Lưu ý:</b> ${step.rule}`;
+                        ruleArea.classList.remove('hidden');
+                        ruleArea.classList.remove('animate-pulse');
+                        void ruleArea.offsetWidth; 
+                        ruleArea.classList.add('animate-pulse');
                     }
                 } else {
                     const s = document.createElement('div');
-                    s.className = `step-item p-3 rounded-lg shadow-sm text-sm border-l-4 font-medium ${step.isLast ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : 'bg-slate-50 border-slate-400 text-slate-700'}`;
+                    s.className = `step-item p-3 rounded-lg shadow-sm text-sm border-l-4 font-medium mb-2 ${step.isLast ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : 'bg-gray-50 border-indigo-400 text-gray-700'}`;
                     s.innerHTML = step.text;
                     container.appendChild(s);
                 }
@@ -627,7 +670,7 @@
 
             if (stepIndex >= currentData.steps.length) {
                 document.getElementById('btn-show-step').disabled = true;
-                document.getElementById('btn-show-step').textContent = "Hoàn thành";
+                document.getElementById('btn-show-step').innerHTML = '<i class="fas fa-check-circle"></i> <span>Hết</span>';
             }
         }
 
@@ -658,20 +701,19 @@
             if (c1Ok && c2Ok && cFOk) correct++;
 
             const fb = document.getElementById('feedback');
-            fb.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-emerald-100', 'text-emerald-700', 'bg-gray-100', 'text-gray-700');
+            fb.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-emerald-100', 'text-emerald-700', 'bg-gray-100', 'text-gray-700', 'bg-blue-100', 'text-blue-800');
             
             // LOGIC TÍNH ĐIỂM
             if (correct === 4) {
-                fb.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Xuất sắc! Bạn làm đúng hết rồi.';
-                fb.classList.add('bg-emerald-100', 'text-emerald-700');
-                
-                // Chỉ tính điểm nếu chưa dùng gợi ý
                 if (statsEnabled) {
                     streak++;
                     correctTotal++;
+                    fb.innerHTML = '<i class="fas fa-crown"></i> Xuất sắc! Bạn làm đúng hết rồi.';
+                    fb.classList.add('bg-green-100', 'text-green-800');
                     updateStatsUI();
                 } else {
-                    fb.innerHTML += ' (Không tính chuỗi vì đã xem gợi ý)';
+                    fb.innerHTML = '<i class="fas fa-check"></i> Chính xác! (Không tính điểm vì đã xem gợi ý)';
+                    fb.classList.add('bg-blue-100', 'text-blue-800');
                 }
 
                 isAnswered = true;
@@ -695,10 +737,10 @@
         function mark(id, isCorrect) {
             const el = document.getElementById(id);
             if (isCorrect) {
-                el.classList.remove('border-gray-300', 'border-red-500');
+                el.classList.remove('border-gray-300', 'border-red-500', 'bg-red-50');
                 el.classList.add('border-emerald-500', 'bg-emerald-50');
             } else {
-                el.classList.remove('border-gray-300', 'border-emerald-500');
+                el.classList.remove('border-gray-300', 'border-emerald-500', 'bg-emerald-50', 'border-indigo-100');
                 el.classList.add('border-red-500', 'bg-red-50');
             }
         }

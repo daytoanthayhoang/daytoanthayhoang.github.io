@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Chinh Phục Toán 7 HK1 - Câu 1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration: Cho phép dùng dấu $ cho toán -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <!-- MathJax for rendering math formulas -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #ecfeff; /* Cyan-50 background */
+        }
+
+        .btn-option {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-option:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+
+        .mode-active {
+            background-color: #0891b2; /* cyan-600 */
+            color: white;
+            border-color: #0891b2;
+        }
+
+        .mode-inactive {
+            background-color: white;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+        .mode-inactive:hover {
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+<header class="w-full max-w-2xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-cyan-800 mb-2 uppercase drop-shadow-sm">
+            <i class="fas fa-square-root-alt mr-2"></i>Ôn tập Chinh Phục Toán 7 HK1 - Câu 1
+        </h1>
+        <p class="text-cyan-600 font-medium">Chủ đề: Căn bậc hai số học</p>
+    </header>
+
+    <!-- Mode Selection -->
+    <div class="w-full max-w-2xl grid grid-cols-3 gap-2 mb-6">
+        <button onclick="setMode('all')" id="btn-mode-all" class="mode-active py-2 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base">
+            <i class="fas fa-random mr-1"></i> Tổng Hợp
+        </button>
+        <button onclick="setMode('calc')" id="btn-mode-calc" class="mode-inactive py-2 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base">
+            <i class="fas fa-calculator mr-1"></i> Tính toán
+        </button>
+        <button onclick="setMode('theory')" id="btn-mode-theory" class="mode-inactive py-2 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base">
+            <i class="fas fa-book mr-1"></i> Lý thuyết
+        </button>
+    </div>
+
+    <!-- Stats Board -->
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-md p-4 mb-6 grid grid-cols-4 gap-2 text-center select-none" id="stats-container">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- Question Card -->
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-lg border-b-4 border-cyan-600 p-6 relative overflow-hidden">
+        
+        <!-- Question Badge -->
+        <div class="absolute top-0 left-0 bg-cyan-100 text-cyan-800 px-3 py-1 rounded-br-lg text-xs font-bold uppercase" id="question-type-badge">
+            Dạng câu hỏi
+        </div>
+
+        <!-- Question Content -->
+        <div class="mt-4 mb-8 fade-in">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-center leading-relaxed" id="question-text">
+                Đang tải câu hỏi...
+            </h2>
+        </div>
+
+        <!-- Options Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="options-container">
+            <!-- Buttons will be injected here -->
+        </div>
+
+        <!-- Explanation Area -->
+        <div id="explanation-area" class="hidden mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in">
+             <!-- JS will inject content -->
+        </div>
+
+        <!-- Feedback & Next -->
+        <div class="mt-6 h-12 flex items-center justify-between">
+            <div id="feedback-msg" class="text-lg font-bold hidden pl-2"></div>
+            <button onclick="handleNextClick()" id="btn-next" class="bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center ml-auto shadow-sm">
+                Bỏ qua <i class="fas fa-forward ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <footer class="mt-auto py-6 text-center text-gray-400 text-xs">
+        © Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io
+    </footer>
+
+    <!-- Feedback Modal (Overlay) -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-blue-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-blue-500 font-bold uppercase mb-1">Giải thích:</p>
+                <div id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></div>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-cyan-600 text-white font-bold rounded-xl shadow-lg hover:bg-cyan-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const state = {
+            mode: 'all', // all, calc, theory
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        // --- UTILS ---
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const formatVN = (n) => {
+            if (n === undefined || n === null) return "";
+            if (typeof n === 'string') {
+                return n.replace('.', ',');
+            }
+            let parts = n.toString().split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            return parts.join(',');
+        };
+
+        // --- DATA BANKS ---
+        const refCalculations = [
+            { num: 64, sqrt: 8 }, { num: 1.21, sqrt: 1.1 }, { num: 16, sqrt: 4 },
+            { num: 9, sqrt: 3 }, { num: 25, sqrt: 5 }, { num: 36, sqrt: 6 },
+            { num: 4, sqrt: 2 }, { num: 49, sqrt: 7 }, { num: 100, sqrt: 10 },
+            { num: 81, sqrt: 9 }
+        ];
+
+        const devCalculations = [
+            { num: 0, sqrt: 0 }, { num: 144, sqrt: 12 }, { num: 121, sqrt: 11 },
+            { num: 225, sqrt: 15 }, { num: 0.01, sqrt: 0.1 }, { num: 0.04, sqrt: 0.2 },
+            { num: "1/4", sqrt: "1/2", isFraction: true }, { num: "4/9", sqrt: "2/3", isFraction: true },
+            { num: "25/16", sqrt: "5/4", isFraction: true }
+        ];
+
+        // --- GENERATORS ---
+
+        // DẠNG 1: TÍNH GIÁ TRỊ CĂN BẬC HAI SỐ HỌC (CŨ)
+        const generateCalculationQ = () => {
+            const isReference = Math.random() < 0.7;
+            let dataItem;
+            if (isReference) dataItem = refCalculations[randomInt(0, refCalculations.length - 1)];
+            else dataItem = devCalculations[randomInt(0, devCalculations.length - 1)];
+
+            const { num, sqrt, isFraction } = dataItem;
+            const displayNum = formatVN(num);
+            let questionText;
+            if (Math.random() < 0.6) questionText = `Căn bậc hai số học của <b>${displayNum}</b> là:`;
+            else questionText = `Giá trị của \\(\\sqrt{${displayNum}}\\) là:`;
+
+            let rawCorrect = sqrt;
+            let rawDistractors = [];
+            if (isFraction) {
+                let [tu, mau] = num.split('/').map(Number);
+                rawDistractors.push(`-${sqrt}`); 
+                rawDistractors.push(num); 
+                rawDistractors.push(`${tu*tu}/${mau*mau}`); 
+            } else {
+                rawDistractors.push(typeof sqrt === 'number' ? -sqrt : `-${sqrt}`);
+                rawDistractors.push(num);
+                if (num === 1.21) rawDistractors.push(0.11); 
+                else if (num === 0.01) rawDistractors.push(0.001);
+                else rawDistractors.push(Math.floor(num/2));
+                if (num === 0) rawDistractors = [1, -1, "Không xác định"];
+            }
+
+            rawDistractors = rawDistractors.filter(d => d != rawCorrect);
+            while(rawDistractors.length < 3) {
+                let r = randomInt(1, 20);
+                if (r != rawCorrect && !rawDistractors.includes(r)) rawDistractors.push(r);
+            }
+            rawDistractors = rawDistractors.slice(0, 3);
+
+            const formattedCorrect = formatVN(rawCorrect);
+            const formattedDistractors = rawDistractors.map(d => formatVN(d));
+            const allOptions = shuffleArray([formattedCorrect, ...formattedDistractors]);
+            const explanation = `Vì $(${formattedCorrect})^2 = ${displayNum}$ và ${formattedCorrect} $\\ge$ 0 nên căn bậc hai số học của ${displayNum} là <b>${formattedCorrect}</b>.`;
+
+            return {
+                typeLabel: "Tính toán giá trị",
+                text: questionText,
+                correct: formattedCorrect,
+                options: allOptions,
+                explanation: explanation
+            };
+        };
+
+        // --- CÁC DẠNG LÝ THUYẾT MỚI & CŨ ---
+
+        const generateTheoryQ = () => {
+            // Tăng số lượng dạng:
+            // 1. Định nghĩa (Cũ)
+            // 2. Ký hiệu (Cũ)
+            // 3. New Type 1: Điều kiện của x
+            // 4. New Type 2: Quan hệ a, b (tìm câu sai)
+            // 5. New Type 3: Nhận định I, II
+            // 6. New Type 4: Đúng/Sai (Khẳng định nào đúng/sai)
+
+            const type = randomInt(1, 6);
+            let question, correct, options, explanation, typeLabel;
+
+            // Dạng 1 & 2: Định nghĩa và Ký hiệu cơ bản (Giữ lại từ phiên bản cũ)
+            if (type === 1) {
+                typeLabel = "Lý thuyết: Định nghĩa";
+                question = "Căn bậc hai số học của số \\(a\\) không âm là:";
+                correct = "Số \\(x \\ge 0\\) sao cho \\(x^2 = a\\)";
+                options = shuffleArray([
+                    correct,
+                    "Số \\(x\\) sao cho \\(x^2 = a\\)", 
+                    "Số \\(x > 0\\) sao cho \\(x^2 = a\\)", 
+                    "Chính số \\(a\\)"
+                ]);
+                explanation = "Định nghĩa: Với số dương $a$, số $\\sqrt{a}$ được gọi là căn bậc hai số học của $a$. $x$ phải không âm.";
+            } 
+            else if (type === 2) {
+                typeLabel = "Lý thuyết: Ký hiệu";
+                question = "Cho số thực \\(a > 0\\). Căn bậc hai số học của \\(a\\) được kí hiệu là:";
+                correct = "\\(\\sqrt{a}\\)";
+                options = shuffleArray([
+                    correct,
+                    "\\(-\\sqrt{a}\\)",
+                    "\\(\\sqrt{a^2}\\)",
+                    "\\(a^2\\)"
+                ]);
+                explanation = "Căn bậc hai số học của số không âm $a$ được kí hiệu là $\\sqrt{a}$.";
+            }
+            // Dạng 3 (Mới): Điều kiện chi tiết của x
+            else if (type === 3) {
+                typeLabel = "Lý thuyết: Điều kiện";
+                question = "Căn bậc hai số học của số thực $a$ không âm là số $x$ thỏa mãn điều kiện nào sau đây?";
+                correct = "$x \\geq 0$ và $x^2=a$";
+                options = shuffleArray([
+                    correct,
+                    "$x < 0$ và $x^2=a$",
+                    "$x > 0$ và $x^2=a$", // Sai vì thiếu số 0
+                    "$x \\geq 0$ và $x=a^2$" // Sai công thức
+                ]);
+                explanation = "Theo định nghĩa, căn bậc hai số học của $a$ là số $x$ sao cho $x$ không âm ($x \\ge 0$) và bình phương của nó bằng $a$ ($x^2 = a$).";
+            }
+            // Dạng 4 (Mới): Quan hệ biến a, b (Tìm câu sai)
+            else if (type === 4) {
+                typeLabel = "Lý thuyết: Quan hệ biến";
+                question = "Biết $b$ là căn bậc hai số học của $a$ ($a \\ge 0$), khẳng định nào dưới đây là <b>SAI</b>?";
+                correct = "$b=a^2$"; // Đây là câu sai
+                options = shuffleArray([
+                    correct,
+                    "$b=\\sqrt{a}$", // Đúng
+                    "$a=b^2$",       // Đúng
+                    "$a \\geq 0$ và $b \\geq 0$" // Đúng
+                ]);
+                explanation = "Vì $b$ là căn bậc hai số học của $a$ nên $b = \\sqrt{a}$ và $b^2 = a$. Khẳng định $b = a^2$ là sai (trừ khi $a=0$ hoặc $a=1$).";
+            }
+            // Dạng 5 (Mới): Phân tích nhận định (I) và (II)
+            else if (type === 5) {
+                typeLabel = "Lý thuyết: Phân tích";
+                // Sinh ngẫu nhiên số liệu để câu hỏi phong phú
+                const nums = [
+                    {n: "0,25", root: "0,5"},
+                    {n: "0,49", root: "0,7"},
+                    {n: "0,04", root: "0,2"},
+                    {n: "100", root: "10"}
+                ];
+                const item = nums[randomInt(0, nums.length - 1)];
+                
+                question = `Căn bậc hai số học của ${item.n} là:<br>
+                (I): $-${item.root}$ vì $(-${item.root})^2=${item.n}$.<br>
+                (II): $${item.root}$ vì $(${item.root})^2=${item.n}$.<br>
+                Chọn nhận định đúng.`;
+                
+                correct = "(II) đúng, (I) sai";
+                options = shuffleArray([
+                    correct,
+                    "(I) đúng, (II) sai",
+                    "(I), (II) đều sai",
+                    "(I), (II) đều đúng"
+                ]);
+                explanation = `Căn bậc hai số học bắt buộc phải là số không âm. Do đó chỉ có (II) là đúng vì ${item.root} > 0. (I) sai vì giá trị âm không phải là căn bậc hai số học.`;
+            }
+            // Dạng 6 (Mới): Khẳng định Đúng/Sai
+            else {
+                typeLabel = "Lý thuyết: Đúng/Sai";
+                // Chọn ngẫu nhiên kiểu hỏi: "Tìm câu ĐÚNG" hoặc "Tìm câu SAI"
+                const askTrue = Math.random() < 0.5;
+                
+                const trueStmts = [
+                    "Nếu $\\sqrt{a}=7$ thì $a=49$",
+                    "Căn bậc hai số học của 81 là 9",
+                    "Số $-16$ không có căn bậc hai số học",
+                    "$\\sqrt{0} = 0$"
+                ];
+                
+                const falseStmts = [
+                    "$\\sqrt{36} = \\pm 6$",
+                    "Căn bậc hai số học của 4 là -2",
+                    "Số âm có căn bậc hai số học",
+                    "$\\sqrt{(-5)^2} = -5$"
+                ];
+
+                if (askTrue) {
+                    question = "Trong các khẳng định sau, khẳng định nào <b>ĐÚNG</b>?";
+                    correct = trueStmts[randomInt(0, trueStmts.length - 1)];
+                    // Lấy 3 câu sai làm nhiễu
+                    let distractors = shuffleArray([...falseStmts]).slice(0, 3);
+                    options = shuffleArray([correct, ...distractors]);
+                    explanation = `Khẳng định "<b>${correct}</b>" là đúng. Các khẳng định còn lại sai do vi phạm định nghĩa căn bậc hai số học (phải không âm, số âm không có căn...).`;
+                } else {
+                    question = "Trong các khẳng định sau, khẳng định nào <b>SAI</b>?";
+                    correct = falseStmts[randomInt(0, falseStmts.length - 1)];
+                    // Lấy 3 câu đúng làm nhiễu
+                    let distractors = shuffleArray([...trueStmts]).slice(0, 3);
+                    options = shuffleArray([correct, ...distractors]);
+                    explanation = `Khẳng định "<b>${correct}</b>" là sai. Căn bậc hai số học luôn trả về kết quả không âm và chỉ tồn tại với số không âm.`;
+                }
+            }
+
+            return {
+                typeLabel: typeLabel,
+                text: question,
+                correct: correct,
+                options: options,
+                explanation: explanation
+            };
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        const renderStats = () => {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span class="text-3xl font-extrabold ${state.streak > 2 ? 'streak-fire' : 'text-gray-800'}">
+                        ${state.streak > 2 ? '<i class="fas fa-fire"></i> ' : ''}${state.streak}
+                    </span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span class="text-xl font-bold text-green-600">${state.correct}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span class="text-xl font-bold text-red-500">${state.wrong}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span class="text-xl font-bold text-gray-400">${state.skipped}</span>
+                </div>
+            `;
+        };
+
+        const setMode = (mode) => {
+            state.mode = mode;
+            ['all', 'calc', 'theory'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m == mode) {
+                    btn.className = "mode-active py-2 px-2 rounded-lg font-bold border-2 shadow-sm transform scale-105 transition text-sm md:text-base";
+                } else {
+                    btn.className = "mode-inactive py-2 px-2 rounded-lg font-bold border-2 shadow-sm transition text-sm md:text-base";
+                }
+            });
+            handleNextClick(true);
+        };
+
+        const loadQuestion = () => {
+            state.isAnswered = false;
+            let qData;
+            
+            let selectedMode = state.mode;
+            
+            if (state.mode === 'all') {
+                selectedMode = Math.random() < 0.5 ? 'calc' : 'theory'; 
+            }
+
+            if (selectedMode == 'calc') qData = generateCalculationQ();
+            else qData = generateTheoryQ();
+
+            state.currentQuestion = qData;
+
+            // Render UI
+            document.getElementById('question-type-badge').innerText = qData.typeLabel;
+            document.getElementById('question-text').innerHTML = qData.text;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option w-full bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 p-4 rounded-xl text-lg font-semibold shadow-sm text-left flex items-center group";
+                
+                // QUAN TRỌNG: Lưu giá trị của nút để so sánh sau này
+                btn.dataset.value = opt; 
+
+                const labels = ['A', 'B', 'C', 'D'];
+                btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-cyan-200 text-center leading-8 mr-3 text-cyan-800 font-bold shadow-sm group-hover:bg-cyan-600 group-hover:text-white transition flex-shrink-0">${labels[index]}</span> <span>${opt}</span>`;
+                
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Reset footer & Feedback
+            document.getElementById('feedback-msg').className = "hidden";
+            document.getElementById('explanation-area').className = "hidden mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in";
+            document.getElementById('explanation-area').innerHTML = '';
+            
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center ml-auto shadow-sm";
+
+            // Trigger MathJax render
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+
+        const checkAnswer = (selectedVal, btnElement) => {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const isCorrect = selectedVal == state.currentQuestion.correct;
+            const feedbackEl = document.getElementById('feedback-msg');
+            const explArea = document.getElementById('explanation-area');
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+
+            // Disable all buttons
+            const allBtns = document.querySelectorAll('.btn-option');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-70');
+            });
+
+            // --- TÌM VÀ TÔ ĐẬM ĐÁP ÁN ĐÚNG ---
+            const correctBtn = Array.from(allBtns).find(b => b.dataset.value === state.currentQuestion.correct);
+            
+            if (correctBtn) {
+                correctBtn.classList.remove('bg-cyan-50', 'text-cyan-900', 'border-cyan-200', 'opacity-70');
+                correctBtn.classList.add('bg-green-100', 'text-green-800', 'border-green-600', 'border-2', 'opacity-100');
+                const span = correctBtn.querySelector('span'); // Label
+                if(span) {
+                    span.classList.remove('bg-cyan-200', 'text-cyan-800');
+                    span.classList.add('bg-green-600', 'text-white');
+                }
+            }
+
+            // Xử lý nút người dùng chọn
+            if (isCorrect) {
+                btnElement.classList.add('bg-green-500', 'text-white', 'pop', 'opacity-100');
+                btnElement.classList.remove('bg-green-100', 'text-green-800'); 
+                const span = btnElement.querySelector('span'); // Label
+                if(span) span.classList.add('bg-white', 'text-green-600');
+
+                feedbackEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2 animate-bounce";
+                
+                state.streak++;
+                state.correct++;
+            } else {
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600', 'shake', 'opacity-100');
+                btnElement.classList.remove('bg-cyan-50');
+                const span = btnElement.querySelector('span'); // Label
+                if(span) span.classList.add('bg-white', 'text-red-600');
+                
+                feedbackEl.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2";
+
+                state.streak = 0;
+                state.wrong++;
+
+                // Setup Modal
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Chưa chính xác";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerHTML = `Đáp án đúng là: <br><span class="text-green-600 font-bold text-xl">${state.currentQuestion.correct}</span>`;
+                
+                // Show modal after delay
+                setTimeout(() => { overlay.classList.remove('hidden'); MathJax.typesetPromise(); }, 600);
+            }
+
+            renderStats();
+
+            // Hiển thị giải thích inline
+            explArea.innerHTML = `<p class="font-bold text-cyan-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích chi tiết:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+
+            // Setup Modal Detail
+            detail.innerHTML = state.currentQuestion.explanation;
+
+            // Update Next Button
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = `Tiếp theo <i class="fas fa-arrow-right ml-2"></i>`;
+            btnNext.className = "bg-cyan-600 text-white px-6 py-2 rounded-full font-bold hover:bg-cyan-700 transition flex items-center ml-auto shadow-lg transform scale-105";
+
+            // Re-render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+
+        const handleNextClick = (forceSkip = false) => {
+            if (!state.isAnswered && !forceSkip) {
+                // Logic Bỏ qua
+                state.streak = 0;
+                state.skipped++;
+                renderStats();
+            }
+            loadQuestion();
+        };
+
+        const closeModal = () => {
+            document.getElementById('feedback-overlay').classList.add('hidden');
+        };
+
+        // Init
+        window.onload = () => {
+            renderStats();
+            loadQuestion();
+        }
+
+    </script>
+</body>
+</html>

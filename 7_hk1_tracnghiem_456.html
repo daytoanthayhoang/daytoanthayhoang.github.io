@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Chinh Phục Toán 7 HK1 - Câu 4, 5, 6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            startup: {
+                typeset: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #eef2ff; /* Indigo-50 */
+        }
+
+        .btn-option {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-option:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mode-active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        .mode-inactive {
+            background-color: white;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+        .mode-inactive:hover {
+            background-color: #e0e7ff; /* indigo-100 */
+        }
+
+        /* Loading Overlay */
+        #question-loader {
+            position: absolute;
+            inset: 0;
+            background-color: white;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s ease-out;
+        }
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden-loader {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #main-content-wrapper {
+            opacity: 0;
+        }
+        #main-content-wrapper.content-visible {
+            opacity: 1;
+            transition: opacity 0.3s ease-in;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-3xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-800 mb-2 uppercase drop-shadow-sm">
+            <i class="fas fa-chart-line mr-2"></i>Ôn tập Chinh Phục Toán 7 HK1 - Câu 4, 5, 6
+        </h1>
+        <p class="text-indigo-600 font-medium">Chủ đề: Trục số, Thứ tự & Giá trị tuyệt đối</p>
+    </header>
+
+    <!-- Mode Selection -->
+    <div class="w-full max-w-3xl grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+        <button onclick="setMode('all')" id="btn-mode-all" class="mode-active py-2 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-random mb-1"></i> Tổng Hợp
+        </button>
+        <button onclick="setMode('q4')" id="btn-mode-q4" class="mode-inactive py-2 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-arrows-alt-h mb-1"></i> Câu 4: Trục số
+        </button>
+        <button onclick="setMode('q5')" id="btn-mode-q5" class="mode-inactive py-2 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-sort-numeric-down mb-1"></i> Câu 5: Thứ tự
+        </button>
+        <button onclick="setMode('q6')" id="btn-mode-q6" class="mode-inactive py-2 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-equals mb-1"></i> Câu 6: GTTĐ
+        </button>
+    </div>
+
+    <!-- Stats Board -->
+    <div class="w-full max-w-3xl bg-white rounded-xl shadow-md p-4 mb-6 grid grid-cols-4 gap-2 text-center select-none" id="stats-container">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- Question Card -->
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg border-b-4 border-indigo-600 p-6 relative overflow-hidden" style="min-height: 400px;">
+        
+        <!-- Loading Overlay -->
+        <div id="question-loader">
+            <div class="loader-spinner mb-3"></div>
+            <span class="text-indigo-600 font-bold text-sm">Đang tải câu hỏi...</span>
+        </div>
+
+        <!-- Question Badge -->
+        <div class="absolute top-0 left-0 bg-indigo-100 text-indigo-800 px-3 py-1 rounded-br-lg text-xs font-bold uppercase z-10" id="question-type-badge">
+            Dạng câu hỏi
+        </div>
+
+        <!-- CONTENT WRAPPER -->
+        <div id="main-content-wrapper" class="flex flex-col h-full justify-between pt-6">
+            
+            <!-- Question Content -->
+            <div class="mb-6 fade-in">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-left leading-relaxed" id="question-text">
+                    <!-- Question goes here -->
+                </h2>
+            </div>
+
+            <!-- Options Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="options-container">
+                <!-- Buttons will be injected here -->
+            </div>
+
+            <!-- Explanation Area -->
+            <div id="explanation-area" class="hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in">
+                 <!-- JS will inject content -->
+            </div>
+
+            <!-- Feedback & Next -->
+            <div class="mt-auto h-12 flex items-center justify-between">
+                <div id="feedback-msg" class="text-lg font-bold hidden pl-2"></div>
+                <button onclick="handleNextClick()" id="btn-next" class="bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center ml-auto shadow-sm">
+                    Bỏ qua <i class="fas fa-forward ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-auto py-6 text-center text-gray-400 text-xs">
+        © Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io
+    </footer>
+
+    <!-- Feedback Modal (Overlay) -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-indigo-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-indigo-500 font-bold uppercase mb-1">Giải thích chi tiết:</p>
+                <div id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></div>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const state = {
+            mode: 'all', // all, q4, q5, q6
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        // --- UTILS ---
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const formatDecimal = (num) => num.toString().replace('.', ',');
+
+        // --- GENERATORS ---
+
+        // ================= CÂU 4: TRỤC SỐ THỰC =================
+        const generateQuestion4 = () => {
+            const type = randomInt(1, 4);
+            let question, correct, options, explanation, typeLabel;
+
+            if (type === 1) {
+                typeLabel = "Câu 4: Vị trí trên trục số";
+                const vars = [['a', 'b', 'A', 'B'], ['x', 'y', 'M', 'N'], ['c', 'd', 'C', 'D'], ['m', 'n', 'M', 'N']];
+                const v = vars[randomInt(0, vars.length-1)];
+                
+                if (Math.random() < 0.5) {
+                    question = `Trên trục số nằm ngang, điểm $${v[2]}$ và $${v[3]}$ lần lượt biểu diễn hai số thực $${v[0]}$ và $${v[1]}$. Biết rằng $${v[0]} < ${v[1]}$ thì:`;
+                    correct = `Điểm $${v[2]}$ nằm bên trái điểm $${v[3]}$`;
+                    options = shuffleArray([
+                        correct,
+                        `Điểm $${v[2]}$ nằm bên phải điểm $${v[3]}$`,
+                        `Điểm $${v[2]}$ trùng với điểm $${v[3]}$`,
+                        `Điểm $${v[2]}$ nằm gần số 0 hơn điểm $${v[3]}$`
+                    ]);
+                    explanation = `Vì $${v[0]} < ${v[1]}$ nên điểm biểu diễn số nhỏ hơn ($${v[2]}$) nằm bên <b>trái</b> điểm biểu diễn số lớn hơn ($${v[3]}$).`;
+                } else {
+                    question = `Trên trục số nằm ngang, điểm $${v[2]}$ và $${v[3]}$ lần lượt biểu diễn hai số thực $${v[0]}$ và $${v[1]}$. Biết rằng $${v[2]}$ nằm bên phải điểm $${v[3]}$ thì:`;
+                    correct = `$${v[0]} > ${v[1]}$`;
+                    options = shuffleArray([
+                        correct,
+                        `$${v[0]} < ${v[1]}$`,
+                        `$${v[0]} = ${v[1]}$`,
+                        `$${v[0]} \\le ${v[1]}$`
+                    ]);
+                    explanation = `Điểm nằm bên <b>phải</b> luôn biểu diễn số lớn hơn. Do đó $${v[2]}$ (biểu diễn $${v[0]}$) nằm phải $${v[3]}$ (biểu diễn $${v[1]}$) suy ra $${v[0]} > ${v[1]}$.`;
+                }
+            } else if (type === 2) {
+                typeLabel = "Câu 4: Vị trí số cụ thể";
+                const pairs = [
+                    {a: "-\\sqrt{5}", b: "-2", valA: -2.236, valB: -2},
+                    {a: "-\\sqrt{3}", b: "-1,7", valA: -1.732, valB: -1.7},
+                    {a: "\\sqrt{2}", b: "1,5", valA: 1.414, valB: 1.5},
+                    {a: "-3", b: "-\\sqrt{10}", valA: -3, valB: -3.16},
+                    {a: "-\\sqrt{5}", b: "-2,2", valA: -2.236, valB: -2.2} // Dạng mới bổ sung
+                ];
+                const p = pairs[randomInt(0, pairs.length-1)];
+                const isALess = p.valA < p.valB;
+                
+                question = `Xét vị trí hai số thực $a=${p.a}$ và $b=${p.b}$ trên trục số nằm ngang, khi đó:`;
+                correct = isALess ? `$a$ nằm bên trái $b$` : `$a$ nằm bên phải $b$`;
+                
+                options = shuffleArray([
+                    `$a$ nằm bên trái $b$`,
+                    `$a$ nằm bên phải $b$`,
+                    `$a$ trùng với $b$`,
+                    `Không xác định được`
+                ]);
+                
+                explanation = `Ta có giá trị xấp xỉ: $a = ${p.a} \\approx ${formatDecimal(p.valA)}$ và $b = ${p.b} \\approx ${formatDecimal(p.valB)}$. <br>Vì ${formatDecimal(p.valA)} ${isALess ? '<' : '>'} ${formatDecimal(p.valB)} nên $a$ nằm bên <b>${isALess ? 'trái' : 'phải'}</b> $b$.`;
+            } else if (type === 3) {
+                typeLabel = "Câu 4: Biểu diễn số thực";
+                const pairs = [
+                    {a: "3", b: "1/2", valA: 3, valB: 0.5},
+                    {a: "\\sqrt{2}", b: "3/2", valA: 1.41, valB: 1.5},
+                    {a: "-1,5", b: "-1", valA: -1.5, valB: -1}
+                ];
+                const p = pairs[randomInt(0, pairs.length-1)];
+                const isALess = p.valA < p.valB;
+                
+                question = `Gọi $A$ là điểm biểu diễn số $${p.a}$ và $B$ là điểm biểu diễn số $${p.b}$ trên trục số. Vị trí tương đối của hai điểm này là:`;
+                correct = isALess ? `Điểm $A$ nằm bên trái điểm $B$` : `Điểm $A$ nằm bên phải điểm $B$`;
+                
+                options = shuffleArray([
+                    `Điểm $A$ nằm bên trái điểm $B$`,
+                    `Điểm $A$ nằm bên phải điểm $B$`,
+                    `Điểm $A$ và $B$ trùng nhau`,
+                    `Không xác định được`
+                ]);
+                
+                explanation = `Ta so sánh giá trị: $${p.a} \\approx ${formatDecimal(p.valA)}$ và $${p.b} \\approx ${formatDecimal(p.valB)}$.`;
+            } else {
+                typeLabel = "Câu 4: Khoảng cách đến gốc O";
+                const nums = [
+                    {tex: "-5", val: 5}, {tex: "4,5", val: 4.5}, 
+                    {tex: "\\sqrt{16}", val: 4}, {tex: "-\\sqrt{9}", val: 3},
+                    {tex: "-100", val: 100}, {tex: "99", val: 99}
+                ];
+                const subset = shuffleArray(nums).slice(0, 4);
+                const maxVal = Math.max(...subset.map(x => x.val));
+                const correctItem = subset.find(x => x.val === maxVal);
+                
+                question = `Trên trục số, điểm biểu diễn số nào sau đây nằm <b>xa</b> điểm gốc $O$ nhất: $${subset.map(x=>x.tex).join('; ')}$?`;
+                correct = `Điểm biểu diễn $${correctItem.tex}$`;
+                options = shuffleArray(subset.map(x => `Điểm biểu diễn $${x.tex}$`));
+                explanation = `Khoảng cách đến gốc $O$ chính là giá trị tuyệt đối. Số có giá trị tuyệt đối lớn nhất là $${correctItem.tex}$ ($|${correctItem.tex}|=${correctItem.val}$) nên điểm biểu diễn của nó nằm xa $O$ nhất.`;
+            }
+            return { typeLabel, text: question, correct, options, explanation };
+        };
+
+        // ================= CÂU 5: THỨ TỰ SỐ THỰC =================
+        const generateQuestion5 = () => {
+            const type = randomInt(1, 4); // Tăng lên 4 dạng để bao phủ hết
+            let question, correct, options, explanation, typeLabel;
+
+            if (type === 1) {
+                // Dạng 1: Tìm chữ số a
+                typeLabel = "Câu 5: Tìm ẩn số";
+                const head = randomInt(1, 15);
+                const decimals = [randomInt(0,9), randomInt(0,9)];
+                const pivot = randomInt(3, 6);
+                const ans = pivot + randomInt(1, 3); 
+                const wrong1 = pivot - randomInt(1, 2);
+                const wrong2 = pivot;
+                
+                question = `Tìm chữ số $a$ thích hợp để: $-${head},${decimals.join('')}a2 < -${head},${decimals.join('')}${pivot}1$`;
+                correct = `${ans}`;
+                options = shuffleArray([`${ans}`, `${wrong1}`, `${wrong2}`, `${pivot-3 < 0 ? 9 : pivot-3}`]);
+                
+                explanation = `Vì là hai số âm, để số bên trái nhỏ hơn thì phần giá trị tuyệt đối của nó phải lớn hơn. Tại vị trí hàng phần nghìn: cần $a > ${pivot}$. Trong các đáp án, $a=${ans}$ thỏa mãn.`;
+            
+            } else if (type === 2) {
+                // Dạng 2: Tìm câu ĐÚNG (Các câu gài đặc biệt)
+                typeLabel = "Câu 5: Kiểm tra khẳng định";
+                question = "Trong các khẳng định sau, khẳng định nào là <b>ĐÚNG</b>?";
+                
+                // Tập hợp các câu ĐÚNG gài bẫy
+                const correctStmts = [
+                    {
+                        tex: "-\\pi > -3,15", 
+                        expl: "Ta có $\\pi \\approx 3,1415... < 3,15$. <br>Vì $3,14... < 3,15$ nên số âm sẽ ngược lại: $-\\pi > -3,15$."
+                    },
+                    {
+                        tex: "-0,(15) > -0,(16)", 
+                        expl: "Khai triển: $-0,(15) = -0,1515...$ và $-0,(16) = -0,1616...$ <br>Vì $0,15 < 0,16$ nên $-0,15... > -0,16...$."
+                    },
+                    {
+                        tex: "-\\sqrt{5} < -2,2", 
+                        expl: "Ta có $\\sqrt{5} \\approx 2,236... > 2,2$. <br>Nên $-\\sqrt{5} < -2,2$."
+                    }
+                ];
+                const selectedCorrect = correctStmts[randomInt(0, correctStmts.length-1)];
+                correct = `$${selectedCorrect.tex}$`;
+                
+                // Tập hợp các câu SAI gài bẫy làm nhiễu
+                const falseStmts = [
+                    "$\\sqrt{0,4} = 0,2$", // Sai điển hình (0.2^2 = 0.04)
+                    "$-2 > -\\sqrt{3}$", // Sai (-2 < -1.73)
+                    "$33,3(5) < 33,(35)$", // Sai (33.355... > 33.353...)
+                    "$3,25(75) < 3,2(57)$", // Sai (thực ra bằng nhau: 3.257575...)
+                    "$\\sqrt{2} > 1,5$" // Sai (1.41 < 1.5)
+                ];
+                const distractors = shuffleArray(falseStmts).slice(0, 3);
+                options = shuffleArray([correct, ...distractors]);
+                
+                explanation = `Khẳng định đúng là: $${selectedCorrect.tex}$. <br><b>Giải thích chi tiết:</b><br>${selectedCorrect.expl}`;
+                
+                // Nếu câu đúng là câu gài A, giải thích thêm về các câu nhiễu nếu cần
+                if(options.includes("$33,3(5) < 33,(35)$")) {
+                     explanation += `<br><br> Lưu ý: $33,3(5) = 33,3555...$ và $33,(35) = 33,3535...$ (số 5 > 3 ở hàng phần nghìn nên vế trái lớn hơn).`;
+                }
+
+            } else if (type === 3) {
+                // Dạng 3: Tìm câu SAI (Các câu gài đặc biệt)
+                typeLabel = "Câu 5: Tìm khẳng định SAI";
+                question = "Trong các khẳng định sau, khẳng định nào là <b>SAI</b>?";
+                
+                // Tập hợp các câu SAI (Đáp án cần chọn)
+                const falseStmts = [
+                    {
+                        tex: "3,25(75) < 3,2(57)", 
+                        expl: "Khai triển:<br> $VT = 3,25(75) = 3,257575...$ <br> $VP = 3,2(57) = 3,257575...$ <br>Hai số này <b>bằng nhau</b>, nên dấu $<$ là SAI."
+                    },
+                    {
+                        tex: "\\sqrt{0,4} = 0,2", 
+                        expl: "Vì $0,2^2 = 0,04 \\ne 0,4$. Giá trị đúng là $\\sqrt{0,4} \\approx 0,632$."
+                    },
+                    {
+                        tex: "-2 > -\\sqrt{3}", 
+                        expl: "Vì $\\sqrt{3} \\approx 1,73$ nên $-2 < -1,73$. Khẳng định $-2 > -\\sqrt{3}$ là SAI."
+                    },
+                    {
+                        tex: "33,3(5) < 33,(35)",
+                        expl: "Khai triển:<br> $VT = 33,3555...$ <br> $VP = 33,3535...$ <br>So sánh hàng phần nghìn: $5 > 3$ nên $VT > VP$. Dấu $<$ là SAI."
+                    }
+                ];
+                const selectedFalse = falseStmts[randomInt(0, falseStmts.length-1)];
+                correct = `$${selectedFalse.tex}$`;
+
+                // Các câu ĐÚNG làm nhiễu
+                const trueStmts = [
+                    "$-0,(15) > -0,(16)$",
+                    "$\\sqrt{2} < \\frac{3}{2}$", // 1.41 < 1.5
+                    "$-\\pi > -3,15$",
+                    "$-\\sqrt{5} < -2,2$"
+                ];
+                const distractors = shuffleArray(trueStmts).slice(0, 3);
+                options = shuffleArray([correct, ...distractors]);
+                explanation = `Khẳng định SAI là: $${selectedFalse.tex}$. <br><b>Giải thích:</b> ${selectedFalse.expl}`;
+
+            } else {
+                // Dạng 4: So sánh trực tiếp cơ bản
+                typeLabel = "Câu 5: So sánh số thực";
+                const pairs = [
+                    {s1: "3,92", s2: "3,(4)", res: ">"},
+                    {s1: "-\\sqrt{2}", s2: "-1,4143", res: ">"},
+                    {s1: "0,(31)", s2: "0,3(12)", res: ">"},
+                    {s1: "-1,5", s2: "-1,50001", res: ">"}
+                ];
+                const p = pairs[randomInt(0, pairs.length-1)];
+                question = `Khẳng định nào sau đây là đúng?`;
+                correct = `$${p.s1} ${p.res} ${p.s2}$`;
+                const opInverse = p.res === ">" ? "<" : ">";
+                options = shuffleArray([
+                    correct,
+                    `$${p.s1} ${opInverse} ${p.s2}$`,
+                    `$${p.s1} = ${p.s2}$`,
+                    `$|${p.s1}| ${opInverse} |${p.s2}|$`
+                ]);
+                explanation = `Đáp án đúng là $${p.s1} ${p.res} ${p.s2}$. (Bạn có thể kiểm tra bằng cách khai triển số thập phân).`;
+            }
+            return { typeLabel, text: question, correct, options, explanation };
+        };
+
+        // ================= CÂU 6: GIÁ TRỊ TUYỆT ĐỐI =================
+        const generateQuestion6 = () => {
+            const type = randomInt(1, 4);
+            let question, correct, options, explanation, typeLabel;
+
+            if (type === 1) {
+                // Dạng 1: Khẳng định SAI/ĐÚNG về GTTĐ
+                typeLabel = "Câu 6: Lý thuyết GTTĐ";
+                question = "Chọn khẳng định <b>SAI</b> trong các khẳng định sau:";
+                const falseStmts = [
+                    {tex: "|-1,(4)| = -1,(4)", expl: "Giá trị tuyệt đối không bao giờ âm ($|-1,(4)| = 1,(4)$)"},
+                    {tex: "|-5| = -5", expl: "Giá trị tuyệt đối của -5 phải là 5"},
+                    {tex: "|x| < 0", expl: "Giá trị tuyệt đối luôn lớn hơn hoặc bằng 0"},
+                    {tex: "-|\\sqrt{3}| = \\sqrt{3}", expl: "$-|\\sqrt{3}| = -\\sqrt{3}$ (là số âm)"}
+                ];
+                const item = falseStmts[randomInt(0, falseStmts.length-1)];
+                correct = `$${item.tex}$`;
+                
+                const trueStmts = [
+                    "$|-3,5| = 3,5$",
+                    "$-|-\\sqrt{2}| = -\\sqrt{2}$",
+                    "$-|\\sqrt{3}| = -\\sqrt{3}$",
+                    "$|0| = 0$"
+                ];
+                const distractors = shuffleArray(trueStmts).slice(0, 3);
+                options = shuffleArray([correct, ...distractors]);
+                explanation = `Khẳng định sai là $${item.tex}$. <br>Giải thích: ${item.expl}.`;
+
+            } else if (type === 2) {
+                // Dạng 2: Tìm x biết |x|=k
+                typeLabel = "Câu 6: Tìm x";
+                const vals = [4, 9, 16, 25, 0.25, "1/4"];
+                const a = vals[randomInt(0, vals.length-1)];
+                
+                question = `Số nào dưới đây có giá trị tuyệt đối bằng $${a}$ (nghĩa là tìm $x$ thỏa $|x|=${a}$)?`;
+                correct = `$${a}$ và $-${a}$`;
+                options = shuffleArray([
+                    `$${a}$ và $-${a}$`,
+                    `Chỉ $${a}$`,
+                    `Chỉ $-${a}$`,
+                    `$${typeof a === 'number' ? a*a : a}$`
+                ]);
+                explanation = `Có hai số thực đối nhau có cùng giá trị tuyệt đối là $x$ và $-x$. Do đó $x = \\pm ${a}$.`;
+
+            } else if (type === 3) {
+                // Dạng 3: Tính toán GTTĐ
+                typeLabel = "Câu 6: Tính GTTĐ";
+                const num = (Math.random() * 10).toFixed(2).replace('.', ',');
+                const isNeg = Math.random() < 0.5;
+                const valStr = isNeg ? `-${num}` : `${num}`;
+                question = `Giá trị tuyệt đối của $${valStr}$ là:`;
+                correct = `${num}`;
+                options = shuffleArray([`${num}`, `-${num}`, `0`, `$\\pm ${num}$`]);
+                explanation = `Giá trị tuyệt đối của một số luôn không âm. $|${valStr}| = ${num}$.`;
+
+            } else {
+                // Dạng 4: Biểu thức GTTĐ
+                typeLabel = "Câu 6: Biểu thức GTTĐ";
+                const a = randomInt(1, 5);
+                const b = randomInt(1, 5);
+                const op = Math.random() < 0.5 ? "+" : "-";
+                question = `Giá trị của biểu thức $M = |-${a}| ${op} |${Math.random() < 0.5 ? '-' : ''}${b}|$ là:`;
+                const res = op === "+" ? a + b : a - b;
+                correct = `${res}`;
+                const w1 = op === "+" ? `${-a + b}` : `${-a - b}`;
+                const w2 = `${res * -1}`;
+                const w3 = `${res + 2}`;
+                options = shuffleArray([correct, w1, w2, w3]);
+                options = [...new Set(options)];
+                explanation = `Ta có $|-${a}| = ${a}$ và $|\\pm${b}| = ${b}$. Thay vào: $M = ${a} ${op} ${b} = ${res}$.`;
+            }
+            return { typeLabel, text: question, correct, options, explanation };
+        };
+
+        // --- CORE LOGIC ---
+        const showLoading = () => {
+            const loader = document.getElementById('question-loader');
+            loader.classList.remove('hidden-loader');
+        };
+
+        const hideLoading = () => {
+            const loader = document.getElementById('question-loader');
+            loader.classList.add('hidden-loader');
+        };
+
+        const loadQuestion = () => {
+            showLoading();
+            const contentWrapper = document.getElementById('main-content-wrapper');
+            contentWrapper.classList.remove('content-visible');
+
+            state.isAnswered = false;
+            let qData;
+            
+            // Mode selection logic
+            let selectedMode = state.mode;
+            if (state.mode === 'all') {
+                const r = Math.random();
+                if (r < 0.33) selectedMode = 'q4';
+                else if (r < 0.66) selectedMode = 'q5';
+                else selectedMode = 'q6';
+            }
+
+            if (selectedMode === 'q4') qData = generateQuestion4();
+            else if (selectedMode === 'q5') qData = generateQuestion5();
+            else qData = generateQuestion6();
+
+            state.currentQuestion = qData;
+
+            // Render content
+            document.getElementById('question-type-badge').innerText = qData.typeLabel;
+            document.getElementById('question-text').innerHTML = qData.text;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 p-4 rounded-xl text-lg font-semibold shadow-sm text-left flex items-center group";
+                btn.dataset.value = opt; 
+
+                const labels = ['A', 'B', 'C', 'D'];
+                btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-indigo-200 text-center leading-8 mr-3 text-indigo-800 font-bold shadow-sm group-hover:bg-indigo-600 group-hover:text-white transition flex-shrink-0">${labels[index]}</span> <span>${opt}</span>`;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Reset UI
+            document.getElementById('feedback-msg').className = "hidden";
+            document.getElementById('explanation-area').className = "hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in";
+            document.getElementById('explanation-area').innerHTML = '';
+            
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center ml-auto shadow-sm";
+
+            // MathJax Rendering
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([contentWrapper]).then(() => {
+                    setTimeout(() => {
+                        hideLoading();
+                        contentWrapper.classList.add('content-visible');
+                    }, 150);
+                });
+            } else {
+                setTimeout(() => {
+                    hideLoading();
+                    contentWrapper.classList.add('content-visible');
+                }, 200);
+            }
+        };
+
+        const checkAnswer = (selectedVal, btnElement) => {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const isCorrect = selectedVal == state.currentQuestion.correct;
+            const feedbackEl = document.getElementById('feedback-msg');
+            const explArea = document.getElementById('explanation-area');
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+
+            const allBtns = document.querySelectorAll('.btn-option');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-70');
+            });
+
+            // Highlight Correct
+            const correctBtn = Array.from(allBtns).find(b => b.dataset.value === state.currentQuestion.correct);
+            if (correctBtn) {
+                correctBtn.classList.remove('bg-indigo-50', 'text-indigo-900', 'border-indigo-200', 'opacity-70');
+                correctBtn.classList.add('bg-green-100', 'text-green-800', 'border-green-600', 'border-2', 'opacity-100');
+                const span = correctBtn.querySelector('span');
+                if(span) {
+                    span.classList.remove('bg-indigo-200', 'text-indigo-800');
+                    span.classList.add('bg-green-600', 'text-white');
+                }
+            }
+
+            if (isCorrect) {
+                btnElement.classList.add('bg-green-500', 'text-white', 'pop', 'opacity-100');
+                btnElement.classList.remove('bg-green-100', 'text-green-800'); 
+                const span = btnElement.querySelector('span');
+                if(span) span.classList.add('bg-white', 'text-green-600');
+
+                feedbackEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2 animate-bounce";
+                
+                state.streak++;
+                state.correct++;
+            } else {
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600', 'shake', 'opacity-100');
+                btnElement.classList.remove('bg-indigo-50');
+                const span = btnElement.querySelector('span');
+                if(span) span.classList.add('bg-white', 'text-red-600');
+                
+                feedbackEl.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2";
+
+                state.streak = 0;
+                state.wrong++;
+
+                // Modal Info
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Chưa chính xác";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerHTML = `Đáp án đúng là: <br><span class="text-green-600 font-bold text-xl mt-2 block">${state.currentQuestion.correct}</span>`;
+                
+                setTimeout(() => { 
+                    overlay.classList.remove('hidden'); 
+                    if (window.MathJax) MathJax.typesetPromise([overlay]);
+                }, 600);
+            }
+
+            renderStats();
+
+            explArea.innerHTML = `<p class="font-bold text-indigo-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+            detail.innerHTML = state.currentQuestion.explanation;
+
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = `Câu tiếp theo <i class="fas fa-arrow-right ml-2"></i>`;
+            btnNext.className = "bg-indigo-600 text-white px-6 py-2 rounded-full font-bold hover:bg-indigo-700 transition flex items-center ml-auto shadow-lg transform scale-105";
+
+            if (window.MathJax) MathJax.typesetPromise([explArea]);
+        };
+
+        const handleNextClick = (forceSkip = false) => {
+            if (!state.isAnswered && !forceSkip) {
+                state.streak = 0;
+                state.skipped++;
+                renderStats();
+            }
+            loadQuestion();
+        };
+
+        const renderStats = () => {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span class="text-3xl font-extrabold ${state.streak > 2 ? 'text-orange-500 animate-pulse' : 'text-gray-800'}">
+                        ${state.streak}
+                    </span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span class="text-xl font-bold text-green-600">${state.correct}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span class="text-xl font-bold text-red-500">${state.wrong}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span class="text-xl font-bold text-gray-400">${state.skipped}</span>
+                </div>
+            `;
+        };
+
+        const setMode = (mode) => {
+            state.mode = mode;
+            ['all', 'q4', 'q5', 'q6'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m === mode) {
+                    btn.className = "mode-active py-2 px-2 rounded-lg font-bold border-2 shadow-sm flex flex-col items-center justify-center transition-transform transform scale-105";
+                } else {
+                    btn.className = "mode-inactive py-2 px-2 rounded-lg font-bold border-2 shadow-sm flex flex-col items-center justify-center transition-transform";
+                }
+            });
+            handleNextClick(true);
+        };
+
+        const closeModal = () => {
+            document.getElementById('feedback-overlay').classList.add('hidden');
+        };
+
+        window.onload = () => {
+            renderStats();
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>

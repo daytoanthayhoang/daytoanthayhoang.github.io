@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Toán 7 HK1 - Bài 3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .chalkboard {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border: 8px solid #854d0e;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .chalkboard::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMTAgMTBRNDAgNDAgMTAgNzAiIHN0cm9rZT0id2hpdGUiIG9wYWNpdHk9IjAuMDUiIGZpbGw9Im5vbmUiLz4KPC9zdmc+');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        .step-item {
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: slideDown 0.3s forwards;
+        }
+        @keyframes slideDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #steps-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #steps-container::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        #steps-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        #steps-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        /* CSS Fraction Styles */
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 4px;
+            font-size: 0.9em;
+        }
+        .frac-top {
+            border-bottom: 2px solid currentColor;
+            padding: 0 2px;
+            line-height: 1.2;
+            font-weight: bold;
+        }
+        .frac-bot {
+            padding: 0 2px;
+            line-height: 1.2;
+            font-weight: bold;
+        }
+
+        /* --- STYLES FOR STATS --- */
+        .streak-fire {
+            color: #ef4444;
+            animation: burn 0.5s infinite alternate;
+        }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+        .stats-box {
+            transition: all 0.3s ease;
+        }
+        .stats-box:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
+
+    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-blue-200">
+        <!-- Header -->
+        <div class="bg-indigo-600 p-4 text-center relative shadow-lg">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
+                <i class="fas fa-divide mr-2"></i>Ôn tập Toán 7 HK1 - Bài 3
+            </h1>
+            <p class="text-white font-medium">Chủ đề: Dãy tỉ số bằng nhau</p>
+        </div>
+
+        <div class="p-4 md:p-6 space-y-4">
+            
+            <!-- STATS BOARD -->
+            <div class="bg-white rounded-xl shadow-md p-3 grid grid-cols-4 gap-2 text-center select-none border border-gray-100" id="stats-container">
+                <div class="flex flex-col items-center stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span id="stat-streak" class="text-2xl md:text-3xl font-extrabold text-indigo-900">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span id="stat-correct" class="text-xl md:text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span id="stat-wrong" class="text-xl md:text-2xl font-bold text-red-500">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span id="stat-skipped" class="text-xl md:text-2xl font-bold text-gray-400">0</span>
+                </div>
+            </div>
+            
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Left Column: Chalkboard & Inputs -->
+                <div class="flex flex-col gap-4">
+                    <!-- Chalkboard -->
+                    <div class="chalkboard p-6 min-h-[300px] relative flex flex-col items-center justify-center text-center">
+                        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs font-mono uppercase tracking-widest opacity-60">
+                            Đề bài
+                        </div>
+                        
+                        <div class="w-full">
+                            <div id="question-text" class="text-xl md:text-2xl font-serif leading-relaxed mb-4">
+                                <!-- Question content will be injected here -->
+                                Đang tải đề bài...
+                            </div>
+                            
+                            <!-- Math visualization area -->
+                            <div id="question-math" class="text-2xl md:text-3xl font-mono text-yellow-300 my-4 flex justify-center items-center flex-wrap gap-4">
+                                <!-- Equations go here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- INPUTS -->
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-inner">
+                        <div class="text-center mb-4 text-gray-500 text-sm font-bold uppercase">Nhập đáp án</div>
+                        
+                        <div id="inputs-container" class="flex flex-wrap justify-center gap-4 mb-4">
+                            <!-- Dynamic Inputs generated by JS -->
+                        </div>
+
+                        <!-- Difficulty Toggle -->
+                        <div class="flex items-center justify-end mt-6 mb-2 pt-4 border-t border-gray-200">
+                            <label class="inline-flex items-center cursor-pointer select-none group">
+                                <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600 transition-colors"></div>
+                                <span class="ms-2 text-sm font-bold text-gray-600 peer-checked:text-red-600 transition-colors flex items-center group-hover:text-red-500">
+                                    <i class="fas fa-skull-crossbones mr-1"></i>Chế độ khó
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-sync-alt"></i> Bài mới
+                            </button>
+                            <button onclick="checkAnswer()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i> Kiểm tra
+                            </button>
+                        </div>
+                        <div id="feedback" class="hidden mt-3 text-center p-3 rounded-lg text-sm font-bold animate-pulse"></div>
+                        <div id="hint-warning" class="hidden mt-2 text-center text-xs text-amber-600 font-semibold bg-amber-50 p-2 rounded border border-amber-200">
+                            <i class="fas fa-lock mr-1"></i>Đã xem gợi ý: Thành tích câu này sẽ không được tính.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Step-by-step -->
+                <div class="flex flex-col h-[600px] lg:h-[750px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-4 relative">
+                    <!-- HEADER WITH BUTTON -->
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 shrink-0">
+                        <div class="flex items-center gap-2 flex-grow">
+                            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide whitespace-nowrap">
+                                <i class="fas fa-file-alt text-blue-500 mr-1"></i>Trình bày bài thi
+                            </h3>
+                            <!-- Button -->
+                            <button onclick="showNextStep()" id="btn-show-step" 
+                                class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed ml-2">
+                                <span>Gợi ý tiếp</span> <i class="fas fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                        <span id="step-counter" class="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded ml-2">0/0</span>
+                    </div>
+
+                    <!-- Helper/Hint Box (Separate from exam presentation) -->
+                    <div id="hint-box" class="hidden mb-3 bg-amber-50 text-amber-900 text-sm p-3 rounded-lg border-l-4 border-amber-400 shadow-sm shrink-0">
+                        <div class="font-bold text-xs uppercase mb-1 flex items-center">
+                            <i class="fas fa-lightbulb mr-1"></i> Gợi ý/Nháp
+                        </div>
+                        <div id="hint-content" class="italic"></div>
+                    </div>
+                    
+                    <!-- Scrollable Steps -->
+                    <div id="steps-container" class="flex-grow overflow-y-auto bg-white p-4 rounded-lg shadow-inner border border-gray-100 scroll-smooth font-serif text-lg leading-relaxed text-gray-800">
+                        <div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center">
+                            <i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i>
+                            <span>Bấm "Gợi ý tiếp" để xem bài làm mẫu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
+        <p>© Công cụ hỗ trợ ôn tập Toán 7 - Bài 3: Dãy tỉ số bằng nhau</p>
+    </footer>
+
+    <script>
+        // --- State ---
+        let currentData = {};
+        let stepIndex = 0;
+        let isAnswered = false;
+        
+        // Stats
+        let streak = 0;
+        let correctTotal = 0;
+        let wrongTotal = 0;
+        let skippedTotal = 0;
+        let statsEnabled = true;
+
+        // --- Math Utils ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function mkFrac(num, den) {
+            return `<div class="frac"><span class="frac-top">${num}</span><span class="frac-bot">${den}</span></div>`;
+        }
+
+        function updateStatsUI() {
+            const streakEl = document.getElementById('stat-streak');
+            streakEl.textContent = streak;
+            document.getElementById('stat-correct').textContent = correctTotal;
+            document.getElementById('stat-wrong').textContent = wrongTotal;
+            document.getElementById('stat-skipped').textContent = skippedTotal;
+
+            if (!statsEnabled) {
+                document.getElementById('hint-warning').classList.remove('hidden');
+            } else {
+                document.getElementById('hint-warning').classList.add('hidden');
+            }
+
+            if (streak > 2) {
+                streakEl.classList.add('streak-fire');
+                streakEl.innerHTML = `<i class="fas fa-fire"></i> ${streak}`;
+            } else {
+                streakEl.classList.remove('streak-fire');
+                streakEl.textContent = streak;
+            }
+        }
+
+        function disableStats() {
+            if (statsEnabled) {
+                statsEnabled = false;
+                updateStatsUI();
+            }
+        }
+
+        // --- Generator Logic ---
+        function generateProblem() {
+            const isHard = document.getElementById('mode-hard').checked;
+            
+            // 70% chance for standard types, 30% for advanced (coefficients != 1)
+            // Hard mode flips this or makes numbers harder
+            const advancedProb = isHard ? 0.8 : 0.3;
+            const isAdvanced = Math.random() < advancedProb;
+
+            // Variables: 2 or 3
+            // Standard usually 2 or 3.
+            const numVars = Math.random() < 0.6 ? 2 : 3;
+            const allVars = Math.random() < 0.5 ? ['x', 'y', 'z'] : ['a', 'b', 'c'];
+            const vars = allVars.slice(0, numVars);
+
+            // 1. Generate Ratios (Denominators)
+            const denoms = [];
+            for (let i = 0; i < numVars; i++) {
+                let d;
+                do {
+                    d = getRandomInt(2, isHard ? 12 : 9);
+                } while (denoms.includes(d)); // Ensure distinct
+                denoms.push(d);
+            }
+
+            // 2. Generate Key Ratio (k)
+            // k should be integer for clean problems
+            let k;
+            do {
+                k = getRandomInt(isHard ? -15 : -10, isHard ? 15 : 10);
+            } while (k === 0 || k === 1 || k === -1);
+
+            // 3. True Values
+            const values = denoms.map(d => d * k);
+
+            // 4. Equation Coefficients
+            const coeffs = [];
+            let sum = 0;
+            let denomSum = 0;
+            let eqStringParts = [];
+            let denomSumStrParts = [];
+
+            for (let i = 0; i < numVars; i++) {
+                let c;
+                if (!isAdvanced) {
+                    // Simple +/-
+                    c = Math.random() < 0.5 ? 1 : -1;
+                    if (i === 0) c = 1; // First term usually positive
+                } else {
+                    // Advanced: coefficients like 2, 3
+                    c = getRandomInt(-4, 4);
+                    if (c === 0) c = 1;
+                    if (i === 0 && c < 0) c = Math.abs(c);
+                }
+                coeffs.push(c);
+                sum += c * values[i];
+                denomSum += c * denoms[i];
+
+                // Build Equation String
+                const v = vars[i];
+                const absC = Math.abs(c);
+                let term = "";
+                
+                if (i === 0) {
+                    term = (c === 1 ? "" : (c === -1 ? "-" : c)) + v;
+                } else {
+                    const sign = c > 0 ? "+ " : "- ";
+                    term = sign + (absC === 1 ? "" : absC) + v;
+                }
+                eqStringParts.push(term);
+                
+                // Build Denom Sum String (for solution)
+                const d = denoms[i];
+                if (!isAdvanced) {
+                    if (i === 0) denomSumStrParts.push(`${d}`);
+                    else denomSumStrParts.push(c > 0 ? `+ ${d}` : `- ${d}`);
+                } else {
+                    const op = i === 0 ? "" : (c > 0 ? "+ " : "- ");
+                    denomSumStrParts.push(`${op}${Math.abs(c)}.${d}`);
+                }
+            }
+
+            // Retry if denomSum is 0 (division by zero)
+            if (denomSum === 0) return generateProblem();
+
+            const eqString = eqStringParts.join(" ") + " = " + sum;
+            
+            // 5. Question Text
+            let questionText = "";
+            let mathDisplay = "";
+            const style = Math.random();
+
+            if (style < 0.4 && !isAdvanced) {
+                // Text style: "tỉ lệ với..."
+                questionText = `Tìm ${numVars === 2 ? 'hai' : 'ba'} số ${vars.join(', ')} biết chúng tỉ lệ với ${denoms.join('; ')} và ${eqString}.`;
+                // Display for clarity
+                const ratios = vars.map((v, i) => mkFrac(v, denoms[i])).join(' = ');
+                mathDisplay = `${ratios} <span class="mx-3 text-white text-base">và</span> ${eqString}`;
+            } else {
+                // Math style: "x/2 = y/3..."
+                questionText = `Tìm ${vars.join(', ')} biết:`;
+                const ratios = vars.map((v, i) => mkFrac(v, denoms[i])).join(' = ');
+                mathDisplay = `${ratios} <span class="mx-3 text-white text-base">và</span> ${eqString}`;
+            }
+
+            // 6. Steps Generation
+            const steps = [];
+
+            // Step 1: Setup
+            const ratioChain = vars.map((v, i) => mkFrac(v, denoms[i])).join(' = ');
+            steps.push({
+                text: `Vì ${vars.join(', ')} tỉ lệ với ${denoms.join('; ')} nên ta có:<br><div class="my-2 font-bold text-xl text-center flex justify-center items-center gap-4">${ratioChain} <span class="text-base font-normal text-gray-500">và</span> ${eqString}</div>`
+            });
+
+            // Step 2 (Optional): Transformation for Advanced
+            let transformedChain = "";
+            let transformedDenomSumStr = "";
+            let hints = "";
+            
+            if (isAdvanced) {
+                // 2a/6 = 3b/15...
+                const terms = vars.map((v, i) => {
+                    const c = coeffs[i];
+                    const d = denoms[i];
+                    const absC = Math.abs(c);
+                    // Numerator: 2a, Denom: 2*3
+                    if (absC !== 1) {
+                        return mkFrac(`${absC}${v}`, `${absC}.${d}`);
+                    }
+                    return mkFrac(v, d);
+                });
+                transformedChain = terms.join(' = ');
+                
+                const hintList = vars.map((v, i) => {
+                    const c = coeffs[i];
+                    if (Math.abs(c) > 1) return `Nhân cả tử và mẫu của ${mkFrac(v, denoms[i])} với ${Math.abs(c)}`;
+                    return null;
+                }).filter(h => h);
+                
+                if (hintList.length > 0) hints = hintList.join('<br>');
+            }
+
+            // Step 3: Application
+            const eqLeft = eqStringParts.join(" ");
+            const eqRight = denomSumStrParts.join(" ");
+            
+            const bigFrac = mkFrac(eqLeft, eqRight);
+            const numFrac = mkFrac(sum, denomSum);
+            
+            let applyText = "Áp dụng tính chất dãy tỉ số bằng nhau, ta được:";
+            
+            // CẬP NHẬT: Luôn hiển thị chuỗi trực tiếp, không hiện bước trung gian nhân hệ số (đã có trong gợi ý)
+            let chainHTML = `${ratioChain} = ${bigFrac} = ${numFrac} = ${k}`;
+
+            steps.push({
+                text: `${applyText}<br><div class="my-3 overflow-x-auto text-xl font-bold flex items-center justify-center space-x-2 py-2">${chainHTML}</div>`,
+                hint: hints
+            });
+
+            // Step 4: Solve
+            let solveHTML = "";
+            vars.forEach((v, i) => {
+                solveHTML += `<div class="flex items-center gap-2 mb-2 justify-center sm:justify-start">
+                    <span>${mkFrac(v, denoms[i])} = ${k}</span> 
+                    <span class="mx-2 text-gray-500 font-bold">nên</span>
+                    <span>${v} = ${k} . ${denoms[i]} = <b>${values[i]}</b></span>
+                </div>`;
+            });
+            steps.push({
+                text: `Suy ra:<br><div class="pl-0 sm:pl-4 mt-2">${solveHTML}</div>`
+            });
+
+            // Step 5: Conclusion
+            steps.push({
+                text: `Vậy ${vars.map((v, i) => `${v} = ${values[i]}`).join(' ; ')}`,
+                isLast: true
+            });
+
+            return {
+                questionText,
+                mathDisplay,
+                vars,
+                values,
+                steps
+            };
+        }
+
+        // --- Interaction ---
+        function nextQuestion() {
+            // Stats check
+            if (!isAnswered && stepIndex > 0) {
+                skippedTotal++;
+                streak = 0;
+                updateStatsUI();
+            }
+
+            currentData = generateProblem();
+            stepIndex = 0;
+            isAnswered = false;
+            statsEnabled = true;
+            updateStatsUI();
+
+            // UI Reset
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('hint-box').classList.add('hidden');
+            
+            document.getElementById('question-text').innerHTML = currentData.questionText;
+            document.getElementById('question-math').innerHTML = currentData.mathDisplay;
+            
+            document.getElementById('steps-container').innerHTML = '<div class="text-gray-400 italic text-sm text-center mt-20">Bấm "Gợi ý tiếp" để xem hướng dẫn chi tiết từng bước</div>';
+            document.getElementById('btn-show-step').disabled = false;
+            document.getElementById('btn-show-step').innerHTML = '<span>Gợi ý tiếp</span> <i class="fas fa-arrow-right text-[10px]"></i>';
+            updateStepCounter();
+
+            // Create Inputs
+            const container = document.getElementById('inputs-container');
+            container.innerHTML = '';
+            currentData.vars.forEach(v => {
+                const div = document.createElement('div');
+                div.className = 'flex flex-col items-center';
+                div.innerHTML = `
+                    <label class="font-bold text-gray-600 mb-1 text-lg">${v} =</label>
+                    <input type="number" id="ans-${v}" class="w-24 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" placeholder="?">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateStepCounter() {
+            document.getElementById('step-counter').textContent = `Bước: ${stepIndex}/${currentData.steps.length}`;
+        }
+
+        function showNextStep() {
+            disableStats();
+
+            const container = document.getElementById('steps-container');
+            const hintBox = document.getElementById('hint-box');
+            const hintContent = document.getElementById('hint-content');
+
+            if (stepIndex === 0) container.innerHTML = '';
+
+            if (stepIndex < currentData.steps.length) {
+                const step = currentData.steps[stepIndex];
+                
+                // Show hint if exists
+                if (step.hint) {
+                    hintContent.innerHTML = step.hint;
+                    hintBox.classList.remove('hidden');
+                } else {
+                    hintBox.classList.add('hidden');
+                }
+
+                const div = document.createElement('div');
+                div.className = `step-item p-4 rounded-lg shadow-sm text-base border-l-4 font-medium mb-4 ${step.isLast ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : 'bg-white border-indigo-400 text-gray-800'}`;
+                div.innerHTML = step.text;
+                container.appendChild(div);
+
+                stepIndex++;
+                updateStepCounter();
+                container.scrollTop = container.scrollHeight;
+            }
+
+            if (stepIndex >= currentData.steps.length) {
+                document.getElementById('btn-show-step').disabled = true;
+                document.getElementById('btn-show-step').innerHTML = '<i class="fas fa-check-circle"></i> <span>Hết</span>';
+            }
+        }
+
+        function checkAnswer() {
+            if (isAnswered) return;
+
+            let allCorrect = true;
+            let correctCount = 0;
+
+            currentData.vars.forEach((v, i) => {
+                const el = document.getElementById(`ans-${v}`);
+                const val = parseInt(el.value);
+                
+                if (val === currentData.values[i]) {
+                    el.classList.remove('border-gray-300', 'border-red-500', 'bg-red-50');
+                    el.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                    correctCount++;
+                } else {
+                    el.classList.remove('border-gray-300', 'border-emerald-500', 'bg-emerald-50');
+                    el.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
+                    allCorrect = false;
+                }
+            });
+
+            const fb = document.getElementById('feedback');
+            fb.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-emerald-100', 'text-emerald-700', 'bg-blue-100', 'text-blue-800');
+
+            if (allCorrect) {
+                if (statsEnabled) {
+                    streak++;
+                    correctTotal++;
+                    fb.innerHTML = '<i class="fas fa-crown text-xl"></i><br>Xuất sắc! Đáp án hoàn toàn chính xác.';
+                    fb.classList.add('bg-emerald-100', 'text-emerald-700');
+                    updateStatsUI();
+                } else {
+                    fb.innerHTML = '<i class="fas fa-check text-xl"></i><br>Đúng rồi! (Không tính điểm vì đã xem gợi ý)';
+                    fb.classList.add('bg-blue-100', 'text-blue-800');
+                }
+                isAnswered = true;
+                
+                // Auto play steps
+                const timer = setInterval(() => {
+                    if (stepIndex < currentData.steps.length) showNextStep();
+                    else clearInterval(timer);
+                }, 400);
+
+            } else {
+                fb.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> Chưa chính xác. Bạn đúng ${correctCount}/${currentData.vars.length} số.`;
+                fb.classList.add('bg-red-100', 'text-red-700');
+                
+                if (statsEnabled) {
+                    streak = 0;
+                    wrongTotal++;
+                    updateStatsUI();
+                }
+            }
+        }
+
+        // Init
+        window.onload = nextQuestion;
+    </script>
+</body>
+</html>

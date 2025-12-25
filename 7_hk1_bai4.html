@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập chinh phục Toán 7 HK1 - Bài 4 (Tỉ lệ thức)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <!-- Load MathJax -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* Chalkboard Style */
+        .chalkboard {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border: 8px solid #854d0e;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .chalkboard::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMTAgMTBRNDAgNDAgMTAgNzAiIHN0cm9rZT0id2hpdGUiIG9wYWNpdHk9IjAuMDUiIGZpbGw9Im5vbmUiLz4KPC9zdmc+');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        /* Step Animation */
+        .step-item {
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: slideDown 0.3s forwards;
+        }
+        @keyframes slideDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar */
+        #steps-container::-webkit-scrollbar { width: 8px; }
+        #steps-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        #steps-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        #steps-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Input Styles */
+        .input-group:focus-within label { color: #4f46e5; }
+
+        /* Stats & Effects */
+        .streak-fire { color: #ef4444; animation: burn 0.5s infinite alternate; }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+        .stats-box { transition: all 0.3s ease; }
+        .stats-box:hover { transform: translateY(-2px); }
+        
+        .highlight-val { color: #34d399; font-weight: bold; }
+
+        /* MathJax Override for size */
+        mjx-container { font-size: 110% !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
+
+    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-blue-200">
+        <!-- Header -->
+        <div class="bg-indigo-600 p-4 text-center relative shadow-lg">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider">
+                <i class="fas fa-balance-scale mr-2"></i>Ôn tập chinh phục Toán 7 HK1 - Bài 4
+            </h1>
+            <p class="text-white font-medium">Chủ đề: Dãy tỉ số bằng nhau & Bài toán thực tế</p>
+        </div>
+
+        <div class="p-4 md:p-6 space-y-4">
+            
+            <!-- STATS BOARD -->
+            <div class="bg-white rounded-xl shadow-md p-3 grid grid-cols-4 gap-2 text-center select-none border border-gray-100" id="stats-container">
+                <div class="flex flex-col items-center stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span id="stat-streak" class="text-2xl md:text-3xl font-extrabold text-indigo-900">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span id="stat-correct" class="text-xl md:text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span id="stat-wrong" class="text-xl md:text-2xl font-bold text-red-500">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span id="stat-skipped" class="text-xl md:text-2xl font-bold text-gray-400">0</span>
+                </div>
+            </div>
+            
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Left Column: Chalkboard & Inputs -->
+                <div class="flex flex-col gap-4">
+                    <!-- Chalkboard -->
+                    <div class="chalkboard p-6 min-h-[350px] relative">
+                         <div class="absolute top-2 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs font-mono uppercase tracking-widest opacity-60">
+                            Đề bài
+                        </div>
+                        <div id="question-text" class="text-white text-lg font-medium leading-relaxed font-sans mt-4 px-2 tracking-wide">
+                            Đang tải đề bài...
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-inner">
+                        
+                        <!-- Control Row: Type & Hard Mode -->
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200 gap-2">
+                             <div class="flex items-center gap-2 flex-grow">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase whitespace-nowrap">Dạng:</label>
+                                <select id="problem-type" class="text-xs font-bold p-1.5 rounded border-gray-300 focus:ring-indigo-500 bg-white w-full max-w-[200px]" onchange="nextQuestion()">
+                                    <option value="random">🎲 Ngẫu nhiên tổng hợp</option>
+                                    <option value="donation">📚 1. Quyên góp / Trồng cây</option>
+                                    <option value="production">🏭 2. Sản xuất / Năng suất</option>
+                                    <option value="profit">💰 3. Kinh doanh / Chia lãi</option>
+                                    <option value="hidden">🧩 4. Giấu tỉ lệ (Tiền/Vật lý)</option>
+                                </select>
+                            </div>
+
+                            <label class="inline-flex items-center cursor-pointer select-none shrink-0">
+                                <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                <span class="ms-2 text-xs font-bold text-gray-600 peer-checked:text-red-600 flex items-center">
+                                    <i class="fas fa-skull-crossbones mr-1"></i>Vận dụng cao
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="mb-2">
+                            <span class="text-xs text-gray-500 font-bold uppercase block mb-2">1. Kết quả từng phần:</span>
+                            <div class="grid grid-cols-3 gap-3 mb-4" id="inputs-container">
+                                <!-- Dynamic inputs generated here -->
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-3 rounded-lg border border-gray-200 mb-4">
+                            <span class="block text-gray-400 font-bold text-[10px] uppercase mb-1" id="label-final-req">2. Yêu cầu đề bài:</span>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="ans-final" placeholder="?" class="flex-grow text-center font-bold text-lg p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 outline-none transition-colors">
+                            </div>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <div class="flex gap-3">
+                            <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-sync-alt"></i> Bài mới
+                            </button>
+                            <button onclick="checkAnswer()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i> Kiểm tra
+                            </button>
+                        </div>
+
+                        <div id="feedback" class="hidden mt-3 text-center p-2 rounded-lg text-sm font-bold"></div>
+                         <div id="hint-warning" class="hidden mt-2 text-center text-xs text-amber-600 font-semibold bg-amber-50 p-1 rounded border border-amber-200">
+                            <i class="fas fa-lock mr-1"></i>Đã xem gợi ý: Thành tích câu này sẽ không được tính.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Step-by-step -->
+                <div class="flex flex-col h-[600px] lg:h-[750px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-4 relative">
+                    <!-- HEADER WITH BUTTON -->
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 shrink-0">
+                        <div class="flex items-center gap-2 flex-grow">
+                            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide whitespace-nowrap">
+                                <i class="fas fa-file-alt text-blue-500 mr-1"></i>Trình bày bài thi
+                            </h3>
+                            <!-- Button -->
+                            <button onclick="showNextStep()" id="btn-show-step" 
+                                class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed ml-2">
+                                <span>Gợi ý tiếp</span> <i class="fas fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                        <span id="step-counter" class="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded ml-2">0/0</span>
+                    </div>
+
+                    <!-- Fixed Rule Hint Area -->
+                    <div id="rule-area" class="hidden mb-3 bg-yellow-50 text-yellow-900 text-sm p-3 rounded-lg border-l-4 border-yellow-400 shadow-sm transition-all duration-300 shrink-0">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                        <span id="rule-content" class="font-medium"></span>
+                    </div>
+
+                    <!-- Steps Content -->
+                    <div id="steps-container" class="flex-grow overflow-y-auto bg-white p-3 rounded-lg shadow-inner border border-gray-100 scroll-smooth">
+                        <div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center">
+                            <i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i>
+                            <span>Bấm "Gợi ý tiếp" để xem bài làm mẫu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
+
+    <script>
+        // --- Game State ---
+        let currentProblem = {};
+        let stepIndex = 0;
+        let isAnswered = false;
+        
+        // Stats
+        let streak = 0;
+        let correctTotal = 0;
+        let wrongTotal = 0;
+        let skippedTotal = 0;
+        let statsEnabled = true;
+
+        // --- Utils ---
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function updateStatsUI() {
+            const streakEl = document.getElementById('stat-streak');
+            streakEl.textContent = streak;
+            document.getElementById('stat-correct').textContent = correctTotal;
+            document.getElementById('stat-wrong').textContent = wrongTotal;
+            document.getElementById('stat-skipped').textContent = skippedTotal;
+
+            if (!statsEnabled) {
+                document.getElementById('hint-warning').classList.remove('hidden');
+            } else {
+                document.getElementById('hint-warning').classList.add('hidden');
+            }
+
+            if (streak > 2) {
+                streakEl.classList.add('streak-fire');
+                streakEl.innerHTML = `<i class="fas fa-fire"></i> ${streak}`;
+            } else {
+                streakEl.classList.remove('streak-fire');
+                streakEl.textContent = streak;
+            }
+        }
+        
+        function disableStats() {
+            if (statsEnabled) {
+                statsEnabled = false;
+                updateStatsUI();
+            }
+        }
+
+        // --- SCENARIO GENERATORS ---
+
+        function generateDonation(isHard) {
+            const items = [
+                { name: "giấy vụn", unit: "kg", action: "quyên góp", prop: "số học sinh", subUnit: "học sinh" },
+                { name: "sách giáo khoa", unit: "quyển", action: "quyên góp", prop: "số học sinh", subUnit: "học sinh" },
+                { name: "cây xanh", unit: "cây", action: "trồng", prop: "số học sinh", subUnit: "học sinh" }
+            ];
+            const item = items[getRandomInt(0, items.length - 1)];
+            const names = ["7A", "7B", "7C"];
+            if (isHard && Math.random() < 0.3) names.push("7D");
+
+            let ratios;
+            if (isHard) {
+                ratios = names.map(() => getRandomInt(30, 45)); 
+            } else {
+                const base = getRandomInt(4, 10);
+                ratios = names.map((_, i) => base + i + getRandomInt(0, 1));
+            }
+
+            return {
+                names, 
+                unit: item.unit, 
+                ratios, 
+                scenarioText: `Ba lớp ${names.join(", ")} tham gia phong trào ${item.action} ${item.name}. Biết số ${item.name} ${item.action} được tỉ lệ với ${item.prop} của mỗi lớp là ${ratios.join(", ")}.`,
+                action: item.action,
+                item: item.name,
+                prop: item.prop,
+                type: 'direct'
+            };
+        }
+
+        function generateProduction(isHard) {
+            const items = [
+                { name: "sản phẩm", unit: "sản phẩm", action: "làm được", prop: "năng suất", subUnit: "sản phẩm/giờ" },
+                { name: "túi xách", unit: "cái", action: "may được", prop: "năng suất", subUnit: "cái/giờ" },
+                { name: "bông hồng", unit: "bó", action: "gói được", prop: "khả năng làm việc", subUnit: "bó/giờ" }
+            ];
+            const item = items[getRandomInt(0, items.length - 1)];
+            const names = ["A", "B", "C"]; 
+            
+            let ratios;
+            if (isHard) {
+                ratios = [getRandomInt(10, 15)*10, getRandomInt(10, 15)*10, getRandomInt(10, 15)*10]; 
+            } else {
+                ratios = [3, 4, 5].map(x => x + getRandomInt(0, 2));
+            }
+
+            return {
+                names, 
+                unit: item.unit, 
+                ratios, 
+                scenarioText: `Ba đơn vị ${names.join(", ")} cùng ${item.action.replace('được','')} ${item.name}. Biết ${item.prop} lần lượt là ${ratios.join("; ")} (${item.subUnit}) và thời gian làm việc như nhau.`,
+                action: item.action,
+                item: item.name,
+                prop: item.prop,
+                type: 'direct'
+            };
+        }
+
+        function generateProfit(isHard) {
+            const names = ["người thứ nhất", "người thứ hai", "người thứ ba"];
+            const items = [
+                { name: "tiền lãi", unit: "triệu đồng", action: "nhận được", prop: "số vốn góp" },
+                { name: "tiền thưởng", unit: "triệu đồng", action: "nhận được", prop: "hiệu quả công việc" }
+            ];
+            const item = items[getRandomInt(0, items.length - 1)];
+
+            let ratios = [3, 4, 5];
+            if (isHard) ratios = [getRandomInt(2,5), getRandomInt(4,8), getRandomInt(6,9)];
+
+            return {
+                names,
+                unit: item.unit,
+                ratios,
+                scenarioText: `Ba ${item.name.includes("lãi") ? "nhà đầu tư" : "công nhân"} chia nhau ${item.name}. Biết số ${item.name} chia tỉ lệ thuận với ${item.prop} là ${ratios.join(" : ")}.`,
+                action: item.action,
+                item: item.name,
+                prop: item.prop,
+                type: 'direct'
+            };
+        }
+
+        // NEW: Hidden Ratio Generator
+        function generateHiddenRatio(isHard) {
+            const type = Math.random() < 0.5 ? 'money' : 'physics';
+            
+            if (type === 'money') {
+                const names = ["bạn An", "bạn Bình", "bạn Cường"];
+                // Denominations: 10k, 20k, 50k -> Ratios 1 : 2 : 5
+                // Or 2k, 5k, 10k -> 2 : 5 : 10
+                const denoms = [10000, 20000, 50000];
+                const ratios = [1, 2, 5];
+                
+                return {
+                    names,
+                    unit: "đồng",
+                    ratios,
+                    scenarioText: `Ba bạn An, Bình, Cường có số lượng tờ tiền lì xì bằng nhau. Biết loại tiền mà ba bạn sở hữu lần lượt là các tờ mệnh giá ${denoms.map(d=>formatNumber(d)).join(", ")} đồng.`,
+                    action: "có",
+                    item: "tổng số tiền",
+                    prop: "mệnh giá tiền",
+                    type: 'hidden',
+                    explain: "Vì số lượng tờ tiền bằng nhau nên tổng giá trị tiền tỉ lệ thuận với mệnh giá."
+                };
+            } else {
+                const names = ["thanh thứ nhất", "thanh thứ hai", "thanh thứ ba"];
+                // Lead, Iron, Al approx ratios
+                const ratios = [11, 8, 3]; // Simplified densities
+                
+                return {
+                    names,
+                    unit: "gam",
+                    ratios,
+                    scenarioText: `Ba thanh kim loại có thể tích bằng nhau. Biết khối lượng riêng của chúng tỉ lệ với các số ${ratios.join(", ")}.`,
+                    action: "nặng",
+                    item: "khối lượng",
+                    prop: "khối lượng riêng",
+                    type: 'hidden',
+                    explain: "Vì thể tích bằng nhau nên khối lượng tỉ lệ thuận với khối lượng riêng."
+                };
+            }
+        }
+
+        // --- MASTER GENERATOR ---
+
+        function generateProblem() {
+            const typeSelect = document.getElementById('problem-type').value;
+            const isHard = document.getElementById('mode-hard').checked;
+            
+            let generator;
+            const types = ['donation', 'production', 'profit', 'hidden'];
+            let selectedType = typeSelect;
+            
+            if (selectedType === 'random') {
+                selectedType = types[getRandomInt(0, types.length - 1)];
+            } else if (selectedType === 'transport') {
+                 selectedType = 'production'; 
+            }
+
+            switch(selectedType) {
+                case 'donation': generator = generateDonation; break;
+                case 'production': generator = generateProduction; break;
+                case 'profit': generator = generateProfit; break;
+                case 'hidden': generator = generateHiddenRatio; break;
+                default: generator = generateDonation;
+            }
+
+            // 1. Get Base Scenario Data
+            const baseData = generator(isHard);
+            
+            // 2. Determine K (Coefficient)
+            let k = getRandomInt(5, 30);
+            if (baseData.unit === "đồng") k = getRandomInt(5, 20) * 10000;
+            if (isHard && Math.random() < 0.3) k = k * 1.5; // Decimal K for hard mode
+
+            // Calculate values
+            const values = baseData.ratios.map(r => Number((r * k).toFixed(0))); 
+            const sumValues = values.reduce((a,b) => a+b, 0);
+            const sumRatios = baseData.ratios.reduce((a,b) => a+b, 0);
+
+            // 3. Determine Condition
+            let conditionText = "";
+            let numeratorStr = "", denominatorStr = "", calcKStr = "";
+            let finalReqText = "", finalReqVal = 0;
+            let finalReqFormula = "";
+
+            const variableNames = ['x', 'y', 'z', 't'].slice(0, baseData.names.length);
+            
+            // LOGIC SELECTION: Direct (Sum/Diff) vs Complex
+            const condRand = Math.random();
+            let mode = 'simple';
+            
+            // Force 50% Sum (Total) condition
+            let isSumCondition = false;
+            
+            if (condRand < 0.5) {
+                isSumCondition = true;
+                // --- SUM CONDITION ---
+                conditionText = `Tổng ${baseData.item} của các đơn vị là ${formatNumber(sumValues)} ${baseData.unit}.`;
+                numeratorStr = variableNames.join(" + ");
+                denominatorStr = baseData.ratios.join(" + ");
+                calcKStr = `\\dfrac{${formatNumber(sumValues)}}{${sumRatios}}`;
+
+                // --- FINAL QUESTION DISTRIBUTION FOR SUM ---
+                const qRand = Math.random();
+                if (qRand < 0.3) {
+                    // 30%: Ask individual
+                    const targetIdx = getRandomInt(0, baseData.names.length - 1);
+                    finalReqText = `Tính ${baseData.item} của ${baseData.names[targetIdx]}?`;
+                    finalReqVal = values[targetIdx];
+                } else if (qRand < 0.65 && baseData.names.length > 2) {
+                    // 35%: Ask sum subset (only if > 2 items)
+                    const idx1 = 0; 
+                    const idx2 = 1; 
+                    finalReqText = `Tính tổng ${baseData.item} của ${baseData.names[idx1]} và ${baseData.names[idx2]}?`;
+                    finalReqVal = values[idx1] + values[idx2];
+                    finalReqFormula = `${variableNames[idx1]} + ${variableNames[idx2]}`;
+                } else {
+                    // 35%: Ask diff/complex (must differ from condition)
+                    // e.g., (A+C) - B or A - B
+                    if (baseData.names.length >= 3) {
+                         // (A+C) - B
+                         const val = (values[0] + values[2]) - values[1];
+                         const sign = val >= 0 ? "nhiều hơn" : "ít hơn";
+                         finalReqText = `Tổng ${baseData.item} của ${baseData.names[0]} và ${baseData.names[2]} ${sign} ${baseData.names[1]} bao nhiêu?`;
+                         finalReqVal = Math.abs(val);
+                         finalReqFormula = `|(${variableNames[0]} + ${variableNames[2]}) - ${variableNames[1]}|`;
+                    } else {
+                         // A - B
+                         const val = values[0] - values[1];
+                         const sign = val >= 0 ? "nhiều hơn" : "ít hơn";
+                         finalReqText = `${baseData.names[0]} có ${baseData.item} ${sign} ${baseData.names[1]} bao nhiêu?`;
+                         finalReqVal = Math.abs(val);
+                         finalReqFormula = `|${variableNames[0]} - ${variableNames[1]}|`;
+                    }
+                }
+            } else {
+                // --- DIFF OR COMPLEX CONDITION ---
+                // Decide between Simple Diff or Complex logic
+                if (isHard && Math.random() < 0.6 && baseData.names.length >= 3) {
+                    mode = 'complex';
+                }
+
+                if (mode === 'simple') {
+                    // DIFF
+                    let i1 = 0, i2 = 1;
+                    // Fix 0 issue: ensure values are different. If same, force shift one value
+                    let attempts = 0;
+                    while (values[i1] === values[i2] && attempts < 10) { 
+                        i2 = (i2 + 1) % values.length; 
+                        attempts++;
+                    }
+                    if (values[i1] === values[i2]) {
+                        // Fallback if all equal: artificially boost one ratio/value just for this problem context
+                        // But wait, values depend on ratios.
+                        // Safe bet: assume ratios distinct. If generated ratios equal, we have logic issue.
+                        // Generator ensures ratios vary or distinct enough usually.
+                    }
+
+                    const diffVal = Math.abs(values[i1] - values[i2]);
+                    // Safety check for 0 diff (0/0 error)
+                    if (diffVal === 0) {
+                         // Fallback to SUM logic if Diff is 0 (rare edge case)
+                         isSumCondition = true;
+                         // ... repeat sum logic ...
+                         // For simplicity, reload page or just display Sum condition here as fallback
+                         conditionText = `Tổng ${baseData.item} của các đơn vị là ${formatNumber(sumValues)} ${baseData.unit}.`;
+                         numeratorStr = variableNames.join(" + ");
+                         denominatorStr = baseData.ratios.join(" + ");
+                         calcKStr = `\\dfrac{${formatNumber(sumValues)}}{${sumRatios}}`;
+                         finalReqText = `Tính ${baseData.item} của ${baseData.names[1]}?`;
+                         finalReqVal = values[1];
+                    } else {
+                        const more = values[i1] > values[i2] ? baseData.names[i1] : baseData.names[i2];
+                        const less = values[i1] > values[i2] ? baseData.names[i2] : baseData.names[i1];
+                        
+                        conditionText = `Biết ${baseData.item} của ${more} ${baseData.action.includes('hơn') ? '' : 'nhiều hơn'} ${less} là ${formatNumber(diffVal)} ${baseData.unit}.`;
+                        
+                        if (values[i1] > values[i2]) {
+                            numeratorStr = `${variableNames[i1]} - ${variableNames[i2]}`;
+                            denominatorStr = `${baseData.ratios[i1]} - ${baseData.ratios[i2]}`;
+                        } else {
+                            numeratorStr = `${variableNames[i2]} - ${variableNames[i1]}`;
+                            denominatorStr = `${baseData.ratios[i2]} - ${baseData.ratios[i1]}`;
+                        }
+                        calcKStr = `\\dfrac{${formatNumber(diffVal)}}{${Math.abs(baseData.ratios[i1] - baseData.ratios[i2])}}`;
+                        
+                        finalReqText = `Tính ${baseData.item} của ${baseData.names[0]}?`;
+                        finalReqVal = values[0];
+                    }
+                } else {
+                    // COMPLEX LOGIC (x + y - z = K etc.)
+                    const complexType = Math.random() < 0.5 ? 1 : 2;
+                    
+                    if (complexType === 1) {
+                        // x + y - z
+                        const targetVal = values[0] + values[1] - values[2];
+                        const sign = targetVal >= 0 ? "nhiều hơn" : "ít hơn";
+                        const absVal = Math.abs(targetVal);
+                        
+                        // Check 0/0
+                        if (absVal === 0 || (baseData.ratios[0] + baseData.ratios[1] - baseData.ratios[2]) === 0) {
+                            // Fallback to simple Sum
+                             conditionText = `Tổng ${baseData.item} của các đơn vị là ${formatNumber(sumValues)} ${baseData.unit}.`;
+                             numeratorStr = variableNames.join(" + ");
+                             denominatorStr = baseData.ratios.join(" + ");
+                             calcKStr = `\\dfrac{${formatNumber(sumValues)}}{${sumRatios}}`;
+                             finalReqText = `Tính ${baseData.item} của ${baseData.names[1]}?`;
+                             finalReqVal = values[1];
+                        } else {
+                            conditionText = `Biết tổng ${baseData.item} của ${baseData.names[0]} và ${baseData.names[1]} ${sign} ${baseData.names[2]} là ${formatNumber(absVal)} ${baseData.unit}.`;
+                            numeratorStr = `${variableNames[0]} + ${variableNames[1]} - ${variableNames[2]}`;
+                            denominatorStr = `${baseData.ratios[0]} + ${baseData.ratios[1]} - ${baseData.ratios[2]}`;
+                            calcKStr = `\\dfrac{${formatNumber(absVal)}}{${Math.abs(baseData.ratios[0] + baseData.ratios[1] - baseData.ratios[2])}}`;
+                            
+                            finalReqText = `Tính tổng ${baseData.item} của cả ba đơn vị?`;
+                            finalReqVal = sumValues;
+                        }
+                    } else {
+                        // 2x - y (or similar)
+                        const valDiff = 2*values[0] - values[1];
+                        const absDiff = Math.abs(valDiff);
+                        const denomDiff = Math.abs(2*baseData.ratios[0] - baseData.ratios[1]);
+                        
+                        if (absDiff === 0 || denomDiff === 0) {
+                             // Fallback
+                             conditionText = `Tổng ${baseData.item} của các đơn vị là ${formatNumber(sumValues)} ${baseData.unit}.`;
+                             numeratorStr = variableNames.join(" + ");
+                             denominatorStr = baseData.ratios.join(" + ");
+                             calcKStr = `\\dfrac{${formatNumber(sumValues)}}{${sumRatios}}`;
+                             finalReqText = `Tính ${baseData.item} của ${baseData.names[1]}?`;
+                             finalReqVal = values[1];
+                        } else {
+                            const sign = valDiff >= 0 ? "nhiều hơn" : "ít hơn";
+                            conditionText = `Biết 2 lần ${baseData.item} của ${baseData.names[0]} ${sign} ${baseData.names[1]} là ${formatNumber(absDiff)} ${baseData.unit}.`;
+                            numeratorStr = `2${variableNames[0]} - ${variableNames[1]}`;
+                            denominatorStr = `2 \\cdot ${baseData.ratios[0]} - ${baseData.ratios[1]}`;
+                            calcKStr = `\\dfrac{${formatNumber(absDiff)}}{${denomDiff}}`;
+                            
+                            finalReqText = `Tổng ${baseData.item} của ${baseData.names[0]} và ${baseData.names[2]} nhiều hơn ${baseData.names[1]} bao nhiêu?`;
+                            finalReqVal = Math.abs((values[0] + values[2]) - values[1]);
+                            finalReqFormula = `|(${variableNames[0]} + ${variableNames[2]}) - ${variableNames[1]}|`;
+                        }
+                    }
+                }
+            }
+
+            const question = `${baseData.scenarioText} ${conditionText} ${finalReqText}`;
+
+            // --- BUILD STEPS ---
+            const steps = [];
+            
+            // B1
+            steps.push({
+                type: 'header',
+                title: "B1: GỌI ẨN",
+                content: `Gọi ${baseData.item} của ${baseData.names.join(", ")} lần lượt là $${variableNames.join(", ")}$ (${baseData.unit}) ($${variableNames.join(", ")} > 0$).`
+            });
+
+            // B2
+            let explainContent = `Vì ${baseData.item} tỉ lệ thuận với ${baseData.prop} (${baseData.ratios.join("; ")}) nên:`;
+            if (baseData.type === 'hidden') {
+                explainContent = `${baseData.explain}<br>${explainContent}`;
+            }
+            steps.push({
+                type: 'header',
+                title: "B2: GIẢI THÍCH BẰNG LẬP LUẬN",
+                content: explainContent
+            });
+
+            // B3
+            const ratioEq = variableNames.map((v, i) => `\\dfrac{${v}}{${baseData.ratios[i]}}`).join(" = ");
+            // Extract math condition
+            let mathConditionDisplay = `${numeratorStr} = ...`;
+            if (conditionText.includes("Tổng") && !conditionText.includes("nhiều hơn")) {
+                 mathConditionDisplay = `${variableNames.join("+")} = ${formatNumber(sumValues)}`;
+            } else if (numeratorStr.includes("-") && !numeratorStr.includes("+") && !numeratorStr.includes("2")) {
+                 mathConditionDisplay = `${numeratorStr} = ${calcKStr.match(/\{([0-9,.]+)\}/)[1]}`; 
+            } else {
+                 // Hacky display for complex
+                 const valMatch = calcKStr.match(/\{([0-9,.]+)\}/);
+                 const val = valMatch ? valMatch[1] : "...";
+                 mathConditionDisplay = `${numeratorStr} = ${val}`; 
+            }
+
+            steps.push({
+                type: 'header',
+                title: "B3: VIẾT CÔNG THỨC DÃY TỈ SỐ VÀ ĐIỀU KIỆN RÀNG BUỘC",
+                content: `$$ ${ratioEq} \\quad \\text{và} \\quad ${mathConditionDisplay} $$`
+            });
+
+            // B4
+            steps.push({
+                type: 'header',
+                title: "B4: GIẢI",
+                content: `Áp dụng tính chất của dãy tỉ số bằng nhau:
+                $$ ${ratioEq} = \\dfrac{${numeratorStr}}{${denominatorStr}} = ${calcKStr} = ${formatNumber(k)} $$`,
+                rule: "Lưu ý: Nếu kết quả cuối cùng không ra số thập phân hữu hạn thì cứ ghi phân số tối giản."
+            });
+
+            // Calc Lines
+            let calcHtml = "";
+            baseData.names.forEach((n, i) => {
+                calcHtml += `<div>$\\dfrac{${variableNames[i]}}{${baseData.ratios[i]}} = ${k} \\text{ nên } ${variableNames[i]} = ${k} \\cdot ${baseData.ratios[i]} = ${formatNumber(values[i])}$ (nhận)</div>`;
+            });
+
+            steps.push({
+                type: 'step',
+                title: "",
+                content: `<div class="space-y-1 ml-4">${calcHtml}</div>`
+            });
+
+            // B5 - KẾT LUẬN
+            let answerStatement = finalReqText;
+            if (answerStatement.startsWith("Tính ")) answerStatement = answerStatement.substring(5);
+            if (answerStatement.endsWith("?")) answerStatement = answerStatement.slice(0, -1);
+            answerStatement = answerStatement.charAt(0).toUpperCase() + answerStatement.slice(1);
+            
+            let complexCalc = "";
+            if (finalReqFormula) {
+                 // Format formula calculation for final step if needed
+                 // Only for complex
+            }
+
+            steps.push({
+                type: 'header',
+                title: "KẾT LUẬN",
+                content: `Vậy ${baseData.item} của ${baseData.names.join(", ")} lần lượt là ${values.map(v => formatNumber(v)).join("; ")} (${baseData.unit}).${complexCalc}<br>
+                <b>${answerStatement} là:</b> ${formatNumber(finalReqVal)} ${baseData.unit}.`
+            });
+
+            return {
+                names: baseData.names,
+                unit: baseData.unit,
+                data: { values, ratios: baseData.ratios, k },
+                question,
+                steps,
+                finalReqText,
+                finalReqVal
+            };
+        }
+
+        // --- Core Functions ---
+
+        function nextQuestion() {
+            if (!isAnswered && document.getElementById('question-text').innerText !== 'Đang tải đề bài...') {
+                skippedTotal++;
+                streak = 0;
+                updateStatsUI();
+            }
+
+            currentProblem = generateProblem();
+            
+            // Reset UI
+            stepIndex = 0;
+            isAnswered = false;
+            statsEnabled = true;
+            updateStatsUI();
+
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('rule-area').classList.add('hidden');
+            document.getElementById('steps-container').innerHTML = '<div class="text-gray-400 italic text-sm text-center mt-20"><i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i><br>Bấm "Gợi ý tiếp" để xem hướng dẫn chi tiết từng bước</div>';
+            
+            document.getElementById('btn-show-step').disabled = false;
+            document.getElementById('btn-show-step').innerHTML = 'Gợi ý tiếp <i class="fas fa-arrow-right ml-1"></i>';
+
+            // Render Question
+            document.getElementById('question-text').innerHTML = currentProblem.question;
+            MathJax.typesetPromise([document.getElementById('question-text')]);
+
+            // Render Inputs
+            const container = document.getElementById('inputs-container');
+            container.innerHTML = '';
+            
+            currentProblem.names.forEach((name, idx) => {
+                const div = document.createElement('div');
+                div.className = "input-group";
+                div.innerHTML = `
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase truncate mb-1" title="${name}">${name}</label>
+                    <input type="text" data-idx="${idx}" class="input-val w-full text-center font-bold text-slate-700 p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 outline-none transition-colors" placeholder="?">
+                `;
+                container.appendChild(div);
+            });
+            
+            document.getElementById('label-final-req').textContent = "2. " + currentProblem.finalReqText;
+            const finalInp = document.getElementById('ans-final');
+            finalInp.value = '';
+            finalInp.className = "flex-grow text-center font-bold text-lg p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 outline-none transition-colors";
+            
+            updateStepCounter();
+        }
+
+        function updateStepCounter() {
+            document.getElementById('step-counter').textContent = `Bước: ${stepIndex}/${currentProblem.steps.length}`;
+        }
+
+        function showNextStep() {
+            disableStats();
+
+            const container = document.getElementById('steps-container');
+            const ruleArea = document.getElementById('rule-area');
+            const ruleContent = document.getElementById('rule-content');
+            
+            if (stepIndex === 0) container.innerHTML = '';
+
+            if (stepIndex < currentProblem.steps.length) {
+                const step = currentProblem.steps[stepIndex];
+                
+                if (step.type === 'header') {
+                    const h = document.createElement('div');
+                    h.className = "mt-4 mb-2 text-xs font-bold text-gray-500 uppercase border-b border-gray-300 pb-1 flex items-center";
+                    h.innerHTML = `<i class="fas fa-caret-right mr-1"></i> ${step.title}`;
+                    container.appendChild(h);
+
+                    const s = document.createElement('div');
+                    s.className = `step-item p-3 rounded-lg shadow-sm text-sm border-l-4 font-medium mb-2 bg-gray-50 border-indigo-400 text-gray-700`;
+                    s.innerHTML = step.content;
+                    container.appendChild(s);
+                    
+                    if (step.rule) {
+                        ruleContent.innerHTML = `<b>Lưu ý:</b> ${step.rule}`;
+                        ruleArea.classList.remove('hidden');
+                        ruleArea.classList.remove('animate-pulse');
+                        void ruleArea.offsetWidth; 
+                        ruleArea.classList.add('animate-pulse');
+                    }
+
+                    MathJax.typesetPromise([s]);
+
+                } else {
+                    const s = document.createElement('div');
+                    s.className = `step-item p-3 rounded-lg shadow-sm text-sm border-l-4 font-medium mb-2 bg-emerald-50 border-emerald-500 text-emerald-900`;
+                    
+                    if(step.title) {
+                         s.innerHTML = `<b>${step.title}:</b><br>${step.content}`;
+                    } else {
+                         s.innerHTML = step.content;
+                    }
+                    
+                    container.appendChild(s);
+
+                    if (step.rule) {
+                        ruleContent.innerHTML = `<b>Lưu ý:</b> ${step.rule}`;
+                        ruleArea.classList.remove('hidden');
+                        ruleArea.classList.remove('animate-pulse');
+                        void ruleArea.offsetWidth; 
+                        ruleArea.classList.add('animate-pulse');
+                    }
+                    
+                    MathJax.typesetPromise([s]);
+                }
+                
+                stepIndex++;
+                updateStepCounter();
+                container.scrollTop = container.scrollHeight;
+            }
+
+            if (stepIndex >= currentProblem.steps.length) {
+                const btn = document.getElementById('btn-show-step');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Hết';
+            }
+        }
+
+        function checkAnswer() {
+            if (isAnswered) return;
+            
+            const inputs = document.querySelectorAll('.input-val');
+            let allCorrect = true;
+            let correctCount = 0;
+            
+            inputs.forEach(inp => {
+                const idx = parseInt(inp.dataset.idx);
+                const val = parseFloat(inp.value.replace(/,/g, '').replace(/\s/g, ''));
+                const correctVal = currentProblem.data.values[idx];
+                
+                if (Math.abs(val - correctVal) < 0.1) {
+                    inp.classList.remove('border-gray-300', 'border-red-500', 'bg-red-50');
+                    inp.classList.add('border-emerald-500', 'bg-emerald-50');
+                    correctCount++;
+                } else {
+                    inp.classList.remove('border-gray-300', 'border-emerald-500', 'bg-emerald-50');
+                    inp.classList.add('border-red-500', 'bg-red-50');
+                    allCorrect = false;
+                }
+            });
+
+            const finalInp = document.getElementById('ans-final');
+            const finalVal = parseFloat(finalInp.value.replace(/,/g, '').replace(/\s/g, ''));
+            
+            if (Math.abs(finalVal - currentProblem.finalReqVal) < 0.1) {
+                finalInp.classList.remove('border-gray-300', 'border-red-500', 'bg-red-50');
+                finalInp.classList.add('border-emerald-500', 'bg-emerald-50');
+                correctCount++;
+            } else {
+                finalInp.classList.remove('border-gray-300', 'border-emerald-500', 'bg-emerald-50');
+                finalInp.classList.add('border-red-500', 'bg-red-50');
+                allCorrect = false;
+            }
+
+            const fb = document.getElementById('feedback');
+            fb.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-800', 'bg-blue-100', 'text-blue-800');
+
+            if (allCorrect) {
+                if (statsEnabled) {
+                    streak++;
+                    correctTotal++;
+                    fb.innerHTML = '<i class="fas fa-crown"></i> Xuất sắc! Bạn làm đúng hết rồi.';
+                    fb.classList.add('bg-green-100', 'text-green-800');
+                    updateStatsUI();
+                } else {
+                    fb.innerHTML = '<i class="fas fa-check"></i> Chính xác! (Không tính điểm vì đã xem gợi ý)';
+                    fb.classList.add('bg-blue-100', 'text-blue-800');
+                }
+                
+                isAnswered = true;
+                const timer = setInterval(() => {
+                    if (stepIndex < currentProblem.steps.length) showNextStep();
+                    else clearInterval(timer);
+                }, 100);
+
+            } else {
+                fb.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> Bạn chưa làm đúng hết. Hãy kiểm tra lại!`;
+                fb.classList.add('bg-red-100', 'text-red-700');
+                if (statsEnabled) {
+                    streak = 0;
+                    wrongTotal++;
+                    updateStatsUI();
+                }
+            }
+        }
+
+        window.onload = nextQuestion;
+
+    </script>
+</body>
+</html>

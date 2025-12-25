@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Chinh Phục Toán 7 HK1 - Câu 7</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            startup: {
+                typeset: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fff7ed; /* Orange-50 */
+        }
+
+        .btn-option {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-option:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mode-active {
+            background-color: #ea580c; /* orange-600 */
+            color: white;
+            border-color: #ea580c;
+        }
+
+        .mode-inactive {
+            background-color: white;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+        .mode-inactive:hover {
+            background-color: #ffedd5; /* orange-100 */
+        }
+
+        /* Loading Overlay */
+        #question-loader {
+            position: absolute;
+            inset: 0;
+            background-color: white;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s ease-out;
+        }
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ea580c; /* Orange-600 */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden-loader {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #main-content-wrapper {
+            opacity: 0;
+        }
+        #main-content-wrapper.content-visible {
+            opacity: 1;
+            transition: opacity 0.3s ease-in;
+        }
+
+        /* SVG Styles */
+        .geometry-svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+            border: 1px dashed #fdba74; /* Orange-300 */
+            border-radius: 8px;
+            background-color: #fff;
+            overflow: visible; 
+        }
+        .geo-line { stroke: #333; stroke-width: 2; stroke-linecap: round; }
+        .geo-ray { stroke: #ea580c; stroke-width: 2; }
+        .geo-text { font-size: 16px; font-weight: bold; fill: #1f2937; font-family: 'Nunito', sans-serif; }
+        .geo-label-box { fill: #fff7ed; stroke: #ea580c; stroke-width: 1; rx: 4; }
+        .geo-point { fill: #ea580c; }
+        .geo-point-label { fill: #ea580c; font-size: 14px; font-weight: bold; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-3xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-orange-800 mb-2 uppercase drop-shadow-sm">
+            <i class="fas fa-shapes mr-2"></i>Ôn tập chinh phục Toán 7 HK1 - Câu 7
+        </h1>
+        <p class="text-orange-600 font-medium">Chủ đề: Hai góc kề bù & Hai góc đối đỉnh</p>
+    </header>
+
+    <!-- Mode Selection -->
+    <div class="w-full max-w-3xl grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+        <button onclick="setMode('all')" id="btn-mode-all" class="mode-active py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform transform scale-105">
+            <i class="fas fa-random mb-1"></i> Tổng Hợp
+        </button>
+        <button onclick="setMode('kebu')" id="btn-mode-kebu" class="mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-arrows-alt-h mb-1"></i> Góc Kề Bù
+        </button>
+        <button onclick="setMode('doidinh')" id="btn-mode-doidinh" class="mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-times mb-1"></i> Đối Đỉnh & Quan Hệ
+        </button>
+        <button onclick="setMode('complex')" id="btn-mode-complex" class="mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-project-diagram mb-1"></i> Phức tạp
+        </button>
+    </div>
+
+    <!-- Stats Board -->
+    <div class="w-full max-w-3xl bg-white rounded-xl shadow-md p-4 mb-6 grid grid-cols-4 gap-2 text-center select-none" id="stats-container">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- Question Card -->
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg border-b-4 border-orange-600 p-6 relative overflow-hidden" style="min-height: 400px;">
+        
+        <!-- Loading Overlay -->
+        <div id="question-loader">
+            <div class="loader-spinner mb-3"></div>
+            <span class="text-orange-600 font-bold text-sm">Đang vẽ hình & sinh câu hỏi...</span>
+        </div>
+
+        <!-- Question Badge -->
+        <div class="absolute top-0 left-0 bg-orange-100 text-orange-800 px-3 py-1 rounded-br-lg text-xs font-bold uppercase z-10" id="question-type-badge">
+            Dạng câu hỏi
+        </div>
+
+        <!-- CONTENT WRAPPER -->
+        <div id="main-content-wrapper" class="flex flex-col h-full justify-between pt-6">
+            
+            <!-- Question Content -->
+            <div class="mb-6 fade-in">
+                <!-- Image Container -->
+                <div id="image-container" class="mb-4 flex justify-center hidden" style="min-height: 200px;">
+                    <!-- SVG will be injected here -->
+                </div>
+
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-left leading-relaxed" id="question-text">
+                    <!-- Question goes here -->
+                </h2>
+            </div>
+
+            <!-- Options Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="options-container">
+                <!-- Buttons will be injected here -->
+            </div>
+
+            <!-- Explanation Area -->
+            <div id="explanation-area" class="hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in">
+                 <!-- JS will inject content -->
+            </div>
+
+            <!-- Feedback & Next -->
+            <div class="mt-auto h-12 flex items-center justify-between">
+                <div id="feedback-msg" class="text-lg font-bold hidden pl-2"></div>
+                <button onclick="handleNextClick()" id="btn-next" class="bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-orange-100 transition flex items-center ml-auto shadow-sm">
+                    Bỏ qua <i class="fas fa-forward ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-auto py-6 text-center text-gray-400 text-xs">
+        © Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io
+    </footer>
+
+    <!-- Feedback Modal (Overlay) -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-orange-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-orange-500 font-bold uppercase mb-1">Giải thích chi tiết:</p>
+                <div id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></div>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-orange-600 text-white font-bold rounded-xl shadow-lg hover:bg-orange-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const state = {
+            mode: 'all', // all, kebu, doidinh, complex
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        // --- UTILS ---
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        // --- NAME GENERATOR ---
+        const generateLabels = (count) => {
+            const isUnfamiliar = Math.random() < 0.4;
+            const useUpperCase = Math.random() < 0.5;
+
+            // Xác định tâm trước để lọc khỏi pool
+            const center = (isUnfamiliar && useUpperCase) ? 'I' : 'O';
+
+            let pool;
+            if (useUpperCase) {
+                // Tên Điểm (In hoa) - Đảm bảo đủ ít nhất 7-8 ký tự
+                if (isUnfamiliar) pool = ['M', 'N', 'P', 'Q', 'E', 'F', 'H', 'K', 'J', 'L'];
+                else pool = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+            } else {
+                // Tên đường thẳng/tia (In thường) - Tránh chữ 'l' dễ nhầm lẫn
+                if (isUnfamiliar) pool = ['u', 'v', 'm', 'n', 'a', 'b', 'h', 'k'];
+                else pool = ['x', 'y', 'z', 't', 'k', 'p', 'q', 'r'];
+            }
+            
+            // Lọc tên tâm ra khỏi pool để tránh trùng (Ví dụ tâm là I thì trong pool không được có I)
+            pool = pool.filter(c => c !== center);
+
+            // Nếu pool không đủ (ít gặp), lấy thêm từ pool khác nhưng phải tránh tâm
+            while(pool.length < count) {
+                const backups = ['X', 'Y', 'Z', 'W', 'S', 'R'].filter(c => c !== center);
+                pool.push(...backups);
+                // Loại bỏ trùng lặp nếu thêm nhiều lần
+                pool = [...new Set(pool)];
+            }
+
+            return {
+                labels: shuffleArray(pool).slice(0, count),
+                isUpper: useUpperCase,
+                center: center
+            };
+        };
+
+        // --- SVG DRAWING HELPERS ---
+        const createSVG = (width, height) => {
+            return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" class="geometry-svg">`;
+        };
+
+        const drawLine = (x1, y1, x2, y2, color="#333", width=2) => {
+            return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${width}" stroke-linecap="round"/>`;
+        };
+
+        const drawText = (x, y, text, color="#1f2937", size=16) => {
+            return `<text x="${x}" y="${y}" fill="${color}" font-family="Nunito" font-weight="bold" font-size="${size}" text-anchor="middle" dominant-baseline="middle">${text}</text>`;
+        };
+        
+        const drawPoint = (x, y, label=null, labelOffset={dx:0, dy:-15}) => {
+            let svg = `<circle cx="${x}" cy="${y}" r="3" fill="#ea580c"/>`;
+            if (label) {
+                svg += drawText(x + labelOffset.dx, y + labelOffset.dy, label);
+            }
+            return svg;
+        };
+
+        // Hàm vẽ tia thông minh: Xử lý vụ in hoa/in thường
+        const drawSmartRay = (cx, cy, angleDeg, label, isUpper, length = 90) => {
+            const rad = (angleDeg * Math.PI) / 180;
+            const ex = cx + length * Math.cos(rad);
+            const ey = cy + length * Math.sin(rad); 
+            
+            const labelDist = 18;
+            const lx = ex + labelDist * Math.cos(rad);
+            const ly = ey + labelDist * Math.sin(rad);
+
+            let svg = "";
+            
+            if (isUpper) {
+                // In hoa
+                const extension = 25;
+                const extX = cx + (length + extension) * Math.cos(rad);
+                const extY = cy + (length + extension) * Math.sin(rad);
+                
+                svg += drawLine(cx, cy, extX, extY, "#333");
+                svg += drawPoint(ex, ey);
+                
+                const perpX = -Math.sin(rad) * 18;
+                const perpY = Math.cos(rad) * 18;
+                svg += drawText(ex + perpX, ey + perpY, label); 
+
+            } else {
+                // In thường
+                svg += drawLine(cx, cy, ex, ey, "#333");
+                svg += drawText(lx, ly, label);
+            }
+            return svg;
+        };
+
+        // --- GENERATORS ---
+
+        // ================= GÓC KỀ BÙ (Cơ bản) =================
+        const generateKeBu = () => {
+            const labelData = generateLabels(3);
+            const labels = labelData.labels;
+            const isUpper = labelData.isUpper;
+            const O = labelData.center;
+            
+            const angle1 = randomInt(40, 140);
+            const angle2 = 180 - angle1;
+            
+            const W = 300, H = 200, CX = 150, CY = 120;
+            let drawing = createSVG(W, H);
+
+            drawing += drawSmartRay(CX, CY, 180, labels[0], isUpper, 100); 
+            drawing += drawSmartRay(CX, CY, 0, labels[1], isUpper, 100);   
+            
+            // Tia thứ 3
+            drawing += drawSmartRay(CX, CY, -angle2, labels[2], isUpper, 90);
+
+            drawing += drawPoint(CX, CY, O, {dx: 0, dy: 25});
+
+            const rad = (-angle2 * Math.PI) / 180;
+            drawing += `<path d="M ${CX+30} ${CY} A 30 30 0 0 0 ${CX + 30*Math.cos(rad)} ${CY + 30*Math.sin(rad)}" fill="none" stroke="blue" stroke-width="2"/>`;
+            
+            drawing += "</svg>";
+            
+            const formatAngle = (ray1, ray2) => {
+                if (isUpper) return `$\\widehat{${ray1}${O}${ray2}}$`;
+                return `$\\widehat{${ray1}${O}${ray2}}$`;
+            };
+
+            const angleLeftName = formatAngle(labels[0], labels[2]);
+            const angleRightName = formatAngle(labels[2], labels[1]);
+            const askName = Math.random() < 0.5 ? angleLeftName : angleRightName;
+            const givenName = askName === angleLeftName ? angleRightName : angleLeftName;
+            const givenVal = askName === angleLeftName ? angle2 : angle1;
+            const correctVal = 180 - givenVal;
+
+            let question, correct, options, explanation;
+
+            if (Math.random() < 0.7) {
+                question = `Quan sát hình vẽ. Biết ${givenName} = $${givenVal}^\\circ$. Số đo của góc ${askName} là:`;
+                correct = `$${correctVal}^\\circ$`;
+                const w1 = `$${givenVal}^\\circ$`;
+                const w2 = `$${Math.abs(90 - givenVal)}^\\circ$`;
+                const w3 = `$${randomInt(20, 160)}^\\circ$`;
+                options = shuffleArray([correct, w1, w2, w3]);
+                explanation = `Quan sát hình vẽ, ta thấy ${givenName} và ${askName} là hai góc kề bù. Tổng số đo là $180^\\circ$.<br>Do đó: ${askName} = $180^\\circ - ${givenVal}^\\circ = ${correctVal}^\\circ$.`;
+            } else {
+                question = `Trong hình vẽ trên, cặp góc nào là hai góc kề bù?`;
+                correct = `${givenName} và ${askName}`;
+                const flatAngle = formatAngle(labels[0], labels[1]);
+                options = shuffleArray([
+                    correct,
+                    `${givenName} và ${flatAngle}`,
+                    "Hai góc đối đỉnh",
+                    "Không có cặp nào"
+                ]);
+                explanation = `Hai góc ${givenName} và ${askName} có chung cạnh $O${labels[2]}$, hai cạnh còn lại nằm trên một đường thẳng.`;
+            }
+
+            return { typeLabel: "Góc Kề Bù", text: question, correct, options, explanation, svg: drawing };
+        };
+
+        // ================= QUAN HỆ GÓC (Cơ bản) =================
+        const generateQuanHeGoc = () => {
+            const labelData = generateLabels(4); 
+            const l = labelData.labels;
+            const isUpper = labelData.isUpper;
+            const O = labelData.center;
+            
+            const angle = randomInt(40, 140);
+            const tilt = randomInt(-15, 15);
+            const W = 300, H = 220, CX = 150, CY = 110;
+            let drawing = createSVG(W, H);
+
+            drawing += drawSmartRay(CX, CY, 180 + tilt, l[0], isUpper, 100);
+            drawing += drawSmartRay(CX, CY, tilt, l[1], isUpper, 100);
+            drawing += drawSmartRay(CX, CY, 180 + tilt + angle, l[2], isUpper, 100);
+            drawing += drawSmartRay(CX, CY, tilt + angle, l[3], isUpper, 100);
+            
+            drawing += drawPoint(CX, CY, O, {dx: 0, dy: -25});
+            drawing += "</svg>";
+
+            const getName = (r1, r2) => isUpper ? `$\\widehat{${r1}${O}${r2}}$` : `$\\widehat{${r1}${O}${r2}}$`;
+            
+            const angles = [
+                { id: 0, name: getName(l[1], l[3]), rays: [l[1], l[3]] },
+                { id: 1, name: getName(l[3], l[0]), rays: [l[3], l[0]] },
+                { id: 2, name: getName(l[0], l[2]), rays: [l[0], l[2]] },
+                { id: 3, name: getName(l[2], l[1]), rays: [l[2], l[1]] }
+            ];
+
+            const i1 = randomInt(0, 3);
+            let i2; do { i2 = randomInt(0, 3); } while (i1 === i2);
+            
+            const ang1 = angles[i1];
+            const ang2 = angles[i2];
+            const diff = Math.abs(i1 - i2);
+            const isAdj = (diff === 1 || diff === 3);
+            
+            let correct, expl;
+            if (isAdj) {
+                correct = "Hai góc kề bù";
+                const common = ang1.rays.find(r => ang2.rays.includes(r));
+                expl = `Hai góc ${ang1.name} và ${ang2.name} có cạnh chung là $${isUpper?"":"O"}${common}$, hai cạnh còn lại là hai tia đối nhau.`;
+            } else {
+                correct = "Hai góc đối đỉnh";
+                expl = `Hai góc ${ang1.name} và ${ang2.name} có đỉnh chung là ${O}, và các cạnh của góc này là tia đối của các cạnh góc kia.`;
+            }
+
+            const question = `Quan sát hình vẽ. Hai góc ${ang1.name} và ${ang2.name} là:`;
+            const staticOptions = ["Hai góc kề bù", "Hai góc đối đỉnh", "Hai góc kề nhau", "Hai góc bẹt"];
+            
+            return { typeLabel: "Quan hệ góc", text: question, correct: correct, options: shuffleArray(staticOptions), explanation: expl, svg: drawing };
+        };
+
+        // ================= GÓC ĐỐI ĐỈNH (Wrapper) =================
+        const generateDoiDinh = () => {
+            if (Math.random() < 0.7) return generateQuanHeGoc();
+            
+            // Logic tính toán góc đối đỉnh cơ bản...
+            const labelData = generateLabels(4); 
+            const labels = labelData.labels;
+            const isUpper = labelData.isUpper;
+            const O = labelData.center;
+            const angle = randomInt(40, 140);
+            const tilt = randomInt(-20, 20); 
+            const W = 300, H = 240, CX = 150, CY = 120;
+            let drawing = createSVG(W, H);
+            drawing += drawSmartRay(CX, CY, 180 + tilt, labels[0], isUpper, 90);
+            drawing += drawSmartRay(CX, CY, tilt, labels[1], isUpper, 90);
+            drawing += drawSmartRay(CX, CY, 180 + tilt + angle, labels[2], isUpper, 90);
+            drawing += drawSmartRay(CX, CY, tilt + angle, labels[3], isUpper, 90);
+            drawing += drawPoint(CX, CY, O, {dx: 0, dy: -25});
+            drawing += "</svg>";
+            const getName = (r1, r2) => isUpper ? `$\\widehat{${r1}${O}${r2}}$` : `$\\widehat{${r1}${O}${r2}}$`;
+            const angleObjs = [
+                { name: getName(labels[1], labels[3]), val: angle },
+                { name: getName(labels[3], labels[0]), val: 180 - angle },
+                { name: getName(labels[0], labels[2]), val: angle },
+                { name: getName(labels[2], labels[1]), val: 180 - angle }
+            ];
+            const knownIdx = randomInt(0, 3);
+            const knownAngle = angleObjs[knownIdx];
+            let askIdx; do { askIdx = randomInt(0, 3); } while (askIdx === knownIdx);
+            const askAngle = angleObjs[askIdx];
+            const isOpposite = (Math.abs(knownIdx - askIdx) === 2);
+            
+            const question = `Quan sát hình vẽ. Biết số đo ${knownAngle.name} = $${knownAngle.val}^\\circ$. Số đo của góc ${askAngle.name} là:`;
+            const correct = `$${askAngle.val}^\\circ$`;
+            const options = shuffleArray([correct, `$${180 - askAngle.val}^\\circ$`, `$90^\\circ$`, `$${Math.abs(askAngle.val - 10)}^\\circ$`]);
+            let explanation = isOpposite 
+                ? `Hai góc ${knownAngle.name} và ${askAngle.name} là hai góc <b>đối đỉnh</b> nên bằng nhau.` 
+                : `Hai góc ${knownAngle.name} và ${askAngle.name} là hai góc <b>kề bù</b> nên tổng bằng $180^\\circ$.`;
+
+            return { typeLabel: "Tính Góc", text: question, correct, options, explanation, svg: drawing };
+        };
+
+        // ================= PHẦN PHỨC TẠP: NHIỀU ĐƯỜNG, TIA GIẢ, HÌNH ẢNH =================
+
+        // 1. Nhiều đường thẳng cắt nhau (3 đường) - LOGIC ĐA DẠNG
+        const generateMultiLines = () => {
+            const labelData = generateLabels(6);
+            const l = labelData.labels; // 6 labels
+            const isUpper = labelData.isUpper;
+            const O = labelData.center;
+            
+            const W = 320, H = 260, CX = 160, CY = 130;
+            let drawing = createSVG(W, H);
+            
+            // Góc ngẫu nhiên
+            const baseAngle1 = randomInt(45, 75);
+            const baseAngle2 = randomInt(45, 75);
+            
+            // Vẽ 3 đường thẳng: l[0]-l[1], l[2]-l[3], l[4]-l[5]
+            drawing += drawSmartRay(CX, CY, 0, l[0], isUpper, 100);
+            drawing += drawSmartRay(CX, CY, 180, l[1], isUpper, 100); // Line 1
+            
+            drawing += drawSmartRay(CX, CY, -baseAngle1, l[2], isUpper, 100);
+            drawing += drawSmartRay(CX, CY, 180 - baseAngle1, l[3], isUpper, 100); // Line 2
+            
+            const totalAng = baseAngle1 + baseAngle2;
+            drawing += drawSmartRay(CX, CY, -totalAng, l[4], isUpper, 100);
+            drawing += drawSmartRay(CX, CY, 180 - totalAng, l[5], isUpper, 100); // Line 3
+            
+            drawing += drawPoint(CX, CY, O, {dx: 0, dy: 25});
+            drawing += "</svg>";
+            
+            const getName = (r1, r2) => isUpper ? `$\\widehat{${r1}${O}${r2}}$` : `$\\widehat{${r1}${O}${r2}}$`;
+            
+            // Map tia đối
+            const oppMap = {};
+            oppMap[l[0]] = l[1]; oppMap[l[1]] = l[0];
+            oppMap[l[2]] = l[3]; oppMap[l[3]] = l[2];
+            oppMap[l[4]] = l[5]; oppMap[l[5]] = l[4];
+
+            // Chọn ngẫu nhiên 2 tia không trùng và không đối nhau để tạo Góc Gốc
+            const rays = [l[0], l[1], l[2], l[3], l[4], l[5]];
+            const r1 = rays[randomInt(0, 5)];
+            let r2;
+            do { r2 = rays[randomInt(0, 5)]; } while (r2 === r1 || r2 === oppMap[r1]); 
+
+            const ang1 = getName(r1, r2);
+            
+            // Logic linh hoạt: hỏi đối đỉnh hoặc kề bù
+            const qType = Math.random() < 0.5 ? 'dd' : 'kb';
+            let question, correct, explanation, wrong1, wrong2, wrong3;
+
+            if (qType === 'dd') {
+                const r1_opp = oppMap[r1];
+                const r2_opp = oppMap[r2];
+                const angOpp = getName(r1_opp, r2_opp);
+                
+                question = `Cho 3 đường thẳng cắt nhau tại ${O}. Góc đối đỉnh với góc ${ang1} là:`;
+                correct = angOpp;
+                
+                // Nhiễu: Góc kề bù, Góc bẹt
+                wrong1 = getName(r1, r2_opp); // Kề bù
+                wrong2 = getName(r1_opp, r2); // Kề bù khác
+                wrong3 = getName(l[0], l[1]); // Góc bẹt
+                explanation = `Góc đối đỉnh với ${ang1} được tạo bởi tia đối của $O${r1}$ (là $O${r1_opp}$) và tia đối của $O${r2}$ (là $O${r2_opp}$).`;
+            } else {
+                const r2_opp = oppMap[r2]; // Tia đối cạnh 2
+                const angKb = getName(r1, r2_opp);
+                
+                question = `Cho 3 đường thẳng cắt nhau tại ${O}. Một góc kề bù với góc ${ang1} là:`;
+                correct = angKb;
+                
+                // Nhiễu: Đối đỉnh, Kề nhưng ko bù (random)
+                wrong1 = getName(oppMap[r1], oppMap[r2]); // Đối đỉnh
+                // Tìm tia r_x kề với r1 nhưng ko phải r2 và ko phải đối r2
+                let r_x = rays.find(r => r !== r1 && r !== r2 && r !== r2_opp && r !== oppMap[r1]);
+                wrong2 = getName(r1, r_x || l[0]); 
+                wrong3 = "Không có góc nào";
+                
+                explanation = `Góc kề bù với ${ang1} có chung cạnh $O${r1}$ và cạnh còn lại là tia đối của $O${r2}$ (là $O${r2_opp}$).`;
+            }
+            
+            const options = shuffleArray([correct, wrong1, wrong2, wrong3]);
+            return { typeLabel: "Nhiều đường thẳng", text: question, correct, options, explanation, svg: drawing };
+        };
+
+        // 2. Đường thẳng + Tia giả - LOGIC ĐA DẠNG
+        const generateFakeRays = () => {
+            const labelData = generateLabels(5); 
+            const l = labelData.labels; // 0-1 (Line1), 2-3 (Line2), 4 (Fake)
+            const isUpper = labelData.isUpper;
+            const O = labelData.center;
+            
+            const W = 320, H = 260, CX = 160, CY = 130;
+            let drawing = createSVG(W, H);
+            
+            // Randomize position
+            const baseAngle = randomInt(40, 60);
+            
+            drawing += drawSmartRay(CX, CY, 0, l[0], isUpper, 100);
+            drawing += drawSmartRay(CX, CY, 180, l[1], isUpper, 100); // Line 1
+            
+            drawing += drawSmartRay(CX, CY, -baseAngle, l[2], isUpper, 100);
+            drawing += drawSmartRay(CX, CY, 180 - baseAngle, l[3], isUpper, 100); // Line 2
+            
+            // Tia giả l[4] nằm giữa l[2] và l[0] hoặc vị trí khác
+            const fakeOffset = randomInt(15, baseAngle - 15);
+            drawing += drawSmartRay(CX, CY, -fakeOffset, l[4], isUpper, 90);
+            
+            drawing += drawPoint(CX, CY, O, {dx: 0, dy: 25});
+            drawing += "</svg>";
+            
+            const getName = (r1, r2) => isUpper ? `$\\widehat{${r1}${O}${r2}}$` : `$\\widehat{${r1}${O}${r2}}$`;
+            
+            // 4 Kịch bản câu hỏi
+            const scenario = randomInt(1, 4);
+            let question, correct, explanation;
+            const optionsList = []; // Để shuffle sau
+
+            if (scenario === 1) { // Hỏi đối đỉnh của góc CHỨA tia giả (Không có)
+                const fakeAng = getName(l[4], l[1]);
+                question = `Góc đối đỉnh với góc ${fakeAng} là góc nào?`;
+                correct = "Không có góc nào";
+                optionsList.push(getName(l[0], l[3]), getName(l[2], l[0]), getName(l[3], l[4]));
+                explanation = `Vì tia $O${l[4]}$ không phải là tia đối của bất kỳ tia nào trong hình, nên góc ${fakeAng} không có góc đối đỉnh.`;
+            } 
+            else if (scenario === 2) { // Hỏi đối đỉnh THẬT (nhưng có đáp án nhiễu là tia giả)
+                const realAng = getName(l[3], l[1]);
+                const realOpp = getName(l[2], l[0]);
+                question = `Góc đối đỉnh với góc ${realAng} là:`;
+                correct = realOpp;
+                optionsList.push(getName(l[2], l[4]), "Không có góc nào", getName(l[1], l[4]));
+                explanation = `Góc đối đỉnh được tạo bởi các tia đối của cạnh góc đã cho ($O${l[2]}$ đối $O${l[3]}$, $O${l[0]}$ đối $O${l[1]}$).`;
+            } 
+            else if (scenario === 3) { // Hỏi kề bù với góc CHỨA tia giả (Vẫn có)
+                // Góc (4, 1) kề bù với (4, 0) vì 1 đối 0
+                const target = getName(l[4], l[1]);
+                const supp = getName(l[4], l[0]);
+                question = `Góc kề bù với góc ${target} là:`;
+                correct = supp;
+                optionsList.push(getName(l[2], l[3]), "Không có góc nào", getName(l[4], l[2]));
+                explanation = `Góc kề bù có chung cạnh $O${l[4]}$ và cạnh còn lại là tia đối của $O${l[1]}$ (là $O${l[0]}$).`;
+            } 
+            else { // Hỏi kề bù THẬT (tránh tia giả)
+                const target = getName(l[2], l[1]);
+                const supp = getName(l[2], l[0]);
+                question = `Góc kề bù với góc ${target} là:`;
+                correct = supp;
+                optionsList.push(getName(l[4], l[1]), "Không có góc nào", getName(l[3], l[0]));
+                explanation = `Góc kề bù có chung cạnh $O${l[2]}$ và cạnh còn lại là tia đối của $O${l[1]}$ (là $O${l[0]}$).`;
+            }
+            
+            const options = shuffleArray([correct, ...optionsList]);
+            return { typeLabel: "Bẫy tia giả", text: question, correct, options, explanation, svg: drawing };
+        };
+
+        // 3. Nhận diện hình ảnh (Visual Question) - CẢI TIẾN HÌNH VẼ
+        const generateVisualIdentify = () => {
+            const W = 400, H = 300;
+            let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="geometry-svg">`;
+            
+            const drawSubFig = (dx, dy, label, type) => {
+                const cx = dx + 100;
+                const cy = dy + 75;
+                let s = "";
+                s += `<rect x="${dx+10}" y="${dy+10}" width="180" height="130" fill="#f9fafb" stroke="#e5e7eb" rx="5" />`;
+                s += `<text x="${dx+30}" y="${dy+30}" font-weight="bold" fill="#ea580c" font-size="14">${label}</text>`;
+                
+                if (type === 'correct_dd') { 
+                    s += drawLine(cx-40, cy-30, cx+40, cy+30, "#333");
+                    s += drawLine(cx-40, cy+30, cx+40, cy-30, "#333");
+                    s += `<path d="M ${cx-15} ${cy-12} Q ${cx-20} ${cy} ${cx-15} ${cy+12}" fill="none" stroke="blue" />`;
+                    s += `<path d="M ${cx+15} ${cy-12} Q ${cx+20} ${cy} ${cx+15} ${cy+12}" fill="none" stroke="blue" />`;
+                } 
+                else if (type === 'wrong_dd_ke') {
+                    // Kề nhưng KHÔNG bù và KHÔNG đối đỉnh (góc gãy rõ ràng)
+                    s += drawLine(cx, cy, cx-40, cy, "#333"); // Ngang trái
+                    s += drawLine(cx, cy, cx+35, cy-35, "#333"); // Xiên lên phải cao
+                    s += drawLine(cx, cy, cx, cy+40, "#333"); // Xuống dưới
+                    // Đánh dấu 2 góc kề nhau
+                    s += `<path d="M ${cx-15} ${cy} Q ${cx-15} ${cy+15} ${cx} ${cy+15}" fill="none" stroke="red" />`; 
+                    s += `<path d="M ${cx+10} ${cy-8} Q ${cx+15} ${cy+10} ${cx} ${cy+15}" fill="none" stroke="red" />`;
+                }
+                else if (type === 'wrong_dd_gay') { 
+                    s += drawLine(cx-40, cy, cx+40, cy, "#333"); // Ngang
+                    s += drawLine(cx, cy, cx-20, cy-35, "#333"); // Lên trái
+                    s += drawLine(cx, cy, cx+30, cy+25, "#333"); // Xuống phải lệch
+                    s += `<path d="M ${cx-10} ${cy-5} Q ${cx-15} ${cy} ${cx-10} ${cy+5}" fill="none" stroke="red" />`;
+                    s += `<path d="M ${cx+10} ${cy-5} Q ${cx+15} ${cy} ${cx+10} ${cy+5}" fill="none" stroke="red" />`;
+                }
+                else if (type === 'correct_kb') { 
+                    s += drawLine(cx-50, cy, cx+50, cy, "#333"); 
+                    s += drawLine(cx, cy, cx+20, cy-40, "#333");
+                    s += `<path d="M ${cx+15} ${cy} A 15 15 0 0 0 ${cx+5} ${cy-12}" fill="none" stroke="green" />`;
+                    s += `<path d="M ${cx-15} ${cy} A 15 15 0 0 1 ${cx+5} ${cy-12}" fill="none" stroke="green" />`;
+                }
+                else if (type === 'wrong_kb_roi') {
+                    // Hai góc rời nhau
+                    s += drawLine(cx-40, cy, cx-10, cy-30, "#333");
+                    s += drawLine(cx-40, cy, cx-10, cy+30, "#333");
+                    
+                    s += drawLine(cx+20, cy, cx+50, cy-30, "#333");
+                    s += drawLine(cx+20, cy, cx+50, cy+30, "#333");
+                }
+                else if (type === 'wrong_dd_lech') { 
+                    // Chung đỉnh nhưng cạnh không thẳng hàng
+                    s += drawLine(cx, cy, cx-30, cy-30, "#333");
+                    s += drawLine(cx, cy, cx+30, cy+30, "#333"); // Thẳng 1 cặp
+                    s += drawLine(cx, cy, cx-30, cy+20, "#333");
+                    s += drawLine(cx, cy, cx+35, cy-10, "#333"); // Lệch cặp 2
+                    s += `<path d="M ${cx-10} ${cy} Q ${cx-15} ${cy} ${cx-10} ${cy}" fill="none" stroke="red" />`; 
+                }
+                return s;
+            };
+
+            const qType = Math.random() < 0.5 ? 'dd' : 'kb';
+            let question, correctLabel, types, expl;
+
+            if (qType === 'dd') {
+                question = "Hình nào dưới đây biểu diễn một cặp góc <b>đối đỉnh</b>?";
+                const wrongTypes = ['wrong_dd_ke', 'wrong_dd_gay', 'wrong_kb_roi', 'wrong_dd_lech'];
+                const selectedWrongs = shuffleArray(wrongTypes).slice(0, 3);
+                
+                // --- FIX LOGIC RANDOM HÌNH ẢNH ---
+                // Tạo danh sách loại hình
+                const typeList = ['correct_dd', selectedWrongs[0], selectedWrongs[1], selectedWrongs[2]];
+                // Xáo trộn danh sách này
+                shuffleArray(typeList);
+                
+                // Xác định vị trí đúng
+                const correctIndex = typeList.indexOf('correct_dd');
+                correctLabel = `Hình ${correctIndex + 1}`;
+                
+                expl = `Hình ${correctIndex + 1} thể hiện hai đường thẳng cắt nhau, tạo thành cặp góc đối đỉnh (các cạnh là tia đối nhau). Các hình còn lại không thỏa mãn tính chất tia đối.`;
+                
+                // Vẽ
+                svg += drawSubFig(0, 0, "Hình 1", typeList[0]);
+                svg += drawSubFig(200, 0, "Hình 2", typeList[1]);
+                svg += drawSubFig(0, 150, "Hình 3", typeList[2]);
+                svg += drawSubFig(200, 150, "Hình 4", typeList[3]);
+
+            } else {
+                question = "Hình nào dưới đây biểu diễn một cặp góc <b>kề bù</b>?";
+                const typeList = ['correct_kb', 'correct_dd', 'wrong_dd_ke', 'wrong_kb_roi'];
+                shuffleArray(typeList);
+                
+                const correctIndex = typeList.indexOf('correct_kb');
+                correctLabel = `Hình ${correctIndex + 1}`;
+                expl = `Hình ${correctIndex + 1} thể hiện hai góc có chung một cạnh, hai cạnh còn lại là hai tia đối nhau (tạo thành đường thẳng), nên chúng là góc kề bù.`;
+                
+                svg += drawSubFig(0, 0, "Hình 1", typeList[0]);
+                svg += drawSubFig(200, 0, "Hình 2", typeList[1]);
+                svg += drawSubFig(0, 150, "Hình 3", typeList[2]);
+                svg += drawSubFig(200, 150, "Hình 4", typeList[3]);
+            }
+
+            svg += "</svg>";
+            const options = ["Hình 1", "Hình 2", "Hình 3", "Hình 4"];
+            return { typeLabel: "Nhận diện hình ảnh", text: question, correct: correctLabel, options, explanation: expl, svg };
+        };
+
+        const generateComplex = () => {
+            const r = Math.random();
+            if (r < 0.4) return generateVisualIdentify();
+            if (r < 0.7) return generateMultiLines();
+            return generateFakeRays();
+        };
+
+        // --- CORE LOGIC ---
+        const showLoading = () => {
+            const loader = document.getElementById('question-loader');
+            loader.classList.remove('hidden-loader');
+        };
+
+        const hideLoading = () => {
+            const loader = document.getElementById('question-loader');
+            loader.classList.add('hidden-loader');
+        };
+
+        const loadQuestion = () => {
+            showLoading();
+            const contentWrapper = document.getElementById('main-content-wrapper');
+            contentWrapper.classList.remove('content-visible');
+
+            state.isAnswered = false;
+            let qData;
+            
+            let selectedMode = state.mode;
+            if (state.mode === 'all') {
+                const r = Math.random();
+                if (r < 0.3) selectedMode = 'kebu';
+                else if (r < 0.6) selectedMode = 'doidinh';
+                else selectedMode = 'complex';
+            }
+
+            if (selectedMode === 'kebu') qData = generateKeBu();
+            else if (selectedMode === 'doidinh') qData = generateDoiDinh();
+            else qData = generateComplex();
+
+            state.currentQuestion = qData;
+
+            // Render UI
+            document.getElementById('question-type-badge').innerText = qData.typeLabel;
+            document.getElementById('question-text').innerHTML = qData.text;
+            
+            const imgContainer = document.getElementById('image-container');
+            if (qData.svg) {
+                imgContainer.innerHTML = qData.svg;
+                imgContainer.classList.remove('hidden');
+            } else {
+                imgContainer.innerHTML = '';
+                imgContainer.classList.add('hidden');
+            }
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option w-full bg-orange-50 hover:bg-orange-100 text-orange-900 border border-orange-200 p-4 rounded-xl text-lg font-semibold shadow-sm text-left flex items-center group";
+                btn.dataset.value = opt; 
+
+                const labels = ['A', 'B', 'C', 'D'];
+                btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-orange-200 text-center leading-8 mr-3 text-orange-800 font-bold shadow-sm group-hover:bg-orange-600 group-hover:text-white transition flex-shrink-0">${labels[index]}</span> <span>${opt}</span>`;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedback-msg').className = "hidden";
+            document.getElementById('explanation-area').className = "hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in";
+            document.getElementById('explanation-area').innerHTML = '';
+            
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-orange-100 transition flex items-center ml-auto shadow-sm";
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([contentWrapper]).then(() => {
+                    setTimeout(() => {
+                        hideLoading();
+                        contentWrapper.classList.add('content-visible');
+                    }, 150);
+                });
+            } else {
+                setTimeout(() => {
+                    hideLoading();
+                    contentWrapper.classList.add('content-visible');
+                }, 200);
+            }
+        };
+
+        const checkAnswer = (selectedVal, btnElement) => {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const isCorrect = selectedVal == state.currentQuestion.correct;
+            const feedbackEl = document.getElementById('feedback-msg');
+            const explArea = document.getElementById('explanation-area');
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+
+            const allBtns = document.querySelectorAll('.btn-option');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-70');
+            });
+
+            const correctBtn = Array.from(allBtns).find(b => b.dataset.value === state.currentQuestion.correct);
+            if (correctBtn) {
+                correctBtn.classList.remove('bg-orange-50', 'text-orange-900', 'border-orange-200', 'opacity-70');
+                correctBtn.classList.add('bg-green-100', 'text-green-800', 'border-green-600', 'border-2', 'opacity-100');
+                const span = correctBtn.querySelector('span');
+                if(span) {
+                    span.classList.remove('bg-orange-200', 'text-orange-800');
+                    span.classList.add('bg-green-600', 'text-white');
+                }
+            }
+
+            if (isCorrect) {
+                btnElement.classList.add('bg-green-500', 'text-white', 'pop', 'opacity-100');
+                btnElement.classList.remove('bg-green-100', 'text-green-800'); 
+                const span = btnElement.querySelector('span');
+                if(span) span.classList.add('bg-white', 'text-green-600');
+
+                feedbackEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2 animate-bounce";
+                
+                state.streak++;
+                state.correct++;
+            } else {
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600', 'shake', 'opacity-100');
+                btnElement.classList.remove('bg-orange-50');
+                const span = btnElement.querySelector('span');
+                if(span) span.classList.add('bg-white', 'text-red-600');
+                
+                feedbackEl.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2";
+
+                state.streak = 0;
+                state.wrong++;
+
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Chưa chính xác";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerHTML = `Đáp án đúng là: <br><span class="text-green-600 font-bold text-xl mt-2 block">${state.currentQuestion.correct}</span>`;
+                
+                setTimeout(() => { 
+                    overlay.classList.remove('hidden'); 
+                    if (window.MathJax) MathJax.typesetPromise([overlay]);
+                }, 600);
+            }
+
+            renderStats();
+
+            explArea.innerHTML = `<p class="font-bold text-orange-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+            detail.innerHTML = state.currentQuestion.explanation;
+
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = `Câu tiếp theo <i class="fas fa-arrow-right ml-2"></i>`;
+            btnNext.className = "bg-orange-600 text-white px-6 py-2 rounded-full font-bold hover:bg-orange-700 transition flex items-center ml-auto shadow-lg transform scale-105";
+
+            if (window.MathJax) MathJax.typesetPromise([explArea]);
+        };
+
+        const handleNextClick = (forceSkip = false) => {
+            if (!state.isAnswered && !forceSkip) {
+                state.streak = 0;
+                state.skipped++;
+                renderStats();
+            }
+            loadQuestion();
+        };
+
+        const renderStats = () => {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span class="text-3xl font-extrabold ${state.streak > 2 ? 'text-orange-500 animate-pulse' : 'text-gray-800'}">
+                        ${state.streak}
+                    </span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span class="text-xl font-bold text-green-600">${state.correct}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span class="text-xl font-bold text-red-500">${state.wrong}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span class="text-xl font-bold text-gray-400">${state.skipped}</span>
+                </div>
+            `;
+        };
+
+        const setMode = (mode) => {
+            state.mode = mode;
+            ['all', 'kebu', 'doidinh', 'complex'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m === mode) {
+                    btn.className = "mode-active py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform transform scale-105";
+                } else {
+                    btn.className = "mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform";
+                }
+            });
+            handleNextClick(true);
+        };
+
+        const closeModal = () => {
+            document.getElementById('feedback-overlay').classList.add('hidden');
+        };
+
+        window.onload = () => {
+            renderStats();
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>

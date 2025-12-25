@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập chinh phục Toán 7 HK1 - Câu Bổ Sung</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            startup: {
+                typeset: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdfa; /* Teal-50 */
+        }
+
+        .btn-option {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-option:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mode-active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+            border-color: #0d9488;
+        }
+
+        .mode-inactive {
+            background-color: white;
+            color: #374151;
+            border-color: #ccfbf1; /* teal-100 */
+        }
+        .mode-inactive:hover {
+            background-color: #ccfbf1;
+        }
+
+        /* Loading Overlay */
+        #question-loader {
+            position: absolute;
+            inset: 0;
+            background-color: white;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s ease-out;
+        }
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0d9488; /* Teal-600 */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden-loader {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #main-content-wrapper {
+            opacity: 0;
+        }
+        #main-content-wrapper.content-visible {
+            opacity: 1;
+            transition: opacity 0.3s ease-in;
+        }
+
+        /* SVG Styles */
+        .geometry-svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+            border: 1px dashed #5eead4; /* Teal-300 */
+            border-radius: 8px;
+            background-color: #fff;
+            overflow: visible; 
+        }
+        .geo-line { stroke: #333; stroke-width: 2; stroke-linecap: round; }
+        .geo-text { font-size: 14px; font-weight: bold; fill: #1f2937; font-family: 'Nunito', sans-serif; }
+        .geo-point { fill: #0d9488; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-3xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-teal-800 mb-2 uppercase drop-shadow-sm">
+            <i class="fas fa-project-diagram mr-2"></i>Ôn tập chinh phục Toán 7 HK1 - Bổ Sung
+        </h1>
+        <p class="text-teal-600 font-medium">Chủ đề: Đường thẳng song song & Định lý</p>
+    </header>
+
+    <!-- Mode Selection -->
+    <div class="w-full max-w-3xl grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+        <button onclick="setMode('all')" id="btn-mode-all" class="mode-active py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform transform scale-105">
+            <i class="fas fa-random mb-1"></i> Tổng Hợp
+        </button>
+        <button onclick="setMode('identify')" id="btn-mode-identify" class="mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-eye mb-1"></i> Nhận Biết Góc
+        </button>
+        <button onclick="setMode('parallel')" id="btn-mode-parallel" class="mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-equals mb-1"></i> Dấu Hiệu Song Song
+        </button>
+        <button onclick="setMode('theorems')" id="btn-mode-theorems" class="mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform">
+            <i class="fas fa-book mb-1"></i> Định Lý & QH
+        </button>
+    </div>
+
+    <!-- Stats Board -->
+    <div class="w-full max-w-3xl bg-white rounded-xl shadow-md p-4 mb-6 grid grid-cols-4 gap-2 text-center select-none" id="stats-container">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- Question Card -->
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg border-b-4 border-teal-600 p-6 relative overflow-hidden" style="min-height: 400px;">
+        
+        <!-- Loading Overlay -->
+        <div id="question-loader">
+            <div class="loader-spinner mb-3"></div>
+            <span class="text-teal-600 font-bold text-sm">Đang thiết lập hình học...</span>
+        </div>
+
+        <!-- Question Badge -->
+        <div class="absolute top-0 left-0 bg-teal-100 text-teal-800 px-3 py-1 rounded-br-lg text-xs font-bold uppercase z-10" id="question-type-badge">
+            Dạng câu hỏi
+        </div>
+
+        <!-- CONTENT WRAPPER -->
+        <div id="main-content-wrapper" class="flex flex-col h-full justify-between pt-6">
+            
+            <!-- Question Content -->
+            <div class="mb-6 fade-in">
+                <!-- Image Container -->
+                <div id="image-container" class="mb-4 flex justify-center hidden" style="min-height: 180px;">
+                    <!-- SVG will be injected here -->
+                </div>
+
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-left leading-relaxed" id="question-text">
+                    <!-- Question goes here -->
+                </h2>
+            </div>
+
+            <!-- Options Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="options-container">
+                <!-- Buttons will be injected here -->
+            </div>
+
+            <!-- Explanation Area -->
+            <div id="explanation-area" class="hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in">
+                 <!-- JS will inject content -->
+            </div>
+
+            <!-- Feedback & Next -->
+            <div class="mt-auto h-12 flex items-center justify-between">
+                <div id="feedback-msg" class="text-lg font-bold hidden pl-2"></div>
+                <button onclick="handleNextClick()" id="btn-next" class="bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-teal-100 transition flex items-center ml-auto shadow-sm">
+                    Bỏ qua <i class="fas fa-forward ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-auto py-6 text-center text-gray-400 text-xs">
+        © Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io
+    </footer>
+
+    <!-- Feedback Modal (Overlay) -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-teal-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-teal-500 font-bold uppercase mb-1">Giải thích chi tiết:</p>
+                <div id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></div>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-teal-600 text-white font-bold rounded-xl shadow-lg hover:bg-teal-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const state = {
+            mode: 'all', // all, identify, parallel, theorems
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        // --- UTILS ---
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const toRad = deg => deg * Math.PI / 180;
+        const toDeg = rad => rad * 180 / Math.PI;
+
+        // --- DRAWING HELPERS ---
+        const createSVG = (width, height) => {
+            return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" class="geometry-svg">`;
+        };
+
+        const drawLine = (x1, y1, x2, y2, color="#333", width=2) => {
+            return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${width}" stroke-linecap="round"/>`;
+        };
+
+        const drawText = (x, y, text, color="#1f2937", size=16) => {
+            return `<text x="${x}" y="${y}" fill="${color}" font-family="Nunito" font-weight="bold" font-size="${size}" text-anchor="middle" dominant-baseline="middle">${text}</text>`;
+        };
+
+        // Vẽ ký hiệu góc
+        const drawAngleArc = (cx, cy, startAngle, endAngle, radius=20, color="blue", fill="none", width=1.5) => {
+            // Chuẩn hóa góc đầu vào
+            let s = startAngle;
+            let e = endAngle;
+            
+            // Tính độ lớn cung tròn
+            let diff = (e - s) % 360;
+            if (diff < 0) diff += 360;
+            
+            // Xác định cờ largeArc (0 nếu góc < 180, 1 nếu > 180)
+            const largeArc = diff > 180 ? 1 : 0;
+            const sweep = 1; // Vẽ theo chiều kim đồng hồ
+
+            const startRad = toRad(s);
+            const endRad = toRad(e);
+
+            const x1 = cx + radius * Math.cos(startRad);
+            const y1 = cy + radius * Math.sin(startRad);
+            const x2 = cx + radius * Math.cos(endRad);
+            const y2 = cy + radius * Math.sin(endRad);
+
+            return `<path d="M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} ${sweep} ${x2} ${y2}" fill="${fill}" stroke="${color}" stroke-width="${width}" />`;
+        };
+
+        // Vẽ ký hiệu vuông góc
+        const drawPerpendicular = (cx, cy, angleDeg, size=15) => {
+            const rad = toRad(angleDeg); // Góc của đường thẳng chính
+            const c = Math.cos(rad);
+            const s = Math.sin(rad);
+            
+            // Vector đơn vị u=(c,s), v=(-s,c) (vuông góc)
+            const p1x = cx + size * c;
+            const p1y = cy + size * s;
+            const p2x = cx - size * s;
+            const p2y = cy + size * c;
+            const p3x = p1x - size * s; // p1 + v*size
+            const p3y = p1y + size * c;
+            
+            return `<polyline points="${p1x},${p1y} ${p3x},${p3y} ${p2x},${p2y}" fill="none" stroke="#ef4444" stroke-width="1.5"/>`;
+        };
+
+        // --- GENERATORS ---
+
+        // 1. NHẬN BIẾT CẶP GÓC - ĐÃ SỬA LỖI
+        const generateIdentify = () => {
+            const W = 320, H = 260; 
+            let svg = createSVG(W, H);
+
+            // Tọa độ giao điểm
+            const Ax = 100, Ay = 60;
+            const Bx = 220, By = 180; 
+            
+            // Tính góc thực tế của đường c (A -> B)
+            const angleCRad = Math.atan2(By - Ay, Bx - Ax); // ~45 độ
+            const angleCDeg = toDeg(angleCRad); 
+            
+            // Vẽ đường cát tuyến c dài ra 2 đầu
+            const ext = 50;
+            const Cx1 = Ax - ext * Math.cos(angleCRad);
+            const Cy1 = Ay - ext * Math.sin(angleCRad);
+            const Cx2 = Bx + ext * Math.cos(angleCRad);
+            const Cy2 = By + ext * Math.sin(angleCRad);
+            
+            svg += drawLine(Cx1, Cy1, Cx2, Cy2, "#333"); // Đường c
+            svg += drawText(Ax - 30, Ay - 40, "c");
+
+            // Đường a và b - CỐ ĐỊNH SONG SONG ĐỂ TRÁNH LỖI HIỂN THỊ
+            const angleA = 0; 
+            const angleB = 0; 
+
+            // Hàm vẽ đường thẳng qua điểm
+            const drawLineAt = (cx, cy, angle, label) => {
+                const len = 120;
+                const r = toRad(angle);
+                const x1 = cx - len * Math.cos(r);
+                const y1 = cy - len * Math.sin(r);
+                const x2 = cx + len * Math.cos(r);
+                const y2 = cy + len * Math.sin(r);
+                return drawLine(x1, y1, x2, y2, "#333") + drawText(x1 - 15, y1 - 5, label);
+            };
+
+            svg += drawLineAt(Ax, Ay, angleA, "a");
+            svg += drawLineAt(Bx, By, angleB, "b");
+
+            // --- ĐỊNH NGHĨA GÓC CHUẨN ---
+            const posA = [
+                { id: 'A3', type: 'bot_right', s: angleA, e: angleCDeg },       // 0 -> 45
+                { id: 'A4', type: 'bot_left', s: angleCDeg, e: angleA + 180 },  // 45 -> 180
+                { id: 'A1', type: 'top_left', s: angleA + 180, e: angleCDeg + 180 }, // 180 -> 225
+                { id: 'A2', type: 'top_right', s: angleCDeg + 180, e: angleA + 360 } // 225 -> 360
+            ];
+
+            const posB = [
+                { id: 'B3', type: 'bot_right', s: angleB, e: angleCDeg },
+                { id: 'B4', type: 'bot_left', s: angleCDeg, e: angleB + 180 },
+                { id: 'B1', type: 'top_left', s: angleB + 180, e: angleCDeg + 180 },
+                { id: 'B2', type: 'top_right', s: angleCDeg + 180, e: angleB + 360 }
+            ];
+
+            // Chọn loại câu hỏi: Chỉ SLT, DV hoặc Đối Đỉnh (Bỏ Trong cùng phía)
+            const qTypes = ['slt', 'dv', 'dd'];
+            const qType = qTypes[randomInt(0, 2)];
+            
+            let p1, p2, correct, expl;
+
+            if (qType === 'slt') {
+                // SLT: (A3, B1) hoặc (A4, B2)
+                if (Math.random() < 0.5) {
+                    p1 = { ...posA[0], cx: Ax, cy: Ay }; // A3
+                    p2 = { ...posB[2], cx: Bx, cy: By }; // B1
+                } else {
+                    p1 = { ...posA[1], cx: Ax, cy: Ay }; // A4
+                    p2 = { ...posB[3], cx: Bx, cy: By }; // B2
+                }
+                correct = "So le trong";
+                expl = `Hai góc được đánh dấu nằm ở phía trong hai đường thẳng $a, b$ và nằm so le nhau qua cát tuyến $c$.`;
+            } else if (qType === 'dv') {
+                // Đồng vị: (A1, B1), (A2, B2), (A3, B3), (A4, B4)
+                const idx = randomInt(0, 3);
+                p1 = { ...posA[idx], cx: Ax, cy: Ay };
+                p2 = { ...posB[idx], cx: Bx, cy: By };
+                correct = "Đồng vị";
+                expl = `Hai góc được đánh dấu nằm ở vị trí giống nhau (cùng phía so với cát tuyến, cùng nằm trên/dưới hai đường thẳng).`;
+            } else {
+                // Đối đỉnh tại A: (A1, A3) hoặc (A2, A4)
+                if (Math.random() < 0.5) {
+                    p1 = { ...posA[2], cx: Ax, cy: Ay }; // A1
+                    p2 = { ...posA[0], cx: Ax, cy: Ay }; // A3
+                } else {
+                    p1 = { ...posA[3], cx: Ax, cy: Ay }; // A2
+                    p2 = { ...posA[1], cx: Ax, cy: Ay }; // A4
+                }
+                correct = "Đối đỉnh";
+                expl = `Hai góc này có chung đỉnh và cạnh góc này là tia đối của cạnh góc kia.`;
+            }
+
+            // Vẽ góc - Radius nhỏ hơn để gọn gàng
+            svg += drawAngleArc(p1.cx, p1.cy, p1.s, p1.e, 20, "red", "rgba(255,0,0,0.2)");
+            svg += drawAngleArc(p2.cx, p2.cy, p2.s, p2.e, 20, "red", "rgba(255,0,0,0.2)");
+
+            svg += "</svg>";
+            
+            // Loại bỏ 'Trong cùng phía' khỏi danh sách đáp án
+            const allOptions = ["So le trong", "Đồng vị", "Đối đỉnh", "Kề bù"];
+            
+            return {
+                typeLabel: "Nhận biết góc",
+                text: "Quan sát hình vẽ. Cặp góc được tô màu đỏ là cặp góc:",
+                correct: correct,
+                options: shuffleArray(allOptions),
+                explanation: expl,
+                svg: svg
+            };
+        };
+
+        // 2. DẤU HIỆU & TÍNH CHẤT SONG SONG (CẬP NHẬT: THÊM DẠNG PHỨC TẠP)
+        const generateParallel = () => {
+            const W = 360, H = 240; // Mở rộng chiều ngang
+            let svg = createSVG(W, H);
+            
+            // Chọn dạng: 
+            // 1: Cơ bản (1 cặp đường + cát tuyến)
+            // 2: Phức tạp 1 (Lưới 2 ngang + 2 chéo, hỏi cặp song song)
+            // 3: Phức tạp 2 (Bắc cầu: a//b, b//c => a//c)
+            
+            const subType = randomInt(1, 3); // 1, 2, 3
+
+            let q, corr, expl, opts;
+
+            if (subType === 1) {
+                // --- DẠNG CƠ BẢN ---
+                const Ay = 60, By = 160;
+                const angleC = 60; 
+                // Vẽ a, b ngang
+                svg += drawLine(40, Ay, 280, Ay, "#333") + drawText(290, Ay, "a");
+                svg += drawLine(40, By, 280, By, "#333") + drawText(290, By, "b");
+                
+                // Cát tuyến c
+                const rad = toRad(angleC);
+                const tanA = Math.tan(rad);
+                const cxCenter = 160, cyCenter = 110;
+                const interAx = cxCenter + (Ay - cyCenter) / tanA;
+                const interBx = cxCenter + (By - cyCenter) / tanA;
+                
+                const len = 220;
+                const cx1 = cxCenter - len/2 * Math.cos(rad); const cy1 = cyCenter - len/2 * Math.sin(rad);
+                const cx2 = cxCenter + len/2 * Math.cos(rad); const cy2 = cyCenter + len/2 * Math.sin(rad);
+                svg += drawLine(cx1, cy1, cx2, cy2, "#333") + drawText(cx1, cy1 - 10, "c");
+
+                // Logic cũ: Sign hoặc Prop
+                if (Math.random() < 0.5) {
+                    // Dấu hiệu: SLT bằng nhau
+                    svg += drawAngleArc(interAx, Ay, 0, 60, 20, "blue", "none");
+                    svg += drawText(interAx + 35, Ay + 15, "60°", "blue", 12);
+                    svg += drawAngleArc(interBx, By, 180, 240, 20, "blue", "none");
+                    svg += drawText(interBx - 35, By - 15, "60°", "blue", 12);
+                    
+                    q = "Quan sát hình vẽ. Khẳng định nào sau đây đúng?";
+                    corr = "Đường thẳng a song song với b ($a // b$)";
+                    opts = [corr, "Đường thẳng a cắt đường thẳng b", "$a \\perp b$", "Không đủ dữ kiện"];
+                    expl = "Có cặp góc **so le trong** bằng nhau ($60^\\circ$) nên $a // b$.";
+                } else {
+                    // Tính chất: Hỏi góc
+                    svg += drawAngleArc(interAx, Ay, 0, 60, 20, "blue", "none") + drawText(interAx + 40, Ay + 15, "?", "red", 14);
+                    svg += drawAngleArc(interBx, By, 0, 60, 20, "blue", "none") + drawText(interBx + 35, By + 15, "60°", "blue", 12);
+                    q = "Cho biết $a // b$. Số đo góc hỏi chấm là?";
+                    corr = "$60^\\circ$";
+                    opts = ["$60^\\circ$", "$120^\\circ$", "$30^\\circ$", "$180^\\circ$"];
+                    expl = "Vì $a // b$, cặp góc **đồng vị** bằng nhau nên góc cần tìm là $60^\\circ$.";
+                }
+
+            } else if (subType === 2) {
+                // --- DẠNG PHỨC TẠP 1: LƯỚI ĐƯỜNG THẲNG ---
+                // a // b ngang. c, d chéo (không song song với nhau).
+                // Đánh dấu góc tại a, b (do c cắt).
+                // Hỏi cặp nào song song.
+                
+                const yA = 50, yB = 150;
+                // a, b song song
+                svg += drawLine(30, yA, 330, yA, "#333") + drawText(340, yA, "a");
+                svg += drawLine(30, yB, 330, yB, "#333") + drawText(340, yB, "b");
+                
+                // c cắt chéo (x=100 -> x=160)
+                svg += drawLine(100, 20, 160, 220, "#333") + drawText(100, 30, "c");
+                // d cắt chéo khác (x=280 -> x=200) -> d ko song song c
+                svg += drawLine(280, 20, 200, 220, "#333") + drawText(280, 30, "d");
+                
+                // Tính giao điểm a-c, b-c để vẽ góc
+                // c qua (100,20) và (160,220). dx=60, dy=200. m = 200/60 = 10/3.
+                // y - 20 = 10/3 (x - 100) => x = 100 + (y-20)*0.3
+                const xAc = 100 + (yA-20)*0.3; // Tại yA=50 -> x = 109
+                const xBc = 100 + (yB-20)*0.3; // Tại yB=150 -> x = 139
+                
+                // Góc của c: atan2(200, 60) ~ 73 độ.
+                // Vẽ cặp đồng vị tại giao điểm với a và b
+                // Góc dưới phải (0 đến 73)
+                svg += drawAngleArc(xAc, yA, 0, 73, 20, "red", "none");
+                // svg += drawText(xAc + 25, yA + 20, "x", "red", 12);
+                
+                svg += drawAngleArc(xBc, yB, 0, 73, 20, "red", "none");
+                // svg += drawText(xBc + 25, yB + 20, "x", "red", 12);
+                
+                q = "Quan sát các ký hiệu góc bằng nhau (màu đỏ) trên hình vẽ. Cặp đường thẳng nào song song với nhau?";
+                corr = "$a // b$";
+                opts = ["$a // b$", "$c // d$", "$a // c$", "$b // d$"];
+                expl = "Cặp góc được đánh dấu ở vị trí **đồng vị** bằng nhau, được tạo bởi đường thẳng $c$ cắt hai đường thẳng $a$ và $b$. Do đó $a // b$. Hai đường thẳng $c$ và $d$ cắt nhau rõ ràng nên không song song.";
+
+            } else {
+                // --- DẠNG PHỨC TẠP 2: SUY DIỄN BẮC CẦU ---
+                // a // b (do góc), b // c (do góc) => a // c
+                
+                const yA = 40, yB = 120, yC = 200;
+                // a, b, c song song
+                svg += drawLine(50, yA, 300, yA, "#333") + drawText(310, yA, "a");
+                svg += drawLine(50, yB, 300, yB, "#333") + drawText(310, yB, "b");
+                svg += drawLine(50, yC, 300, yC, "#333") + drawText(310, yC, "c");
+                
+                // Cát tuyến d (x=100 -> x=180)
+                svg += drawLine(120, 20, 200, 220, "#333") + drawText(120, 30, "d");
+                
+                // Tính giao điểm: dx=80, dy=200. m=2.5. x = 120 + (y-20)/2.5
+                const xAd = 120 + (yA-20)/2.5; 
+                const xBd = 120 + (yB-20)/2.5;
+                const xCd = 120 + (yC-20)/2.5;
+                
+                // Góc ~68 độ.
+                const ang = 68;
+                
+                // Đánh dấu a // b (SLT: A-Dưới-Phải, B-Trên-Trái) - Màu Xanh
+                svg += drawAngleArc(xAd, yA, 0, ang, 22, "blue", "none"); // A
+                svg += drawAngleArc(xBd, yB, 180, 180+ang, 22, "blue", "none"); // B1
+                
+                // Đánh dấu b // c (Đồng vị: B-Dưới-Phải, C-Dưới-Phải) - Màu Đỏ
+                // Hoặc B-Trên-Trái (đã vẽ) = C-Trên-Trái
+                svg += drawAngleArc(xCd, yC, 180, 180+ang, 25, "red", "none"); // C1
+                // Vẽ thêm vòng cung đỏ đè lên B1 để thể hiện B1 cũng bằng C1
+                svg += drawAngleArc(xBd, yB, 180, 180+ang, 25, "red", "none"); 
+
+                q = "Biết các cặp góc màu xanh bằng nhau và các cặp góc màu đỏ bằng nhau. Kết luận nào sau đây là đúng nhất?";
+                corr = "$a // b // c$"; // Cả 3 song song
+                opts = ["$a // b // c$", "$a \\perp c$", "$a$ cắt $c$", "Chỉ có $a // b$"];
+                
+                expl = "Từ cặp góc màu xanh (so le trong) $\\Rightarrow a // b$. <br>Từ cặp góc màu đỏ (đồng vị) $\\Rightarrow b // c$. <br>Theo tính chất bắc cầu: $a // b$ và $b // c \\Rightarrow a // c$. Vậy cả ba đường thẳng song song với nhau.";
+            }
+
+            return {
+                typeLabel: "Dấu hiệu Song song",
+                text: q,
+                correct: corr,
+                options: shuffleArray(opts),
+                explanation: expl,
+                svg: svg
+            };
+        };
+
+        // 3. ĐỊNH LÝ (TEXT HOẶC HÌNH ĐƠN GIẢN)
+        const generateTheorem = () => {
+            const type = randomInt(1, 3);
+            let q, corr, expl, drawing = "";
+
+            if (type === 1) {
+                // 3 đường song song
+                q = "Cho ba đường thẳng phân biệt a, b, c. Biết $a // b$ và $b // c$. Khẳng định nào đúng?";
+                corr = "$a // c$";
+                expl = "Hai đường thẳng phân biệt cùng song song với đường thẳng thứ ba thì chúng song song với nhau.";
+                
+                const W = 300, H = 150;
+                drawing = createSVG(W, H);
+                drawing += drawLine(50, 40, 250, 40, "blue") + drawText(260, 40, "a");
+                drawing += drawLine(50, 80, 250, 80, "blue") + drawText(260, 80, "b");
+                drawing += drawLine(50, 120, 250, 120, "blue") + drawText(260, 120, "c");
+                drawing += "</svg>";
+            } else if (type === 2) {
+                // Vuông góc -> Song song
+                q = "Cho $a \\perp c$ và $b \\perp c$. Khẳng định nào sau đây đúng về quan hệ giữa a và b?";
+                corr = "$a // b$";
+                expl = "Hai đường thẳng phân biệt cùng vuông góc với một đường thẳng thứ ba thì chúng song song với nhau.";
+                
+                const W = 300, H = 200;
+                drawing = createSVG(W, H);
+                drawing += drawLine(100, 20, 100, 180, "black") + drawText(100, 10, "c"); 
+                drawing += drawLine(40, 60, 260, 60, "blue") + drawText(270, 60, "a");
+                drawing += drawLine(40, 140, 260, 140, "blue") + drawText(270, 140, "b");
+                drawing += drawPerpendicular(100, 60, 0);
+                drawing += drawPerpendicular(100, 140, 0);
+                drawing += "</svg>";
+            } else {
+                // 1 vuông, 1 song -> vuông
+                q = "Cho $a // b$. Nếu đường thẳng $c \\perp a$ thì:";
+                corr = "$c \\perp b$";
+                expl = "Một đường thẳng vuông góc với một trong hai đường thẳng song song thì nó cũng vuông góc với đường thẳng kia.";
+                
+                const W = 300, H = 200;
+                drawing = createSVG(W, H);
+                drawing += drawLine(40, 60, 260, 60, "blue") + drawText(270, 60, "a");
+                drawing += drawLine(40, 140, 260, 140, "blue") + drawText(270, 140, "b");
+                drawing += drawLine(150, 20, 150, 180, "black") + drawText(150, 10, "c");
+                drawing += drawPerpendicular(150, 60, 0); 
+                drawing += drawText(180, 130, "?", "red"); 
+                drawing += "</svg>";
+            }
+
+            const options = shuffleArray([
+                corr, 
+                "$a \\perp b$", 
+                "$a$ cắt $b$", 
+                "Không kết luận được",
+                type === 1 ? "$a \\perp c$" : "$a // c$"
+            ]).slice(0, 4);
+
+            return {
+                typeLabel: "Định lý",
+                text: q,
+                correct: corr,
+                options: options,
+                explanation: expl,
+                svg: drawing
+            };
+        };
+
+        // --- MAIN LOAD LOGIC ---
+        const showLoading = () => {
+            const loader = document.getElementById('question-loader');
+            loader.classList.remove('hidden-loader');
+        };
+
+        const hideLoading = () => {
+            const loader = document.getElementById('question-loader');
+            loader.classList.add('hidden-loader');
+        };
+
+        const loadQuestion = () => {
+            showLoading();
+            const contentWrapper = document.getElementById('main-content-wrapper');
+            contentWrapper.classList.remove('content-visible');
+
+            state.isAnswered = false;
+            let qData;
+            
+            let selectedMode = state.mode;
+            if (state.mode === 'all') {
+                const r = Math.random();
+                if (r < 0.4) selectedMode = 'identify'; // 40%
+                else if (r < 0.75) selectedMode = 'parallel'; // 35%
+                else selectedMode = 'theorems'; // 25%
+            }
+
+            if (selectedMode === 'identify') qData = generateIdentify();
+            else if (selectedMode === 'parallel') qData = generateParallel();
+            else qData = generateTheorem();
+
+            state.currentQuestion = qData;
+
+            document.getElementById('question-type-badge').innerText = qData.typeLabel;
+            document.getElementById('question-text').innerHTML = qData.text;
+            
+            const imgContainer = document.getElementById('image-container');
+            if (qData.svg) {
+                imgContainer.innerHTML = qData.svg;
+                imgContainer.classList.remove('hidden');
+            } else {
+                imgContainer.classList.add('hidden');
+            }
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option w-full bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 p-4 rounded-xl text-lg font-semibold shadow-sm text-left flex items-center group";
+                btn.dataset.value = opt; 
+
+                const labels = ['A', 'B', 'C', 'D'];
+                btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-teal-200 text-center leading-8 mr-3 text-teal-800 font-bold shadow-sm group-hover:bg-teal-600 group-hover:text-white transition flex-shrink-0">${labels[index]}</span> <span>${opt}</span>`;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedback-msg').className = "hidden";
+            document.getElementById('explanation-area').className = "hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in";
+            document.getElementById('explanation-area').innerHTML = '';
+            
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-teal-100 transition flex items-center ml-auto shadow-sm";
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([contentWrapper]).then(() => {
+                    setTimeout(() => {
+                        hideLoading();
+                        contentWrapper.classList.add('content-visible');
+                    }, 150);
+                });
+            } else {
+                setTimeout(() => {
+                    hideLoading();
+                    contentWrapper.classList.add('content-visible');
+                }, 200);
+            }
+        };
+
+        const checkAnswer = (selectedVal, btnElement) => {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const isCorrect = selectedVal == state.currentQuestion.correct;
+            const feedbackEl = document.getElementById('feedback-msg');
+            const explArea = document.getElementById('explanation-area');
+
+            const allBtns = document.querySelectorAll('.btn-option');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-70');
+            });
+
+            const correctBtn = Array.from(allBtns).find(b => b.dataset.value === state.currentQuestion.correct);
+            if (correctBtn) {
+                correctBtn.classList.remove('bg-teal-50', 'text-teal-900', 'border-teal-200', 'opacity-70');
+                correctBtn.classList.add('bg-green-100', 'text-green-800', 'border-green-600', 'border-2', 'opacity-100');
+                const span = correctBtn.querySelector('span');
+                if(span) {
+                    span.classList.remove('bg-teal-200', 'text-teal-800');
+                    span.classList.add('bg-green-600', 'text-white');
+                }
+            }
+
+            if (isCorrect) {
+                btnElement.classList.add('bg-green-500', 'text-white', 'pop', 'opacity-100');
+                btnElement.classList.remove('bg-green-100', 'text-green-800'); 
+                const span = btnElement.querySelector('span');
+                if(span) span.classList.add('bg-white', 'text-green-600');
+
+                feedbackEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2 animate-bounce";
+                
+                state.streak++;
+                state.correct++;
+            } else {
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600', 'shake', 'opacity-100');
+                btnElement.classList.remove('bg-teal-50');
+                const span = btnElement.querySelector('span');
+                if(span) span.classList.add('bg-white', 'text-red-600');
+                
+                feedbackEl.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2";
+
+                state.streak = 0;
+                state.wrong++;
+
+                showFeedbackModal(false);
+            }
+
+            renderStats();
+
+            explArea.innerHTML = `<p class="font-bold text-teal-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = `Câu tiếp theo <i class="fas fa-arrow-right ml-2"></i>`;
+            btnNext.className = "bg-teal-600 text-white px-6 py-2 rounded-full font-bold hover:bg-teal-700 transition flex items-center ml-auto shadow-lg transform scale-105";
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([explArea]);
+            }
+        };
+
+        const showFeedbackModal = (isSuccess) => {
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+
+            if (!isSuccess) {
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Chưa chính xác";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerHTML = `Đáp án đúng là: <br><span class="text-green-600 font-bold text-xl mt-2 block">${state.currentQuestion.correct}</span>`;
+            }
+            
+            detail.innerHTML = state.currentQuestion.explanation;
+
+            setTimeout(() => { 
+                overlay.classList.remove('hidden'); 
+                if (window.MathJax) MathJax.typesetPromise([overlay]);
+            }, 600);
+        };
+
+        const handleNextClick = (forceSkip = false) => {
+            if (!state.isAnswered && !forceSkip) {
+                state.streak = 0;
+                state.skipped++;
+                renderStats();
+            }
+            loadQuestion();
+        };
+
+        const renderStats = () => {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span class="text-3xl font-extrabold ${state.streak > 2 ? 'text-teal-500 animate-pulse' : 'text-gray-800'}">
+                        ${state.streak}
+                    </span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span class="text-xl font-bold text-green-600">${state.correct}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span class="text-xl font-bold text-red-500">${state.wrong}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span class="text-xl font-bold text-gray-400">${state.skipped}</span>
+                </div>
+            `;
+        };
+
+        const setMode = (mode) => {
+            state.mode = mode;
+            ['all', 'identify', 'parallel', 'theorems'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m === mode) {
+                    btn.className = "mode-active py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform transform scale-105";
+                } else {
+                    btn.className = "mode-inactive py-2 px-1 rounded-lg font-bold border-2 shadow-sm text-xs md:text-sm flex flex-col items-center justify-center transition-transform";
+                }
+            });
+            handleNextClick(true);
+        };
+
+        const closeModal = () => {
+            document.getElementById('feedback-overlay').classList.add('hidden');
+        };
+
+        window.onload = () => {
+            renderStats();
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>

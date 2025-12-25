@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Chinh Phục Toán 7 HK1 - Câu 2 & 3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            startup: {
+                typeset: false // Tắt tự động render ban đầu để kiểm soát bằng code
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* Green-50 */
+        }
+
+        .btn-option {
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-option:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mode-active {
+            background-color: #16a34a; /* green-600 */
+            color: white;
+            border-color: #16a34a;
+        }
+
+        .mode-inactive {
+            background-color: white;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+        .mode-inactive:hover {
+            background-color: #dcfce7; /* green-100 */
+        }
+
+        /* Loading Overlay Style */
+        #question-loader {
+            position: absolute;
+            inset: 0;
+            background-color: white;
+            z-index: 50; /* Tăng Z-index cao nhất */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s ease-out;
+        }
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #16a34a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden-loader {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Content Visibility Control - SỬA LỖI FLASHING */
+        #main-content-wrapper {
+            opacity: 0;
+            /* QUAN TRỌNG: Không set transition ở đây để khi ẩn nó ẩn NGAY LẬP TỨC */
+        }
+        #main-content-wrapper.content-visible {
+            opacity: 1;
+            transition: opacity 0.3s ease-in; /* Chỉ có hiệu ứng khi HIỆN lên */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+	<header class="w-full max-w-3xl text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-green-800 mb-2 uppercase drop-shadow-sm">
+            <i class="fas fa-infinity mr-2"></i>Ôn tập Chinh Phục Toán 7 HK1 - Câu 2,3
+        </h1>
+        <p class="text-green-600 font-medium">Chủ đề: Số thập phân & Số thực</p>
+    </header>
+
+    <!-- Mode Selection -->
+    <div class="w-full max-w-3xl grid grid-cols-3 gap-2 mb-6">
+        <button onclick="setMode('all')" id="btn-mode-all" class="mode-active py-3 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base flex flex-col md:flex-row items-center justify-center">
+            <i class="fas fa-random md:mr-2 mb-1 md:mb-0"></i> Tổng Hợp
+        </button>
+        <button onclick="setMode('q2')" id="btn-mode-q2" class="mode-inactive py-3 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base flex flex-col md:flex-row items-center justify-center">
+            <i class="fas fa-percent md:mr-2 mb-1 md:mb-0"></i> Câu 2: Số thập phân
+        </button>
+        <button onclick="setMode('q3')" id="btn-mode-q3" class="mode-inactive py-3 px-2 rounded-lg font-bold border-2 shadow-sm text-sm md:text-base flex flex-col md:flex-row items-center justify-center">
+            <i class="fas fa-square-root-alt md:mr-2 mb-1 md:mb-0"></i> Câu 3: Số thực
+        </button>
+    </div>
+
+    <!-- Stats Board -->
+    <div class="w-full max-w-3xl bg-white rounded-xl shadow-md p-4 mb-6 grid grid-cols-4 gap-2 text-center select-none" id="stats-container">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- Question Card -->
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg border-b-4 border-green-600 p-6 relative overflow-hidden" style="min-height: 400px;">
+        
+        <!-- Loading Overlay (Che phủ toàn bộ card) -->
+        <div id="question-loader">
+            <div class="loader-spinner mb-3"></div>
+            <span class="text-green-600 font-bold text-sm">Đang xử lý công thức...</span>
+        </div>
+
+        <!-- Question Badge -->
+        <div class="absolute top-0 left-0 bg-green-100 text-green-800 px-3 py-1 rounded-br-lg text-xs font-bold uppercase z-10" id="question-type-badge">
+            Dạng câu hỏi
+        </div>
+
+        <!-- WRAPPER CONTENT (Ẩn/Hiện đồng bộ) -->
+        <div id="main-content-wrapper" class="flex flex-col h-full justify-between pt-6">
+            
+            <!-- Question Content -->
+            <div class="mb-6 fade-in">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-left leading-relaxed" id="question-text">
+                    <!-- Question goes here -->
+                </h2>
+            </div>
+
+            <!-- Options Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="options-container">
+                <!-- Buttons will be injected here -->
+            </div>
+
+            <!-- Explanation Area -->
+            <div id="explanation-area" class="hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in">
+                 <!-- JS will inject content -->
+            </div>
+
+            <!-- Feedback & Next -->
+            <div class="mt-auto h-12 flex items-center justify-between">
+                <div id="feedback-msg" class="text-lg font-bold hidden pl-2"></div>
+                <button onclick="handleNextClick()" id="btn-next" class="bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center ml-auto shadow-sm">
+                    Bỏ qua <i class="fas fa-forward ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-auto py-6 text-center text-gray-400 text-xs">
+        © Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io
+    </footer>
+
+    <!-- Feedback Modal (Overlay) -->
+    <div id="feedback-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center relative">
+            <div id="feedback-icon" class="text-6xl mb-4"></div>
+            <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+            <p id="feedback-message" class="text-gray-700 mb-4 text-lg font-medium"></p>
+            <div class="bg-blue-50 p-4 rounded-xl text-left mb-6">
+                <p class="text-xs text-blue-500 font-bold uppercase mb-1">Giải thích chi tiết:</p>
+                <div id="feedback-detail" class="text-gray-800 text-sm leading-relaxed"></div>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition transform hover:-translate-y-1">
+                Đóng để xem lại <i class="fas fa-times ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const state = {
+            mode: 'all', // all, q2, q3
+            streak: 0,
+            correct: 0,
+            wrong: 0,
+            skipped: 0,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        // --- UTILS ---
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+
+        const isFinite = (numerator, denominator) => {
+            if (numerator === 0) return true;
+            let common = gcd(Math.abs(numerator), Math.abs(denominator));
+            let b = Math.abs(denominator) / common;
+            while (b % 2 === 0) b /= 2;
+            while (b % 5 === 0) b /= 5;
+            return b === 1;
+        };
+        
+        // Helper tính giá trị thập phân của phân số dạng string "a/b" hoặc số
+        const getDecimalVal = (valStr) => {
+            if (typeof valStr === 'number') return valStr;
+            if (valStr.includes('/')) {
+                const [n, d] = valStr.split('/').map(Number);
+                if (d === 0) return Infinity;
+                return n / d;
+            }
+            // Xử lý căn
+            if (valStr.startsWith('\\sqrt{')) {
+                // Rất cơ bản: lấy số trong {}
+                const match = valStr.match(/\\sqrt\{([\d,.]+)\}/);
+                if (match) {
+                    const num = parseFloat(match[1].replace(',', '.'));
+                    return Math.sqrt(num);
+                }
+            }
+            return parseFloat(valStr.replace(',', '.'));
+        };
+        
+        // Format hiển thị số thập phân (thay chấm bằng phẩy)
+        const formatDecimal = (num) => {
+            // Làm tròn tối đa 5 chữ số thập phân để hiển thị gọn
+            let s = parseFloat(num.toFixed(5)).toString();
+            return s.replace('.', ',');
+        }
+
+        // --- GENERATORS ---
+        const generateQuestion2 = () => {
+            const isReference = Math.random() < 0.7;
+            let question, correct, options, explanation, typeLabel;
+
+            if (isReference) {
+                const subType = randomInt(1, 4);
+                
+                if (subType === 1) {
+                    typeLabel = "Câu 2: Nhận biết loại số";
+                    const samples = [
+                        { val: "3,(2)", type: "Số thập phân vô hạn tuần hoàn", note: "có chu kỳ (2) lặp lại ngay sau dấu phẩy" },
+                        { val: "0,(123)", type: "Số thập phân vô hạn tuần hoàn", note: "có chu kỳ (123) lặp lại" },
+                        { val: "5,1(6)", type: "Số thập phân vô hạn tuần hoàn", note: "có phần thập phân lặp lại là (6)" }, 
+                        { val: "12,8(91)", type: "Số thập phân vô hạn tuần hoàn", note: "có chu kỳ (91)" },
+                        { val: "1,5", type: "Số thập phân hữu hạn", note: "phần thập phân dừng lại (hữu hạn)" },
+                        { val: "-3,14", type: "Số thập phân hữu hạn", note: "phần thập phân hữu hạn" },
+                        { val: "0,1234...", type: "Số thập phân vô hạn không tuần hoàn", note: "phần thập phân kéo dài mãi không có chu kỳ" },
+                        { val: "\\frac{9}{24}", type: "Số thập phân hữu hạn", note: "vì $\\frac{9}{24} = \\frac{3}{8} = 0,375$" }
+                    ];
+                    
+                    const item = samples[randomInt(0, samples.length - 1)]; 
+                    
+                    question = `Số $${item.val}$ là:`;
+                    correct = item.type;
+                    options = shuffleArray([
+                        correct,
+                        "Số thập phân hữu hạn",
+                        "Số nguyên",
+                        "Số thập phân vô hạn tuần hoàn",
+                        "Số vô tỉ"
+                    ]);
+                    options = [...new Set(options)]; 
+                    if (options.length > 4) options = options.slice(0, 4);
+
+                    explanation = `Số $${item.val}$ là <b>${item.type}</b> ${item.note}.`;
+                    
+                } else if (subType === 2) {
+                    typeLabel = "Câu 2: Tìm số TP hữu hạn";
+                    question = "Trong các số sau, số nào là <b>số thập phân hữu hạn</b>?";
+                    
+                    // CẬP NHẬT: Dùng object để lưu giá trị tính toán
+                    const finiteFracs = [
+                        {tex: "\\frac{3}{2}", val: 1.5}, 
+                        {tex: "-\\frac{3}{2}", val: -1.5}, 
+                        {tex: "-\\frac{4}{25}", val: -0.16}, 
+                        {tex: "-\\frac{3}{5}", val: -0.6}, 
+                        {tex: "\\frac{4}{5}", val: 0.8}, 
+                        {tex: "\\frac{7}{20}", val: 0.35}, 
+                        {tex: "\\frac{9}{8}", val: 1.125}, 
+                        {tex: "\\frac{11}{40}", val: 0.275}, 
+                        {tex: "\\sqrt{0,3025}", val: 0.55}, 
+                        {tex: "\\frac{9}{24}", val: 0.375}
+                    ];
+                    
+                    const selectedCorrect = finiteFracs[randomInt(0, finiteFracs.length - 1)];
+                    correct = `$${selectedCorrect.tex}$`; // Đảm bảo bọc $ để render
+                    
+                    const infiniteFracs = ["$\\frac{1}{3}$", "$\\frac{2}{3}$", "$\\frac{5}{6}$", "$\\frac{1}{7}$", "$\\frac{2}{9}$", "$\\frac{4}{11}$", "$\\frac{5}{12}$", "$\\frac{7}{15}$", "$\\sqrt{7}$", "$\\frac{5}{12}$"];
+                    let distractors = shuffleArray(infiniteFracs).slice(0, 3);
+                    options = shuffleArray([correct, ...distractors]);
+                    // Lọc trùng
+                    options = [...new Set(options)];
+
+                    // Giải thích bằng kết quả tính toán
+                    explanation = `Ta thực hiện phép tính (hoặc bấm máy tính):
+                    <br> $${selectedCorrect.tex} = ${formatDecimal(selectedCorrect.val)}$
+                    <br> Kết quả là số thập phân hữu hạn (phần thập phân dừng lại).
+                    <br> <small class="text-gray-500">(Giải thích bổ sung: Mẫu số sau khi tối giản chỉ chứa thừa số nguyên tố 2 và 5)</small>`;
+                    
+                } else if (subType === 3) {
+                    typeLabel = "Câu 2: Tìm số TP VHTH";
+                    question = "Trong các số sau, số nào viết được dưới dạng <b>số thập phân vô hạn tuần hoàn</b>?";
+                    
+                    // CẬP NHẬT: Object cho giải thích
+                    const infiniteFracs = [
+                        {tex: "\\frac{1}{9}", val: "0,111..."},
+                        {tex: "\\frac{5}{9}", val: "0,555..."},
+                        {tex: "\\frac{2}{3}", val: "0,666..."},
+                        {tex: "-\\frac{2}{3}", val: "-0,666..."},
+                        {tex: "-\\frac{75}{74}", val: "-1,0135..."},
+                        {tex: "\\frac{1}{6}", val: "0,1666..."},
+                        {tex: "\\frac{5}{11}", val: "0,4545..."},
+                        {tex: "\\frac{5}{6}", val: "0,8333..."},
+                        {tex: "\\frac{10}{3}", val: "3,333..."}
+                    ];
+                    
+                    const selectedCorrect = infiniteFracs[randomInt(0, infiniteFracs.length - 1)];
+                    correct = `$${selectedCorrect.tex}$`;
+                    
+                    const finiteFracs = ["$\\frac{1}{2}$", "$\\frac{3}{4}$", "0,5", "-1,25", "$\\frac{3}{5}$", "$\\frac{7}{10}$", "$\\frac{15}{4}$", "$\\frac{13}{20}$", "$\\frac{7}{50}$"];
+                    let distractors = shuffleArray(finiteFracs).slice(0, 3);
+                    options = shuffleArray([correct, ...distractors]);
+                    options = [...new Set(options)]; // Lọc trùng
+
+                    explanation = `Ta thực hiện phép tính:
+                    <br> $${selectedCorrect.tex} = ${selectedCorrect.val}$
+                    <br> Phần thập phân kéo dài vô tận và lặp lại, nên đây là số thập phân vô hạn tuần hoàn.
+                    <br> <small class="text-gray-500">(Giải thích bổ sung: Mẫu số sau khi tối giản có chứa thừa số nguyên tố khác 2 và 5)</small>`;
+                    
+                } else {
+                    typeLabel = "Câu 2: Khai triển số TP";
+                    const a = randomInt(1, 9);
+                    const b = randomInt(1, 9);
+                    // Đảm bảo c và d khác nhau và khác b để tạo ra các đáp án nhiễu khác biệt rõ ràng
+                    let cd, c, d;
+                    do {
+                        cd = randomInt(10, 99);
+                        c = Math.floor(cd / 10);
+                        d = cd % 10;
+                    } while (c === d || c === b || d === b);
+                    
+                    const numStr = `${a},${b}(${cd})`;
+                    
+                    // Đáp án đúng: lặp lại cd
+                    const expanded = `${a},${b}${cd}${cd}...`; 
+                    
+                    // Nhiễu 1: Lặp lại chữ số cuối của chu kỳ (sai quy luật)
+                    const wrong1 = `${a},${b}${cd}${d}${d}...`; 
+                    
+                    // Nhiễu 2: Lặp lại cả phần trước chu kỳ (sai chu kỳ)
+                    const wrong2 = `${a},${b}${cd}${b}${cd}...`;
+                    
+                    // Nhiễu 3: Số hữu hạn (sai bản chất vô hạn)
+                    const wrong3 = `${a},${b}${cd}${cd}`; 
+                    
+                    question = `Cho số thập phân $x=${numStr}$. Cách viết nào sau đây là đúng?`;
+                    correct = `$x=${expanded}$`;
+                    options = shuffleArray([
+                        correct,
+                        `$x=${wrong1}$`,
+                        `$x=${wrong2}$`,
+                        `$x=${wrong3}$`
+                    ]);
+                    options = [...new Set(options)];
+
+                    explanation = `Ký hiệu $(${cd})$ nghĩa là phần số $${cd}$ được lặp lại vô hạn lần. <br>Vậy $x = ${a},${b}${cd}${cd}...$`;
+                }
+            } else {
+                // Nhóm phát triển (Lý thuyết)
+                const subType = randomInt(1, 2);
+                if (subType === 1) {
+                    typeLabel = "Câu 2: Lý thuyết phân loại";
+                    question = "Phát biểu nào sau đây là <b>ĐÚNG</b>?";
+                    correct = "Số thập phân vô hạn tuần hoàn là số hữu tỉ.";
+                    options = shuffleArray([
+                        correct,
+                        "Số thập phân vô hạn tuần hoàn là số vô tỉ.",
+                        "Số thập phân hữu hạn là số vô tỉ.",
+                        "Mọi phân số đều viết được dưới dạng số thập phân hữu hạn."
+                    ]);
+                    options = [...new Set(options)];
+                    explanation = "Số thập phân vô hạn tuần hoàn biểu diễn được dưới dạng phân số $a/b$, do đó nó là số hữu tỉ. Số vô tỉ là số thập phân vô hạn <b>không</b> tuần hoàn.";
+                } else {
+                    typeLabel = "Câu 2: Kiểm tra điều kiện mẫu";
+                    const num = randomInt(1, 10);
+                    const dens = [
+                        { d: 30, type: "vô hạn tuần hoàn", reason: "có ước 3" },
+                        { d: 21, type: "vô hạn tuần hoàn", reason: "có ước 3, 7" },
+                        { d: 50, type: "hữu hạn", reason: "chỉ có ước 2, 5" },
+                        { d: 80, type: "hữu hạn", reason: "chỉ có ước 2, 5" },
+                        { d: 11, type: "vô hạn tuần hoàn", reason: "có ước 11" }
+                    ];
+                    const selected = dens[randomInt(0, dens.length - 1)];
+                    question = `Phân số $\\frac{${num}}{${selected.d}}$ (đã tối giản) viết được dưới dạng:`;
+                    correct = `Số thập phân ${selected.type}`;
+                    options = shuffleArray([
+                        `Số thập phân ${selected.type}`,
+                        selected.type === "hữu hạn" ? "Số thập phân vô hạn tuần hoàn" : "Số thập phân hữu hạn",
+                        "Số thập phân vô hạn không tuần hoàn",
+                        "Số nguyên"
+                    ]);
+                    options = [...new Set(options)];
+                    explanation = `Mẫu số $${selected.d}$ ${selected.reason} (khác 2 và 5) nên phân số viết được dưới dạng ${selected.type}.`;
+                }
+            }
+            return { typeLabel, text: question, correct, options, explanation };
+        };
+
+        const generateQuestion3 = () => {
+            const isReference = Math.random() < 0.7;
+            let question, correct, options, explanation, typeLabel;
+
+            if (isReference) {
+                const subType = randomInt(1, 5);
+                if (subType === 1) {
+                    typeLabel = "Câu 3: Định nghĩa Số thực";
+                    question = "Số hữu tỉ và số vô tỉ được gọi chung là:";
+                    correct = "Số thực";
+                    options = shuffleArray(["Số thực", "Số nguyên", "Số tự nhiên", "Số thập phân hữu hạn"]);
+                    options = [...new Set(options)];
+                    explanation = "Tập hợp các số thực ($\\mathbb{R}$) bao gồm tập hợp các số hữu tỉ ($\\mathbb{Q}$) và tập hợp các số vô tỉ ($\\mathbb{I}$).";
+                } else if (subType === 2) {
+                    typeLabel = "Câu 3: Nhận biết số vô tỉ";
+                    question = "Trong các số sau, số nào là <b>số vô tỉ</b>?";
+                    const irrationals = ["$\\sqrt{2}$", "$\\sqrt{3}$", "$\\sqrt{5}$", "$\\pi$", "$-\\sqrt{7}$", "1,41421..."];
+                    correct = irrationals[randomInt(0, irrationals.length - 1)];
+                    const rationals = ["$\\sqrt{4}$", "$\\sqrt{9}$", "$\\frac{2}{3}$", "1,5", "0", "$\\sqrt{16}$", "-3,14", "$\\frac{9}{24}$"];
+                    let distractors = shuffleArray(rationals).slice(0, 3);
+                    options = shuffleArray([correct, ...distractors]);
+                    options = [...new Set(options)]; // Lọc trùng
+                    explanation = `Số <b>${correct}</b> là số vô tỉ vì nó là số thập phân vô hạn không tuần hoàn (hoặc căn bậc hai của số không chính phương). Các số còn lại đều là số hữu tỉ.`;
+                } else if (subType === 3) {
+                    typeLabel = "Câu 3: Ký hiệu tập hợp";
+                    question = "Chọn phát biểu đúng về ký hiệu:";
+                    const trueStmts = ["$5 \\in \\mathbb{R}$", "$\\sqrt{2} \\in \\mathbb{R}$", "$\\pi \\in \\mathbb{R}$", "$-3,5 \\in \\mathbb{Q}$"];
+                    correct = trueStmts[randomInt(0, trueStmts.length - 1)];
+                    const falseStmts = ["$3,5 \\notin \\mathbb{R}$", "$\\sqrt{2} \\in \\mathbb{Q}$", "$-5 \\notin \\mathbb{R}$", "$\\pi \\in \\mathbb{Q}$"];
+                    let distractors = shuffleArray(falseStmts).slice(0, 3);
+                    options = shuffleArray([correct, ...distractors]);
+                    options = [...new Set(options)];
+                    explanation = "Tập hợp số thực $\\mathbb{R}$ chứa tất cả các số hữu tỉ và vô tỉ. Ta dùng ký hiệu $\\in$ để chỉ một số thuộc tập hợp nào đó.";
+                } else if (subType === 4) {
+                    typeLabel = "Câu 3: Tìm khẳng định sai";
+                    question = "Trong các khẳng định sau, khẳng định nào <b>SAI</b>?";
+                    correct = "Mọi số thực đều là số vô tỉ.";
+                    if (Math.random() < 0.5) correct = "$3,14 \\in \\mathbb{I}$";
+                    if (Math.random() < 0.3) correct = "$\\sqrt{4}$ là số vô tỉ";
+                    const trueOptions = ["Số vô tỉ là số thập phân vô hạn không tuần hoàn.", "Số hữu tỉ và số vô tỉ gọi chung là số thực.", "$\\sqrt{2}$ là số thực.", "$0 \\in \\mathbb{R}$"];
+                    let distractors = shuffleArray(trueOptions).slice(0, 3);
+                    options = shuffleArray([correct, ...distractors]);
+                    options = [...new Set(options)];
+                    explanation = `Khẳng định "<b>${correct}</b>" là sai. (Ví dụ: Số hữu tỉ cũng là số thực nhưng không phải số vô tỉ; hoặc 3,14 là số hữu tỉ).`;
+                } else {
+                    // Dạng mới: Liệt kê tập hợp con (Câu 9, 10)
+                    typeLabel = "Câu 3: Liệt kê số vô tỉ";
+                    
+                    const pool = [
+                        {val: "\\sqrt{3}", isIrr: true},
+                        {val: "\\pi", isIrr: true},
+                        {val: "-\\sqrt{6}", isIrr: true},
+                        {val: "\\sqrt{8}", isIrr: true},
+                        {val: "3,14", isIrr: false},
+                        {val: "\\sqrt{16}", isIrr: false},
+                        {val: "\\frac{1}{3}", isIrr: false},
+                        {val: "8,(3)", isIrr: false},
+                        {val: "-\\sqrt{3,14}", isIrr: true},
+                        {val: "\\sqrt{1,44}", isIrr: false}
+                    ];
+                    
+                    const selected = shuffleArray(pool).slice(0, 5);
+                    const listStr = selected.map(s => `$${s.val}$`).join("; ");
+                    const correctList = selected.filter(s => s.isIrr).map(s => `$${s.val}$`);
+                    
+                    if (correctList.length === 0) {
+                        question = `Trong các số sau: ${listStr}; $\\sqrt{2}$. Các số vô tỉ là:`;
+                        correct = `$\\sqrt{2}$`;
+                    } else {
+                        question = `Trong các số sau: ${listStr}. Các số vô tỉ là:`;
+                        correct = correctList.join("; ");
+                    }
+                    
+                    let distractors = [];
+                    // Nhiễu 1: Thêm số hữu tỉ
+                    const rationals = selected.filter(s => !s.isIrr);
+                    if (rationals.length > 0) {
+                        distractors.push([...correctList, `$${rationals[0].val}$`].join("; "));
+                    } else {
+                         distractors.push([...correctList, "$3,5$"].join("; "));
+                    }
+                    
+                    // Nhiễu 2: Bớt số vô tỉ
+                    if (correctList.length > 1) {
+                        distractors.push(correctList.slice(0, correctList.length-1).join("; "));
+                    } else {
+                        distractors.push("Không có số vô tỉ nào");
+                    }
+                    
+                    // Nhiễu 3: Thêm căn 4 (là 2)
+                    distractors.push([...correctList, "$\\sqrt{4}$"].join("; "));
+
+                    options = shuffleArray([correct, ...distractors]);
+                    options = [...new Set(options)]; // Lọc trùng quan trọng ở đây
+                    
+                    explanation = `Các số vô tỉ là số thập phân vô hạn không tuần hoàn (ví dụ $\\pi, \\sqrt{3}, \\sqrt{8} \\dots$). Các số như $3,14; \\sqrt{16}=4; 8,(3)$ đều là số hữu tỉ.`;
+                }
+            } else {
+                const subType = randomInt(1, 2);
+                if (subType === 1) {
+                    typeLabel = "Câu 3: Đếm số vô tỉ";
+                    const setNums = [
+                        {val: "\\sqrt{3}", isIrr: true}, {val: "\\sqrt{1}", isIrr: false},
+                        {val: "0,(3)", isIrr: false}, {val: "\\frac{5}{2}", isIrr: false},
+                        {val: "\\pi", isIrr: true}, {val: "2,3543...", isIrr: true},
+                        {val: "\\sqrt{9}", isIrr: false}
+                    ];
+                    const subset = shuffleArray(setNums).slice(0, 4);
+                    const listStr = subset.map(s => `$${s.val}$`).join("; ");
+                    const count = subset.filter(s => s.isIrr).length;
+                    question = `Trong các số sau: ${listStr}. Có bao nhiêu <b>số vô tỉ</b>?`;
+                    correct = `${count}`;
+                    let distractors = [];
+                    for(let i=0; i<4; i++) if(i !== count) distractors.push(`${i}`);
+                    distractors = shuffleArray(distractors).slice(0, 3);
+                    options = shuffleArray([correct, ...distractors]);
+                    options = [...new Set(options)];
+                    const listIrr = subset.filter(s => s.isIrr).map(s => `$${s.val}$`).join(", ");
+                    explanation = count > 0 
+                        ? `Có ${count} số vô tỉ là: ${listIrr}. (Lưu ý: $\\sqrt{1}, \\sqrt{9}, 0,(3)$ là số hữu tỉ).`
+                        : "Không có số vô tỉ nào trong danh sách trên.";
+                } else {
+                    typeLabel = "Câu 3: Quan hệ tập hợp (Mô tả)";
+                    question = "Phát biểu nào sau đây mô tả <b>ĐÚNG</b> mối quan hệ giữa các tập hợp số?";
+                    correct = "Mọi số hữu tỉ đều là số thực.";
+                    options = shuffleArray([
+                        correct,
+                        "Mọi số thực đều là số hữu tỉ.", 
+                        "Số tự nhiên không phải là số thực.", 
+                        "Số vô tỉ cũng là số hữu tỉ."
+                    ]);
+                    options = [...new Set(options)];
+                    explanation = "Tập hợp số thực bao gồm cả số hữu tỉ và số vô tỉ. Do đó, bất kỳ số hữu tỉ nào cũng là một phần của số thực (nhưng ngược lại thì chưa chắc đúng).";
+                }
+            }
+            return { typeLabel, text: question, correct, options, explanation };
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        const renderStats = () => {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span class="text-3xl font-extrabold ${state.streak > 2 ? 'text-red-500 animate-pulse' : 'text-gray-800'}">
+                        ${state.streak > 2 ? '<i class="fas fa-fire"></i> ' : ''}${state.streak}
+                    </span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span class="text-xl font-bold text-green-600">${state.correct}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span class="text-xl font-bold text-red-500">${state.wrong}</span>
+                </div>
+                <div class="flex flex-col items-center border-l">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span class="text-xl font-bold text-gray-400">${state.skipped}</span>
+                </div>
+            `;
+        };
+
+        const setMode = (mode) => {
+            state.mode = mode;
+            ['all', 'q2', 'q3'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m == mode) {
+                    btn.className = "mode-active py-3 px-2 rounded-lg font-bold border-2 shadow-sm transform scale-105 transition text-sm md:text-base flex flex-col md:flex-row items-center justify-center";
+                } else {
+                    btn.className = "mode-inactive py-3 px-2 rounded-lg font-bold border-2 shadow-sm transition text-sm md:text-base flex flex-col md:flex-row items-center justify-center";
+                }
+            });
+            handleNextClick(true);
+        };
+
+        // UI Helpers
+        const showLoading = () => {
+            const loader = document.getElementById('question-loader');
+            loader.classList.remove('hidden-loader');
+        };
+
+        const hideLoading = () => {
+            const loader = document.getElementById('question-loader');
+            loader.classList.add('hidden-loader');
+        };
+
+        // === LOGIC MỚI: QUẢN LÝ HIỂN THỊ CHẶT CHẼ ===
+        const loadQuestion = () => {
+            // 1. Hiện Loader & Ẩn Nội dung NGAY LẬP TỨC
+            showLoading();
+            const contentWrapper = document.getElementById('main-content-wrapper');
+            contentWrapper.classList.remove('content-visible'); // Opacity -> 0
+            
+            state.isAnswered = false;
+            let qData;
+            
+            let selectedMode = state.mode;
+            if (state.mode === 'all') {
+                selectedMode = Math.random() < 0.5 ? 'q2' : 'q3'; 
+            }
+
+            if (selectedMode == 'q2') qData = generateQuestion2();
+            else qData = generateQuestion3();
+
+            state.currentQuestion = qData;
+
+            // 2. Chèn nội dung (lúc này đang ẩn)
+            document.getElementById('question-type-badge').innerText = qData.typeLabel;
+            document.getElementById('question-text').innerHTML = qData.text;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option w-full bg-green-50 hover:bg-green-100 text-green-900 border border-green-200 p-4 rounded-xl text-lg font-semibold shadow-sm text-left flex items-center group";
+                btn.dataset.value = opt; 
+
+                const labels = ['A', 'B', 'C', 'D'];
+                btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-green-200 text-center leading-8 mr-3 text-green-800 font-bold shadow-sm group-hover:bg-green-600 group-hover:text-white transition flex-shrink-0">${labels[index]}</span> <span>${opt}</span>`;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Reset Footer
+            document.getElementById('feedback-msg').className = "hidden";
+            document.getElementById('explanation-area').className = "hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg text-gray-700 text-sm md:text-base fade-in";
+            document.getElementById('explanation-area').innerHTML = '';
+            
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = 'Bỏ qua <i class="fas fa-forward ml-2"></i>';
+            btnNext.className = "bg-white border border-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold hover:bg-gray-100 transition flex items-center ml-auto shadow-sm";
+
+            // 3. Render Math & Chỉ hiện khi XONG
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                // Chỉ render trong wrapper
+                MathJax.typesetPromise([contentWrapper]).then(() => {
+                    // Đợi thêm 150ms để trình duyệt vẽ xong hoàn toàn
+                    setTimeout(() => {
+                        hideLoading();
+                        contentWrapper.classList.add('content-visible'); // Opacity -> 1
+                    }, 150);
+                }).catch(err => {
+                    console.error("MathJax Error:", err);
+                    // Lỗi thì vẫn phải hiện nội dung
+                    hideLoading();
+                    contentWrapper.classList.add('content-visible');
+                });
+            } else {
+                // Fallback nếu không có MathJax
+                setTimeout(() => {
+                    hideLoading();
+                    contentWrapper.classList.add('content-visible');
+                }, 200);
+            }
+        };
+
+        const checkAnswer = (selectedVal, btnElement) => {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const isCorrect = selectedVal == state.currentQuestion.correct;
+            const feedbackEl = document.getElementById('feedback-msg');
+            const explArea = document.getElementById('explanation-area');
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-message');
+            const detail = document.getElementById('feedback-detail');
+
+            const allBtns = document.querySelectorAll('.btn-option');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-70');
+            });
+
+            const correctBtn = Array.from(allBtns).find(b => b.dataset.value === state.currentQuestion.correct);
+            
+            if (correctBtn) {
+                correctBtn.classList.remove('bg-green-50', 'text-green-900', 'border-green-200', 'opacity-70');
+                correctBtn.classList.add('bg-green-100', 'text-green-800', 'border-green-600', 'border-2', 'opacity-100');
+                const span = correctBtn.querySelector('span');
+                if(span) {
+                    span.classList.remove('bg-green-200', 'text-green-800');
+                    span.classList.add('bg-green-600', 'text-white');
+                }
+            }
+
+            if (isCorrect) {
+                btnElement.classList.add('bg-green-500', 'text-white', 'pop', 'opacity-100');
+                btnElement.classList.remove('bg-green-100', 'text-green-800'); 
+                const span = btnElement.querySelector('span');
+                if(span) span.classList.add('bg-white', 'text-green-600');
+
+                feedbackEl.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> Chính xác!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2 animate-bounce";
+                
+                state.streak++;
+                state.correct++;
+            } else {
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600', 'shake', 'opacity-100');
+                btnElement.classList.remove('bg-green-50');
+                const span = btnElement.querySelector('span');
+                if(span) span.classList.add('bg-white', 'text-red-600');
+                
+                feedbackEl.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle"></i> Chưa đúng!</span>`;
+                feedbackEl.className = "text-lg font-bold block pl-2";
+
+                state.streak = 0;
+                state.wrong++;
+
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                title.innerText = "Tiếc quá!";
+                title.className = "text-2xl font-bold mb-2 text-red-600";
+                msg.innerHTML = `Đáp án đúng là: <br><span class="text-green-600 font-bold text-xl mt-2 block">${state.currentQuestion.correct}</span>`;
+                
+                // Show modal & render math inside modal
+                setTimeout(() => { 
+                    overlay.classList.remove('hidden'); 
+                    if (window.MathJax) MathJax.typesetPromise([overlay]);
+                }, 600);
+            }
+
+            renderStats();
+
+            explArea.innerHTML = `<p class="font-bold text-green-800 mb-1"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Giải thích:</p> ${state.currentQuestion.explanation}`;
+            explArea.classList.remove('hidden');
+
+            detail.innerHTML = state.currentQuestion.explanation;
+
+            const btnNext = document.getElementById('btn-next');
+            btnNext.innerHTML = `Câu tiếp theo <i class="fas fa-arrow-right ml-2"></i>`;
+            btnNext.className = "bg-green-600 text-white px-6 py-2 rounded-full font-bold hover:bg-green-700 transition flex items-center ml-auto shadow-lg transform scale-105";
+
+            // Render Math for Explanation Area
+            if (window.MathJax) {
+                MathJax.typesetPromise([explArea]);
+            }
+        };
+
+        const handleNextClick = (forceSkip = false) => {
+            if (!state.isAnswered && !forceSkip) {
+                state.streak = 0;
+                state.skipped++;
+                renderStats();
+            }
+            loadQuestion();
+        };
+
+        const closeModal = () => {
+            document.getElementById('feedback-overlay').classList.add('hidden');
+        };
+
+        window.onload = () => {
+            renderStats();
+            loadQuestion();
+        }
+
+    </script>
+</body>
+</html>

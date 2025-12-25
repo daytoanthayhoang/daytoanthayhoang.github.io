@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Toán 7 HK1 - Bài 5 (Tỉ lệ thuận)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+	
+	
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+  <!-- --- CẤU HÌNH TÀI LIỆU PDF --- -->
+
+<script>
+	
+// 
+// Khi nào có file, bạn chỉ cần sửa isAvailable: true và cập nhật link
+const pdfConfig = {
+    isAvailable: true,  // false: Chưa có | true: Đã có
+    fileName: "7_hk1_bai5_tilenghich.pdf" // Tên file hoặc đường dẫn
+};
+
+// Hàm cập nhật trạng thái nút (Sẽ chạy khi tải trang)
+function initPdfButton() {
+    const btn = document.getElementById('pdf-btn');
+    const txt = document.getElementById('pdf-text');
+    const icon = document.getElementById('pdf-icon');
+
+    if (pdfConfig.isAvailable) {
+        // Trạng thái: CÓ TÀI LIỆU
+        btn.href = pdfConfig.fileName;
+        btn.classList.add('hover:bg-white/20', 'cursor-pointer');
+        btn.classList.remove('opacity-60', 'cursor-not-allowed', 'bg-gray-500/10');
+        txt.textContent = "Tải tài liệu PDF";
+        icon.className = "fas fa-file-pdf text-red-300 group-hover:text-red-200";
+    } else {
+        // Trạng thái: CHƯA CẬP NHẬT
+        btn.removeAttribute('href');
+        btn.classList.remove('hover:bg-white/20', 'cursor-pointer');
+        btn.classList.add('opacity-60', 'cursor-not-allowed', 'bg-gray-500/10');
+        txt.textContent = "Chưa cập nhật PDF";
+        icon.className = "fas fa-clock text-gray-300"; // Đổi icon thành đồng hồ
+    }
+}
+    </script>
+
+    <!-- Load MathJax -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* Chalkboard Style */
+        .chalkboard {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border: 8px solid #854d0e;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .chalkboard::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMTAgMTBRNDAgNDAgMTAgNzAiIHN0cm9rZT0id2hpdGUiIG9wYWNpdHk9IjAuMDUiIGZpbGw9Im5vbmUiLz4KPC9zdmc+');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        /* Step Animation */
+        .step-item {
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: slideDown 0.3s forwards;
+        }
+        @keyframes slideDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar */
+        #steps-container::-webkit-scrollbar { width: 8px; }
+        #steps-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        #steps-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        #steps-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Stats & Effects */
+        .streak-fire { color: #ef4444; animation: burn 0.5s infinite alternate; }
+        @keyframes burn {
+            from { text-shadow: 0 0 2px #fca5a5, 0 -2px 4px #f87171; }
+            to { text-shadow: 0 0 4px #fca5a5, 0 -4px 8px #ef4444; }
+        }
+        .stats-box { transition: all 0.3s ease; }
+        .stats-box:hover { transform: translateY(-2px); }
+        
+        /* MathJax Override for size */
+        mjx-container { font-size: 110% !important; }
+
+        .hint-box {
+            border-left: 4px solid #f59e0b;
+            background-color: #fffbeb;
+            color: #92400e;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
+
+    <div class="max-w-6xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-4 border-blue-200">
+        <!-- Header -->
+        <div class="bg-indigo-600 p-4 relative shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-xl md:text-2xl font-extrabold text-white uppercase tracking-wider">
+                    <i class="fas fa-chart-line mr-2"></i>Ôn tập Toán 7 HK1 - Bài 5
+                </h1>
+                <p class="text-blue-200 font-medium text-sm">Chủ đề: Đại lượng Tỉ lệ thuận (Vận dụng thực tế)</p>
+            </div>
+            
+			<a id="pdf-btn" href="#" target="_blank" class="bg-white/10 text-white border border-white/40 px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 group">
+				<i id="pdf-icon" class="fas fa-file-pdf"></i>
+				<span id="pdf-text">Đang tải trạng thái...</span>
+			</a>
+        </div>
+
+        <div class="p-4 md:p-6 space-y-4">
+            
+            <!-- STATS BOARD -->
+            <div class="bg-white rounded-xl shadow-md p-3 grid grid-cols-4 gap-2 text-center select-none border border-gray-100" id="stats-container">
+                <div class="flex flex-col items-center stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Chuỗi thắng 🔥</span>
+                    <span id="stat-streak" class="text-2xl md:text-3xl font-extrabold text-indigo-900">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Đúng</span>
+                    <span id="stat-correct" class="text-xl md:text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Sai</span>
+                    <span id="stat-wrong" class="text-xl md:text-2xl font-bold text-red-500">0</span>
+                </div>
+                <div class="flex flex-col items-center border-l border-gray-200 stats-box">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Bỏ qua</span>
+                    <span id="stat-skipped" class="text-xl md:text-2xl font-bold text-gray-400">0</span>
+                </div>
+            </div>
+            
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Left Column: Chalkboard & Inputs -->
+                <div class="flex flex-col gap-4">
+                    <!-- Chalkboard -->
+                    <div class="chalkboard p-6 min-h-[280px] relative">
+                         <div class="absolute top-2 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs font-mono uppercase tracking-widest opacity-60">
+                            Đề bài
+                        </div>
+                        <div id="question-text" class="text-white text-lg font-medium leading-relaxed font-sans mt-4 px-2 tracking-wide">
+                            Đang tải đề bài...
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-inner">
+                        
+                        <!-- Control Row: Type & Hard Mode -->
+                        <div class="flex flex-wrap justify-between items-center mb-4 pb-3 border-b border-gray-200 gap-2">
+                             <div class="flex items-center gap-2 flex-grow">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase whitespace-nowrap">Dạng toán:</label>
+                                <select id="problem-type" class="text-xs font-bold p-1.5 rounded border-gray-300 focus:ring-indigo-500 bg-white w-full max-w-[220px]" onchange="nextQuestion()">
+                                    <option value="random">🎲 Ngẫu nhiên (70% Cơ bản)</option>
+                                    <option value="budget">💰 Ngân sách & Chi phí (Mới)</option>
+                                    <option value="worker">👷 Công nhân & Sản phẩm</option>
+                                    <option value="machine">🚜 Máy móc & Diện tích</option>
+                                    <option value="consume">🍚 Nhu cầu & Tiêu thụ</option>
+                                    <option value="motion">🚗 Chuyển động (Vận tốc & QĐ)</option>
+                                </select>
+                            </div>
+
+                            <label class="inline-flex items-center cursor-pointer select-none shrink-0" title="Bật chế độ bài toán vận dụng cao (ví dụ: tính lượng tăng thêm)">
+                                <input type="checkbox" id="mode-hard" class="sr-only peer" onchange="nextQuestion()">
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                <span class="ms-2 text-xs font-bold text-gray-600 peer-checked:text-red-600 flex items-center">
+                                    <i class="fas fa-skull-crossbones mr-1"></i>Vận dụng cao
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Answer Input -->
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                            <label class="block text-gray-400 font-bold text-xs uppercase mb-2" id="label-final-req">Kết quả bài toán:</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="ans-final" placeholder="Nhập đáp số..." class="flex-grow text-center font-bold text-xl p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 outline-none transition-colors">
+                                <span id="unit-display" class="font-bold text-gray-500 bg-gray-100 p-2 rounded border border-gray-200 min-w-[60px] text-center">...</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <div class="flex gap-3">
+                            <button onclick="nextQuestion()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-sync-alt"></i> Bài mới
+                            </button>
+                            <button onclick="checkAnswer()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i> Kiểm tra
+                            </button>
+                        </div>
+
+                        <div id="feedback" class="hidden mt-3 text-center p-2 rounded-lg text-sm font-bold"></div>
+                        <div id="hint-warning" class="hidden mt-2 text-center text-xs text-amber-600 font-semibold bg-amber-50 p-1 rounded border border-amber-200">
+                            <i class="fas fa-lock mr-1"></i>Đã xem hướng dẫn: Thành tích câu này sẽ không được tính.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Step-by-step -->
+                <div class="flex flex-col h-[600px] lg:h-[750px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-4 relative">
+                    <!-- HEADER WITH BUTTON -->
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 shrink-0">
+                        <div class="flex items-center gap-2 flex-grow">
+                            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide whitespace-nowrap">
+                                <i class="fas fa-file-alt text-blue-500 mr-1"></i>Trình bày bài thi
+                            </h3>
+                            <button onclick="showNextStep()" id="btn-show-step" 
+                                class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-all flex items-center gap-1 disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed ml-2">
+                                <span>Hướng dẫn giải</span> <i class="fas fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                        <span id="step-counter" class="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded ml-2">0/0</span>
+                    </div>
+
+                    <!-- Hint Box (Moved Here) -->
+                    <div id="hint-box" class="hidden hint-box p-3 rounded-lg text-sm shadow-sm">
+                        <div class="font-bold flex items-center gap-2 mb-1">
+                            <i class="fas fa-lightbulb text-amber-500"></i> Gợi ý nhanh:
+                        </div>
+                        <div id="hint-content"></div>
+                    </div>
+
+                    <!-- Steps Content -->
+                    <div id="steps-container" class="flex-grow overflow-y-auto bg-white p-3 rounded-lg shadow-inner border border-gray-100 scroll-smooth">
+                        <div class="text-gray-400 italic text-sm text-center mt-10 flex flex-col items-center">
+                            <i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i>
+                            <span>Bấm "Hướng dẫn giải" để xem bài làm mẫu từng bước</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <footer class="mt-8 text-center text-gray-500 text-xs w-full">
+        <p>© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io</p>
+    </footer>
+
+    <script>
+        // --- Game State ---
+        let currentProblem = {};
+        let stepIndex = 0;
+        let isAnswered = false;
+        
+        // Stats
+        let streak = 0;
+        let correctTotal = 0;
+        let wrongTotal = 0;
+        let skippedTotal = 0;
+        let statsEnabled = true;
+
+        // --- Utils ---
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function updateStatsUI() {
+            const streakEl = document.getElementById('stat-streak');
+            streakEl.textContent = streak;
+            document.getElementById('stat-correct').textContent = correctTotal;
+            document.getElementById('stat-wrong').textContent = wrongTotal;
+            document.getElementById('stat-skipped').textContent = skippedTotal;
+
+            if (!statsEnabled) {
+                document.getElementById('hint-warning').classList.remove('hidden');
+            } else {
+                document.getElementById('hint-warning').classList.add('hidden');
+            }
+
+            if (streak > 2) {
+                streakEl.classList.add('streak-fire');
+                streakEl.innerHTML = `<i class="fas fa-fire"></i> ${streak}`;
+            } else {
+                streakEl.classList.remove('streak-fire');
+                streakEl.textContent = streak;
+            }
+        }
+        
+        function disableStats() {
+            if (statsEnabled) {
+                statsEnabled = false;
+                updateStatsUI();
+            }
+        }
+
+        // --- SCENARIO DATA & GENERATORS ---
+
+        const scenarios = {
+            worker: {
+                subj: ["Một đội công nhân", "Một nhóm thợ", "Một tổ sản xuất"],
+                unit_subj: "người",
+                verb: ["làm được", "sản xuất được", "lắp ráp được", "đóng gói được"],
+                obj: ["sản phẩm", "chi tiết máy", "hộp quà", "bộ quần áo"],
+                unit_obj: ["sản phẩm", "chi tiết", "hộp", "bộ"],
+                time_constraint: ["trong một ngày", "trong một giờ", "trong cùng thời gian dự kiến"],
+                type: "direct"
+            },
+            machine: {
+                subj: ["Một đội máy cày", "Một nhóm máy xúc", "Đội xe vận tải"],
+                unit_subj: "máy",
+                verb: ["cày được", "san lấp được", "vận chuyển được"],
+                obj: ["ha đất", "mét đường", "tấn hàng"],
+                unit_obj: ["ha", "m", "tấn"],
+                time_constraint: ["trong cùng thời gian", "trong một buổi"],
+                type: "direct" 
+            },
+            consume: {
+                subj: ["Bếp ăn tập thể", "Đơn vị bộ đội", "Trại hè"],
+                unit_subj: "người",
+                verb: ["tiêu thụ hết", "dùng hết", "ăn hết"],
+                obj: ["gạo", "nước sạch", "thực phẩm"],
+                unit_obj: ["kg", "lít", "kg"],
+                time_constraint: ["trong một ngày", "mỗi ngày"],
+                type: "direct" 
+            },
+            motion: {
+                subj: ["Một ô tô", "Một xe máy", "Một vận động viên"],
+                unit_subj: "km/h", 
+                subj_label: "vận tốc",
+                verb: ["đi được", "chạy được"],
+                obj: ["quãng đường"],
+                unit_obj: ["km", "m"],
+                time_constraint: ["trong cùng khoảng thời gian", "với thời gian không đổi"],
+                type: "direct" 
+            }
+        };
+
+        // NEW: Budget & Cost Special Scenarios
+        const budgetTemplates = [
+            {
+                // Áo phao
+                type: "increase",
+                template: "Theo dự toán ban đầu, {place} được cấp {money} triệu đồng để mua {qty} chiếc {item} trang bị cho đội xung kích. Tuy nhiên, do tình hình {reason}, {place} quyết định bổ sung thêm nhân sự nên cần mua nhiều hơn dự kiến {delta} chiếc. Hỏi với số lượng thực tế cần mua, {place} phải chi tổng cộng bao nhiêu tiền? (Giả sử giá mỗi chiếc là không đổi).",
+                vars: {
+                    place: ["thôn Z", "xã X", "huyện Y"],
+                    item: ["áo phao", "đèn pin chuyên dụng", "mũ bảo hộ"],
+                    reason: ["mưa lũ diễn biến phức tạp", "thiên tai bất thường", "nhu cầu cấp thiết"]
+                },
+                unit_subj: "chiếc",
+                unit_obj: "triệu đồng",
+                subj_label: "số lượng",
+                obj_label: "số tiền"
+            },
+            {
+                // Đê kè
+                type: "increase",
+                template: "Để gia cố đoạn đê bao quanh {place}, đơn vị thi công báo giá: Để kè đá được đoạn đê dài {qty} mét thì chi phí trọn gói là {money} triệu đồng. Sau khi khảo sát lại, Ban chỉ huy phòng chống lụt bão yêu cầu kè thêm {delta} mét nữa ở đoạn xung yếu. Hỏi tổng chi phí để hoàn thành đoạn đê (bao gồm cả phần phát sinh) là bao nhiêu?",
+                vars: {
+                    place: ["thôn Z", "xã A", "vùng ven biển"],
+                },
+                unit_subj: "mét",
+                unit_obj: "triệu đồng",
+                subj_label: "độ dài đê",
+                obj_label: "chi phí"
+            },
+            {
+                // Lúa giống (Giảm)
+                type: "decrease",
+                template: "Quỹ khuyến nông dự định dùng số tiền {money} triệu đồng để mua {item} cấp phát cho {qty} hộ dân bị mất trắng vụ mùa (mức cấp phát mỗi hộ như nhau). Tuy nhiên, có {delta} hộ trong danh sách đã nhận được hỗ trợ từ nguồn xã hội hóa khác nên tự nguyện rút tên. Hỏi số tiền thực tế Quỹ cần chi để mua {item} cho các hộ còn lại là bao nhiêu?",
+                vars: {
+                    item: ["lúa giống", "ngô giống", "cây giống"],
+                },
+                unit_subj: "hộ",
+                unit_obj: "triệu đồng",
+                subj_label: "số hộ",
+                obj_label: "số tiền"
+            },
+            {
+                // Phun thuốc (Giảm)
+                type: "decrease",
+                template: "Sau khi nước rút, Trung tâm Y tế dự phòng cử đội phun thuốc khử khuẩn môi trường cho {place}. Theo kế hoạch, chi phí hóa chất để phun toàn bộ {qty} m2 khu vực công cộng là {money} triệu đồng. Thực tế, các ngõ ngách nhỏ xe phun không vào được nên diện tích phun máy giảm đi {delta} m2 so với kế hoạch. Hỏi chi phí hóa chất thực tế đã sử dụng là bao nhiêu?",
+                vars: {
+                    place: ["thôn Z", "khu phố 5", "trường học"],
+                },
+                unit_subj: "m2",
+                unit_obj: "triệu đồng",
+                subj_label: "diện tích",
+                obj_label: "chi phí"
+            }
+        ];
+
+        function generateBudgetProblem() {
+            // 1. Pick a template
+            const tplIdx = getRandomInt(0, budgetTemplates.length - 1);
+            const tplData = budgetTemplates[tplIdx];
+
+            // 2. Generate numbers logic (Clean division)
+            // Price per unit should be reasonable or simple fraction
+            // Let's generate price P first, then Quantity X1. Y1 = P * X1.
+            
+            let price, x1, delta;
+            
+            // Adjust ranges based on context to make numbers realistic
+            if (tplData.unit_subj === "m2") {
+                // Phun thuốc: price low, x1 large. E.g. 5000d/m2 = 0.005 mil/m2.
+                // Or make money integer. 210 mil / 42000 = 0.005. 
+                // Let's generate Y1 (Money) first, divisible by something.
+                const moneyBase = getRandomInt(5, 50) * 10; // 50, 60... 500
+                const div = [100, 200, 500]; // divisor factor
+                const factor = div[getRandomInt(0, div.length-1)]; 
+                x1 = moneyBase * factor; // e.g. 210 * 200 = 42000
+                price = moneyBase / x1;
+                delta = getRandomInt(1, 5) * factor * 10; // small chunk
+            } else {
+                // Normal items
+                price = getRandomInt(1, 10) * 0.1; // 0.3, 1.5, ...
+                if (Math.random() < 0.5) price = getRandomInt(1, 5); // Integer price 2, 3...
+                
+                // x1 should make y1 integer or simple decimal 1 decimal place
+                // y1 = x1 * price.
+                const seed = getRandomInt(2, 20);
+                x1 = seed * 10; // 20, 30... 
+                // Ensure x1 * price is nice. 
+                // Easier: Pick Y1 and X1 such that Y1/X1 is clean.
+                // Let's stick to user example: 210 mil, 700 items -> 0.3 price.
+                
+                const prices = [0.2, 0.3, 0.5, 1.2, 1.5, 2, 2.5, 3];
+                price = prices[getRandomInt(0, prices.length-1)];
+                
+                // Find X1 such that Price * X1 is integer (money in millions)
+                // If price 0.3, X1 must be multiple of 10.
+                x1 = getRandomInt(5, 50) * 10;
+                
+                delta = getRandomInt(1, 5) * 10;
+            }
+
+            let y1 = Math.round(x1 * price * 100) / 100; // Round to 2 decimals max
+            // Re-check integer preference for money
+            if (!Number.isInteger(y1)) {
+                // Adjust X1 to make Y1 integer if possible, else keep decimal
+                 x1 = x1 * 10;
+                 delta = delta * 10;
+                 y1 = Math.round(x1 * price);
+            }
+
+            let x2 = (tplData.type === 'increase') ? x1 + delta : x1 - delta;
+            let y2 = Math.round(x2 * price * 100) / 100;
+
+            // 3. Fill Template
+            let text = tplData.template;
+            text = text.replace("{money}", y1).replace("{qty}", x1).replace("{delta}", delta);
+            
+            // Random vars
+            if (tplData.vars) {
+                for (const [key, options] of Object.entries(tplData.vars)) {
+                    const val = options[getRandomInt(0, options.length - 1)];
+                    text = text.replace(`{${key}}`, val);
+                    // Also replace recurring keys if any (simple replace only does first, use regex)
+                    text = text.replace(new RegExp(`{${key}}`, 'g'), val);
+                }
+            }
+
+            // 4. Build return object compatible with generateProblem
+            // Steps need to be custom for this flow
+            
+            // Tóm tắt
+            let t_x1 = x1, t_y1 = y1;
+            let t_x2 = x2, t_y2 = "x";
+            
+            let preStep = `<div>Theo đề bài, ${tplData.subj_label} thực tế là: $${x1} ${tplData.type === 'increase' ? '+' : '-'} ${delta} = ${x2}$ (${tplData.unit_subj})</div>`;
+
+            let summaryTable = `
+<div class="grid grid-cols-2 gap-4 text-center font-bold text-gray-600 bg-blue-50 p-2 rounded mb-2">
+    <div class="border-b-2 border-blue-200 pb-1">${tplData.subj_label.charAt(0).toUpperCase() + tplData.subj_label.slice(1)} (${tplData.unit_subj})</div>
+    <div class="border-b-2 border-blue-200 pb-1">${tplData.obj_label.charAt(0).toUpperCase() + tplData.obj_label.slice(1)} (${tplData.unit_obj})</div>
+    <div class="py-1">${t_x1}</div>
+    <div class="py-1">${t_y1}</div>
+    <div class="py-1 text-indigo-600">${t_x2}</div>
+    <div class="py-1 text-indigo-600">${t_y2}</div>
+</div>
+<div class="text-sm text-gray-500 italic mb-2">Lưu ý: Đề cho dữ kiện "${tplData.type === 'increase' ? 'tăng/bổ sung thêm' : 'giảm/rút bớt'}", cần tính ${tplData.subj_label} thực tế để điền vào tóm tắt.</div>
+${preStep}
+`;
+
+            const steps = [];
+            steps.push({ title: "Tóm tắt & Xử lý số liệu", content: summaryTable });
+            
+            steps.push({
+                title: "Bước 1: Gọi ẩn",
+                content: `Gọi ${tplData.obj_label} thực tế cần tìm là $x$ (${tplData.unit_obj}) ($x > 0$).`
+            });
+
+            steps.push({
+                title: "Bước 2: Lập luận",
+                content: `Vì ${tplData.obj_label} tỉ lệ thuận với ${tplData.subj_label} (số lượng/diện tích càng lớn thì chi phí càng cao) nên ta có tỉ lệ thức:`
+            });
+
+            const calcStep = `x = \\dfrac{${x2} \\cdot ${y1}}{${x1}}`;
+            
+            steps.push({
+                title: "Bước 3: Thiết lập tỉ lệ thức",
+                content: `$$\\frac{x}{${y1}} = \\frac{${x2}}{${x1}} \\quad \\text{hay} \\quad \\frac{x}{${x2}} = \\frac{${y1}}{${x1}}$$`
+            });
+
+            steps.push({
+                title: "Bước 4: Tính toán",
+                content: `$$${calcStep}$$ 
+                          $$x = ${y2}$$`
+            });
+
+            steps.push({
+                title: "Kết luận",
+                content: `Vậy ${tplData.obj_label} thực tế là: <b>${y2} ${tplData.unit_obj}</b>.`
+            });
+
+            return {
+                question: text,
+                steps: steps,
+                finalAns: y2,
+                unit: tplData.unit_obj,
+                hint: `Gợi ý: Đây là bài toán về chi phí. Trước hết hãy tính tổng số lượng/diện tích thực tế (sau khi cộng thêm hoặc trừ bớt). Số tiền tỉ lệ thuận với số lượng.`
+            };
+        }
+
+        function generateProblem() {
+            const typeSelect = document.getElementById('problem-type').value;
+            const isHard = document.getElementById('mode-hard').checked;
+            
+            // Handle Budget Scenario specially
+            if (typeSelect === 'budget') {
+                return generateBudgetProblem();
+            }
+
+            // 1. Select Scenario Type
+            let selectedKey = typeSelect;
+            if (selectedKey === 'random') {
+                const rand = Math.random();
+                // Add probability for budget in random mode
+                if (rand < 0.2) return generateBudgetProblem();
+                
+                const keys = Object.keys(scenarios);
+                if (rand < 0.45) selectedKey = 'worker';
+                else if (rand < 0.70) selectedKey = 'machine';
+                else selectedKey = keys[getRandomInt(0, keys.length - 1)];
+            }
+
+            const data = scenarios[selectedKey];
+            
+            // 2. Generate Numbers
+            const baseX = getRandomInt(2, 9);
+            const baseY = getRandomInt(2, 9) * getRandomInt(2, 5); 
+            const k1 = getRandomInt(2, 8); 
+            const k2 = k1 + getRandomInt(1, 4); 
+            
+            const x1 = baseX * k1;
+            const y1 = baseY * k1;
+            const x2 = baseX * k2;
+            const y2 = baseY * k2;
+
+            // 3. Logic: Determine Modes (Probability 30%)
+            const isDeltaData = Math.random() < 0.3 || (isHard && Math.random() < 0.8);
+            const isDeltaQuestion = Math.random() < 0.3 || (isHard && Math.random() < 0.8);
+
+            // 4. Target Unknown: 50% Find X (Subject), 50% Find Y (Object)
+            const findTargetX = Math.random() < 0.5;
+
+            // Randomize text elements
+            const subjText = data.subj[getRandomInt(0, data.subj.length-1)];
+            const verbText = data.verb[getRandomInt(0, data.verb.length-1)];
+            const objText = data.obj[getRandomInt(0, data.obj.length-1)];
+            const unitSubj = data.unit_subj;
+            const unitObj = Array.isArray(data.unit_obj) ? data.unit_obj[getRandomInt(0, data.unit_obj.length-1)] : data.unit_obj;
+            const timeText = data.time_constraint[getRandomInt(0, data.time_constraint.length-1)];
+
+            let subjLabel = data.subj_label || "số " + unitSubj;
+            if (selectedKey === 'motion') subjLabel = "vận tốc";
+
+            let question = "";
+            let finalAns = 0;
+            let finalUnit = "";
+            let steps = [];
+            let unknownLabel = "";
+            let t_x1 = x1, t_y1 = y1, t_x2 = x2, t_y2 = y2;
+            
+            // --- Part 1: Given x1, y1 ---
+            const part1 = `${subjText} ${selectedKey === 'motion' ? 'chạy với vận tốc' : 'có'} ${x1} ${unitSubj} ${verbText} ${y1} ${unitObj} ${timeText}.`;
+            let part2 = "";
+            let reqText = "";
+
+            // --- Part 2 & Question ---
+            if (findTargetX) {
+                // We need to find X2. So we are given Y2.
+                // Y2 can be given as Absolute OR Delta.
+                t_x2 = "x";
+                unknownLabel = subjLabel;
+                finalUnit = unitSubj;
+
+                let givenYText = "";
+                let valY_ForDisplay = y2; // If absolute
+
+                if (isDeltaData) {
+                     const deltaY = y2 - y1;
+                     // Ensure delta is positive for "increase" phrasing ease or handle decrease
+                     // Since k2 > k1, y2 > y1 usually.
+                     givenYText = `muốn ${verbText} thêm ${deltaY} ${unitObj}`;
+                     if(selectedKey === 'motion') givenYText = `muốn quãng đường đi được tăng thêm ${deltaY} ${unitObj}`;
+                } else {
+                     givenYText = `muốn ${verbText} ${y2} ${unitObj}`;
+                     if(selectedKey === 'motion') givenYText = `muốn đi được quãng đường ${y2} ${unitObj}`;
+                }
+
+                part2 = `Để ${givenYText} ${timeText}`;
+
+                // Question asks for X2. Can be Absolute or Delta.
+                if (isDeltaQuestion) {
+                    reqText = `thì cần ${selectedKey === 'motion' ? 'tăng vận tốc thêm' : 'tăng thêm'} bao nhiêu ${unitSubj}?`;
+                    finalAns = x2 - x1;
+                } else {
+                    reqText = `thì cần ${selectedKey === 'motion' ? 'vận tốc là' : 'số lượng là'} bao nhiêu ${unitSubj}?`;
+                    finalAns = x2;
+                }
+
+            } else {
+                // We need to find Y2. So we are given X2.
+                // X2 can be given as Absolute OR Delta.
+                t_y2 = "x";
+                unknownLabel = `số ${unitObj} ${verbText}`;
+                finalUnit = unitObj;
+
+                let givenXText = "";
+                if (isDeltaData) {
+                    const deltaX = x2 - x1;
+                    givenXText = `tăng thêm ${deltaX} ${unitSubj}`;
+                    if (selectedKey === 'motion') givenXText = `tăng vận tốc thêm ${deltaX} ${unitSubj}`;
+                    else if (selectedKey === 'worker' || selectedKey === 'consume') givenXText = `bổ sung thêm ${deltaX} ${unitSubj}`;
+                } else {
+                    givenXText = `có ${x2} ${unitSubj}`;
+                    if (selectedKey === 'motion') givenXText = `vận tốc là ${x2} ${unitSubj}`;
+                }
+
+                part2 = `Nếu ${givenXText}`;
+                if(selectedKey === 'worker' || selectedKey === 'consume') part2 += ` làm việc ${timeText}`;
+                else part2 += ` ${timeText}`;
+
+                // Question asks for Y2. Can be Absolute or Delta.
+                if (isDeltaQuestion) {
+                    reqText = `thì ${objText} ${verbText} tăng thêm bao nhiêu ${unitObj}?`;
+                    finalAns = y2 - y1;
+                } else {
+                    reqText = `thì ${verbText} bao nhiêu ${unitObj}?`;
+                    finalAns = y2;
+                }
+            }
+
+            question = `${part1} ${part2} ${reqText} (Giả sử năng suất không đổi).`;
+
+            // --- SOLUTION STEPS ---
+            
+            // 1. Tóm tắt
+            // If data was delta, we need to calculate absolute for summary or show calculation
+            // For simplicity, summary usually shows absolute values x1, y1, x2, y2.
+            // But if input was delta, step 1 should convert delta to absolute first.
+            let preStep = "";
+            if (isDeltaData) {
+                if (findTargetX) { // Given Y Delta
+                     preStep = `<div>Ta có số ${unitObj} lúc sau là: $${y1} + ${y2-y1} = ${y2}$ (${unitObj})</div>`;
+                } else { // Given X Delta
+                     preStep = `<div>Ta có ${subjLabel} lúc sau là: $${x1} + ${x2-x1} = ${x2}$ (${unitSubj})</div>`;
+                }
+            }
+
+            let summaryTable = `
+<div class="grid grid-cols-2 gap-4 text-center font-bold text-gray-600 bg-blue-50 p-2 rounded mb-2">
+    <div class="border-b-2 border-blue-200 pb-1">${subjLabel.charAt(0).toUpperCase() + subjLabel.slice(1)} (${unitSubj})</div>
+    <div class="border-b-2 border-blue-200 pb-1">${objText.charAt(0).toUpperCase() + objText.slice(1)} (${unitObj})</div>
+    <div class="py-1">${t_x1}</div>
+    <div class="py-1">${t_y1}</div>
+    <div class="py-1 text-indigo-600">${t_x2}</div>
+    <div class="py-1 text-indigo-600">${t_y2}</div>
+</div>
+${preStep ? '<div class="text-sm text-gray-500 italic mb-2">Lưu ý: Đề cho dữ kiện "tăng thêm", cần tính giá trị lúc sau để điền vào tóm tắt.</div>' + preStep : ''}
+`;
+
+            steps.push({
+                title: "Tóm tắt",
+                content: summaryTable
+            });
+
+            // 2. B1: Gọi ẩn
+            let step1Content = `Gọi ${unknownLabel} lúc sau là $x$ (${finalUnit}) ($x > 0$).`;
+            if (isDeltaQuestion) {
+                 // If asking for delta, we typically still solve for absolute first then subtract
+                 step1Content += `<br>(Bài toán hỏi phần tăng thêm, ta sẽ tính tổng số trước rồi trừ đi ban đầu).`;
+            }
+
+            steps.push({
+                title: "Bước 1: Gọi ẩn",
+                content: step1Content
+            });
+
+            // 3. B2: Giải thích
+            // Format: "Vì số [đơn vị tìm] tỉ lệ thuận với số [đơn vị tương ứng] nên:"
+            let labelX_Reason = subjLabel; 
+            let labelY_Reason = (selectedKey === 'motion') ? "quãng đường" : ("số " + unitObj);
+            
+            let reasonText = "";
+            if (findTargetX) {
+                // Finding X (Subject)
+                reasonText = `Vì ${labelX_Reason} tỉ lệ thuận với ${labelY_Reason} nên:`;
+            } else {
+                // Finding Y (Object)
+                reasonText = `Vì ${labelY_Reason} tỉ lệ thuận với ${labelX_Reason} nên:`;
+            }
+            
+            steps.push({
+                title: "Bước 2: Lập luận",
+                content: reasonText
+            });
+
+            // 4. B3: Công thức
+            let numeratorLeft, demonimatorLeft, numeratorRight, denominatorRight;
+            let calcStep;
+            let resultVal = (findTargetX) ? x2 : y2;
+            
+            if (findTargetX) { // Find X
+                numeratorLeft = "x"; demonimatorLeft = x1;
+                numeratorRight = y2; denominatorRight = y1;
+                calcStep = `x = \\dfrac{${y2} \\cdot ${x1}}{${y1}}`;
+            } else { // Find Y
+                numeratorLeft = "x"; demonimatorLeft = y1;
+                numeratorRight = x2; denominatorRight = x1;
+                calcStep = `x = \\dfrac{${x2} \\cdot ${y1}}{${x1}}`;
+            }
+
+            steps.push({
+                title: "Bước 3: Thiết lập tỉ lệ thức",
+                content: `$$\\frac{${numeratorLeft}}{${demonimatorLeft}} = \\frac{${numeratorRight}}{${denominatorRight}}$$`
+            });
+
+            // 5. B4: Tính toán
+            steps.push({
+                title: "Bước 4: Tính toán",
+                content: `$$${calcStep}$$ 
+                          $$x = ${resultVal}$$`
+            });
+
+            // 6. Kết luận
+            let conclusion = "";
+            if (isDeltaQuestion) {
+                let baseVal = (findTargetX) ? x1 : y1;
+                let diff = Math.abs(resultVal - baseVal);
+                conclusion = `Giá trị lúc sau là: $${resultVal}$.<br>
+                              Theo yêu cầu đề bài (tính phần tăng thêm):<br>
+                              $$${resultVal} - ${baseVal} = ${diff} \\; (${finalUnit})$$<br>
+                              <b>Vậy đáp án là: ${diff} ${finalUnit}.</b>`;
+            } else {
+                conclusion = `Vậy ${unknownLabel} là: <b>${resultVal} ${finalUnit}</b>.`;
+            }
+
+            steps.push({
+                title: "Kết luận",
+                content: conclusion
+            });
+
+            // Hint Logic
+            let hintText = "";
+            if (selectedKey === 'worker') hintText = "Gợi ý: Số người càng đông thì làm được càng nhiều sản phẩm. Đây là tỉ lệ thuận.";
+            if (selectedKey === 'machine') hintText = "Gợi ý: Càng nhiều máy thì cày được càng nhiều đất. Tỉ số máy bằng tỉ số diện tích.";
+            if (selectedKey === 'motion') hintText = "Gợi ý: Đi càng nhanh thì quãng đường đi được càng dài (trong cùng thời gian). Vận tốc tỉ lệ thuận với quãng đường.";
+            if (isDeltaData || isDeltaQuestion) hintText += "<br><b>Lưu ý:</b> Đề bài có dữ kiện/câu hỏi về 'tăng thêm', hãy chú ý cộng/trừ với giá trị ban đầu.";
+
+            return {
+                question,
+                steps,
+                finalAns,
+                unit: finalUnit,
+                hint: hintText
+            };
+        }
+
+        // --- Core Functions ---
+
+        function nextQuestion() {
+            if (!isAnswered && document.getElementById('question-text').innerText !== 'Đang tải đề bài...') {
+                skippedTotal++;
+                streak = 0;
+                updateStatsUI();
+            }
+
+            currentProblem = generateProblem();
+            
+            // Reset UI
+            stepIndex = 0;
+            isAnswered = false;
+            statsEnabled = true;
+            updateStatsUI();
+
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('hint-box').classList.add('hidden');
+            document.getElementById('steps-container').innerHTML = '<div class="text-gray-400 italic text-sm text-center mt-10"><i class="fas fa-pen-alt text-3xl mb-2 opacity-30"></i><br>Bấm "Hướng dẫn giải" để xem bài làm mẫu</div>';
+            
+            document.getElementById('btn-show-step').disabled = false;
+            document.getElementById('btn-show-step').innerHTML = 'Hướng dẫn giải <i class="fas fa-arrow-right ml-1"></i>';
+
+            // Render Question
+            document.getElementById('question-text').innerHTML = currentProblem.question;
+            document.getElementById('unit-display').textContent = currentProblem.unit;
+            document.getElementById('hint-content').innerHTML = currentProblem.hint;
+            
+            // Reset input
+            document.getElementById('ans-final').value = '';
+            document.getElementById('ans-final').className = "flex-grow text-center font-bold text-xl p-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 outline-none transition-colors";
+            document.getElementById('ans-final').focus();
+            
+            MathJax.typesetPromise([document.getElementById('question-text')]);
+            updateStepCounter();
+        }
+
+        function updateStepCounter() {
+            document.getElementById('step-counter').textContent = `Bước: ${stepIndex}/${currentProblem.steps.length}`;
+        }
+
+        function showNextStep() {
+            disableStats(); // Showing steps disables stats for this question
+            
+            // Show hint box automatically when asking for help
+            document.getElementById('hint-box').classList.remove('hidden');
+
+            const container = document.getElementById('steps-container');
+            
+            if (stepIndex === 0) container.innerHTML = '';
+
+            if (stepIndex < currentProblem.steps.length) {
+                const step = currentProblem.steps[stepIndex];
+                
+                const s = document.createElement('div');
+                // Alternating colors for steps to differentiate
+                const isOdd = stepIndex % 2 !== 0;
+                s.className = `step-item p-3 rounded-lg shadow-sm text-sm border-l-4 font-medium mb-3 ${isOdd ? 'bg-indigo-50 border-indigo-400 text-indigo-900' : 'bg-white border-gray-300 text-gray-800'}`;
+                
+                s.innerHTML = `<div class="font-bold text-xs uppercase mb-1 opacity-70">${step.title}</div><div class="text-base">${step.content}</div>`;
+                
+                container.appendChild(s);
+                MathJax.typesetPromise([s]);
+                
+                stepIndex++;
+                updateStepCounter();
+                container.scrollTop = container.scrollHeight;
+            }
+
+            if (stepIndex >= currentProblem.steps.length) {
+                const btn = document.getElementById('btn-show-step');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Hết';
+            }
+        }
+
+        function checkAnswer() {
+            if (isAnswered) return;
+            
+            const finalInp = document.getElementById('ans-final');
+            const userVal = parseFloat(finalInp.value.replace(/,/g, '').replace(/\s/g, ''));
+            const correctVal = currentProblem.finalAns;
+            
+            const fb = document.getElementById('feedback');
+            fb.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-800', 'bg-blue-100', 'text-blue-800');
+
+            if (Math.abs(userVal - correctVal) < 0.1) {
+                // Correct
+                finalInp.classList.remove('border-gray-300', 'border-red-500');
+                finalInp.classList.add('border-emerald-500', 'bg-emerald-50');
+
+                if (statsEnabled) {
+                    streak++;
+                    correctTotal++;
+                    fb.innerHTML = '<i class="fas fa-crown"></i> Xuất sắc! Đáp án chính xác.';
+                    fb.classList.add('bg-green-100', 'text-green-800');
+                    updateStatsUI();
+                } else {
+                    fb.innerHTML = '<i class="fas fa-check"></i> Chính xác! (Không tính điểm vì đã xem hướng dẫn)';
+                    fb.classList.add('bg-blue-100', 'text-blue-800');
+                }
+                
+                isAnswered = true;
+                // Auto show remaining steps
+                const timer = setInterval(() => {
+                    if (stepIndex < currentProblem.steps.length) showNextStep();
+                    else clearInterval(timer);
+                }, 150);
+
+            } else {
+                // Wrong
+                finalInp.classList.remove('border-gray-300', 'border-emerald-500');
+                finalInp.classList.add('border-red-500', 'bg-red-50');
+                
+                fb.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> Sai rồi. Hãy thử lại hoặc xem hướng dẫn.`;
+                fb.classList.add('bg-red-100', 'text-red-700');
+                
+                if (statsEnabled) {
+                    streak = 0;
+                    wrongTotal++;
+                    updateStatsUI();
+                }
+            }
+        }
+
+        window.onload = function() {
+    initPdfButton(); // Gọi hàm kiểm tra nút PDF
+    nextQuestion();  // Gọi hàm tạo câu hỏi
+};
+
+    </script>
+	
+</body>
+</html>
