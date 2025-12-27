@@ -449,6 +449,7 @@
             let numeratorStr = "", denominatorStr = "", calcKStr = "";
             let finalReqText = "", finalReqVal = 0;
             let finalReqFormula = "";
+            let displayTargetVal = 0; // NEW: Variable to hold the actual RHS value for display
 
             const variableNames = ['x', 'y', 'z', 't'].slice(0, baseData.names.length);
             
@@ -466,6 +467,7 @@
                 numeratorStr = variableNames.join(" + ");
                 denominatorStr = baseData.ratios.join(" + ");
                 calcKStr = `\\dfrac{${formatNumber(sumValues)}}{${sumRatios}}`;
+                displayTargetVal = sumValues;
 
                 // --- FINAL QUESTION DISTRIBUTION FOR SUM ---
                 const qRand = Math.random();
@@ -483,7 +485,6 @@
                     finalReqFormula = `${variableNames[idx1]} + ${variableNames[idx2]}`;
                 } else {
                     // 35%: Ask diff/complex (must differ from condition)
-                    // e.g., (A+C) - B or A - B
                     if (baseData.names.length >= 3) {
                          // (A+C) - B
                          const val = (values[0] + values[2]) - values[1];
@@ -502,41 +503,32 @@
                 }
             } else {
                 // --- DIFF OR COMPLEX CONDITION ---
-                // Decide between Simple Diff or Complex logic
-                if (isHard && Math.random() < 0.6 && baseData.names.length >= 3) {
+                if (isHard && Math.random() < 0.7 && baseData.names.length >= 3) {
                     mode = 'complex';
                 }
 
                 if (mode === 'simple') {
-                    // DIFF
+                    // DIFF Logic (Simple x - y)
                     let i1 = 0, i2 = 1;
-                    // Fix 0 issue: ensure values are different. If same, force shift one value
                     let attempts = 0;
                     while (values[i1] === values[i2] && attempts < 10) { 
                         i2 = (i2 + 1) % values.length; 
                         attempts++;
                     }
-                    if (values[i1] === values[i2]) {
-                        // Fallback if all equal: artificially boost one ratio/value just for this problem context
-                        // But wait, values depend on ratios.
-                        // Safe bet: assume ratios distinct. If generated ratios equal, we have logic issue.
-                        // Generator ensures ratios vary or distinct enough usually.
-                    }
-
-                    const diffVal = Math.abs(values[i1] - values[i2]);
-                    // Safety check for 0 diff (0/0 error)
-                    if (diffVal === 0) {
-                         // Fallback to SUM logic if Diff is 0 (rare edge case)
+                    if (Math.abs(values[i1] - values[i2]) === 0) {
+                         // Fallback to SUM logic
                          isSumCondition = true;
-                         // ... repeat sum logic ...
-                         // For simplicity, reload page or just display Sum condition here as fallback
                          conditionText = `Tổng ${baseData.item} của các đơn vị là ${formatNumber(sumValues)} ${baseData.unit}.`;
                          numeratorStr = variableNames.join(" + ");
                          denominatorStr = baseData.ratios.join(" + ");
                          calcKStr = `\\dfrac{${formatNumber(sumValues)}}{${sumRatios}}`;
+                         displayTargetVal = sumValues;
                          finalReqText = `Tính ${baseData.item} của ${baseData.names[1]}?`;
                          finalReqVal = values[1];
                     } else {
+                        const diffVal = Math.abs(values[i1] - values[i2]);
+                        displayTargetVal = diffVal;
+                        
                         const more = values[i1] > values[i2] ? baseData.names[i1] : baseData.names[i2];
                         const less = values[i1] > values[i2] ? baseData.names[i2] : baseData.names[i1];
                         
@@ -550,63 +542,85 @@
                             denominatorStr = `${baseData.ratios[i2]} - ${baseData.ratios[i1]}`;
                         }
                         calcKStr = `\\dfrac{${formatNumber(diffVal)}}{${Math.abs(baseData.ratios[i1] - baseData.ratios[i2])}}`;
-                        
                         finalReqText = `Tính ${baseData.item} của ${baseData.names[0]}?`;
                         finalReqVal = values[0];
                     }
                 } else {
-                    // COMPLEX LOGIC (x + y - z = K etc.)
-                    const complexType = Math.random() < 0.5 ? 1 : 2;
+                    // --- COMPLEX LOGIC (UPDATED WITH REVERSE VARIANTS) ---
+                    // Select 3 unique indices
+                    let idxs = [0, 1, 2].sort(() => Math.random() - 0.5);
+                    let [i1, i2, i3] = idxs;
                     
-                    if (complexType === 1) {
-                        // x + y - z
-                        const targetVal = values[0] + values[1] - values[2];
-                        const sign = targetVal >= 0 ? "nhiều hơn" : "ít hơn";
-                        const absVal = Math.abs(targetVal);
-                        
-                        // Check 0/0
-                        if (absVal === 0 || (baseData.ratios[0] + baseData.ratios[1] - baseData.ratios[2]) === 0) {
-                            // Fallback to simple Sum
-                             conditionText = `Tổng ${baseData.item} của các đơn vị là ${formatNumber(sumValues)} ${baseData.unit}.`;
-                             numeratorStr = variableNames.join(" + ");
-                             denominatorStr = baseData.ratios.join(" + ");
-                             calcKStr = `\\dfrac{${formatNumber(sumValues)}}{${sumRatios}}`;
-                             finalReqText = `Tính ${baseData.item} của ${baseData.names[1]}?`;
-                             finalReqVal = values[1];
-                        } else {
-                            conditionText = `Biết tổng ${baseData.item} của ${baseData.names[0]} và ${baseData.names[1]} ${sign} ${baseData.names[2]} là ${formatNumber(absVal)} ${baseData.unit}.`;
-                            numeratorStr = `${variableNames[0]} + ${variableNames[1]} - ${variableNames[2]}`;
-                            denominatorStr = `${baseData.ratios[0]} + ${baseData.ratios[1]} - ${baseData.ratios[2]}`;
-                            calcKStr = `\\dfrac{${formatNumber(absVal)}}{${Math.abs(baseData.ratios[0] + baseData.ratios[1] - baseData.ratios[2])}}`;
-                            
-                            finalReqText = `Tính tổng ${baseData.item} của cả ba đơn vị?`;
-                            finalReqVal = sumValues;
-                        }
+                    const patterns = [
+                        { type: 1, cSum: 1, cSingle: 1 }, 
+                        { type: 2, cSum: 1, cSingle: 2 },
+                        { type: 3, cSum: 2, cSingle: 1 }
+                    ];
+                    
+                    const pat = patterns[getRandomInt(0, patterns.length - 1)];
+                    
+                    // Calculate real values to see which side is bigger
+                    const leftVal = pat.cSum * (values[i1] + values[i2]);
+                    const rightVal = pat.cSingle * values[i3];
+                    const diffVal = Math.abs(leftVal - rightVal);
+                    
+                    // Fallback if equal (rare but possible)
+                    if (diffVal === 0) {
+                         conditionText = `Tổng ${baseData.item} của các đơn vị là ${formatNumber(sumValues)} ${baseData.unit}.`;
+                         numeratorStr = variableNames.join(" + ");
+                         denominatorStr = baseData.ratios.join(" + ");
+                         calcKStr = `\\dfrac{${formatNumber(sumValues)}}{${sumRatios}}`;
+                         displayTargetVal = sumValues;
+                         finalReqText = `Tính ${baseData.item} của ${baseData.names[1]}?`;
+                         finalReqVal = values[1];
                     } else {
-                        // 2x - y (or similar)
-                        const valDiff = 2*values[0] - values[1];
-                        const absDiff = Math.abs(valDiff);
-                        const denomDiff = Math.abs(2*baseData.ratios[0] - baseData.ratios[1]);
+                        displayTargetVal = diffVal;
+
+                        // Construct strings
+                        const nameSum = `tổng ${baseData.item} của ${baseData.names[i1]} và ${baseData.names[i2]}`;
+                        const nameSingle = `${baseData.item} của ${baseData.names[i3]}`;
                         
-                        if (absDiff === 0 || denomDiff === 0) {
-                             // Fallback
-                             conditionText = `Tổng ${baseData.item} của các đơn vị là ${formatNumber(sumValues)} ${baseData.unit}.`;
-                             numeratorStr = variableNames.join(" + ");
-                             denominatorStr = baseData.ratios.join(" + ");
-                             calcKStr = `\\dfrac{${formatNumber(sumValues)}}{${sumRatios}}`;
-                             finalReqText = `Tính ${baseData.item} của ${baseData.names[1]}?`;
-                             finalReqVal = values[1];
+                        let partLeft = pat.cSum === 1 ? `${variableNames[i1]} + ${variableNames[i2]}` : `${pat.cSum}(${variableNames[i1]} + ${variableNames[i2]})`;
+                        let partRight = pat.cSingle === 1 ? variableNames[i3] : `${pat.cSingle}${variableNames[i3]}`;
+                        
+                        let ratioLeft = pat.cSum === 1 ? `(${baseData.ratios[i1]} + ${baseData.ratios[i2]})` : `${pat.cSum}(${baseData.ratios[i1]} + ${baseData.ratios[i2]})`;
+                        let ratioRight = pat.cSingle === 1 ? baseData.ratios[i3] : `${pat.cSingle} \\cdot ${baseData.ratios[i3]}`;
+
+                        // Determine who is bigger to create "Positive" subtraction
+                        if (leftVal > rightVal) {
+                             // (A+B) > C -> "Tổng A,B nhiều hơn C"
+                             let textStart = pat.cSum === 1 ? `Biết ${nameSum}` : `Biết ${pat.cSum} lần ${nameSum}`;
+                             let textEnd = pat.cSingle === 1 ? `nhiều hơn ${nameSingle}` : `nhiều hơn ${pat.cSingle} lần ${nameSingle}`;
+                             
+                             conditionText = `${textStart} ${textEnd} là ${formatNumber(diffVal)} ${baseData.unit}.`;
+                             
+                             // Remove parens if coeff is 1 for cleaner look
+                             if (pat.cSum === 1) partLeft = `${variableNames[i1]} + ${variableNames[i2]}`;
+                             if (pat.cSum === 1) ratioLeft = `${baseData.ratios[i1]} + ${baseData.ratios[i2]}`;
+
+                             numeratorStr = `${partLeft} - ${partRight}`;
+                             denominatorStr = `${ratioLeft} - ${ratioRight}`;
                         } else {
-                            const sign = valDiff >= 0 ? "nhiều hơn" : "ít hơn";
-                            conditionText = `Biết 2 lần ${baseData.item} của ${baseData.names[0]} ${sign} ${baseData.names[1]} là ${formatNumber(absDiff)} ${baseData.unit}.`;
-                            numeratorStr = `2${variableNames[0]} - ${variableNames[1]}`;
-                            denominatorStr = `2 \\cdot ${baseData.ratios[0]} - ${baseData.ratios[1]}`;
-                            calcKStr = `\\dfrac{${formatNumber(absDiff)}}{${denomDiff}}`;
-                            
-                            finalReqText = `Tổng ${baseData.item} của ${baseData.names[0]} và ${baseData.names[2]} nhiều hơn ${baseData.names[1]} bao nhiêu?`;
-                            finalReqVal = Math.abs((values[0] + values[2]) - values[1]);
-                            finalReqFormula = `|(${variableNames[0]} + ${variableNames[2]}) - ${variableNames[1]}|`;
+                             // C > (A+B) -> "C nhiều hơn Tổng A,B" OR "Tổng A,B ít hơn C"
+                             let textStart = pat.cSum === 1 ? `Biết ${nameSum}` : `Biết ${pat.cSum} lần ${nameSum}`;
+                             let textEnd = pat.cSingle === 1 ? `ít hơn ${nameSingle}` : `ít hơn ${pat.cSingle} lần ${nameSingle}`;
+
+                             conditionText = `${textStart} ${textEnd} là ${formatNumber(diffVal)} ${baseData.unit}.`;
+                             
+                             // Formula must be Big - Small = Positive
+                             // So: Right - Left
+                             if (pat.cSum === 1) partLeft = `(${variableNames[i1]} + ${variableNames[i2]})`; // Need parens because of minus
+                             
+                             numeratorStr = `${partRight} - ${partLeft}`;
+                             denominatorStr = `${ratioRight} - ${ratioLeft}`;
                         }
+                        
+                        let denomCalc = Math.abs((pat.cSum * (baseData.ratios[i1] + baseData.ratios[i2])) - (pat.cSingle * baseData.ratios[i3]));
+                        calcKStr = `\\dfrac{${formatNumber(diffVal)}}{${denomCalc}}`;
+
+                        // Final Req
+                        finalReqText = `Tính tổng ${baseData.item} của cả ba đơn vị?`;
+                        finalReqVal = sumValues;
                     }
                 }
             }
@@ -624,7 +638,21 @@
             });
 
             // B2
-            let explainContent = `Vì ${baseData.item} tỉ lệ thuận với ${baseData.prop} (${baseData.ratios.join("; ")}) nên:`;
+            // Prepare condition text for explanation
+            let conditionClause = conditionText;
+            if (conditionClause.startsWith("Biết ")) {
+                conditionClause = conditionClause.substring(5);
+            }
+            if (conditionClause.endsWith(".")) {
+                conditionClause = conditionClause.slice(0, -1);
+            }
+            // Lowercase first letter if it is "Tổng" to make the sentence flow better
+            if (conditionClause.startsWith("Tổng")) {
+                conditionClause = "tổng" + conditionClause.substring(4);
+            }
+
+            let explainContent = `Vì ${baseData.item} tỉ lệ thuận với ${baseData.prop} (${baseData.ratios.join("; ")}) và ${conditionClause} nên:`;
+            
             if (baseData.type === 'hidden') {
                 explainContent = `${baseData.explain}<br>${explainContent}`;
             }
@@ -636,18 +664,8 @@
 
             // B3
             const ratioEq = variableNames.map((v, i) => `\\dfrac{${v}}{${baseData.ratios[i]}}`).join(" = ");
-            // Extract math condition
-            let mathConditionDisplay = `${numeratorStr} = ...`;
-            if (conditionText.includes("Tổng") && !conditionText.includes("nhiều hơn")) {
-                 mathConditionDisplay = `${variableNames.join("+")} = ${formatNumber(sumValues)}`;
-            } else if (numeratorStr.includes("-") && !numeratorStr.includes("+") && !numeratorStr.includes("2")) {
-                 mathConditionDisplay = `${numeratorStr} = ${calcKStr.match(/\{([0-9,.]+)\}/)[1]}`; 
-            } else {
-                 // Hacky display for complex
-                 const valMatch = calcKStr.match(/\{([0-9,.]+)\}/);
-                 const val = valMatch ? valMatch[1] : "...";
-                 mathConditionDisplay = `${numeratorStr} = ${val}`; 
-            }
+            // FIX: Use displayedTargetVal directly instead of regex parsing
+            let mathConditionDisplay = `${numeratorStr} = ${formatNumber(displayTargetVal)}`;
 
             steps.push({
                 type: 'header',
