@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng Thí Nghiệm Xác Suất Lớp 6</title>
+    
+    <!-- Tải React và ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Tải Babel để biên dịch JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- CSS cho hiệu ứng 3D -->
+    <style>
+        @keyframes toss-coin {
+            0% { transform: translateY(0) rotateY(0); }
+            40% { transform: translateY(-150px) rotateY(900deg); }
+            100% { transform: translateY(0) rotateY(1800deg); } 
+        }
+
+        @keyframes shake-box {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-5px, 5px) rotate(-5deg); }
+            50% { transform: translate(5px, -5px) rotate(5deg); }
+            75% { transform: translate(-5px, -5px) rotate(-5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        @keyframes jiggle-ball {
+            0%, 100% { transform: translate(0,0); }
+            25% { transform: translate(2px, -2px); }
+            50% { transform: translate(-2px, 3px); }
+            75% { transform: translate(-2px, -2px); }
+        }
+
+        .perspective-800 { perspective: 800px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 2px; }
+        
+        /* Dice Faces Transforms */
+        .face-1 { transform: rotateY(0deg) translateZ(50px); }
+        .face-2 { transform: rotateY(180deg) translateZ(50px); }
+        .face-3 { transform: rotateY(90deg) translateZ(50px); }
+        .face-4 { transform: rotateY(-90deg) translateZ(50px); }
+        .face-5 { transform: rotateX(90deg) translateZ(50px); }
+        .face-6 { transform: rotateX(-90deg) translateZ(50px); }
+
+        /* Coin Faces */
+        .coin-front { transform: rotateY(0deg) translateZ(1px); }
+        .coin-back { transform: rotateY(180deg) translateZ(1px); }
+        .coin-side { transform: rotateY(90deg); width: 4px; left: 48px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- ICON COMPONENTS (Thay thế Lucide-React để chạy trên web đơn giản) ---
+        const IconBase = ({ d, size = 24, className = "", color="currentColor" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {d}
+            </svg>
+        );
+
+        const CircleIcon = (props) => <IconBase {...props} d={<><circle cx="12" cy="12" r="10"/></>} />;
+        const BoxIcon = (props) => <IconBase {...props} d={<><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></>} />;
+        const DicesIcon = (props) => <IconBase {...props} d={<><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></>} />;
+        const BarChart3Icon = (props) => <IconBase {...props} d={<><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></>} />;
+        const RefreshCwIcon = (props) => <IconBase {...props} d={<><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></>} />;
+        const RotateCcwIcon = (props) => <IconBase {...props} d={<><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/><path d="M3 3v9h9"/></>} />;
+        const ArrowRightIcon = (props) => <IconBase {...props} d={<><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></>} />;
+        const CalculatorIcon = (props) => <IconBase {...props} d={<><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></>} />;
+        const ZapIcon = (props) => <IconBase {...props} d={<><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></>} />;
+
+        // --- SHARED COMPONENTS ---
+
+        const Card = ({ title, children, className = "" }) => (
+            <div className={`bg-white rounded-2xl shadow-xl p-6 border border-indigo-100 ${className} overflow-hidden flex flex-col`}>
+                <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center gap-2 border-b border-indigo-50 pb-2">
+                {title}
+                </h3>
+                <div className="flex-1">
+                {children}
+                </div>
+            </div>
+        );
+
+        const SimpleBarChart = ({ data, total }) => {
+            const maxVal = Math.max(...data.map(d => d.value)) || 1;
+            
+            return (
+                <div className="w-full mt-2 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+                <div className="flex items-end justify-between h-40 gap-4 pb-2 border-b-2 border-slate-300">
+                    {data.map((item, idx) => {
+                    const height = total === 0 ? 0 : (item.value / maxVal) * 100;
+                    return (
+                        <div key={idx} className="flex flex-col items-center flex-1 h-full justify-end group">
+                        <div className="relative w-full flex flex-col items-center justify-end h-full">
+                            <span className="text-xs font-bold text-slate-600 mb-1 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-white px-2 py-1 rounded shadow-sm border border-slate-200 whitespace-nowrap z-10 pointer-events-none">
+                            {item.value} lần
+                            </span>
+                            <div 
+                            className="w-full md:w-4/5 rounded-t-md transition-all duration-500 ease-out border-t border-x border-black/5 shadow-sm relative hover:brightness-110"
+                            style={{ 
+                                height: `${height === 0 ? 2 : height}%`, 
+                                backgroundColor: item.colorCode || '#6366f1',
+                                opacity: height === 0 ? 0.3 : 1 
+                            }}
+                            >
+                                {height > 15 && (
+                                    <span className="absolute bottom-1 w-full text-center text-[10px] font-bold text-white/90 truncate px-1">
+                                        {item.value}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <span className="text-xs font-bold mt-2 text-slate-700 text-center leading-tight truncate w-full" title={item.label}>{item.label}</span>
+                        </div>
+                    );
+                    })}
+                </div>
+                <div className="text-center text-xs text-slate-400 mt-1 italic">Biểu đồ số lần xuất hiện</div>
+                </div>
+            );
+        };
+
+        const ProbabilityFormulaDisplay = ({ data, total }) => {
+            return (
+                <div className="mt-4 p-4 bg-indigo-50/60 rounded-xl border border-indigo-100">
+                <h4 className="font-bold text-indigo-900 mb-3 flex items-center gap-2 text-sm uppercase tracking-wide">
+                    <CalculatorIcon size={16} /> Xác suất thực nghiệm
+                </h4>
+                
+                <div className="space-y-2 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
+                    {data.map((item, idx) => {
+                        const percent = total > 0 ? ((item.value/total)*100).toFixed(1) : 0;
+                        return (
+                        <div key={idx} className="flex items-center text-sm gap-2 bg-white/70 p-2 rounded hover:bg-white transition-colors border border-transparent hover:border-indigo-100">
+                            <div className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm" style={{ backgroundColor: item.colorCode }}></div>
+                            <span className="font-semibold text-slate-700 w-20 truncate" title={item.label}>{item.label}:</span>
+                            <div className="flex items-center gap-1 font-mono text-slate-800 flex-1 justify-end">
+                            <span className="text-gray-400 text-[10px] mr-1 hidden sm:inline">{item.value}/{total} ≈</span>
+                            <span className="font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded text-xs">{percent}%</span>
+                            </div>
+                        </div>
+                        );
+                    })}
+                </div>
+                </div>
+            );
+        }
+
+        const FastForwardControls = ({ onBulkRun, disabled }) => (
+            <div className="mt-4 pt-4 border-t border-slate-200">
+                <div className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide flex items-center gap-1">
+                <ZapIcon size={14} className="text-yellow-500 fill-yellow-500" /> Chạy thực nghiệm nhanh:
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                {[10, 50, 100, 200, 500, 1000].map(num => (
+                    <button
+                    key={num}
+                    onClick={() => onBulkRun(num)}
+                    disabled={disabled}
+                    className="px-1 py-2 bg-white border border-slate-300 rounded shadow-sm hover:bg-indigo-50 hover:border-indigo-400 hover:text-indigo-700 text-xs font-bold text-slate-600 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                    +{num}
+                    </button>
+                ))}
+                </div>
+                <div className="text-[10px] text-slate-400 mt-2 text-center italic">
+                *Giúp quan sát kết quả khi số lần thử lớn
+                </div>
+            </div>
+        );
+
+        // --- MODULES ---
+
+        // 1. TUNG ĐỒNG XU
+        const CoinToss = () => {
+            const [isFlipping, setIsFlipping] = useState(false);
+            const [result, setResult] = useState(null); 
+            const [counts, setCounts] = useState({ S: 0, N: 0 });
+            const coinRef = useRef(null);
+
+            const toss = () => {
+                if (isFlipping) return;
+                setIsFlipping(true);
+                setResult(null);
+                const outcome = Math.random() < 0.5 ? 'S' : 'N';
+                
+                if (coinRef.current) {
+                    coinRef.current.style.animation = 'none';
+                    void coinRef.current.offsetWidth;
+                    coinRef.current.style.animation = 'toss-coin 1s ease-in-out forwards';
+                }
+
+                setTimeout(() => {
+                if (coinRef.current) {
+                    coinRef.current.style.animation = 'none';
+                    const finalRotate = outcome === 'S' ? 0 : 180;
+                    const randomTilt = Math.random() * 20 - 10;
+                    coinRef.current.style.transform = `rotateY(${finalRotate}deg) rotateZ(${randomTilt}deg)`;
+                }
+                setResult(outcome);
+                setCounts(prev => ({ ...prev, [outcome]: prev[outcome] + 1 }));
+                setIsFlipping(false);
+                }, 1000);
+            };
+
+            const runBulk = (n) => {
+                if (isFlipping) return;
+                let newS = 0;
+                let newN = 0;
+                for (let i = 0; i < n; i++) {
+                    Math.random() < 0.5 ? newS++ : newN++;
+                }
+                setCounts(prev => ({ S: prev.S + newS, N: prev.N + newN }));
+                setResult(null); 
+                if (coinRef.current) coinRef.current.style.transform = 'rotateY(0deg)'; 
+            };
+
+            const reset = () => {
+                setCounts({ S: 0, N: 0 });
+                setResult(null);
+                if (coinRef.current) coinRef.current.style.transform = 'rotateY(0deg)';
+            };
+
+            const total = counts.S + counts.N;
+            const chartData = [
+                { label: 'Sấp (S)', value: counts.S, colorCode: '#eab308' }, 
+                { label: 'Ngửa (N)', value: counts.N, colorCode: '#6366f1' }  
+            ];
+
+            return (
+                <div className="grid lg:grid-cols-2 gap-6 h-full">
+                <Card title="Thí nghiệm: Tung Đồng Xu" className="bg-gradient-to-br from-indigo-50 to-white min-h-[400px]">
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                        <div className="perspective-800 h-48 flex items-center justify-center w-full my-4">
+                        <div ref={coinRef} className="w-32 h-32 relative preserve-3d transition-transform duration-500">
+                            <div className="absolute inset-0 rounded-full bg-yellow-400 border-4 border-yellow-600 flex items-center justify-center backface-hidden shadow-xl coin-front">
+                            <div className="w-24 h-24 rounded-full border-2 border-yellow-600/50 flex items-center justify-center bg-yellow-300">
+                                <span className="text-4xl font-black text-yellow-800">S</span>
+                            </div>
+                            </div>
+                            <div className="absolute inset-0 rounded-full bg-yellow-400 border-4 border-yellow-600 flex items-center justify-center backface-hidden coin-back shadow-xl">
+                            <div className="w-24 h-24 rounded-full border-2 border-yellow-600/50 flex items-center justify-center bg-yellow-300">
+                                <span className="text-4xl font-black text-yellow-800">N</span>
+                            </div>
+                            </div>
+                            <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-yellow-700 transform -translate-x-1/2 rotateY(90deg)"></div>
+                        </div>
+                        </div>
+                        
+                        <div className="h-8 mb-4">
+                        {isFlipping ? <span className="text-indigo-500 font-semibold animate-pulse">Đang tung...</span> : 
+                            result ? <span className="text-2xl font-bold text-indigo-700 animate-bounce block">Mặt {result === 'S' ? 'SẤP' : 'NGỬA'}</span> : 
+                            <span className="text-gray-400">Sẵn sàng</span>}
+                        </div>
+
+                        <button 
+                        onClick={toss} 
+                        disabled={isFlipping}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900 font-bold py-3 px-8 rounded-full shadow-lg shadow-yellow-500/30 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 text-lg"
+                        >
+                        <RotateCcwIcon size={20} className={isFlipping ? "animate-spin" : ""} /> TUNG 1 LẦN
+                        </button>
+                    </div>
+                </Card>
+
+                <Card title="Thống kê & Tính toán">
+                    <div className="flex justify-between mb-4 items-center bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <span className="text-sm font-medium text-slate-600">Tổng lần tung: <strong className="text-indigo-700 text-lg">{total}</strong></span>
+                    <button onClick={reset} className="text-xs text-red-500 hover:bg-red-50 px-3 py-1 rounded border border-red-200 transition-colors">Làm lại</button>
+                    </div>
+
+                    <SimpleBarChart data={chartData} total={total} />
+                    <ProbabilityFormulaDisplay data={chartData} total={total} />
+                    <FastForwardControls onBulkRun={runBulk} disabled={isFlipping} />
+                </Card>
+                </div>
+            );
+        };
+
+        // 2. GIEO XÚC XẮC
+        const DiceRoll = () => {
+            const [rolling, setRolling] = useState(false);
+            const [face, setFace] = useState(1);
+            const [history, setHistory] = useState([0, 0, 0, 0, 0, 0]); 
+            const cubeRef = useRef(null);
+
+            const roll = () => {
+                if (rolling) return;
+                setRolling(true);
+                
+                const newFace = Math.floor(Math.random() * 6) + 1;
+                let finalX = 0, finalY = 0;
+                const rotations = { 1: [0, 0], 2: [0, 180], 3: [0, -90], 4: [0, 90], 5: [-90, 0], 6: [90, 0] };
+                [finalX, finalY] = rotations[newFace];
+                const extraSpinX = 720 * (Math.floor(Math.random()*2) + 1); 
+                const extraSpinY = 720 * (Math.floor(Math.random()*2) + 1);
+
+                if (cubeRef.current) {
+                cubeRef.current.style.transition = "transform 1.5s cubic-bezier(0.15, 0.45, 0.15, 1.05)"; 
+                cubeRef.current.style.transform = `rotateX(${finalX + extraSpinX}deg) rotateY(${finalY + extraSpinY}deg)`;
+                }
+
+                setTimeout(() => {
+                setFace(newFace);
+                setHistory(prev => {
+                    const newHist = [...prev];
+                    newHist[newFace - 1]++;
+                    return newHist;
+                });
+                setRolling(false);
+                }, 1500);
+            };
+
+            const runBulk = (n) => {
+                if (rolling) return;
+                const newHistory = [...history];
+                for(let i=0; i<n; i++) {
+                    const val = Math.floor(Math.random() * 6); // 0-5
+                    newHistory[val]++;
+                }
+                setHistory(newHistory);
+                if (cubeRef.current) {
+                    cubeRef.current.style.transition = "none";
+                    cubeRef.current.style.transform = "rotateX(0deg) rotateY(0deg)";
+                    setFace(1); 
+                }
+            };
+
+            const reset = () => {
+                setHistory([0,0,0,0,0,0]);
+                if (cubeRef.current) {
+                    cubeRef.current.style.transition = "transform 0.5s ease";
+                    cubeRef.current.style.transform = "rotateX(0deg) rotateY(0deg)";
+                }
+            };
+
+            const total = history.reduce((a, b) => a + b, 0);
+            const chartData = history.map((val, idx) => ({ 
+                label: `Mặt ${idx+1}`, 
+                value: val,
+                colorCode: '#ef4444' 
+            }));
+
+            const Dot = () => <div className="w-2.5 h-2.5 bg-white rounded-full shadow-inner"></div>;
+            const Face = ({ className, children }) => (
+                <div className={`absolute w-[100px] h-[100px] border-2 border-red-900/20 bg-red-600 rounded-xl shadow-[inset_0_0_15px_rgba(0,0,0,0.3)] flex flex-col justify-center items-center ${className} backface-hidden`}>
+                {children}
+                </div>
+            );
+
+            return (
+                <div className="grid lg:grid-cols-2 gap-6 h-full">
+                <Card title="Thí nghiệm: Gieo Xúc Xắc" className="bg-gradient-to-br from-red-50 to-white min-h-[400px]">
+                    <div className="flex-1 flex flex-col items-center justify-center perspective-800">
+                    <div className="relative w-[100px] h-[100px] preserve-3d mb-10" ref={cubeRef} style={{ transform: 'rotateX(-20deg) rotateY(20deg)' }}>
+                        <Face className="face-1"><div className="w-full h-full flex items-center justify-center"><Dot /></div></Face>
+                        <Face className="face-2"><div className="w-full h-full flex justify-between p-2"><Dot /><div className="self-end"><Dot /></div></div></Face>
+                        <Face className="face-3"><div className="w-full h-full flex justify-between p-2"><Dot /><div className="self-center"><Dot /></div><div className="self-end"><Dot /></div></div></Face>
+                        <Face className="face-4"><div className="w-full h-full flex justify-between p-2"><div className="flex flex-col justify-between"><Dot /><Dot /></div><div className="flex flex-col justify-between"><Dot /><Dot /></div></div></Face>
+                        <Face className="face-5"><div className="w-full h-full flex justify-between p-2"><div className="flex flex-col justify-between"><Dot /><Dot /></div><div className="self-center"><Dot /></div><div className="flex flex-col justify-between"><Dot /><Dot /></div></div></Face>
+                        <Face className="face-6"><div className="w-full h-full flex justify-between p-2"><div className="flex flex-col justify-between"><Dot /><Dot /><Dot /></div><div className="flex flex-col justify-between"><Dot /><Dot /><Dot /></div></div></Face>
+                    </div>
+                    <button 
+                        onClick={roll} 
+                        disabled={rolling}
+                        className="mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-12 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-2 transform active:scale-95 transition-all"
+                        >
+                        <DicesIcon size={24} className={rolling ? "animate-bounce" : ""} /> GIEO 1 LẦN
+                        </button>
+                    </div>
+                </Card>
+
+                <Card title="Thống kê & Tính toán">
+                    <div className="flex justify-between items-center mb-4 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <span className="text-sm font-medium text-slate-600">Tổng: <strong className="text-red-600 text-lg">{total}</strong></span>
+                    <button onClick={reset} className="text-xs text-red-500 hover:underline">Xóa lịch sử</button>
+                    </div>
+                    
+                    <SimpleBarChart data={chartData} total={total} />
+                    <ProbabilityFormulaDisplay data={chartData} total={total} />
+                    <FastForwardControls onBulkRun={runBulk} disabled={rolling} />
+                </Card>
+                </div>
+            );
+        };
+
+        // 3. BỐC BI
+        const BallDraw = () => {
+            const initialBalls = [
+                { id: 1, color: 'red', label: 'Đỏ', css: 'bg-red-500', hex: '#ef4444' },
+                { id: 2, color: 'red', label: 'Đỏ', css: 'bg-red-500', hex: '#ef4444' },
+                { id: 3, color: 'red', label: 'Đỏ', css: 'bg-red-500', hex: '#ef4444' },
+                { id: 4, color: 'blue', label: 'Xanh', css: 'bg-blue-500', hex: '#3b82f6' },
+                { id: 5, color: 'blue', label: 'Xanh', css: 'bg-blue-500', hex: '#3b82f6' },
+                { id: 6, color: 'yellow', label: 'Vàng', css: 'bg-yellow-400', hex: '#facc15' },
+            ];
+
+            const [boxState, setBoxState] = useState('idle'); 
+            const [pickedBall, setPickedBall] = useState(null);
+            const [stats, setStats] = useState({ red: 0, blue: 0, yellow: 0 });
+
+            const pickBall = () => {
+                if (boxState === 'shaking' || boxState === 'picked') return;
+                setBoxState('shaking');
+                setPickedBall(null);
+
+                setTimeout(() => {
+                const randomBall = initialBalls[Math.floor(Math.random() * initialBalls.length)];
+                setPickedBall(randomBall);
+                setStats(prev => ({ ...prev, [randomBall.color]: prev[randomBall.color] + 1 }));
+                setBoxState('picked');
+                }, 1200);
+            };
+
+            const runBulk = (n) => {
+                if (boxState === 'shaking') return;
+                if (boxState === 'picked') setBoxState('idle'); 
+                setPickedBall(null);
+
+                let r=0, b=0, y=0;
+                for(let i=0; i<n; i++) {
+                    const rand = Math.floor(Math.random() * initialBalls.length);
+                    const color = initialBalls[rand].color;
+                    if(color === 'red') r++;
+                    else if(color === 'blue') b++;
+                    else y++;
+                }
+                setStats(prev => ({ red: prev.red + r, blue: prev.blue + b, yellow: prev.yellow + y }));
+            };
+
+            const closeBox = () => {
+                setBoxState('idle');
+                setPickedBall(null);
+            };
+
+            const reset = () => {
+                setStats({ red: 0, blue: 0, yellow: 0 });
+                setPickedBall(null);
+                setBoxState('idle');
+            };
+
+            const total = stats.red + stats.blue + stats.yellow;
+            const chartData = [
+                { label: 'Bi Đỏ', value: stats.red, colorCode: '#ef4444' },
+                { label: 'Bi Xanh', value: stats.blue, colorCode: '#3b82f6' },
+                { label: 'Bi Vàng', value: stats.yellow, colorCode: '#facc15' }
+            ];
+
+            return (
+                <div className="grid lg:grid-cols-2 gap-6 h-full">
+                <Card title="Thí nghiệm: Bốc Bi Ngẫu Nhiên" className="bg-gradient-to-br from-indigo-50 to-white min-h-[400px]">
+                    <div className="flex-1 flex flex-col items-center justify-center relative">
+                        
+                        {/* Box Visualization */}
+                        <div className="relative w-full h-64 flex items-end justify-center mb-8">
+                            <div 
+                                className={`relative w-56 h-48 bg-gray-800 rounded-b-3xl rounded-t-lg overflow-hidden border-4 border-gray-700 shadow-2xl flex flex-wrap content-end justify-center p-4 gap-2 transition-transform ${boxState === 'shaking' ? 'animate-[shake-box_0.5s_infinite]' : ''}`}
+                            >
+                                {initialBalls.map((b, i) => {
+                                    const isPicked = boxState === 'picked' && pickedBall?.id === b.id;
+                                    return (
+                                        <div 
+                                            key={b.id} 
+                                            className={`w-10 h-10 rounded-full ${b.css} shadow-[inset_-4px_-4px_6px_rgba(0,0,0,0.3)] border border-white/20 transition-all duration-300 ${boxState === 'shaking' ? 'animate-[jiggle-ball_0.3s_infinite]' : ''} ${isPicked ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}`}
+                                            style={{ animationDelay: `${i * 0.1}s` }}
+                                        ></div>
+                                    )
+                                })}
+                                
+                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none"></div>
+                            </div>
+
+                            {/* Picked Ball Animation - Appearing Outside */}
+                            {boxState === 'picked' && pickedBall && (
+                            <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                                <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px] rounded-3xl animate-in fade-in duration-300"></div>
+                                <div className="relative flex flex-col items-center animate-in zoom-in slide-in-from-bottom-24 duration-700 ease-out">
+                                    <div className={`w-24 h-24 rounded-full ${pickedBall.css} shadow-[inset_-8px_-8px_12px_rgba(0,0,0,0.3),0_20px_25px_rgba(0,0,0,0.2)] border-4 border-white flex items-center justify-center`}>
+                                        <span className="text-white font-bold text-lg drop-shadow-md">{pickedBall.label}</span>
+                                    </div>
+                                    <div className="mt-4 bg-white px-6 py-2 rounded-full shadow-xl text-indigo-700 font-bold border-2 border-indigo-100 animate-bounce">
+                                    Đã bốc ra ngoài!
+                                    </div>
+                                </div>
+                            </div>
+                            )}
+                        </div>
+                    
+                        {boxState === 'picked' ? (
+                            <button onClick={closeBox} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-full shadow-lg flex items-center gap-2 animate-in zoom-in hover:scale-105 transition-transform">
+                                <ArrowRightIcon size={20} /> Cho lại vào hộp
+                            </button>
+                        ) : (
+                            <button 
+                            onClick={pickBall} 
+                            disabled={boxState === 'shaking'}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-indigo-500/30 flex items-center gap-2 disabled:opacity-70 text-lg hover:scale-105 transition-transform"
+                            >
+                            <BoxIcon size={20} className={boxState === 'shaking' ? 'animate-bounce' : ''} /> 
+                            {boxState === 'shaking' ? 'Đang lắc...' : 'BỐC 1 BI'}
+                            </button>
+                        )}
+                    </div>
+                </Card>
+
+                <Card title="Thống kê & Tính toán">
+                    <div className="flex justify-between items-center mb-4 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <span className="text-sm font-medium text-slate-600">Tổng lần bốc: <strong className="text-indigo-600 text-lg">{total}</strong></span>
+                    <button onClick={reset} className="text-xs text-red-500 hover:underline">Xóa thống kê</button>
+                    </div>
+                    
+                    <SimpleBarChart data={chartData} total={total} />
+                    <ProbabilityFormulaDisplay data={chartData} total={total} />
+                    <FastForwardControls onBulkRun={runBulk} disabled={boxState === 'shaking'} />
+                </Card>
+                </div>
+            );
+        };
+
+        // 4. VÒNG QUAY
+        const Spinner = () => {
+            const [rotation, setRotation] = useState(0);
+            const [spinning, setSpinning] = useState(false);
+            const [stats, setStats] = useState([0, 0, 0, 0]); 
+            
+            const segments = [
+                { color: '#EF4444', label: '1', text: 'Đỏ' },
+                { color: '#3B82F6', label: '2', text: 'Xanh' },
+                { color: '#10B981', label: '3', text: 'Lục' },
+                { color: '#F59E0B', label: '4', text: 'Vàng' }
+            ];
+
+            const spin = () => {
+                if (spinning) return;
+                setSpinning(true);
+                
+                const randomDeg = Math.floor(Math.random() * 360);
+                const extraSpins = 1800; 
+                const newRotation = rotation + extraSpins + randomDeg;
+                setRotation(newRotation);
+                
+                setTimeout(() => {
+                setSpinning(false);
+                const normalizedRot = newRotation % 360;
+                let winningIndex = 0;
+                if (normalizedRot < 90) winningIndex = 3; 
+                else if (normalizedRot < 180) winningIndex = 2; 
+                else if (normalizedRot < 270) winningIndex = 1; 
+                else winningIndex = 0; 
+                
+                setStats(prev => {
+                    const n = [...prev];
+                    n[winningIndex]++;
+                    return n;
+                });
+                }, 3000);
+            };
+            
+            const runBulk = (n) => {
+                if (spinning) return;
+                const newStats = [...stats];
+                for(let i=0; i<n; i++) {
+                    const winIdx = Math.floor(Math.random() * 4);
+                    newStats[winIdx]++;
+                }
+                setStats(newStats);
+            };
+
+            const reset = () => {
+                setStats([0,0,0,0]);
+                setRotation(0);
+            };
+            
+            const total = stats.reduce((a,b) => a+b, 0);
+            const chartData = segments.map((seg, i) => ({
+                label: seg.text,
+                value: stats[i],
+                colorCode: seg.color
+            }));
+
+            return (
+                <div className="grid lg:grid-cols-2 gap-6 h-full">
+                <Card title="Thí nghiệm: Vòng Quay May Mắn" className="bg-gradient-to-br from-green-50 to-white min-h-[400px]">
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                        <div className="relative mb-8 scale-110">
+                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 drop-shadow-lg">
+                                <div className="w-8 h-10 bg-gray-800 clip-path-polygon-[50%_100%,_0%_0%,_100%_0%] rounded-t-sm"></div>
+                                <div className="w-2 h-2 bg-white rounded-full absolute top-1 left-1/2 -translate-x-1/2"></div>
+                            </div>
+                            <div 
+                            className="w-64 h-64 rounded-full overflow-hidden border-8 border-white shadow-[0_0_20px_rgba(0,0,0,0.1)] relative"
+                            style={{ 
+                                transform: `rotate(${rotation}deg)`,
+                                transition: 'transform 3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
+                            }}
+                            >
+                            <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-0">
+                                <path d="M50 50 L50 0 A50 50 0 0 1 100 50 Z" fill="#EF4444" />
+                                <path d="M50 50 L100 50 A50 50 0 0 1 50 100 Z" fill="#3B82F6" />
+                                <path d="M50 50 L50 100 A50 50 0 0 1 0 50 Z" fill="#10B981" />
+                                <path d="M50 50 L0 50 A50 50 0 0 1 50 0 Z" fill="#F59E0B" />
+                            </svg>
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-md z-10 flex items-center justify-center">
+                                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                            </div>
+                            </div>
+                            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-32 h-16 bg-gray-200 -z-10 rounded-t-full clip-path-polygon-[20%_0%,_80%_0%,_100%_100%,_0%_100%]"></div>
+                        </div>
+                        
+                        <button 
+                            onClick={spin} 
+                            disabled={spinning}
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-12 rounded-full shadow-lg shadow-green-500/30 active:scale-95 transition-transform disabled:opacity-50 disabled:scale-100 text-lg"
+                        >
+                            {spinning ? 'Đang quay...' : 'QUAY 1 LẦN'}
+                        </button>
+                    </div>
+                </Card>
+                
+                <Card title="Thống kê & Tính toán">
+                    <div className="flex justify-between items-center mb-4 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <span className="text-sm font-medium text-slate-600">Lượt quay: <strong className="text-green-600 text-lg">{total}</strong></span>
+                    <button onClick={reset} className="text-xs text-red-500 hover:underline">Làm lại</button>
+                    </div>
+                    
+                    <SimpleBarChart data={chartData} total={total} />
+                    <ProbabilityFormulaDisplay data={chartData} total={total} />
+                    <FastForwardControls onBulkRun={runBulk} disabled={spinning} />
+                </Card>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        function App() {
+            const [activeTab, setActiveTab] = useState('coin');
+
+            const tabs = [
+                { id: 'coin', label: 'Tung Đồng Xu', icon: CircleIcon },
+                { id: 'dice', label: 'Gieo Xúc Xắc', icon: BoxIcon },
+                { id: 'balls', label: 'Bốc Bi', icon: BarChart3Icon },
+                { id: 'spinner', label: 'Vòng Quay', icon: RefreshCwIcon },
+            ];
+
+            return (
+                <div className="min-h-screen bg-slate-100 font-sans text-slate-800 p-4 md:p-8">
+                <div className="max-w-6xl mx-auto">
+                    <header className="mb-8 text-center">
+                    <h1 className="text-3xl md:text-5xl font-black text-indigo-900 mb-3 tracking-tight">
+                        PHÒNG THÍ NGHIỆM XÁC SUẤT
+                    </h1>
+                    <p className="text-indigo-600 font-medium text-lg">Mô phỏng 3D trực quan & Công thức tính toán</p>
+                    </header>
+
+                    {/* Navigation */}
+                    <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+                    {tabs.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center gap-2 md:gap-3 px-4 py-2 md:px-6 md:py-3 rounded-2xl transition-all font-bold text-sm md:text-lg shadow-sm border-2 ${
+                            isActive
+                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-indigo-200 transform scale-105'
+                                : 'bg-white border-transparent text-gray-500 hover:bg-white hover:text-indigo-600 hover:border-indigo-100'
+                            }`}
+                        >
+                            <Icon size={20} className={isActive ? "text-yellow-300" : ""} />
+                            {tab.label}
+                        </button>
+                        );
+                    })}
+                    </div>
+
+                    {/* Content Area */}
+                    <main className="animate-in fade-in duration-500 slide-in-from-bottom-8">
+                    {activeTab === 'coin' && <CoinToss />}
+                    {activeTab === 'dice' && <DiceRoll />}
+                    {activeTab === 'balls' && <BallDraw />}
+                    {activeTab === 'spinner' && <Spinner />}
+                    </main>
+
+                    <footer className="mt-16 text-center text-gray-400 text-sm pb-8">
+						© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io                    </footer>
+                </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
