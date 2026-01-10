@@ -8,594 +8,727 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #0f172a; color: #e2e8f0; user-select: none; touch-action: none; }
+        body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #0f172a; color: #e2e8f0; user-select: none; touch-action: none; overflow: hidden; }
         .font-tech { font-family: 'Orbitron', sans-serif; }
         
-        /* Grid Customization */
+        /* --- Grid Styles --- */
         .nonogram-cell {
-            transition: background-color 0.05s, transform 0.1s;
+            transition: background-color 0.1s;
+            position: relative;
         }
-        .nonogram-cell:active {
-            transform: scale(0.9);
-        }
-        /* Thêm !important để đảm bảo màu hiển thị đè lên màu nền mặc định */
+        
         .cell-filled {
-            background-color: #22d3ee !important; /* Cyan-400 */
+            background-color: #22d3ee !important;
             border-color: #06b6d4 !important;
-            box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
         }
+        
         .cell-crossed {
-            background-color: #1e293b !important; /* Slate-800 */
-            color: #64748b;
-            display: flex; align-items: center; justify-content: center;
+            background-color: #1e293b !important;
         }
         .cell-crossed::after {
-            content: "✖"; font-size: 14px; font-weight: bold;
+            content: "✖"; font-size: 70%; font-weight: bold; color: #64748b;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+
+        .cell-highlight-guide { background-color: rgba(56, 189, 248, 0.1) !important; }
+        .cell-filled.cell-highlight-guide { background-color: #38bdf8 !important; }
+
+        /* --- Hint Styles --- */
+        .hint-num {
+            font-size: 0.75rem; color: #94a3b8; margin: 1px; transition: all 0.3s;
+        }
+        .hint-completed {
+            color: #475569; text-decoration: line-through; opacity: 0.5;
         }
         
-        /* Hint Effect */
-        @keyframes flashHint {
-            0% { background-color: #facc15; box-shadow: 0 0 20px #facc15; transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        .hint-anim {
-            animation: flashHint 0.5s ease-out;
-        }
-
-        /* Hint text styles */
-        .hint-num {
-            font-size: 0.75rem;
-            color: #94a3b8;
-        }
-        .hint-done {
-            color: #334155; text-decoration: line-through;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-
-        /* Zoom transition */
+        /* --- Zoom & Pan --- */
         #game-board {
-            transform-origin: 0 0; /* Quan trọng: Phóng to từ góc trên trái */
-            transition: transform 0.2s ease;
+            transform-origin: 0 0;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth centering animation */
         }
-        /* Wrapper chứa board để tính toán kích thước cuộn */
-        #board-container {
-            transition: width 0.2s ease, height 0.2s ease;
+        #viewport {
+            cursor: grab;
+            overflow: hidden;
+            position: relative;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 20px 20px;
         }
+        #viewport.cursor-crosshair { cursor: crosshair; }
+        #viewport.cursor-grabbing { cursor: grabbing; }
+
+        /* --- UI Elements --- */
+        .btn-tool:active { transform: scale(0.95); }
+        .btn-active {
+            background-color: #0891b2 !important; color: white !important;
+            box-shadow: 0 0 10px rgba(8, 145, 178, 0.5);
+            border-color: #22d3ee !important;
+        }
+
+        /* Modal & Toasts */
+        .modal-overlay {
+            background-color: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(4px);
+        }
+        
+        @keyframes slideInUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-anim { animation: slideInUp 0.3s ease-out; }
+
+        @keyframes flashHint {
+            0% { background-color: #facc15; box-shadow: 0 0 20px #facc15; z-index: 50; }
+            100% { z-index: 0; }
+        }
+        .hint-anim { animation: flashHint 0.8s ease-out; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
+<body class="h-screen w-screen flex flex-col p-2 overflow-hidden">
 
-    <!-- Header -->
-    <div class="text-center mb-2 md:mb-4">
-        <h1 class="text-xl md:text-3xl font-bold font-tech text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-1">
-            NONOGRAM LOGIC
-        </h1>
-        <p class="text-slate-400 text-xs md:text-sm">Tô màu các ô dựa trên số gợi ý để tìm hình bí ẩn.</p>
-    </div>
-
-    <!-- Controls & Level Select -->
-    <div class="flex flex-wrap gap-2 md:gap-3 mb-4 justify-center items-center max-w-4xl px-2">
-        <!-- Level Select -->
-        <select id="level-select" class="bg-slate-800 border border-slate-600 text-cyan-400 text-xs md:text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2 outline-none">
-            <!-- Options added by JS -->
-        </select>
-        
-        <!-- Game Actions -->
-        <button onclick="resetGame()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-xs md:text-sm transition-colors border border-slate-600" title="Chơi lại">
-            <i class="fa-solid fa-rotate-right"></i>
-        </button>
-
-        <button onclick="getHint()" class="px-3 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-white text-xs md:text-sm transition-colors border border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.2)]" title="Gợi ý 1 nước đi">
-            <i class="fa-solid fa-lightbulb"></i> <span class="hidden md:inline">Gợi ý</span>
-        </button>
-
-        <button onclick="showAnswer()" class="px-3 py-2 bg-rose-700 hover:bg-rose-600 rounded-lg text-white text-xs md:text-sm transition-colors border border-rose-500" title="Hiện toàn bộ đáp án">
-            <i class="fa-solid fa-key"></i> <span class="hidden md:inline">Giải</span>
-        </button>
-
-         <!-- Zoom Controls -->
-         <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-600 ml-1">
-            <button onclick="changeZoom(-0.2)" class="px-2 py-1.5 text-slate-300 hover:text-white transition-colors" title="Thu nhỏ">
-                <i class="fa-solid fa-minus"></i>
+    <!-- 1. Header Area -->
+    <header class="flex justify-between items-center mb-2 px-1 shrink-0">
+        <div class="flex items-center gap-3">
+            <div>
+                <h1 class="text-lg md:text-2xl font-bold font-tech text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+                    NONOGRAM
+                </h1>
+                <p class="text-slate-500 text-[10px] md:text-xs">Logic Puzzle</p>
+            </div>
+            <!-- Nút Hướng Dẫn Mới: Nổi bật hơn -->
+            <button onclick="toggleRules()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg shadow-purple-500/30 flex items-center gap-1 transition-all animate-pulse">
+                <i class="fa-solid fa-circle-question"></i> Hướng Dẫn
             </button>
-            <span class="text-xs text-slate-500 px-1"><i class="fa-solid fa-magnifying-glass"></i></span>
-            <button onclick="changeZoom(0.2)" class="px-2 py-1.5 text-slate-300 hover:text-white transition-colors" title="Phóng to">
-                <i class="fa-solid fa-plus"></i>
+        </div>
+        
+        <select id="level-select" class="bg-slate-800 border border-slate-600 text-cyan-400 text-xs rounded-lg p-1.5 outline-none max-w-[140px] shadow-sm">
+            <!-- JS will populate -->
+        </select>
+    </header>
+
+    <!-- 2. Toolbar Area -->
+    <div class="flex flex-wrap gap-2 mb-2 justify-center items-center shrink-0 bg-slate-900/80 p-2 rounded-xl border border-slate-700 shadow-lg z-10">
+        
+        <!-- Tools -->
+        <div class="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
+            <button id="tool-draw" onclick="setTool('draw')" class="btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1">
+                <i class="fa-solid fa-pen"></i> <span class="hidden sm:inline">Vẽ</span>
+            </button>
+            <button id="tool-pan" onclick="setTool('pan')" class="btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1 transition-colors">
+                <i class="fa-solid fa-hand"></i> <span class="hidden sm:inline">Kéo</span>
             </button>
         </div>
 
-        <!-- Mode Toggle (Mobile) -->
-        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-600 ml-1 md:ml-2">
-            <button id="mode-fill" class="px-3 py-1.5 rounded bg-cyan-600 text-white text-xs mr-1 transition-all" onclick="setMode('fill')">
+        <!-- Draw Modes -->
+        <div id="draw-modes" class="flex bg-slate-800 rounded-lg p-1 border border-slate-700 transition-opacity">
+            <button id="mode-fill" onclick="setDrawMode('fill')" class="btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1">
                 <i class="fa-solid fa-square"></i> Tô
             </button>
-            <button id="mode-cross" class="px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs transition-all" onclick="setMode('cross')">
+            <button id="mode-cross" onclick="setDrawMode('cross')" class="btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1">
                 <i class="fa-solid fa-xmark"></i> Xóa
             </button>
         </div>
+
+        <!-- Helpers -->
+        <div class="flex gap-1">
+            <button onclick="getLogicalHint()" class="btn-tool bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 border border-yellow-600/50 rounded-lg px-3 py-1.5 text-xs shadow-[0_0_10px_rgba(234,179,8,0.1)] transition-all" title="Gợi ý 1 nước đi logic">
+                <i class="fa-solid fa-lightbulb"></i> Gợi ý
+            </button>
+            <!-- Nút Giải (Show Answer) Đã Khôi Phục -->
+            <button onclick="showAnswer()" class="btn-tool bg-rose-900/40 hover:bg-rose-700/60 text-rose-400 border border-rose-800 rounded-lg px-3 py-1.5 text-xs transition-all" title="Hiện toàn bộ đáp án">
+                <i class="fa-solid fa-key"></i> Giải
+            </button>
+            <button onclick="centerBoard()" class="btn-tool bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3 py-1.5 text-xs" title="Căn giữa">
+                <i class="fa-solid fa-compress"></i>
+            </button>
+        </div>
     </div>
 
-    <!-- Game Container (Overflow auto here) -->
-    <div class="bg-slate-800/50 rounded-2xl border border-slate-700 shadow-2xl relative overflow-auto max-w-full h-[65vh] md:h-[70vh] w-full">
-        <!-- Flex Wrapper to Center Content when small -->
-        <div class="min-w-full min-h-full flex justify-center items-start p-4">
-            <!-- Size Wrapper (Container matches zoomed size) -->
-            <div id="board-container" class="relative">
-                <div id="game-board" class="inline-block touch-none select-none">
-                    <!-- Grid generated by JS -->
+    <!-- 3. Game Viewport -->
+    <div id="viewport" class="flex-1 rounded-xl border border-slate-700 shadow-inner relative w-full h-full">
+        <div id="game-board-container" class="absolute top-0 left-0">
+            <div id="game-board" class="inline-block p-10">
+                <!-- Grid generated by JS -->
+            </div>
+        </div>
+
+        <!-- Hint Toast Message -->
+        <div id="hint-toast" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-800/95 text-white px-4 py-3 rounded-lg border border-yellow-500/50 shadow-2xl z-40 max-w-[90%] md:max-w-md text-sm toast-anim flex gap-3 items-start">
+            <div class="text-yellow-400 text-lg mt-0.5"><i class="fa-solid fa-lightbulb"></i></div>
+            <div>
+                <h4 class="font-bold text-yellow-400 text-xs uppercase mb-1">Gợi ý Logic</h4>
+                <p id="hint-text" class="text-slate-200 leading-snug">Nội dung gợi ý...</p>
+            </div>
+            <button onclick="document.getElementById('hint-toast').classList.add('hidden')" class="text-slate-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+    <!-- 4. Rules Modal -->
+    <div id="rules-modal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-[fadeIn_0.2s]">
+            <div class="bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="font-bold text-white text-lg font-tech"><i class="fa-solid fa-book-open mr-2"></i>Luật Chơi Nonogram</h3>
+                <button onclick="toggleRules()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 text-sm text-slate-300 space-y-4 max-h-[60vh] overflow-y-auto">
+                <p><strong>Mục tiêu:</strong> Tô đen các ô vuông trong lưới để tạo thành một bức tranh ẩn dựa trên các con số gợi ý.</p>
+                
+                <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                    <p class="text-cyan-400 font-bold mb-1">🔍 Cách đọc số:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Số ở hàng/cột thể hiện <strong>độ dài các đoạn liên tiếp</strong> cần tô đen.</li>
+                        <li>Ví dụ hàng có số <strong>"3 2"</strong> nghĩa là: Có một đoạn <strong>3 ô đen</strong>, sau đó là ít nhất <strong>1 ô trống</strong>, rồi đến <strong>2 ô đen</strong>.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                    <p class="text-yellow-400 font-bold mb-1">💡 Mẹo suy luận:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Ô chắc chắn:</strong> Nếu số gợi ý lớn (ví dụ 8 trong hàng 10 ô), các ô ở giữa chắc chắn sẽ được tô.</li>
+                        <li><strong>Đánh dấu X:</strong> Dùng chuột phải hoặc chế độ Xóa để đánh dấu các ô chắc chắn là TRỐNG. Điều này rất quan trọng!</li>
+                    </ul>
                 </div>
             </div>
+            <div class="p-4 bg-slate-800/50 border-t border-slate-700 text-center">
+                <button onclick="toggleRules()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2 rounded-lg font-bold transition-all">Đã Hiểu</button>
+            </div>
         </div>
+    </div>
+
+    <!-- 5. Victory Overlay -->
+    <div id="win-overlay" class="hidden fixed bottom-0 left-0 right-0 z-50 flex flex-col items-center justify-end pb-10 pointer-events-none">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent pointer-events-auto"></div>
         
-        <!-- Win Overlay -->
-        <div id="win-overlay" class="hidden absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center z-20 rounded-2xl backdrop-blur-sm transition-all p-4 text-center">
-            <div class="text-5xl text-yellow-400 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
+        <!-- Content -->
+        <div class="relative z-10 text-center p-6 w-full max-w-lg pointer-events-auto animate-[slideInUp_0.5s]">
+            <div class="text-5xl text-yellow-400 mb-2 drop-shadow-[0_0_25px_rgba(250,204,21,0.6)] animate-bounce">
                 <i class="fa-solid fa-trophy"></i>
             </div>
-            <h2 class="text-2xl md:text-3xl font-bold text-white font-tech mb-2">HOÀN THÀNH!</h2>
+            <h2 class="text-3xl font-bold text-white font-tech mb-1">HOÀN THÀNH!</h2>
             <p class="text-cyan-400 mb-6 text-lg font-semibold" id="level-name-display">Hình bí ẩn</p>
-            <div class="flex gap-4">
-                <button onclick="replayLevel()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-full transition-all text-sm">
-                    Chơi lại
-                </button>
-                <button onclick="nextLevel()" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold rounded-full shadow-lg shadow-cyan-500/30 transition-all transform hover:scale-105 text-sm">
-                    Màn tiếp <i class="fa-solid fa-arrow-right ml-2"></i>
+            
+            <div class="flex flex-col gap-3">
+                <div class="flex gap-3 justify-center">
+                    <button onclick="nextLevel()" class="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/30 transform transition-all hover:-translate-y-1">
+                        Màn Tiếp Theo <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+                <button onclick="toggleWinOverlay(false)" class="text-slate-400 hover:text-white text-sm underline mt-2">
+                    <i class="fa-regular fa-eye"></i> Xem lại hình vẽ (Ẩn bảng này)
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- How to play (Compact) -->
-    <div class="mt-4 text-xs text-slate-500 flex flex-wrap gap-4 justify-center px-4 text-center">
-        <span><i class="fa-solid fa-hand-pointer"></i> PC: Chuột Trái (Tô) - Phải (X)</span>
-        <span><i class="fa-solid fa-mobile-screen"></i> Mobile: Chọn chế độ & Kéo ngón tay</span>
-    </div>
+    <!-- Floating "Show Win" button (visible when win overlay is hidden) -->
+    <button id="show-win-btn" onclick="toggleWinOverlay(true)" class="hidden fixed bottom-4 right-4 z-40 bg-yellow-600 text-white px-4 py-2 rounded-full shadow-lg font-bold animate-pulse">
+        <i class="fa-solid fa-trophy"></i> Kết quả
+    </button>
 
     <script>
-        // --- DATA MÀN CHƠI ---
+        // --- DATA ---
         const levels = [
-            {
-                name: "Trái Tim (Dễ)",
-                size: 5,
-                grid: [
-                    [0, 1, 0, 1, 0],
-                    [1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1],
-                    [0, 1, 1, 1, 0],
-                    [0, 0, 1, 0, 0]
-                ]
-            },
-            {
-                name: "Mặt Cười (Dễ)",
-                size: 5,
-                grid: [
-                    [0, 1, 0, 1, 0],
-                    [0, 1, 0, 1, 0],
-                    [0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 1],
-                    [0, 1, 1, 1, 0]
-                ]
-            },
-            {
-                name: "Chữ T (Siêu Dễ)",
-                size: 5,
-                grid: [
-                    [1, 1, 1, 1, 1],
-                    [0, 0, 1, 0, 0],
-                    [0, 0, 1, 0, 0],
-                    [0, 0, 1, 0, 0],
-                    [0, 0, 1, 0, 0]
-                ]
-            },
-            {
-                name: "Thuyền Buồm (Trung Bình)",
-                size: 10,
-                grid: [
-                    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 1, 1, 0, 0, 1, 0, 0, 0],
-                    [0, 0, 1, 1, 0, 1, 1, 0, 0, 0],
-                    [0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
-                    [0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 0, 0, 0]
-                ]
-            },
-            {
-                name: "Con Vịt (Khó)",
-                size: 10,
-                grid: [
-                    [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-                    [0, 1, 1, 0, 0, 1, 1, 0, 0, 0],
-                    [1, 1, 0, 0, 0, 0, 1, 1, 0, 0]
-                ]
-            },
-            {
-                name: "Tên Lửa",
-                size: 10,
-                grid: [
-                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
-                    [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                    [0, 1, 1, 0, 1, 1, 0, 1, 1, 0],
-                    [1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
-                    [1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
-                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0]
-                ]
-            },
-            {
-                name: "Con Cua (Mới)",
-                size: 10,
-                grid: [
-                    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
-                    [0, 1, 1, 1, 0, 1, 1, 1, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
-                    [0, 1, 1, 0, 0, 1, 1, 1, 1, 1],
-                    [0, 1, 1, 0, 0, 1, 1, 1, 0, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 0, 0, 0, 0, 0]
-                ]
-            }
+            { name: "Trái Tim (5x5)", size: 5, grid: [[0,1,0,1,0],[1,1,1,1,1],[1,1,1,1,1],[0,1,1,1,0],[0,0,1,0,0]] },
+            { name: "Mặt Cười (5x5)", size: 5, grid: [[0,1,0,1,0],[0,1,0,1,0],[0,0,0,0,0],[1,0,0,0,1],[0,1,1,1,0]] },
+            { name: "Thuyền Buồm (10x10)", size: 10, grid: [[0,0,0,1,0,0,0,0,0,0],[0,0,1,1,0,0,0,0,0,0],[0,1,1,1,0,0,1,0,0,0],[0,0,1,1,0,1,1,0,0,0],[0,0,1,1,0,0,1,0,0,0],[0,0,1,1,0,0,1,0,0,0],[0,0,0,0,0,0,1,0,0,0],[1,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1,0,0],[0,0,1,1,1,1,1,0,0,0]] },
+            { name: "Tên Lửa (10x10)", size: 10, grid: [[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,1,1,1,1,0,0],[0,1,1,0,1,1,0,1,1,0],[1,1,0,0,1,1,0,0,1,1],[1,1,0,0,1,1,0,0,1,1],[0,0,0,1,1,1,1,0,0,0]] },
+            { name: "Con Cua (10x10)", size: 10, grid: [[0,0,1,0,0,0,0,1,0,0],[0,1,1,1,0,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,1,1,1],[0,1,1,0,0,1,1,1,1,1],[0,1,1,0,0,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,0,0,0,0,0]] },
+            { name: "Người Nhện (10x10)", size: 10, grid: [[0,1,0,0,0,0,0,0,1,0],[1,1,1,0,0,0,0,1,1,1],[1,1,1,1,1,1,1,1,1,1],[0,1,1,1,0,0,1,1,1,0],[0,0,1,1,0,0,1,1,0,0],[0,1,0,1,1,1,1,0,1,0],[1,0,0,1,1,1,1,0,0,1],[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,0,0,1,0,0,0],[0,0,0,1,0,0,1,0,0,0]] }
         ];
 
-        let currentLevelIdx = 0;
-        let currentMode = 'fill'; // 'fill' or 'cross'
-        let userGrid = [];
-        let isInputDown = false; // Mouse or Touch
-        let isRightClick = false;
-        let boardIntention = 0; // 0: clear, 1: fill, 2: cross
-        let lastTouchedCell = null; // To prevent rapid toggling on same cell during move
-        let currentZoom = 1.0;
+        let state = {
+            levelIdx: 0,
+            grid: [],
+            tool: 'draw',
+            drawMode: 'fill',
+            scale: 1, panX: 0, panY: 0,
+            isDragging: false, lastX: 0, lastY: 0, intention: 0,
+            isWin: false
+        };
 
-        // --- CORE LOGIC ---
+        const boardEl = document.getElementById('game-board');
+        const viewportEl = document.getElementById('viewport');
 
         function init() {
+            // Level Select
             const selector = document.getElementById('level-select');
-            levels.forEach((lvl, idx) => {
+            levels.forEach((l, i) => {
                 const opt = document.createElement('option');
-                opt.value = idx;
-                opt.text = lvl.name;
+                opt.value = i; opt.text = l.name;
                 selector.appendChild(opt);
             });
             selector.addEventListener('change', (e) => loadLevel(parseInt(e.target.value)));
+            
+            // Events
+            viewportEl.addEventListener('mousedown', onPointerDown);
+            viewportEl.addEventListener('mousemove', onPointerMove);
+            window.addEventListener('mouseup', onPointerUp);
+            viewportEl.addEventListener('touchstart', onTouchStart, {passive: false});
+            viewportEl.addEventListener('touchmove', onTouchMove, {passive: false});
+            window.addEventListener('touchend', onPointerUp);
+            viewportEl.addEventListener('wheel', (e) => {
+                if(e.ctrlKey) { e.preventDefault(); zoom(e.deltaY > 0 ? -0.1 : 0.1); }
+            }, {passive: false});
+
             loadLevel(0);
         }
 
-        function calculateHints(line) {
-            let hints = [];
-            let count = 0;
-            for (let val of line) {
-                if (val === 1) count++;
-                else if (count > 0) {
-                    hints.push(count);
-                    count = 0;
-                }
-            }
-            if (count > 0) hints.push(count);
-            return hints.length > 0 ? hints : [0];
+        function loadLevel(idx) {
+            state.levelIdx = idx;
+            state.isWin = false;
+            document.getElementById('level-select').value = idx;
+            toggleWinOverlay(false, true); // Force hide win overlay
+            document.getElementById('show-win-btn').classList.add('hidden');
+            
+            const level = levels[idx];
+            state.grid = Array(level.size).fill().map(() => Array(level.size).fill(0));
+            
+            renderBoard(level);
+            
+            // Auto Center after render
+            setTimeout(centerBoard, 50);
         }
 
-        function loadLevel(idx) {
-            currentLevelIdx = idx;
-            document.getElementById('level-select').value = idx;
-            document.getElementById('win-overlay').classList.add('hidden');
-            const level = levels[idx];
-            const size = level.size;
-            
-            userGrid = Array(size).fill().map(() => Array(size).fill(0));
-
-            const board = document.getElementById('game-board');
-            board.innerHTML = '';
-            
-            // Reset zoom when loading new level
-            currentZoom = 1.0;
-            
-
-            const rowHints = level.grid.map(row => calculateHints(row));
-            const colHints = [];
-            for(let j=0; j<size; j++) {
-                let col = [];
-                for(let i=0; i<size; i++) col.push(level.grid[i][j]);
-                colHints.push(calculateHints(col));
+        function calculateHints(line) {
+            let hints = [], count = 0;
+            for(let val of line) {
+                if(val === 1) count++;
+                else if(count > 0) { hints.push(count); count = 0; }
             }
+            if(count > 0) hints.push(count);
+            return hints.length ? hints : [0];
+        }
+
+        function renderBoard(level) {
+            boardEl.innerHTML = '';
+            const rowHints = level.grid.map(row => calculateHints(row));
+            const colHints = Array(level.size).fill().map((_, j) => calculateHints(level.grid.map(row => row[j])));
 
             const table = document.createElement('table');
             table.style.borderCollapse = 'separate';
             table.style.borderSpacing = '0';
-
-            // Header Hints
-            const headerRow = document.createElement('tr');
-            headerRow.appendChild(document.createElement('td')); 
-            for(let j=0; j<size; j++) {
+            
+            // Header
+            const trHead = document.createElement('tr');
+            trHead.appendChild(document.createElement('td')); 
+            colHints.forEach((hints, c) => {
                 const td = document.createElement('td');
-                td.className = "text-center align-bottom pb-1 px-1 min-w-[25px] md:min-w-[30px]";
-                colHints[j].forEach(h => {
-                    const div = document.createElement('div');
-                    div.className = "hint-num";
-                    div.innerText = h;
-                    td.appendChild(div);
+                td.className = "text-center align-bottom pb-1 px-1 min-w-[25px] select-none";
+                td.id = `hint-col-${c}`;
+                const div = document.createElement('div');
+                div.className = "flex flex-col justify-end";
+                hints.forEach(h => {
+                    const sp = document.createElement('span');
+                    sp.className = "hint-num block"; sp.innerText = h;
+                    div.appendChild(sp);
                 });
-                headerRow.appendChild(td);
-            }
-            table.appendChild(headerRow);
+                td.appendChild(div);
+                trHead.appendChild(td);
+            });
+            table.appendChild(trHead);
 
-            // Grid Rows
-            for(let i=0; i<size; i++) {
+            // Body
+            for(let r=0; r<level.size; r++) {
                 const tr = document.createElement('tr');
-                
-                // Row Hints
-                const hintTd = document.createElement('td');
-                hintTd.className = "text-right pr-2 h-8 whitespace-nowrap align-middle";
-                rowHints[i].forEach(h => {
-                    const span = document.createElement('span');
-                    span.className = "hint-num ml-1";
-                    span.innerText = h;
-                    hintTd.appendChild(span);
+                const tdHint = document.createElement('td');
+                tdHint.className = "text-right pr-2 h-8 whitespace-nowrap align-middle select-none";
+                tdHint.id = `hint-row-${r}`;
+                rowHints[r].forEach(h => {
+                    const sp = document.createElement('span');
+                    sp.className = "hint-num inline-block ml-1"; sp.innerText = h;
+                    tdHint.appendChild(sp);
                 });
-                tr.appendChild(hintTd);
+                tr.appendChild(tdHint);
 
-                // Cells
-                for(let j=0; j<size; j++) {
+                for(let c=0; c<level.size; c++) {
                     const td = document.createElement('td');
-                    td.className = "w-7 h-7 md:w-8 md:h-8 border border-slate-600 bg-slate-900 cursor-pointer nonogram-cell relative touch-none";
-                    
-                    if ((j + 1) % 5 === 0 && j !== size - 1) td.style.borderRight = "2px solid #64748b";
-                    if ((i + 1) % 5 === 0 && i !== size - 1) td.style.borderBottom = "2px solid #64748b";
-
-                    td.dataset.r = i;
-                    td.dataset.c = j;
-                    td.id = `cell-${i}-${j}`;
-                    
+                    td.className = "w-8 h-8 border border-slate-600 bg-slate-900 cursor-pointer nonogram-cell";
+                    td.dataset.r = r; td.dataset.c = c; td.id = `cell-${r}-${c}`;
+                    if((c+1)%5===0 && c!==level.size-1) td.style.borderRight = "2px solid #94a3b8";
+                    if((r+1)%5===0 && r!==level.size-1) td.style.borderBottom = "2px solid #94a3b8";
                     tr.appendChild(td);
                 }
                 table.appendChild(tr);
             }
+            boardEl.appendChild(table);
+        }
 
-            board.appendChild(table);
+        // --- BOARD CONTROL (PAN/ZOOM/CENTER) ---
+
+        function centerBoard() {
+            const boardRect = boardEl.getBoundingClientRect();
+            const viewRect = viewportEl.getBoundingClientRect();
             
-            // Cập nhật zoom sau khi bảng đã render để tính toán kích thước
-            updateZoom();
-
-            // --- UNIFIED EVENT LISTENERS (MOUSE & TOUCH) ---
-            table.addEventListener('mousedown', handleInputStart);
-            table.addEventListener('mouseover', handleInputMove);
-            document.addEventListener('mouseup', handleInputEnd);
-
-            // Touch Events (For Mobile/Tablet)
-            table.addEventListener('touchstart', (e) => {
-                if(e.cancelable) e.preventDefault();
-                handleInputStart(e.touches[0]); 
-            }, {passive: false});
-
-            table.addEventListener('touchmove', (e) => {
-                if(e.cancelable) e.preventDefault();
-                const touch = e.touches[0];
-                const element = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (element) handleInputMove({ target: element });
-            }, {passive: false});
-
-            document.addEventListener('touchend', handleInputEnd);
+            // Tính scale để vừa khít màn hình nếu bảng quá to
+            const padding = 40;
+            const contentW = boardEl.offsetWidth;
+            const contentH = boardEl.offsetHeight;
+            const availW = viewRect.width - padding;
+            const availH = viewRect.height - padding;
             
-            board.addEventListener('contextmenu', e => {
-                e.preventDefault();
-                return false;
-            });
+            let newScale = Math.min(availW / contentW, availH / contentH);
+            if (newScale > 1.5) newScale = 1.5; // Không zoom quá to
+            if (newScale < 0.5) newScale = 0.5;
+            
+            state.scale = newScale;
+            
+            // Tính toán vị trí center
+            // Transform origin là 0 0, nên translate cần đưa về giữa
+            state.panX = (viewRect.width - contentW * state.scale) / 2;
+            state.panY = (viewRect.height - contentH * state.scale) / 2;
+            
+            updateTransform();
         }
 
-        // --- ZOOM FUNCTION ---
-        function changeZoom(delta) {
-            currentZoom += delta;
-            // Cho phép zoom to hơn một chút
-            if (currentZoom < 0.5) currentZoom = 0.5;
-            if (currentZoom > 3.0) currentZoom = 3.0;
-            updateZoom();
+        function zoom(delta) {
+            state.scale = Math.max(0.3, Math.min(3, state.scale + delta));
+            updateTransform();
         }
 
-        function updateZoom() {
-            const board = document.getElementById('game-board');
-            const container = document.getElementById('board-container');
-            if (board && container) {
-                // Scale board
-                board.style.transform = `scale(${currentZoom})`;
-                
-                // Quan trọng: Cập nhật kích thước vật lý của wrapper chứa board
-                // để thanh cuộn (overflow) nhận diện được kích thước thật sau khi zoom.
-                container.style.width = `${board.offsetWidth * currentZoom}px`;
-                container.style.height = `${board.offsetHeight * currentZoom}px`;
+        function updateTransform() {
+            boardEl.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+        }
+
+        // --- GAMEPLAY INPUT ---
+
+        function onPointerDown(e) {
+            if(state.isWin) return;
+            e.preventDefault();
+            startAction(e.clientX, e.clientY, e.target, e.button === 2);
+        }
+        function onTouchStart(e) {
+            if(state.isWin) return;
+            e.preventDefault();
+            if(e.touches.length > 1) return;
+            const t = e.touches[0];
+            startAction(t.clientX, t.clientY, document.elementFromPoint(t.clientX, t.clientY), false);
+        }
+
+        function startAction(x, y, target, isRightClick) {
+            state.isDragging = true;
+            state.lastX = x; state.lastY = y;
+            const cell = target ? target.closest('td[data-r]') : null;
+
+            if (state.tool === 'pan' || !cell) {
+                state.actionType = 'pan';
+                viewportEl.classList.add('cursor-grabbing');
+                return;
             }
-        }
 
-        // --- UNIFIED INPUT HANDLER ---
-
-        function handleInputStart(e) {
-            const cell = e.target.closest('td');
-            if (!cell || !cell.dataset.r) return;
-
-            let isRight = false;
-            if (e.button !== undefined) {
-                 if (e.button === 2) isRight = true;
-            }
-            isRightClick = isRight || (currentMode === 'cross');
-
-            isInputDown = true;
-            lastTouchedCell = cell;
-
+            state.actionType = 'draw';
             const r = parseInt(cell.dataset.r);
             const c = parseInt(cell.dataset.c);
-            const currentVal = userGrid[r][c];
-
-            if (isRightClick) {
-                boardIntention = (currentVal === 2) ? 0 : 2;
-            } else {
-                boardIntention = (currentVal === 1) ? 0 : 1;
-            }
-
+            const useCross = isRightClick || state.drawMode === 'cross';
+            state.intention = (useCross ? (state.grid[r][c] === 2 ? 0 : 2) : (state.grid[r][c] === 1 ? 0 : 1));
             applyMove(r, c);
         }
 
-        function handleInputMove(e) {
-            if (!isInputDown) return;
-            const cell = e.target.closest('td');
-            if (!cell || !cell.dataset.r) return;
-            
-            if (cell === lastTouchedCell) return;
-            lastTouchedCell = cell;
-
-            const r = parseInt(cell.dataset.r);
-            const c = parseInt(cell.dataset.c);
-
-            applyMove(r, c, true);
-        }
-
-        function handleInputEnd() {
-            isInputDown = false;
-            lastTouchedCell = null;
-            checkWin();
-        }
-
-        function applyMove(r, c, isDragging = false) {
-            const currentVal = userGrid[r][c];
-            
-            if (isDragging) {
-                if (boardIntention === 1 && currentVal === 2) return;
-                if (boardIntention === 2 && currentVal === 1) return;
+        function onPointerMove(e) {
+            if (!state.isDragging) {
+                const cell = e.target.closest('td[data-r]');
+                if(cell) highlightGuides(parseInt(cell.dataset.r), parseInt(cell.dataset.c));
+                return;
             }
+            moveAction(e.clientX, e.clientY, e.target);
+        }
+        function onTouchMove(e) {
+            if (!state.isDragging) return;
+            const t = e.touches[0];
+            moveAction(t.clientX, t.clientY, document.elementFromPoint(t.clientX, t.clientY));
+        }
 
-            if (userGrid[r][c] !== boardIntention) {
-                 userGrid[r][c] = boardIntention;
-                 updateCellVisual(r, c);
+        function moveAction(x, y, target) {
+            if (state.actionType === 'pan') {
+                state.panX += x - state.lastX;
+                state.panY += y - state.lastY;
+                state.lastX = x; state.lastY = y;
+                updateTransform();
+            } else if (state.actionType === 'draw' && target) {
+                const cell = target.closest('td[data-r]');
+                if (cell) applyMove(parseInt(cell.dataset.r), parseInt(cell.dataset.c), true);
+            }
+        }
+
+        function onPointerUp() {
+            state.isDragging = false;
+            viewportEl.classList.remove('cursor-grabbing');
+            if(!state.isWin) checkWin();
+        }
+
+        function applyMove(r, c, isDrag = false) {
+            if(state.isWin) return;
+            const cur = state.grid[r][c];
+            if (isDrag) {
+                if (state.intention === 1 && cur === 2) return;
+                if (state.intention === 2 && cur === 1) return;
+            }
+            if (cur !== state.intention) {
+                state.grid[r][c] = state.intention;
+                updateCellVisual(r, c);
+                checkLineComplete(r, c);
             }
         }
 
         function updateCellVisual(r, c) {
             const cell = document.getElementById(`cell-${r}-${c}`);
             if(!cell) return;
-            const val = userGrid[r][c];
+            cell.className = `w-8 h-8 border border-slate-600 bg-slate-900 cursor-pointer nonogram-cell ${state.grid[r][c] === 1 ? 'cell-filled' : ''} ${state.grid[r][c] === 2 ? 'cell-crossed' : ''}`;
+            // Re-apply highlight if needed (handled by mousemove usually but good for consistency)
+        }
+
+        function highlightGuides(r, c) {
+            document.querySelectorAll('.cell-highlight-guide').forEach(el => el.classList.remove('cell-highlight-guide'));
+            const size = levels[state.levelIdx].size;
+            for(let j=0; j<size; j++) document.getElementById(`cell-${r}-${j}`)?.classList.add('cell-highlight-guide');
+            for(let i=0; i<size; i++) document.getElementById(`cell-${i}-${c}`)?.classList.add('cell-highlight-guide');
+        }
+
+        function checkLineComplete(r, c) {
+            const target = levels[state.levelIdx].grid;
+            const size = target.length;
             
-            cell.classList.remove("cell-filled", "cell-crossed", "hint-anim");
-            cell.innerHTML = ""; 
-            
-            if (val === 1) cell.classList.add("cell-filled");
-            if (val === 2) cell.classList.add("cell-crossed");
+            // Check Row
+            let rOk = true; for(let j=0; j<size; j++) if((state.grid[r][j]===1) !== (target[r][j]===1)) { rOk = false; break; }
+            const rEl = document.getElementById(`hint-row-${r}`);
+            rEl.querySelectorAll('.hint-num').forEach(el => el.classList.toggle('hint-completed', rOk));
+
+            // Check Col
+            let cOk = true; for(let i=0; i<size; i++) if((state.grid[i][c]===1) !== (target[i][c]===1)) { cOk = false; break; }
+            const cEl = document.getElementById(`hint-col-${c}`);
+            cEl.querySelectorAll('.hint-num').forEach(el => el.classList.toggle('hint-completed', cOk));
         }
 
-        function setMode(mode) {
-            currentMode = mode;
-            document.getElementById('mode-fill').className = mode === 'fill' 
-                ? "px-3 py-1.5 rounded bg-cyan-600 text-white text-xs mr-1 transition-all shadow-[0_0_10px_rgba(8,145,178,0.5)]"
-                : "px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs mr-1 transition-all";
-                
-            document.getElementById('mode-cross').className = mode === 'cross'
-                ? "px-3 py-1.5 rounded bg-slate-600 text-white text-xs transition-all shadow-[0_0_10px_rgba(71,85,105,0.5)]"
-                : "px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs transition-all";
-        }
+        // --- LOGICAL HINTS SYSTEM ---
 
-        function resetGame() {
-            loadLevel(currentLevelIdx);
-        }
+        function getLogicalHint() {
+            if(state.isWin) return;
+            const level = levels[state.levelIdx];
+            const size = level.size;
+            const target = level.grid;
+            const user = state.grid;
 
-        function replayLevel() {
-            document.getElementById('win-overlay').classList.add('hidden');
-            resetGame();
-        }
-
-        // --- HINT & SOLVE FUNCTIONS ---
-
-        function getHint() {
-            const target = levels[currentLevelIdx].grid;
-            const size = levels[currentLevelIdx].size;
-            let possibleMoves = [];
-
-            // 1. Check for errors
-            for(let i=0; i<size; i++) {
-                for(let j=0; j<size; j++) {
-                    if (userGrid[i][j] === 1 && target[i][j] === 0) {
-                        userGrid[i][j] = 0; 
-                        updateCellVisual(i, j);
-                        flashCell(i, j);
-                        return; 
+            // Helper: Get possibilities for a line
+            // Returns array where: 1=Must Fill, 0=Must Empty, -1=Unknown
+            function solveLine(length, hints) {
+                let validPerms = [];
+                function generate(idx, hintIdx, currentLine) {
+                    if(hintIdx === hints.length) {
+                        // Check if remaining space can be empty
+                        for(let k=idx; k<length; k++) currentLine[k] = 0;
+                        validPerms.push([...currentLine]);
+                        return;
                     }
-                    if (userGrid[i][j] === 2 && target[i][j] === 1) {
-                         userGrid[i][j] = 0;
-                         updateCellVisual(i, j);
-                         flashCell(i, j);
-                         return;
+                    const clue = hints[hintIdx];
+                    // Try positions
+                    // Max start index = length - (remaining clues + gaps)
+                    // Simplified: just try all valid positions
+                    for(let i=idx; i <= length - clue; i++) {
+                        // Check if we can place here
+                        // 1. Prev cell must be 0 (or boundary) - handled by `idx` jump
+                        // 2. Next cell must be 0 (or boundary)
+                        let canPlace = true;
+                        if(i + clue < length) {
+                            // Gap required
+                        }
+                        // Actually, simplified recursion:
+                        // Place clue at `i`. Next recursion starts at `i + clue + 1`
+                        // Ensure we fit all remaining clues
+                        
+                        // Remaining minimum length = sum(remaining clues) + (remaining clues - 1)
+                        let remainingLen = 0;
+                        for(let z=hintIdx+1; z<hints.length; z++) remainingLen += hints[z] + 1;
+                        if (length - (i + clue + (remainingLen>0?1:0)) < remainingLen - (remainingLen>0?1:0)) continue; // Not enough space (heuristic)
+
+                        let newLine = [...currentLine];
+                        // Fill gaps before
+                        for(let k=idx; k<i; k++) newLine[k] = 0;
+                        // Fill clue
+                        for(let k=0; k<clue; k++) newLine[i+k] = 1;
+                        // Fill gap after (if not last)
+                        if(i+clue < length) newLine[i+clue] = 0;
+
+                        generate(i + clue + 1, hintIdx + 1, newLine);
                     }
-                    if (userGrid[i][j] === 0 && target[i][j] === 1) {
-                        possibleMoves.push({r: i, c: j});
+                }
+                // Very naive generator - optimized for small puzzles (<=15)
+                // For 10x10 it's instant.
+                generate(0, 0, Array(length).fill(0));
+
+                if(validPerms.length === 0) return Array(length).fill(-1); // Should not happen if puzzle valid
+
+                // Intersect
+                let result = Array(length).fill(-1);
+                for(let i=0; i<length; i++) {
+                    let allOne = true, allZero = true;
+                    for(let p of validPerms) {
+                        if(p[i] === 0) allOne = false;
+                        if(p[i] === 1) allZero = false;
+                    }
+                    if(allOne) result[i] = 1;
+                    else if(allZero) result[i] = 0;
+                }
+                return result;
+            }
+
+            // 1. Scan Rows for Logical deductions
+            for(let r=0; r<size; r++) {
+                const hints = calculateHints(target[r]);
+                const deduction = solveLine(size, hints);
+                for(let c=0; c<size; c++) {
+                    // If logic says MUST FILL but user hasn't -> Hint
+                    if(deduction[c] === 1 && user[r][c] !== 1) {
+                        flashCell(r, c);
+                        showToast(`Hàng ${r+1} có gợi ý [${hints.join(', ')}]. Dựa trên quy luật giao thoa, ô này chắc chắn phải TÔ.`);
+                        return;
+                    }
+                    // If logic says MUST EMPTY but user hasn't crossed -> Hint
+                    if(deduction[c] === 0 && user[r][c] !== 2 && user[r][c] !== 0) {
+                         // Only suggest X if user filled it wrongly. 
+                         // If it's empty, suggesting X is weak hint, but valid.
+                         // Let's prioritize Fills first.
                     }
                 }
             }
 
-            // 2. Fill random correct cell
-            if (possibleMoves.length > 0) {
-                const move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-                userGrid[move.r][move.c] = 1;
-                updateCellVisual(move.r, move.c);
-                flashCell(move.r, move.c);
-                checkWin();
-            } else {
-                alert("Bạn đã làm đúng hết các ô cần tô! Hãy kiểm tra lại các ô đánh dấu X.");
+            // 2. Scan Cols
+            for(let c=0; c<size; c++) {
+                const col = []; for(let r=0; r<size; r++) col.push(target[r][c]);
+                const hints = calculateHints(col);
+                const deduction = solveLine(size, hints);
+                for(let r=0; r<size; r++) {
+                    if(deduction[r] === 1 && user[r][c] !== 1) {
+                        flashCell(r, c);
+                        showToast(`Cột ${c+1} có gợi ý [${hints.join(', ')}]. Logic cho thấy ô này phải TÔ.`);
+                        return;
+                    }
+                }
             }
+
+            // 3. Fallback: Find a simple "Line Complete" hint (Filling Xs)
+            for(let r=0; r<size; r++) {
+                const hints = calculateHints(target[r]);
+                // Check if filled count matches hint sum (naive check)
+                let fillCount = user[r].filter(x=>x===1).length;
+                let hintSum = hints.reduce((a,b)=>a+b, 0);
+                if(fillCount === hintSum) {
+                    // Check if the arrangement is actually correct first
+                    let isCorrectArrangement = JSON.stringify(calculateHints(user[r])) === JSON.stringify(hints);
+                    if(isCorrectArrangement) {
+                        // Find empty spot to X
+                        for(let c=0; c<size; c++) {
+                            if(user[r][c] === 0) {
+                                state.grid[r][c] = 2; updateCellVisual(r,c); flashCell(r,c);
+                                showToast(`Hàng ${r+1} đã đủ số ô đen. Hãy đánh dấu X vào các ô trống còn lại.`);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 4. Last Resort: Reveal a random cell
+            showToast("Hệ thống chưa tìm thấy bước đi logic đơn giản. Đây là một gợi ý ngẫu nhiên.");
+            let moves = [];
+            for(let i=0; i<size; i++) for(let j=0; j<size; j++) if(user[i][j]===0 && target[i][j]===1) moves.push({r:i,c:j});
+            if(moves.length) {
+                const m = moves[Math.floor(Math.random()*moves.length)];
+                state.grid[m.r][m.c] = 1; updateCellVisual(m.r,m.c); flashCell(m.r,m.c); checkLineComplete(m.r,m.c);
+            }
+        }
+
+        // --- ANSWER REVEAL ---
+        function showAnswer() {
+            if(!confirm("Bạn có chắc muốn xem toàn bộ đáp án? Sẽ mất đi sự thú vị đó!")) return;
+            const target = levels[state.levelIdx].grid;
+            const size = target.length;
+            
+            // Fill grid with target
+            for(let i=0; i<size; i++) {
+                for(let j=0; j<size; j++) {
+                    state.grid[i][j] = target[i][j];
+                    updateCellVisual(i, j);
+                }
+            }
+            // Update hint visuals (cross out numbers)
+            for(let i=0; i<size; i++) for(let j=0; j<size; j++) checkLineComplete(i, j);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('hint-toast');
+            document.getElementById('hint-text').innerText = msg;
+            t.classList.remove('hidden');
+            // Reset anim
+            t.classList.remove('toast-anim');
+            void t.offsetWidth; 
+            t.classList.add('toast-anim');
+            
+            setTimeout(() => t.classList.add('hidden'), 5000);
         }
 
         function flashCell(r, c) {
             const cell = document.getElementById(`cell-${r}-${c}`);
-            if(cell) {
-                cell.classList.add('hint-anim');
-                setTimeout(() => cell.classList.remove('hint-anim'), 500);
-            }
+            if(cell) { cell.classList.add('hint-anim'); setTimeout(()=>cell.classList.remove('hint-anim'), 800); }
         }
 
-        function showAnswer() {
-            if(!confirm("Bạn có chắc muốn xem đáp án không?")) return;
-            const target = levels[currentLevelIdx].grid;
-            const size = levels[currentLevelIdx].size;
-            for(let i=0; i<size; i++) {
-                for(let j=0; j<size; j++) {
-                    userGrid[i][j] = target[i][j]; 
-                    updateCellVisual(i, j);
-                }
-            }
-        }
+        // --- WIN SYSTEM ---
 
         function checkWin() {
-            const target = levels[currentLevelIdx].grid;
-            const size = levels[currentLevelIdx].size;
-            for(let i=0; i<size; i++) {
-                for(let j=0; j<size; j++) {
-                    const userFilled = userGrid[i][j] === 1;
-                    const targetFilled = target[i][j] === 1;
-                    if (userFilled !== targetFilled) return; 
-                }
+            if(state.isWin) return;
+            const target = levels[state.levelIdx].grid;
+            const size = state.grid.length;
+            for(let i=0; i<size; i++) for(let j=0; j<size; j++) if((state.grid[i][j]===1) !== (target[i][j]===1)) return;
+            
+            // Win!
+            state.isWin = true;
+            document.getElementById('level-name-display').innerText = levels[state.levelIdx].name;
+            document.getElementById('show-win-btn').classList.add('hidden');
+            toggleWinOverlay(true);
+        }
+
+        function toggleWinOverlay(show, forceHide=false) {
+            const overlay = document.getElementById('win-overlay');
+            const btn = document.getElementById('show-win-btn');
+            
+            if(forceHide) {
+                overlay.classList.add('hidden');
+                btn.classList.add('hidden');
+                return;
             }
-            document.getElementById('level-name-display').innerText = levels[currentLevelIdx].name;
-            document.getElementById('win-overlay').classList.remove('hidden');
+
+            if(show) {
+                overlay.classList.remove('hidden');
+                btn.classList.add('hidden');
+            } else {
+                overlay.classList.add('hidden');
+                if(state.isWin) btn.classList.remove('hidden'); // Show peek button
+            }
+        }
+
+        function toggleRules() {
+            const el = document.getElementById('rules-modal');
+            el.classList.toggle('hidden');
         }
 
         function nextLevel() {
-            let next = currentLevelIdx + 1;
-            if (next >= levels.length) next = 0; 
+            let next = state.levelIdx + 1;
+            if (next >= levels.length) next = 0;
             loadLevel(next);
+        }
+        function replayLevel() { loadLevel(state.levelIdx); }
+        function resetGame() { replayLevel(); }
+        function setTool(t) {
+            state.tool = t;
+            document.getElementById('tool-draw').className = t === 'draw' ? "btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1" : "btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1 transition-colors";
+            document.getElementById('tool-pan').className = t === 'pan' ? "btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1" : "btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1 transition-colors";
+            document.getElementById('draw-modes').style.opacity = t === 'draw' ? '1' : '0.3';
+            viewportEl.style.cursor = t === 'draw' ? 'crosshair' : 'grab';
+        }
+        function setDrawMode(m) {
+            state.drawMode = m;
+            document.getElementById('mode-fill').className = m === 'fill' ? "btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1" : "btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1";
+            document.getElementById('mode-cross').className = m === 'cross' ? "btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1" : "btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1";
+            if(state.tool !== 'draw') setTool('draw');
         }
 
         init();
