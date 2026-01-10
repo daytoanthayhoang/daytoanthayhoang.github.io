@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nonogram - CLB Toán Học</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #0f172a; color: #e2e8f0; user-select: none; touch-action: none; }
+        .font-tech { font-family: 'Orbitron', sans-serif; }
+        
+        /* Grid Customization */
+        .nonogram-cell {
+            transition: background-color 0.05s, transform 0.1s;
+        }
+        .nonogram-cell:active {
+            transform: scale(0.9);
+        }
+        /* Thêm !important để đảm bảo màu hiển thị đè lên màu nền mặc định */
+        .cell-filled {
+            background-color: #22d3ee !important; /* Cyan-400 */
+            border-color: #06b6d4 !important;
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+        }
+        .cell-crossed {
+            background-color: #1e293b !important; /* Slate-800 */
+            color: #64748b;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cell-crossed::after {
+            content: "✖"; font-size: 14px; font-weight: bold;
+        }
+        
+        /* Hint Effect */
+        @keyframes flashHint {
+            0% { background-color: #facc15; box-shadow: 0 0 20px #facc15; transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .hint-anim {
+            animation: flashHint 0.5s ease-out;
+        }
+
+        /* Hint text styles */
+        .hint-num {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        .hint-done {
+            color: #334155; text-decoration: line-through;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        /* Zoom transition */
+        #game-board {
+            transform-origin: 0 0; /* Quan trọng: Phóng to từ góc trên trái */
+            transition: transform 0.2s ease;
+        }
+        /* Wrapper chứa board để tính toán kích thước cuộn */
+        #board-container {
+            transition: width 0.2s ease, height 0.2s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
+
+    <!-- Header -->
+    <div class="text-center mb-2 md:mb-4">
+        <h1 class="text-xl md:text-3xl font-bold font-tech text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-1">
+            NONOGRAM LOGIC
+        </h1>
+        <p class="text-slate-400 text-xs md:text-sm">Tô màu các ô dựa trên số gợi ý để tìm hình bí ẩn.</p>
+    </div>
+
+    <!-- Controls & Level Select -->
+    <div class="flex flex-wrap gap-2 md:gap-3 mb-4 justify-center items-center max-w-4xl px-2">
+        <!-- Level Select -->
+        <select id="level-select" class="bg-slate-800 border border-slate-600 text-cyan-400 text-xs md:text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2 outline-none">
+            <!-- Options added by JS -->
+        </select>
+        
+        <!-- Game Actions -->
+        <button onclick="resetGame()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-xs md:text-sm transition-colors border border-slate-600" title="Chơi lại">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+
+        <button onclick="getHint()" class="px-3 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-white text-xs md:text-sm transition-colors border border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.2)]" title="Gợi ý 1 nước đi">
+            <i class="fa-solid fa-lightbulb"></i> <span class="hidden md:inline">Gợi ý</span>
+        </button>
+
+        <button onclick="showAnswer()" class="px-3 py-2 bg-rose-700 hover:bg-rose-600 rounded-lg text-white text-xs md:text-sm transition-colors border border-rose-500" title="Hiện toàn bộ đáp án">
+            <i class="fa-solid fa-key"></i> <span class="hidden md:inline">Giải</span>
+        </button>
+
+         <!-- Zoom Controls -->
+         <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-600 ml-1">
+            <button onclick="changeZoom(-0.2)" class="px-2 py-1.5 text-slate-300 hover:text-white transition-colors" title="Thu nhỏ">
+                <i class="fa-solid fa-minus"></i>
+            </button>
+            <span class="text-xs text-slate-500 px-1"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <button onclick="changeZoom(0.2)" class="px-2 py-1.5 text-slate-300 hover:text-white transition-colors" title="Phóng to">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+
+        <!-- Mode Toggle (Mobile) -->
+        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-600 ml-1 md:ml-2">
+            <button id="mode-fill" class="px-3 py-1.5 rounded bg-cyan-600 text-white text-xs mr-1 transition-all" onclick="setMode('fill')">
+                <i class="fa-solid fa-square"></i> Tô
+            </button>
+            <button id="mode-cross" class="px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs transition-all" onclick="setMode('cross')">
+                <i class="fa-solid fa-xmark"></i> Xóa
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Container (Overflow auto here) -->
+    <div class="bg-slate-800/50 rounded-2xl border border-slate-700 shadow-2xl relative overflow-auto max-w-full h-[65vh] md:h-[70vh] w-full">
+        <!-- Flex Wrapper to Center Content when small -->
+        <div class="min-w-full min-h-full flex justify-center items-start p-4">
+            <!-- Size Wrapper (Container matches zoomed size) -->
+            <div id="board-container" class="relative">
+                <div id="game-board" class="inline-block touch-none select-none">
+                    <!-- Grid generated by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Win Overlay -->
+        <div id="win-overlay" class="hidden absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center z-20 rounded-2xl backdrop-blur-sm transition-all p-4 text-center">
+            <div class="text-5xl text-yellow-400 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-bold text-white font-tech mb-2">HOÀN THÀNH!</h2>
+            <p class="text-cyan-400 mb-6 text-lg font-semibold" id="level-name-display">Hình bí ẩn</p>
+            <div class="flex gap-4">
+                <button onclick="replayLevel()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-full transition-all text-sm">
+                    Chơi lại
+                </button>
+                <button onclick="nextLevel()" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold rounded-full shadow-lg shadow-cyan-500/30 transition-all transform hover:scale-105 text-sm">
+                    Màn tiếp <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- How to play (Compact) -->
+    <div class="mt-4 text-xs text-slate-500 flex flex-wrap gap-4 justify-center px-4 text-center">
+        <span><i class="fa-solid fa-hand-pointer"></i> PC: Chuột Trái (Tô) - Phải (X)</span>
+        <span><i class="fa-solid fa-mobile-screen"></i> Mobile: Chọn chế độ & Kéo ngón tay</span>
+    </div>
+
+    <script>
+        // --- DATA MÀN CHƠI ---
+        const levels = [
+            {
+                name: "Trái Tim (Dễ)",
+                size: 5,
+                grid: [
+                    [0, 1, 0, 1, 0],
+                    [1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1],
+                    [0, 1, 1, 1, 0],
+                    [0, 0, 1, 0, 0]
+                ]
+            },
+            {
+                name: "Mặt Cười (Dễ)",
+                size: 5,
+                grid: [
+                    [0, 1, 0, 1, 0],
+                    [0, 1, 0, 1, 0],
+                    [0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 1],
+                    [0, 1, 1, 1, 0]
+                ]
+            },
+            {
+                name: "Chữ T (Siêu Dễ)",
+                size: 5,
+                grid: [
+                    [1, 1, 1, 1, 1],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 1, 0, 0]
+                ]
+            },
+            {
+                name: "Thuyền Buồm (Trung Bình)",
+                size: 10,
+                grid: [
+                    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 0, 0, 1, 0, 0, 0],
+                    [0, 0, 1, 1, 0, 1, 1, 0, 0, 0],
+                    [0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+                    [0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 0, 0, 0]
+                ]
+            },
+            {
+                name: "Con Vịt (Khó)",
+                size: 10,
+                grid: [
+                    [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 1, 1, 0, 0]
+                ]
+            },
+            {
+                name: "Tên Lửa",
+                size: 10,
+                grid: [
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+                    [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 1, 1, 0, 1, 1, 0, 1, 1, 0],
+                    [1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
+                    [1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
+                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0]
+                ]
+            },
+            {
+                name: "Con Cua (Mới)",
+                size: 10,
+                grid: [
+                    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 1, 1, 1, 0, 1, 1, 1, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 1, 1, 0, 0, 1, 1, 1, 1, 1],
+                    [0, 1, 1, 0, 0, 1, 1, 1, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 0, 0, 0, 0, 0]
+                ]
+            }
+        ];
+
+        let currentLevelIdx = 0;
+        let currentMode = 'fill'; // 'fill' or 'cross'
+        let userGrid = [];
+        let isInputDown = false; // Mouse or Touch
+        let isRightClick = false;
+        let boardIntention = 0; // 0: clear, 1: fill, 2: cross
+        let lastTouchedCell = null; // To prevent rapid toggling on same cell during move
+        let currentZoom = 1.0;
+
+        // --- CORE LOGIC ---
+
+        function init() {
+            const selector = document.getElementById('level-select');
+            levels.forEach((lvl, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.text = lvl.name;
+                selector.appendChild(opt);
+            });
+            selector.addEventListener('change', (e) => loadLevel(parseInt(e.target.value)));
+            loadLevel(0);
+        }
+
+        function calculateHints(line) {
+            let hints = [];
+            let count = 0;
+            for (let val of line) {
+                if (val === 1) count++;
+                else if (count > 0) {
+                    hints.push(count);
+                    count = 0;
+                }
+            }
+            if (count > 0) hints.push(count);
+            return hints.length > 0 ? hints : [0];
+        }
+
+        function loadLevel(idx) {
+            currentLevelIdx = idx;
+            document.getElementById('level-select').value = idx;
+            document.getElementById('win-overlay').classList.add('hidden');
+            const level = levels[idx];
+            const size = level.size;
+            
+            userGrid = Array(size).fill().map(() => Array(size).fill(0));
+
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+            
+            // Reset zoom when loading new level
+            currentZoom = 1.0;
+            
+
+            const rowHints = level.grid.map(row => calculateHints(row));
+            const colHints = [];
+            for(let j=0; j<size; j++) {
+                let col = [];
+                for(let i=0; i<size; i++) col.push(level.grid[i][j]);
+                colHints.push(calculateHints(col));
+            }
+
+            const table = document.createElement('table');
+            table.style.borderCollapse = 'separate';
+            table.style.borderSpacing = '0';
+
+            // Header Hints
+            const headerRow = document.createElement('tr');
+            headerRow.appendChild(document.createElement('td')); 
+            for(let j=0; j<size; j++) {
+                const td = document.createElement('td');
+                td.className = "text-center align-bottom pb-1 px-1 min-w-[25px] md:min-w-[30px]";
+                colHints[j].forEach(h => {
+                    const div = document.createElement('div');
+                    div.className = "hint-num";
+                    div.innerText = h;
+                    td.appendChild(div);
+                });
+                headerRow.appendChild(td);
+            }
+            table.appendChild(headerRow);
+
+            // Grid Rows
+            for(let i=0; i<size; i++) {
+                const tr = document.createElement('tr');
+                
+                // Row Hints
+                const hintTd = document.createElement('td');
+                hintTd.className = "text-right pr-2 h-8 whitespace-nowrap align-middle";
+                rowHints[i].forEach(h => {
+                    const span = document.createElement('span');
+                    span.className = "hint-num ml-1";
+                    span.innerText = h;
+                    hintTd.appendChild(span);
+                });
+                tr.appendChild(hintTd);
+
+                // Cells
+                for(let j=0; j<size; j++) {
+                    const td = document.createElement('td');
+                    td.className = "w-7 h-7 md:w-8 md:h-8 border border-slate-600 bg-slate-900 cursor-pointer nonogram-cell relative touch-none";
+                    
+                    if ((j + 1) % 5 === 0 && j !== size - 1) td.style.borderRight = "2px solid #64748b";
+                    if ((i + 1) % 5 === 0 && i !== size - 1) td.style.borderBottom = "2px solid #64748b";
+
+                    td.dataset.r = i;
+                    td.dataset.c = j;
+                    td.id = `cell-${i}-${j}`;
+                    
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+
+            board.appendChild(table);
+            
+            // Cập nhật zoom sau khi bảng đã render để tính toán kích thước
+            updateZoom();
+
+            // --- UNIFIED EVENT LISTENERS (MOUSE & TOUCH) ---
+            table.addEventListener('mousedown', handleInputStart);
+            table.addEventListener('mouseover', handleInputMove);
+            document.addEventListener('mouseup', handleInputEnd);
+
+            // Touch Events (For Mobile/Tablet)
+            table.addEventListener('touchstart', (e) => {
+                if(e.cancelable) e.preventDefault();
+                handleInputStart(e.touches[0]); 
+            }, {passive: false});
+
+            table.addEventListener('touchmove', (e) => {
+                if(e.cancelable) e.preventDefault();
+                const touch = e.touches[0];
+                const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (element) handleInputMove({ target: element });
+            }, {passive: false});
+
+            document.addEventListener('touchend', handleInputEnd);
+            
+            board.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                return false;
+            });
+        }
+
+        // --- ZOOM FUNCTION ---
+        function changeZoom(delta) {
+            currentZoom += delta;
+            // Cho phép zoom to hơn một chút
+            if (currentZoom < 0.5) currentZoom = 0.5;
+            if (currentZoom > 3.0) currentZoom = 3.0;
+            updateZoom();
+        }
+
+        function updateZoom() {
+            const board = document.getElementById('game-board');
+            const container = document.getElementById('board-container');
+            if (board && container) {
+                // Scale board
+                board.style.transform = `scale(${currentZoom})`;
+                
+                // Quan trọng: Cập nhật kích thước vật lý của wrapper chứa board
+                // để thanh cuộn (overflow) nhận diện được kích thước thật sau khi zoom.
+                container.style.width = `${board.offsetWidth * currentZoom}px`;
+                container.style.height = `${board.offsetHeight * currentZoom}px`;
+            }
+        }
+
+        // --- UNIFIED INPUT HANDLER ---
+
+        function handleInputStart(e) {
+            const cell = e.target.closest('td');
+            if (!cell || !cell.dataset.r) return;
+
+            let isRight = false;
+            if (e.button !== undefined) {
+                 if (e.button === 2) isRight = true;
+            }
+            isRightClick = isRight || (currentMode === 'cross');
+
+            isInputDown = true;
+            lastTouchedCell = cell;
+
+            const r = parseInt(cell.dataset.r);
+            const c = parseInt(cell.dataset.c);
+            const currentVal = userGrid[r][c];
+
+            if (isRightClick) {
+                boardIntention = (currentVal === 2) ? 0 : 2;
+            } else {
+                boardIntention = (currentVal === 1) ? 0 : 1;
+            }
+
+            applyMove(r, c);
+        }
+
+        function handleInputMove(e) {
+            if (!isInputDown) return;
+            const cell = e.target.closest('td');
+            if (!cell || !cell.dataset.r) return;
+            
+            if (cell === lastTouchedCell) return;
+            lastTouchedCell = cell;
+
+            const r = parseInt(cell.dataset.r);
+            const c = parseInt(cell.dataset.c);
+
+            applyMove(r, c, true);
+        }
+
+        function handleInputEnd() {
+            isInputDown = false;
+            lastTouchedCell = null;
+            checkWin();
+        }
+
+        function applyMove(r, c, isDragging = false) {
+            const currentVal = userGrid[r][c];
+            
+            if (isDragging) {
+                if (boardIntention === 1 && currentVal === 2) return;
+                if (boardIntention === 2 && currentVal === 1) return;
+            }
+
+            if (userGrid[r][c] !== boardIntention) {
+                 userGrid[r][c] = boardIntention;
+                 updateCellVisual(r, c);
+            }
+        }
+
+        function updateCellVisual(r, c) {
+            const cell = document.getElementById(`cell-${r}-${c}`);
+            if(!cell) return;
+            const val = userGrid[r][c];
+            
+            cell.classList.remove("cell-filled", "cell-crossed", "hint-anim");
+            cell.innerHTML = ""; 
+            
+            if (val === 1) cell.classList.add("cell-filled");
+            if (val === 2) cell.classList.add("cell-crossed");
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('mode-fill').className = mode === 'fill' 
+                ? "px-3 py-1.5 rounded bg-cyan-600 text-white text-xs mr-1 transition-all shadow-[0_0_10px_rgba(8,145,178,0.5)]"
+                : "px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs mr-1 transition-all";
+                
+            document.getElementById('mode-cross').className = mode === 'cross'
+                ? "px-3 py-1.5 rounded bg-slate-600 text-white text-xs transition-all shadow-[0_0_10px_rgba(71,85,105,0.5)]"
+                : "px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs transition-all";
+        }
+
+        function resetGame() {
+            loadLevel(currentLevelIdx);
+        }
+
+        function replayLevel() {
+            document.getElementById('win-overlay').classList.add('hidden');
+            resetGame();
+        }
+
+        // --- HINT & SOLVE FUNCTIONS ---
+
+        function getHint() {
+            const target = levels[currentLevelIdx].grid;
+            const size = levels[currentLevelIdx].size;
+            let possibleMoves = [];
+
+            // 1. Check for errors
+            for(let i=0; i<size; i++) {
+                for(let j=0; j<size; j++) {
+                    if (userGrid[i][j] === 1 && target[i][j] === 0) {
+                        userGrid[i][j] = 0; 
+                        updateCellVisual(i, j);
+                        flashCell(i, j);
+                        return; 
+                    }
+                    if (userGrid[i][j] === 2 && target[i][j] === 1) {
+                         userGrid[i][j] = 0;
+                         updateCellVisual(i, j);
+                         flashCell(i, j);
+                         return;
+                    }
+                    if (userGrid[i][j] === 0 && target[i][j] === 1) {
+                        possibleMoves.push({r: i, c: j});
+                    }
+                }
+            }
+
+            // 2. Fill random correct cell
+            if (possibleMoves.length > 0) {
+                const move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                userGrid[move.r][move.c] = 1;
+                updateCellVisual(move.r, move.c);
+                flashCell(move.r, move.c);
+                checkWin();
+            } else {
+                alert("Bạn đã làm đúng hết các ô cần tô! Hãy kiểm tra lại các ô đánh dấu X.");
+            }
+        }
+
+        function flashCell(r, c) {
+            const cell = document.getElementById(`cell-${r}-${c}`);
+            if(cell) {
+                cell.classList.add('hint-anim');
+                setTimeout(() => cell.classList.remove('hint-anim'), 500);
+            }
+        }
+
+        function showAnswer() {
+            if(!confirm("Bạn có chắc muốn xem đáp án không?")) return;
+            const target = levels[currentLevelIdx].grid;
+            const size = levels[currentLevelIdx].size;
+            for(let i=0; i<size; i++) {
+                for(let j=0; j<size; j++) {
+                    userGrid[i][j] = target[i][j]; 
+                    updateCellVisual(i, j);
+                }
+            }
+        }
+
+        function checkWin() {
+            const target = levels[currentLevelIdx].grid;
+            const size = levels[currentLevelIdx].size;
+            for(let i=0; i<size; i++) {
+                for(let j=0; j<size; j++) {
+                    const userFilled = userGrid[i][j] === 1;
+                    const targetFilled = target[i][j] === 1;
+                    if (userFilled !== targetFilled) return; 
+                }
+            }
+            document.getElementById('level-name-display').innerText = levels[currentLevelIdx].name;
+            document.getElementById('win-overlay').classList.remove('hidden');
+        }
+
+        function nextLevel() {
+            let next = currentLevelIdx + 1;
+            if (next >= levels.length) next = 0; 
+            loadLevel(next);
+        }
+
+        init();
+    </script>
+</body>
+</html>
