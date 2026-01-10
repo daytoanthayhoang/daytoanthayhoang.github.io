@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nonogram - CLB Toán Học</title>
+    <title>Nonogram - CLB Toán Học (Full Data)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -13,235 +13,290 @@
         
         /* --- Grid Styles --- */
         .nonogram-cell {
-            transition: background-color 0.1s;
             position: relative;
+            background-color: #0f172a;
+            transition: transform 0.1s ease-out;
+            z-index: 1;
         }
-        
+        .nonogram-cell:hover {
+            z-index: 10;
+            transform: scale(1.1);
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        .nonogram-cell.guide-active::before {
+            content: ''; position: absolute; inset: 0;
+            background-color: rgba(56, 189, 248, 0.15); pointer-events: none; z-index: -1;
+        }
         .cell-filled {
-            background-color: #22d3ee !important;
-            border-color: #06b6d4 !important;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            background-color: #22d3ee !important; border-color: #06b6d4 !important;
+            box-shadow: inset 0 0 4px rgba(0,0,0,0.2), 0 0 8px rgba(34, 211, 238, 0.4);
+            animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        
         .cell-crossed {
-            background-color: #1e293b !important;
+            background-color: #1e293b !important; animation: fadeIn 0.2s ease-out;
         }
         .cell-crossed::after {
             content: "✖"; font-size: 70%; font-weight: bold; color: #64748b;
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
         }
-
-        .cell-highlight-guide { background-color: rgba(56, 189, 248, 0.1) !important; }
-        .cell-filled.cell-highlight-guide { background-color: #38bdf8 !important; }
-
-        /* --- Hint Styles --- */
-        .hint-num {
-            font-size: 0.75rem; color: #94a3b8; margin: 1px; transition: all 0.3s;
-        }
-        .hint-completed {
-            color: #475569; text-decoration: line-through; opacity: 0.5;
-        }
-        
-        /* --- Zoom & Pan --- */
-        #game-board {
-            transform-origin: 0 0;
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth centering animation */
-        }
-        #viewport {
-            cursor: grab;
-            overflow: hidden;
-            position: relative;
-            background-image: radial-gradient(#1e293b 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes flashHint { 0% { background-color: #facc15 !important; box-shadow: 0 0 20px #facc15; z-index: 50; transform: scale(1.2); } 100% { z-index: 0; transform: scale(1); } }
+        .hint-anim { animation: flashHint 0.6s ease-out; }
+        .hint-completed { color: #475569; text-decoration: line-through; opacity: 0.5; transition: all 0.3s ease; }
+        #game-board { transform-origin: 0 0; transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform; }
+        #viewport { cursor: grab; overflow: hidden; background-image: radial-gradient(#1e293b 1px, transparent 1px); background-size: 20px 20px; }
         #viewport.cursor-crosshair { cursor: crosshair; }
         #viewport.cursor-grabbing { cursor: grabbing; }
-
-        /* --- UI Elements --- */
-        .btn-tool:active { transform: scale(0.95); }
-        .btn-active {
-            background-color: #0891b2 !important; color: white !important;
-            box-shadow: 0 0 10px rgba(8, 145, 178, 0.5);
-            border-color: #22d3ee !important;
-        }
-
-        /* Modal & Toasts */
-        .modal-overlay {
-            background-color: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(4px);
-        }
-        
-        @keyframes slideInUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .toast-anim { animation: slideInUp 0.3s ease-out; }
-
-        @keyframes flashHint {
-            0% { background-color: #facc15; box-shadow: 0 0 20px #facc15; z-index: 50; }
-            100% { z-index: 0; }
-        }
-        .hint-anim { animation: flashHint 0.8s ease-out; }
+        .btn-tool { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-tool:active { transform: scale(0.92); }
+        .btn-active { background-color: #0891b2 !important; color: white !important; box-shadow: 0 0 10px rgba(8, 145, 178, 0.5); border-color: #22d3ee !important; transform: translateY(-1px); }
+        .modal-overlay { background-color: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); transition: opacity 0.3s ease; }
+        .level-card { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); border: 1px solid #334155; }
+        .level-card:hover { transform: translateY(-4px) scale(1.02); border-color: #22d3ee; box-shadow: 0 10px 25px -5px rgba(34, 211, 238, 0.2); }
+        .level-card.active { border-color: #22d3ee; background-color: rgba(34, 211, 238, 0.1); box-shadow: 0 0 15px rgba(34, 211, 238, 0.3); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col p-2 overflow-hidden">
+<body class="h-screen w-screen flex flex-col p-2 overflow-hidden bg-slate-950">
 
-    <!-- 1. Header Area -->
-    <header class="flex justify-between items-center mb-2 px-1 shrink-0">
-        <div class="flex items-center gap-3">
-            <div>
-                <h1 class="text-lg md:text-2xl font-bold font-tech text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
-                    NONOGRAM
-                </h1>
-                <p class="text-slate-500 text-[10px] md:text-xs">Logic Puzzle</p>
-            </div>
-            <!-- Nút Hướng Dẫn Mới: Nổi bật hơn -->
-            <button onclick="toggleRules()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg shadow-purple-500/30 flex items-center gap-1 transition-all animate-pulse">
-                <i class="fa-solid fa-circle-question"></i> Hướng Dẫn
+    <header class="flex justify-between items-center mb-3 px-2 shrink-0 gap-3">
+        <div class="flex items-center gap-3 overflow-hidden">
+            <h1 class="text-xl md:text-3xl font-bold font-tech text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 whitespace-nowrap drop-shadow-md">
+                NONOGRAM
+            </h1>
+            <button onclick="toggleRules()" class="group bg-slate-800 hover:bg-purple-600 border border-slate-700 hover:border-purple-500 text-slate-300 hover:text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-question text-purple-400 group-hover:text-white transition-colors"></i> 
+                <span class="hidden sm:inline">Hướng Dẫn</span>
             </button>
         </div>
         
-        <select id="level-select" class="bg-slate-800 border border-slate-600 text-cyan-400 text-xs rounded-lg p-1.5 outline-none max-w-[140px] shadow-sm">
-            <!-- JS will populate -->
-        </select>
+        <button onclick="toggleLevelMenu()" class="group flex-1 max-w-xs bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-xl shadow-lg shadow-cyan-500/20 flex items-center justify-between transition-all transform hover:scale-[1.02] hover:shadow-cyan-500/40">
+            <span class="flex items-center gap-2">
+                <i class="fa-solid fa-list-ul"></i> 
+                <span id="current-level-btn-text">Chọn Màn Chơi</span>
+            </span>
+            <i class="fa-solid fa-chevron-down text-[10px] opacity-70 group-hover:opacity-100 transition-opacity"></i>
+        </button>
     </header>
 
-    <!-- 2. Toolbar Area -->
-    <div class="flex flex-wrap gap-2 mb-2 justify-center items-center shrink-0 bg-slate-900/80 p-2 rounded-xl border border-slate-700 shadow-lg z-10">
+    <div class="flex flex-wrap gap-2 mb-3 justify-center items-center shrink-0 bg-slate-900/90 p-2.5 rounded-2xl border border-slate-700/50 shadow-xl z-10 backdrop-blur-md">
         
-        <!-- Tools -->
-        <div class="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
-            <button id="tool-draw" onclick="setTool('draw')" class="btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1">
+        <div class="flex bg-slate-800/80 rounded-xl p-1 border border-slate-700/50">
+            <button id="tool-draw" onclick="setTool('draw')" class="btn-tool btn-active px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium">
                 <i class="fa-solid fa-pen"></i> <span class="hidden sm:inline">Vẽ</span>
             </button>
-            <button id="tool-pan" onclick="setTool('pan')" class="btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1 transition-colors">
+            <button id="tool-pan" onclick="setTool('pan')" class="btn-tool px-4 py-2 rounded-lg text-slate-400 hover:text-white text-xs flex items-center gap-1.5 font-medium transition-colors">
                 <i class="fa-solid fa-hand"></i> <span class="hidden sm:inline">Kéo</span>
             </button>
         </div>
 
-        <!-- Draw Modes -->
-        <div id="draw-modes" class="flex bg-slate-800 rounded-lg p-1 border border-slate-700 transition-opacity">
-            <button id="mode-fill" onclick="setDrawMode('fill')" class="btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1">
+        <div id="draw-modes" class="flex bg-slate-800/80 rounded-xl p-1 border border-slate-700/50 transition-all duration-300">
+            <button id="mode-fill" onclick="setDrawMode('fill')" class="btn-tool btn-active px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium">
                 <i class="fa-solid fa-square"></i> Tô
             </button>
-            <button id="mode-cross" onclick="setDrawMode('cross')" class="btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1">
+            <button id="mode-cross" onclick="setDrawMode('cross')" class="btn-tool px-4 py-2 rounded-lg text-slate-400 hover:text-white text-xs flex items-center gap-1.5 font-medium">
                 <i class="fa-solid fa-xmark"></i> Xóa
             </button>
         </div>
 
-        <!-- Helpers -->
-        <div class="flex gap-1">
-            <button onclick="getLogicalHint()" class="btn-tool bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 border border-yellow-600/50 rounded-lg px-3 py-1.5 text-xs shadow-[0_0_10px_rgba(234,179,8,0.1)] transition-all" title="Gợi ý 1 nước đi logic">
-                <i class="fa-solid fa-lightbulb"></i> Gợi ý
-            </button>
-            <!-- Nút Giải (Show Answer) Đã Khôi Phục -->
-            <button onclick="showAnswer()" class="btn-tool bg-rose-900/40 hover:bg-rose-700/60 text-rose-400 border border-rose-800 rounded-lg px-3 py-1.5 text-xs transition-all" title="Hiện toàn bộ đáp án">
-                <i class="fa-solid fa-key"></i> Giải
-            </button>
-            <button onclick="centerBoard()" class="btn-tool bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3 py-1.5 text-xs" title="Căn giữa">
-                <i class="fa-solid fa-compress"></i>
-            </button>
-        </div>
-    </div>
+        <div class="w-[1px] h-8 bg-slate-700 mx-1 hidden sm:block"></div>
 
-    <!-- 3. Game Viewport -->
-    <div id="viewport" class="flex-1 rounded-xl border border-slate-700 shadow-inner relative w-full h-full">
-        <div id="game-board-container" class="absolute top-0 left-0">
-            <div id="game-board" class="inline-block p-10">
-                <!-- Grid generated by JS -->
+        <div class="flex gap-2 items-center">
+            <div class="flex gap-1">
+                <button onclick="undoMove()" class="btn-tool bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 hover:border-slate-600 rounded-lg px-3 py-2 text-xs flex items-center gap-1.5 transition-colors" title="Undo (Ctrl+Z)">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <button onclick="resetGame()" class="btn-tool bg-slate-800 hover:bg-red-900/50 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-800 rounded-lg px-3 py-2 text-xs flex items-center gap-1.5 transition-colors" title="Chơi lại">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
             </div>
-        </div>
-
-        <!-- Hint Toast Message -->
-        <div id="hint-toast" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-800/95 text-white px-4 py-3 rounded-lg border border-yellow-500/50 shadow-2xl z-40 max-w-[90%] md:max-w-md text-sm toast-anim flex gap-3 items-start">
-            <div class="text-yellow-400 text-lg mt-0.5"><i class="fa-solid fa-lightbulb"></i></div>
-            <div>
-                <h4 class="font-bold text-yellow-400 text-xs uppercase mb-1">Gợi ý Logic</h4>
-                <p id="hint-text" class="text-slate-200 leading-snug">Nội dung gợi ý...</p>
-            </div>
-            <button onclick="document.getElementById('hint-toast').classList.add('hidden')" class="text-slate-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-    </div>
-
-    <!-- 4. Rules Modal -->
-    <div id="rules-modal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-[fadeIn_0.2s]">
-            <div class="bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center">
-                <h3 class="font-bold text-white text-lg font-tech"><i class="fa-solid fa-book-open mr-2"></i>Luật Chơi Nonogram</h3>
-                <button onclick="toggleRules()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <div class="p-6 text-sm text-slate-300 space-y-4 max-h-[60vh] overflow-y-auto">
-                <p><strong>Mục tiêu:</strong> Tô đen các ô vuông trong lưới để tạo thành một bức tranh ẩn dựa trên các con số gợi ý.</p>
-                
-                <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
-                    <p class="text-cyan-400 font-bold mb-1">🔍 Cách đọc số:</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li>Số ở hàng/cột thể hiện <strong>độ dài các đoạn liên tiếp</strong> cần tô đen.</li>
-                        <li>Ví dụ hàng có số <strong>"3 2"</strong> nghĩa là: Có một đoạn <strong>3 ô đen</strong>, sau đó là ít nhất <strong>1 ô trống</strong>, rồi đến <strong>2 ô đen</strong>.</li>
-                    </ul>
-                </div>
-
-                <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
-                    <p class="text-yellow-400 font-bold mb-1">💡 Mẹo suy luận:</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Ô chắc chắn:</strong> Nếu số gợi ý lớn (ví dụ 8 trong hàng 10 ô), các ô ở giữa chắc chắn sẽ được tô.</li>
-                        <li><strong>Đánh dấu X:</strong> Dùng chuột phải hoặc chế độ Xóa để đánh dấu các ô chắc chắn là TRỐNG. Điều này rất quan trọng!</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="p-4 bg-slate-800/50 border-t border-slate-700 text-center">
-                <button onclick="toggleRules()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2 rounded-lg font-bold transition-all">Đã Hiểu</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 5. Victory Overlay -->
-    <div id="win-overlay" class="hidden fixed bottom-0 left-0 right-0 z-50 flex flex-col items-center justify-end pb-10 pointer-events-none">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent pointer-events-auto"></div>
-        
-        <!-- Content -->
-        <div class="relative z-10 text-center p-6 w-full max-w-lg pointer-events-auto animate-[slideInUp_0.5s]">
-            <div class="text-5xl text-yellow-400 mb-2 drop-shadow-[0_0_25px_rgba(250,204,21,0.6)] animate-bounce">
-                <i class="fa-solid fa-trophy"></i>
-            </div>
-            <h2 class="text-3xl font-bold text-white font-tech mb-1">HOÀN THÀNH!</h2>
-            <p class="text-cyan-400 mb-6 text-lg font-semibold" id="level-name-display">Hình bí ẩn</p>
             
-            <div class="flex flex-col gap-3">
-                <div class="flex gap-3 justify-center">
-                    <button onclick="nextLevel()" class="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/30 transform transition-all hover:-translate-y-1">
-                        Màn Tiếp Theo <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
-                <button onclick="toggleWinOverlay(false)" class="text-slate-400 hover:text-white text-sm underline mt-2">
-                    <i class="fa-regular fa-eye"></i> Xem lại hình vẽ (Ẩn bảng này)
+            <div class="flex gap-1">
+                <button onclick="getLogicalHint()" class="btn-tool bg-yellow-600/10 hover:bg-yellow-600/30 text-yellow-600 hover:text-yellow-400 border border-yellow-600/30 hover:border-yellow-500 rounded-lg px-3 py-2 text-xs flex items-center gap-1.5 transition-all shadow-sm" title="Gợi ý Logic">
+                    <i class="fa-solid fa-lightbulb"></i>
+                </button>
+                <button onclick="showAnswer()" class="btn-tool bg-rose-900/20 hover:bg-rose-700/40 text-rose-500 hover:text-rose-400 border border-rose-800/50 hover:border-rose-600 rounded-lg px-3 py-2 text-xs transition-all" title="Hiện đáp án">
+                    <i class="fa-solid fa-key"></i>
+                </button>
+            </div>
+
+            <div class="flex bg-slate-800/80 rounded-lg p-1 border border-slate-700/50 ml-1">
+                <button onclick="zoom(-0.1)" class="px-2 py-1 text-slate-400 hover:text-white transition-colors" title="Thu nhỏ">
+                    <i class="fa-solid fa-minus text-[10px]"></i>
+                </button>
+                <button onclick="centerBoard()" class="px-2 py-1 text-slate-500 hover:text-cyan-400 text-xs transition-colors" title="Căn giữa">
+                    <i class="fa-solid fa-compress"></i>
+                </button>
+                <button onclick="zoom(0.1)" class="px-2 py-1 text-slate-400 hover:text-white transition-colors" title="Phóng to">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Floating "Show Win" button (visible when win overlay is hidden) -->
-    <button id="show-win-btn" onclick="toggleWinOverlay(true)" class="hidden fixed bottom-4 right-4 z-40 bg-yellow-600 text-white px-4 py-2 rounded-full shadow-lg font-bold animate-pulse">
-        <i class="fa-solid fa-trophy"></i> Kết quả
-    </button>
+    <div id="viewport" class="flex-1 rounded-2xl border border-slate-700/50 shadow-inner relative w-full h-full bg-slate-900/30 backdrop-blur-sm overflow-hidden">
+        <div id="game-board-container" class="absolute top-0 left-0 w-full h-full">
+            <div id="game-board" class="inline-block p-10 transform-gpu">
+                </div>
+        </div>
+
+        <div id="hint-toast" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-800/95 text-white px-5 py-3.5 rounded-xl border border-yellow-500/40 shadow-2xl shadow-black/50 z-40 max-w-[90%] md:max-w-md text-sm flex gap-4 items-start transition-all transform duration-300">
+            <div class="text-yellow-400 text-xl mt-0.5 animate-pulse"><i class="fa-solid fa-lightbulb"></i></div>
+            <div class="flex-1">
+                <h4 class="font-bold text-yellow-400 text-xs uppercase mb-1 tracking-wide">Gợi ý Logic</h4>
+                <p id="hint-text" class="text-slate-200 leading-snug font-medium">...</p>
+            </div>
+            <button onclick="document.getElementById('hint-toast').classList.add('hidden')" class="text-slate-500 hover:text-white transition-colors p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+    </div>
+
+    <div id="level-menu-modal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full h-[85vh] shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="level-menu-content">
+            <div class="bg-slate-800 p-5 border-b border-slate-700 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 class="font-bold text-white text-xl font-tech text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 tracking-wide">THƯ VIỆN HÌNH ẢNH</h3>
+                    <p class="text-xs text-slate-400 mt-1" id="menu-subtitle">Chọn một bức tranh để bắt đầu giải mã</p>
+                </div>
+                <button onclick="toggleLevelMenu()" class="bg-slate-700 hover:bg-slate-600 text-white w-9 h-9 rounded-full flex items-center justify-center transition-all hover:rotate-90">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 bg-slate-950 custom-scrollbar">
+                <div id="level-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rules-modal" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full shadow-2xl transform scale-95 transition-transform duration-300" id="rules-content">
+            <div class="bg-slate-800 p-5 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="font-bold text-white text-lg font-tech flex items-center gap-2"><i class="fa-solid fa-book-open text-cyan-400"></i> Hướng Dẫn</h3>
+                <button onclick="toggleRules()" class="text-slate-400 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 text-sm text-slate-300 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar leading-relaxed">
+                <p><strong>Mục tiêu:</strong> Tô đen các ô vuông để tạo thành bức tranh dựa trên số gợi ý.</p>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                    <p class="text-cyan-400 font-bold mb-2">Cách đọc số:</p>
+                    <ul class="list-disc pl-5 space-y-1.5 marker:text-cyan-500">
+                        <li>Số ở hàng/cột thể hiện <strong>độ dài đoạn tô đen liên tiếp</strong>.</li>
+                        <li>Ví dụ <strong>"3 2"</strong>: Có 3 ô đen, cách ít nhất 1 ô trắng, rồi đến 2 ô đen.</li>
+                    </ul>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                    <p class="text-green-400 font-bold mb-2">Thao tác:</p>
+                    <ul class="list-disc pl-5 space-y-1.5 marker:text-green-500">
+                        <li><strong>Chuột trái:</strong> Tô đen.</li>
+                        <li><strong>Chuột phải:</strong> Đánh dấu X (ô trống).</li>
+                        <li><strong>Kéo thả:</strong> Để tô/xóa nhanh nhiều ô.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-overlay" class="hidden fixed bottom-0 left-0 right-0 z-50 flex flex-col items-center justify-end pb-12 pointer-events-none transition-all duration-500 ease-out transform translate-y-full opacity-0">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/95 to-transparent pointer-events-auto backdrop-blur-[2px]"></div>
+        <div class="relative z-10 text-center p-8 w-full max-w-lg pointer-events-auto">
+            <div class="text-6xl text-yellow-400 mb-3 animate-bounce drop-shadow-[0_0_30px_rgba(250,204,21,0.6)]"><i class="fa-solid fa-trophy"></i></div>
+            <h2 class="text-4xl font-bold text-white font-tech mb-2 tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500 drop-shadow-sm">HOÀN THÀNH!</h2>
+            <p class="text-cyan-400 mb-8 text-xl font-semibold tracking-wide" id="level-name-display">Hình bí ẩn</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="toggleLevelMenu(); toggleWinOverlay(false);" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl shadow-lg transform transition-all hover:-translate-y-1 border border-slate-600">
+                    <i class="fa-solid fa-bars mr-2"></i> Menu
+                </button>
+                <button onclick="nextLevel()" class="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/30 transform transition-all hover:-translate-y-1 hover:shadow-cyan-500/50">
+                    Màn Tiếp <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+            <button onclick="toggleWinOverlay(false)" class="text-slate-400 hover:text-white text-sm mt-6 block mx-auto transition-colors flex items-center gap-2">
+                <i class="fa-regular fa-eye"></i> Xem lại hình vẽ
+            </button>
+        </div>
+    </div>
 
     <script>
-        // --- DATA ---
-        const levels = [
-            { name: "Trái Tim (5x5)", size: 5, grid: [[0,1,0,1,0],[1,1,1,1,1],[1,1,1,1,1],[0,1,1,1,0],[0,0,1,0,0]] },
-            { name: "Mặt Cười (5x5)", size: 5, grid: [[0,1,0,1,0],[0,1,0,1,0],[0,0,0,0,0],[1,0,0,0,1],[0,1,1,1,0]] },
-            { name: "Thuyền Buồm (10x10)", size: 10, grid: [[0,0,0,1,0,0,0,0,0,0],[0,0,1,1,0,0,0,0,0,0],[0,1,1,1,0,0,1,0,0,0],[0,0,1,1,0,1,1,0,0,0],[0,0,1,1,0,0,1,0,0,0],[0,0,1,1,0,0,1,0,0,0],[0,0,0,0,0,0,1,0,0,0],[1,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1,0,0],[0,0,1,1,1,1,1,0,0,0]] },
-            { name: "Tên Lửa (10x10)", size: 10, grid: [[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,1,1,1,1,0,0],[0,1,1,0,1,1,0,1,1,0],[1,1,0,0,1,1,0,0,1,1],[1,1,0,0,1,1,0,0,1,1],[0,0,0,1,1,1,1,0,0,0]] },
-            { name: "Con Cua (10x10)", size: 10, grid: [[0,0,1,0,0,0,0,1,0,0],[0,1,1,1,0,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,1,1,1],[0,1,1,0,0,1,1,1,1,1],[0,1,1,0,0,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,0,0,0,0,0]] },
-            { name: "Người Nhện (10x10)", size: 10, grid: [[0,1,0,0,0,0,0,0,1,0],[1,1,1,0,0,0,0,1,1,1],[1,1,1,1,1,1,1,1,1,1],[0,1,1,1,0,0,1,1,1,0],[0,0,1,1,0,0,1,1,0,0],[0,1,0,1,1,1,1,0,1,0],[1,0,0,1,1,1,1,0,0,1],[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,0,0,1,0,0,0],[0,0,0,1,0,0,1,0,0,0]] }
+        // --- DATA FROM NONOGRAM.JSON ---
+        // Đã tích hợp trực tiếp 48 màn chơi
+        const rawLevels = [
+		{	"id":4, "name":"Trái Tim", "width":5, "height":5, "solution":[[0,1,0,1,0],[1,1,1,1,1],[1,1,1,1,1],[0,1,1,1,0],[0,0,1,0,0]]},
+		  {"id":5, "name":"Mặt Cười", "width":5, "height":5, "solution":[[0,1,0,1,0],[0,1,0,1,0],[0,0,0,0,0],[1,0,0,0,1],[0,1,1,1,0]]},
+		  {"id":6, "name":"Chữ T", "width":5, "height":5, "solution":[[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]]},
+		  {"id":7, "name":"Con Vịt (Duck)", "width":10, "height":10, "solution":[[0,0,0,1,1,0,0,0,0,0],[0,0,1,1,1,0,0,0,0,0],[0,0,1,1,1,0,0,0,0,0],[0,1,1,1,0,0,0,0,0,0],[1,1,1,1,1,1,1,0,0,0],[1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0],[0,1,1,0,0,1,1,0,0,0],[1,1,0,0,0,0,1,1,0,0]]},
+		  {"id":8, "name":"Ngôi Nhà (House)", "width":10, "height":10, "solution":[[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1],[0,1,1,0,0,0,0,1,1,0],[0,1,1,0,1,1,0,1,1,0],[0,1,1,0,1,1,0,1,1,0],[0,1,1,0,1,1,0,1,1,0],[1,1,1,1,1,1,1,1,1,1]]},
+		  {"id":9, "name":"Thuyền Buồm (Boat)", "width":10, "height":10, "solution":[[0,0,0,1,0,0,0,0,0,0],[0,0,1,1,0,0,0,0,0,0],[0,1,1,1,0,0,1,0,0,0],[0,0,1,1,0,1,1,0,0,0],[0,0,1,1,0,0,1,0,0,0],[0,0,1,1,0,0,1,0,0,0],[0,0,0,0,0,0,1,0,0,0],[1,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1,0,0],[0,0,1,1,1,1,1,0,0,0]]},
+		  {"id":10, "name":"Con Mèo (Cat)", "width":10, "height":10, "solution":[[1,0,0,0,0,0,0,0,0,1],[1,1,0,0,0,0,0,0,1,1],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,0,0,1,0,1,1],[1,1,1,1,1,1,1,1,1,1],[1,1,1,0,0,0,0,1,1,1],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,1,1,1,1,0,0]]},
+		  {"id":11, "name":"Bông Hoa (Flower)", "width":10, "height":10, "solution":[[0,0,1,1,0,0,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,0,1,1],[0,1,1,1,0,0,1,1,1,0],[0,0,1,0,1,1,0,1,0,0],[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,0,0,1,0,0,0],[0,0,1,0,1,1,0,1,0,0],[0,1,1,0,0,0,0,1,1,0]]},
+		  {"id":12, "name":"Con Thỏ (Rabbit)", "width":10, "height":10, "solution":[[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[0,1,1,0,0,0,0,1,1,0],[0,1,1,0,0,0,0,1,1,0],[0,0,1,1,1,1,1,1,0,0]]},
+		  {"id":13, "name":"Con Cua", "width":10, "height":10, "solution":[[0,0,1,0,0,0,0,1,0,0],[0,1,1,1,0,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,1,1,1],[0,1,1,0,0,1,1,1,1,1],[0,1,1,0,0,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,0,0,0,0,0]]},
+		  {"id":14, "name":"Người Nhện", "width":10, "height":10, "solution":[[0,1,0,0,0,0,0,0,1,0],[1,1,1,0,0,0,0,1,1,1],[1,1,1,1,1,1,1,1,1,1],[0,1,1,1,0,0,1,1,1,0],[0,0,1,1,0,0,1,1,0,0],[0,1,0,1,1,1,1,0,1,0],[1,0,0,1,1,1,1,0,0,1],[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,0,0,1,0,0,0],[0,0,0,1,0,0,1,0,0,0]]},
+		  {"id":1,"name":"Con Ma (Ghost)","width":10,"height":10,"solution":[[0,0,0,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,0,1,1],[1,1,0,1,1,1,1,0,1,1],[1,1,1,1,1,1,1,1,1,1],[0,1,1,1,0,0,1,1,1,0],[0,1,1,1,0,0,1,1,1,0],[0,0,1,0,0,0,0,1,0,0]]},
+          {"id":2,"name":"Con Thỏ (Rabbit)","width":10,"height":10,"solution":[[0,0,1,0,0,0,0,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,0,1,1,1,1,1,1,0,1],[1,0,1,1,1,1,1,1,0,1],[0,0,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0]]},
+          {"id":3,"name":"Ngôi Nhà (House)","width":10,"height":10,"solution":[[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1],[1,1,1,0,1,1,0,1,1,1],[1,1,1,0,1,1,0,1,1,1],[1,1,1,1,1,1,1,1,1,1],[1,1,1,0,0,0,0,1,1,1],[1,1,1,0,0,0,0,1,1,1]]},
+          {"id":4,"name":"Cây Nấm (Mushroom)","width":10,"height":10,"solution":[[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,0,1,1,0,0,0,0]]},
+          {"id":5,"name":"Con Cua (Crab)","width":10,"height":10,"solution":[[0,0,1,0,0,0,0,1,0,0],[0,1,1,0,0,0,0,1,1,0],[0,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,0,1,1],[1,1,0,1,1,1,1,0,1,1],[1,1,1,1,1,1,1,1,1,1],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0]]},
+          {"id":6,"name":"Đầu Lâu (Skull)","width":10,"height":10,"solution":[[0,0,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,0,1,1],[1,1,0,1,1,1,1,0,1,1],[1,1,1,1,1,1,1,1,1,1],[0,1,1,1,1,1,1,1,1,0],[0,0,1,0,1,1,0,1,0,0],[0,0,1,0,1,1,0,1,0,0],[0,0,1,1,1,1,1,1,0,0]]},
+          {"id":7,"name":"Bạch Tuộc (Octopus)","width":10,"height":10,"solution":[[0,0,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,0,1,1,1,1,0,1,1],[1,1,0,1,1,1,1,0,1,1],[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1],[1,0,1,1,0,0,1,1,0,1],[1,0,1,1,0,0,1,1,0,1],[1,0,1,1,0,0,1,1,0,1]]},
+          {"id":8,"name":"Bông Hoa (Flower)","width":10,"height":10,"solution":[[0,0,0,1,0,0,1,0,0,0],[0,0,1,1,0,0,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,0,1,1,0,0,0,0],[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0]]},
+          {"id":9,"name":"Chìa Khóa (Key)","width":10,"height":10,"solution":[[0,0,1,1,0,0,1,1,1,1],[0,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,0,1,1],[1,1,0,0,0,1,1,0,1,1],[1,1,0,0,0,0,0,0,1,1],[1,1,0,0,0,0,0,0,1,1],[1,1,0,0,0,0,0,0,1,1],[1,1,0,0,0,0,0,0,1,1],[0,1,0,0,0,0,0,0,1,1],[0,1,0,0,0,0,1,1,1,1]]},
+          {"id":10,"name":"Bí Ngô (Pumpkin)","width":10,"height":10,"solution":[[0,0,0,0,1,1,0,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,1,0,1,1,0,1,1,1],[1,1,1,0,1,1,0,1,1,1],[1,1,0,1,1,1,1,0,1,1],[1,1,1,0,0,0,0,1,1,1],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,0,0,1,1,0,0]]},
+          {"id":11,"name":"Con Dơi (Bat)","width":10,"height":10,"solution":[[0,0,1,0,0,0,0,1,0,0],[0,1,1,0,0,0,0,1,1,0],[0,1,1,1,0,0,1,1,1,0],[0,1,1,0,1,1,0,1,1,0],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,0,1,1],[1,1,0,1,1,1,1,0,1,1],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,0,0],[0,0,0,1,0,0,1,0,0,0]]},
+          {"id":12,"name":"Con Nhện (Spider)","width":10,"height":10,"solution":[[0,1,1,0,0,0,0,1,1,0],[1,1,1,0,0,0,0,1,1,1],[1,1,1,1,1,1,1,1,1,1],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,1,1,1,1,0,0],[1,1,0,1,1,1,1,0,1,1],[1,1,1,0,1,1,0,1,1,1],[1,1,1,0,1,1,0,1,1,1],[0,1,1,0,1,1,0,1,1,0]]},
+          {"id":13,"name":"Xương Rồng (Cactus)","width":10,"height":15,"solution":[[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,0,0,0],[1,1,1,1,1,1,1,1,1,1],[0,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,0,0]]},
+          {"id":14,"name":"Con Heo (Pig)","width":15,"height":10,"solution":[[0,1,1,0,0,0,0,0,0,0,0,0,0,1,1],[1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,1,1,1,1,0,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[0,1,1,1,0,0,1,1,1,0,0,1,1,1,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0]]},
+          {"id":15,"name":"Ốc Sên (Snail)","width":15,"height":10,"solution":[[0,0,0,0,0,0,0,1,1,1,0,0,0,0,0],[0,0,0,0,0,1,1,1,1,1,1,1,0,0,0],[0,0,0,0,1,1,1,0,0,0,1,1,1,0,0],[0,0,0,1,1,1,0,0,0,0,0,1,1,0,0],[0,0,1,1,1,0,0,1,1,1,0,1,1,0,0],[0,0,1,1,1,0,0,1,0,1,0,1,1,0,0],[0,1,1,1,0,0,1,1,0,0,1,1,0,0,0],[0,1,1,1,0,0,1,1,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]},
+          {"id":16,"name":"Cá Voi (Whale)","width":15,"height":10,"solution":[[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,0,1,0,0,0,0,0,0],[0,0,0,0,0,1,0,1,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,0,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,1,1,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,0,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[0,0,0,1,1,1,1,1,0,0,0,0,0,0,0]]},
+          {"id":17,"name":"Trực Thăng (Helicopter)","width":15,"height":10,"solution":[[0,0,0,0,1,1,0,0,0,0,0,0,0,0,0],[0,0,1,1,1,1,1,1,0,1,1,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[0,1,1,1,0,0,0,0,0,0,0,1,1,1,0],[0,1,1,1,0,0,0,0,0,0,0,1,1,1,0],[0,1,1,1,0,0,0,0,0,0,0,1,1,1,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,0,0,1,1,0,0,0,0,0,1,1,0,0,0]]},
+          {"id":18,"name":"Con Cá (Fish)","width":10,"height":10,"solution":[[0,0,0,1,1,0,0,0,0,0],[0,0,1,1,0,0,0,0,0,0],[0,0,1,1,0,0,1,1,1,0],[0,0,1,0,0,0,0,0,1,1],[0,1,0,0,0,0,0,0,0,1],[1,1,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,1,1,0],[0,0,1,1,1,0,1,1,1,0],[0,0,0,1,1,1,0,1,1,0],[0,0,0,0,1,1,0,0,0,0]]},
+          {"id":19,"name":"Đà Điểu (Ostrich)","width":10,"height":15,"solution":[[0,0,0,1,1,0,0,0,0,0],[0,0,1,1,1,1,0,0,0,0],[0,1,1,0,0,1,1,0,0,0],[0,1,1,1,1,1,1,0,0,0],[0,0,0,1,1,0,0,0,0,0],[0,0,0,1,1,0,0,0,0,0],[0,0,1,1,1,1,1,0,0,0],[0,1,1,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,0,0],[0,0,0,1,0,0,1,0,0,0],[0,0,0,1,0,0,1,0,0,0],[0,0,1,1,0,0,1,1,0,0],[0,0,1,1,0,0,1,1,0,0]]},
+          {"id":20,"name":"Đầu Tàu (Train)","width":15,"height":10,"solution":[[0,0,0,0,0,0,1,1,1,1,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,0,0,0,0,0],[0,0,1,0,0,0,1,1,1,1,0,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,0,1,1,1],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,0,1,1,1,0,1,1,0,1],[1,1,0,1,1,1,0,1,1,1,0,1,1,0,0]]},
+          {"id":21,"name":"Cái Ô (Umbrella)","width":15,"height":15,"solution":[[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,1,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,0,0,0,0,0,0]]},
+          {"id":22,"name":"Cây Nấm (Mushroom)","width":15,"height":15,"solution":[[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],[0,0,0,1,1,1,0,1,0,1,1,1,0,0,0],[0,0,1,0,1,1,1,1,1,1,1,0,1,0,0],[0,0,1,0,1,0,1,0,1,0,1,0,1,0,0],[0,0,1,0,1,0,1,0,1,0,1,0,1,0,0],[0,0,1,0,1,0,1,0,1,0,1,0,1,0,0],[0,0,1,0,1,0,1,0,1,0,1,0,1,0,0],[0,0,1,0,1,1,1,1,1,1,1,0,1,0,0],[0,0,0,1,1,1,0,1,0,1,1,1,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],[0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],[0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],[0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],[0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],[0,0,0,0,0,1,1,1,1,1,0,0,0,0,0]]},
+          {"id":23,"name":"Quả Táo (Apple)","width":15,"height":15,"solution":[[0,0,0,0,0,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,0,0,0,0,0],[0,0,0,0,0,1,1,1,1,1,1,0,0,0,0],[0,0,0,0,1,1,0,0,0,0,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,0,1,1,1,1,0,0,0]]},
+          {"id":24,"name":"Cái Giường (Bed)","width":10,"height":10,"solution":[[0,1,1,0,0,0,0,1,1,0],[0,1,1,0,0,0,0,1,1,0],[0,1,1,0,0,0,0,1,1,0],[0,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1,1,0],[0,1,1,0,0,0,0,1,1,0],[0,1,1,0,0,0,0,1,1,0],[1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1]]},
+          {"id":25,"name":"Nấm Độc (Poison Mushroom)","width":10,"height":10,"solution":[[0,0,1,1,0,0,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,0,0,0,0,0,0,1,1],[1,0,0,0,0,0,0,0,0,1],[1,0,0,1,0,0,1,0,0,1],[1,0,0,1,1,1,1,0,0,1],[1,0,0,1,1,1,1,0,0,1],[1,0,0,1,1,1,1,0,0,1],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,0,0]]},
+          {"id":26,"name":"Con Ốc (Small Snail)","width":10,"height":10,"solution":[[0,0,0,1,1,0,0,0,0,0],[0,0,1,1,1,1,1,0,0,0],[0,1,1,1,1,1,1,1,0,0],[0,1,1,0,0,0,1,1,0,0],[1,1,1,1,0,0,0,1,0,0],[1,1,1,0,0,0,1,0,0,0],[1,1,0,0,0,1,1,0,0,0],[0,1,1,1,1,1,0,0,0,0],[0,0,1,1,1,0,0,0,0,0],[0,0,0,1,0,0,0,0,0,0]]},
+          {"id":27,"name":"Trái Tim (Heart)","width":10,"height":10,"solution":[[0,0,1,1,0,0,1,1,0,0],[0,1,1,1,1,1,1,1,1,0],[1,1,0,1,1,1,1,0,1,1],[1,1,1,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,0,1,1],[0,1,1,0,1,1,0,1,1,0],[0,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,0,0,0],[0,0,0,0,1,1,0,0,0,0]]},
+          {"id":28,"name":"Con Sóc (Squirrel)","width":10,"height":10,"solution":[[0,0,0,0,0,1,0,0,0,0],[0,0,0,0,1,1,1,0,0,0],[0,0,0,1,1,1,1,0,1,0],[0,0,1,1,1,0,1,1,1,0],[0,1,1,1,0,0,0,1,1,0],[0,1,1,0,0,0,0,0,1,0],[0,1,1,0,0,0,0,0,0,0],[1,1,0,0,0,0,1,1,1,0],[1,1,1,1,0,1,1,1,1,0],[0,1,1,1,1,1,1,1,0,0]]},
+          {"id":29,"name":"Con Chuột (Mouse)","width":10,"height":10,"solution":[[0,0,1,0,0,0,1,0,0,0],[0,1,1,0,0,0,1,1,0,0],[1,1,1,0,0,0,1,1,1,0],[1,1,0,0,0,0,0,1,1,0],[0,1,0,0,1,0,0,1,0,0],[0,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,0,0],[0,1,1,0,1,0,1,1,0,0],[0,1,1,0,1,0,1,1,0,0],[0,0,1,1,0,1,1,0,0,0]]},
+          {"id":30,"name":"Hộp Quà (Gift Box)","width":15,"height":15,"solution":[[0,0,0,0,0,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,1,0,0,0,0,0],[0,0,0,0,0,1,1,0,0,1,1,0,0,0,0],[0,0,0,0,1,1,0,0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,1,1,0,0,1,1,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,0,1,0,0,1,0,0,0,0,1,0,0,1,0],[0,0,1,0,0,1,0,0,0,0,1,0,0,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,0,1,0,0,1,0,0,0,0,1,0,0,1,0],[0,0,1,0,0,1,0,0,0,0,1,0,0,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,0,1,0,0,1,0,0,0,0,1,0,0,1,0],[0,0,1,0,0,1,0,0,0,0,1,0,0,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0]]},
+          {"id":31,"name":"Dấu Chân (Footprint)","width":15,"height":15,"solution":[[0,0,1,1,0,0,0,1,1,0,0,0,1,1,0],[0,1,1,1,1,0,1,1,1,1,0,1,1,1,1],[0,1,1,1,1,0,1,1,1,1,0,1,1,1,1],[0,0,1,1,0,0,0,1,1,0,0,0,1,1,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],[0,0,0,0,1,1,1,0,1,1,1,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],[0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,0,0,0,0,0,0]]},
+          {"id":32,"name":"Mặt Heo (Pig Face)","width":15,"height":15,"solution":[[0,0,1,1,1,0,0,0,1,1,1,0,0,0,0],[0,1,1,1,1,1,0,1,1,1,1,1,0,0,0],[1,1,1,1,1,1,1,0,1,1,1,1,1,1,1],[1,1,0,1,1,1,0,0,0,1,1,1,0,1,1],[1,1,0,1,0,0,0,0,0,0,0,1,0,1,1],[1,1,0,1,1,1,0,0,0,1,1,1,0,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,0,0,0,1,1,1,1,1,1],[1,1,1,1,1,0,0,1,0,0,1,1,1,1,1],[1,1,1,1,0,0,1,1,1,0,0,1,1,1,1],[1,1,1,0,0,1,1,1,1,1,0,0,1,1,1],[1,1,0,0,1,1,1,1,1,1,1,0,0,1,1],[1,0,0,1,1,1,1,1,1,1,1,1,0,0,1],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0]]},
+          {"id":33,"name":"Mặt Mèo (Cat Face)","width":15,"height":15,"solution":[[0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],[0,0,0,0,1,1,0,1,0,0,1,1,0,0,0],[0,0,0,1,0,1,0,1,0,1,0,1,0,0,0],[0,0,0,1,1,0,0,1,0,0,1,1,0,0,0],[0,0,0,0,1,1,0,0,0,1,1,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],[0,1,1,0,0,0,0,1,1,0,0,0,0,1,1],[1,1,0,0,0,0,1,1,1,0,0,0,0,1,1],[1,1,0,0,0,0,0,1,0,0,0,0,0,1,1],[1,1,0,0,0,1,0,0,0,1,0,0,0,1,1],[1,1,0,0,0,1,1,0,1,1,0,0,0,1,1],[0,1,1,0,0,1,1,1,1,1,1,1,0,1,1],[0,0,1,1,0,0,0,1,1,1,0,0,1,1,0],[0,0,0,1,1,1,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,1,1,1,1,1,1,1,1,1,0]]},
+          {"id":34,"name":"Đầu Lâu (Large Skull)","width":15,"height":15,"solution":[[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],[0,1,1,0,0,0,0,1,0,0,0,0,1,1,0],[0,1,1,0,0,0,0,0,0,0,0,0,1,1,0],[1,1,0,0,0,1,1,0,1,1,0,0,0,1,1],[1,1,0,0,0,1,1,0,1,1,0,0,0,1,1],[1,1,0,0,0,0,0,0,0,0,0,0,0,1,1],[1,1,0,0,0,1,1,1,1,1,0,0,0,1,1],[1,1,0,0,1,1,0,0,0,1,1,0,0,1,1],[1,1,0,0,1,1,0,0,0,1,1,0,0,1,1],[0,1,1,0,0,1,1,1,1,1,0,0,1,1,0],[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],[0,0,0,1,1,0,0,1,0,0,1,1,0,0,0],[0,0,0,1,0,1,0,1,0,1,0,1,0,0,0],[0,0,0,1,1,1,0,1,0,1,1,1,0,0,0]]},
+          {"id":35,"name":"Chìa Khóa (Large Key)","width":15,"height":15,"solution":[[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,1,1,0,1,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,0,1,1,0,0,0,0],[0,0,0,1,1,0,0,0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,1,0,0,1,1,0,0,0],[0,0,0,1,1,0,1,1,1,0,1,1,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,1,1,1,1,0,1,0,0,0,0,0,0],[0,0,0,1,1,0,0,1,1,1,0,0,0,0,0],[0,0,0,1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,1,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,1,1,1,0,0,0,0,0,0,0,0]]},
+          {"id":36,"name":"Con Vịt (Duck)","width":15,"height":15,"solution":[[0,0,0,0,0,0,0,0,1,1,1,0,0,0,0],[0,0,0,0,0,0,0,1,1,0,1,1,0,0,0],[0,0,0,0,0,0,1,1,0,0,0,1,1,0,0],[0,0,0,0,0,0,1,1,0,0,0,1,1,0,0],[0,0,0,0,0,0,1,1,0,0,1,1,1,0,0],[0,0,0,0,0,0,0,1,1,1,1,0,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],[0,1,1,0,1,1,1,1,1,1,1,0,0,0,0],[0,1,1,1,0,0,0,0,0,0,0,1,1,1,0],[1,1,0,0,0,0,0,0,0,0,0,1,1,0,0],[1,1,0,0,0,0,0,0,0,0,0,1,1,0,0],[1,1,0,0,0,0,0,0,0,0,0,1,1,0,0],[0,1,1,0,0,0,0,0,0,0,0,0,1,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0]]},
+          {"id":37,"name":"Con Gà (Chicken)","width":15,"height":15,"solution":[[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,1,1,0,1,1,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],[0,0,1,1,1,1,0,0,0,1,1,1,1,0,0],[0,1,0,0,0,1,1,1,1,0,0,0,1,0,0],[1,0,0,0,0,0,1,1,0,0,0,0,0,1,0],[1,0,0,0,0,0,1,1,0,0,0,0,0,1,0],[0,1,0,0,0,1,1,1,1,0,0,0,1,0,0],[0,0,1,1,1,1,0,0,0,1,1,1,1,0,0],[0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],[0,0,0,1,1,1,0,0,0,1,1,1,0,0,0],[0,0,1,0,0,0,0,0,0,0,0,0,1,0,0]]},
+          {"id":38,"name":"Thuyền Buồm (Sailboat)","width":15,"height":15,"solution":[[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,1,1,1,0,0,0,0,0,0,0],[0,0,0,0,1,0,1,1,0,0,0,0,0,0,0],[0,0,0,1,0,0,1,1,0,0,0,0,0,0,0],[0,0,1,0,0,0,1,1,0,0,0,0,0,0,0],[0,1,0,0,0,0,1,1,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,0,1,1,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,0,0],[0,0,1,0,0,0,0,0,0,0,0,0,0,1,0],[0,1,0,0,0,1,1,1,1,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]]},
+          {"id":39,"name":"Mặt Gấu (Bear Face)","width":15,"height":15,"solution":[[0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],[0,1,1,1,0,0,0,0,0,0,0,1,1,1,0],[1,1,1,1,0,0,0,0,0,0,0,1,1,1,1],[1,1,1,1,0,0,0,0,0,0,0,1,1,1,1],[1,1,1,1,0,0,0,0,0,0,0,1,1,1,1],[0,1,1,1,0,0,0,0,0,0,0,1,1,1,0],[0,0,1,1,1,0,0,0,0,0,1,1,1,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,0,1,0,1,1,1,1,1,0,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,0,1,1,1,1,1,1,1,0,1,1,0],[0,1,1,0,1,0,0,0,0,0,1,0,1,1,0],[0,1,1,0,0,0,0,0,0,0,0,0,1,1,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0]]},
+          {"id":40,"name":"Cái Cốc (Cup)","width":15,"height":15,"solution":[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],[0,0,1,1,0,0,1,1,0,0,1,1,0,0,0],[0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,1,0,0,0],[1,0,0,1,1,1,1,1,1,0,0,1,0,0,0],[1,0,0,1,0,0,0,0,1,0,0,1,1,1,0],[1,0,0,1,0,0,0,0,1,0,0,1,0,1,0],[1,0,0,1,1,1,1,1,1,0,0,1,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,0,0,0,0,0]]},
+          {"id":41,"name":"Con Gấu (Bear)","width":15,"height":20,"solution":[[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],[0,1,1,1,1,0,0,0,0,0,1,1,1,1,0],[1,1,0,0,1,1,0,0,0,1,1,0,0,1,1],[1,0,0,0,0,1,1,1,1,1,0,0,0,0,1],[1,0,0,0,0,1,1,1,1,1,0,0,0,0,1],[1,0,0,0,1,1,1,1,1,1,1,0,0,0,1],[1,1,0,0,1,0,0,0,0,0,1,0,0,1,1],[1,1,1,1,0,0,0,0,0,0,0,1,1,1,1],[0,1,1,0,0,0,0,0,0,0,0,0,1,1,0],[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,0,0,1,1,1,0,0,1,1,1,0],[0,1,1,0,0,0,1,1,1,0,0,0,1,1,0],[0,1,1,0,0,0,0,0,0,0,0,0,1,1,0],[0,1,1,0,0,0,0,0,0,0,0,0,1,1,0],[0,1,1,0,0,0,0,0,0,0,0,0,1,1,0],[0,1,1,0,0,0,1,1,1,0,0,0,1,1,0],[0,1,1,0,0,1,1,0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0,0,0,1,1,0,0,0]]},
+          {"id":42,"name":"Tàu Ngầm (Submarine)","width":15,"height":10,"solution":[[0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,1,1,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[1,1,0,0,0,1,1,1,0,0,0,0,0,1,1],[1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],[1,0,0,0,0,1,1,1,0,0,0,0,0,0,1],[1,1,0,0,0,0,0,0,0,0,0,0,0,1,1],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0]]},
+          {"id":43,"name":"Con Heo (Pig)","width":15,"height":10,"solution":[[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],[0,1,1,1,0,0,0,0,0,0,0,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,0,0,1,0,0,0,0,0,1,0,0,1,1],[1,1,0,0,1,0,0,0,0,0,1,0,0,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[0,1,1,1,0,1,1,1,1,1,0,1,1,1,0],[0,1,1,1,0,1,0,1,0,1,0,1,1,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,0,0,1,1,0,0,0,0,0,1,1,0,0,0]]},
+          {"id":44,"name":"Con Cá (Large Fish)","width":15,"height":15,"solution":[[0,0,0,0,0,0,0,0,0,0,0,0,1,1,0],[0,0,0,0,0,0,0,0,0,0,0,1,1,1,0],[0,0,0,1,0,0,0,0,0,0,1,1,0,1,0],[0,0,1,1,0,0,0,0,0,1,1,0,0,1,0],[0,1,1,1,1,0,0,0,1,1,0,0,0,1,0],[1,1,0,0,1,1,0,1,1,0,0,0,0,1,0],[1,0,0,0,0,1,1,1,0,0,0,0,0,1,0],[1,0,0,0,0,0,1,0,0,0,0,0,1,1,0],[1,1,0,0,0,1,1,1,0,0,0,1,1,0,0],[0,1,1,1,1,0,0,1,1,1,1,1,0,0,0],[0,0,1,1,0,0,0,0,0,1,1,0,0,0,0],[0,0,1,1,1,0,0,0,1,1,1,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,0,0,0,0,0],[0,0,0,0,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,0,1,1,1,0,0,0,0,0,0,0]]},
+          {"id":45,"name":"Ấm Trà (Teapot)","width":15,"height":15,"solution":[[0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,1,1,0,0,1,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,1,1,0,0,0,0,0,0,0,1,1,0,0,0],[1,1,0,0,0,0,0,0,0,0,0,1,1,0,1],[1,0,0,0,1,0,0,0,1,0,0,0,1,1,1],[1,0,0,1,0,0,0,1,0,0,0,0,1,0,1],[1,0,0,0,1,0,1,0,0,0,0,0,1,0,1],[1,1,0,0,0,0,0,0,0,0,0,1,1,0,1],[0,1,1,0,0,0,0,0,0,0,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]},
+          {"id":46,"name":"Cá Voi (Large Whale)","width":15,"height":15,"solution":[[0,0,0,0,0,1,1,0,0,1,1,0,0,0,0],[0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,0,1,1,1,0,1,1,1,1,0],[1,1,1,1,1,0,1,1,1,0,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0,0,0,1,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]},
+          {"id":47,"name":"Con Chim (Bird)","width":15,"height":15,"solution":[[0,0,0,0,1,1,0,0,1,1,1,0,0,0,0],[0,0,0,1,1,0,0,0,0,1,1,0,0,0,0],[0,0,0,1,1,0,0,0,0,1,1,1,0,0,0],[0,0,1,1,1,0,0,0,0,0,1,1,0,0,0],[0,0,1,1,1,0,0,0,0,0,1,1,0,0,0],[0,1,1,1,1,0,0,1,1,0,1,1,1,0,0],[1,1,1,1,1,0,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,0,1,1,1,0,1,1,1,1,0],[1,1,1,0,1,0,1,1,1,0,1,1,1,1,0],[1,1,0,0,1,0,1,1,1,1,1,1,1,0,0],[1,1,0,0,0,0,0,1,1,1,1,1,0,0,0],[1,1,0,0,0,0,0,0,1,1,1,0,0,0,0],[1,1,1,0,0,0,0,0,0,1,0,0,0,0,0],[0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,1,1,0,0,0,0,0,0,0,0,0,0,0,0]]},
+          {"id":48,"name":"Gấu Trúc (Panda)","width":15,"height":15,"solution":[[0,0,0,1,1,0,0,0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0,1,1,1,1,1,1,0],[0,1,1,0,0,1,1,0,0,1,1,0,0,1,1],[0,1,1,0,0,1,1,0,0,1,1,0,0,1,1],[0,1,1,1,1,1,1,0,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,1,0,0,0,1,1,0,0,0,1,1,1],[1,1,1,0,0,0,0,0,0,0,0,0,0,1,1],[1,1,1,0,0,0,0,0,0,0,0,0,0,1,1],[1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],[0,1,1,0,0,0,0,0,0,0,0,0,0,1,1],[0,0,1,1,1,0,0,0,0,0,0,1,1,1,0]]}
         ];
 
+        // --- MAP DATA TO GAME ENGINE ---
+        // Chuyển đổi format để phù hợp logic Width/Height
+        const levels = rawLevels.map(l => ({
+            name: l.name,
+            rows: l.height,
+            cols: l.width,
+            grid: l.solution
+        }));
+
+        // --- STATE ---
         let state = {
-            levelIdx: 0,
-            grid: [],
-            tool: 'draw',
-            drawMode: 'fill',
+            levelIdx: -1, grid: [], history: [],
+            tool: 'draw', drawMode: 'fill',
             scale: 1, panX: 0, panY: 0,
             isDragging: false, lastX: 0, lastY: 0, intention: 0,
             isWin: false
@@ -251,16 +306,41 @@
         const viewportEl = document.getElementById('viewport');
 
         function init() {
-            // Level Select
-            const selector = document.getElementById('level-select');
+            const levelGrid = document.getElementById('level-grid');
             levels.forEach((l, i) => {
-                const opt = document.createElement('option');
-                opt.value = i; opt.text = l.name;
-                selector.appendChild(opt);
+                const card = document.createElement('button');
+                card.className = "level-card bg-slate-800 p-4 rounded-xl flex flex-col items-center gap-3 relative overflow-hidden group text-left border border-slate-700";
+                card.onclick = () => { loadLevel(i); toggleLevelMenu(); };
+                
+                const miniGrid = document.createElement('div');
+                miniGrid.className = "w-full aspect-square bg-slate-900 border border-slate-700 p-1.5 grid gap-[1px] opacity-60 group-hover:opacity-100 transition-opacity rounded-lg";
+                miniGrid.style.gridTemplateColumns = `repeat(${l.cols}, 1fr)`;
+                
+                // Mini grid render
+                for(let r=0; r<l.rows; r++) {
+                    for(let c=0; c<l.cols; c++) {
+                        const cell = document.createElement('div');
+                        // Nếu lưới không vuông, miniGrid vẫn render cell nhưng có thể bị méo nhẹ hoặc thừa. 
+                        // Ở đây ta cứ render đủ số ô, CSS Grid sẽ lo việc chia cột.
+                        cell.className = "bg-slate-700 rounded-[1px]";
+                        miniGrid.appendChild(cell);
+                    }
+                }
+
+                const title = document.createElement('span');
+                title.className = "text-cyan-400 font-bold text-xs truncate w-full text-center group-hover:text-white transition-colors mt-1";
+                title.innerText = l.name;
+
+                const badge = document.createElement('span');
+                badge.className = "absolute top-2 right-2 bg-slate-900/90 text-slate-200 text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm border border-slate-600 font-tech";
+                badge.innerText = `${l.cols}x${l.rows}`;
+
+                card.appendChild(miniGrid);
+                card.appendChild(title);
+                card.appendChild(badge);
+                levelGrid.appendChild(card);
             });
-            selector.addEventListener('change', (e) => loadLevel(parseInt(e.target.value)));
-            
-            // Events
+
             viewportEl.addEventListener('mousedown', onPointerDown);
             viewportEl.addEventListener('mousemove', onPointerMove);
             window.addEventListener('mouseup', onPointerUp);
@@ -270,31 +350,65 @@
             viewportEl.addEventListener('wheel', (e) => {
                 if(e.ctrlKey) { e.preventDefault(); zoom(e.deltaY > 0 ? -0.1 : 0.1); }
             }, {passive: false});
+            
+            document.addEventListener('keydown', (e) => {
+                if((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undoMove(); }
+            });
 
+            toggleLevelMenu(); 
             loadLevel(0);
         }
 
         function loadLevel(idx) {
-            state.levelIdx = idx;
-            state.isWin = false;
-            document.getElementById('level-select').value = idx;
-            toggleWinOverlay(false, true); // Force hide win overlay
-            document.getElementById('show-win-btn').classList.add('hidden');
-            
+            state.levelIdx = idx; state.isWin = false; state.history = [];
             const level = levels[idx];
-            state.grid = Array(level.size).fill().map(() => Array(level.size).fill(0));
+            document.getElementById('current-level-btn-text').innerText = level.name;
+            toggleWinOverlay(false, true);
+            document.querySelectorAll('.level-card').forEach((el, i) => {
+                if(i === idx) el.classList.add('active'); else el.classList.remove('active');
+            });
             
+            // Init empty grid based on Rows/Cols
+            state.grid = Array(level.rows).fill().map(() => Array(level.cols).fill(0));
             renderBoard(level);
-            
-            // Auto Center after render
-            setTimeout(centerBoard, 50);
+            setTimeout(centerBoard, 100);
+        }
+
+        function saveState() {
+            const gridCopy = state.grid.map(row => [...row]);
+            state.history.push(gridCopy);
+            if(state.history.length > 50) state.history.shift();
+        }
+
+        function undoMove() {
+            if(state.history.length === 0) { showToast("Không còn nước đi nào."); return; }
+            state.grid = state.history.pop();
+            const level = levels[state.levelIdx];
+            // Re-check complete lines
+            for(let r=0; r<level.rows; r++) {
+                for(let c=0; c<level.cols; c++) updateCellVisual(r, c);
+                checkLineComplete(r, -1);
+            }
+            for(let c=0; c<level.cols; c++) checkLineComplete(-1, c);
+        }
+
+        function resetGame() {
+            if(!confirm("Bạn có chắc muốn chơi lại từ đầu?")) return;
+            saveState();
+            const level = levels[state.levelIdx];
+            state.grid = Array(level.rows).fill().map(() => Array(level.cols).fill(0));
+            for(let r=0; r<level.rows; r++) {
+                for(let c=0; c<level.cols; c++) updateCellVisual(r, c);
+                checkLineComplete(r, -1);
+            }
+            for(let c=0; c<level.cols; c++) checkLineComplete(-1, c);
+            centerBoard();
         }
 
         function calculateHints(line) {
             let hints = [], count = 0;
             for(let val of line) {
-                if(val === 1) count++;
-                else if(count > 0) { hints.push(count); count = 0; }
+                if(val === 1) count++; else if(count > 0) { hints.push(count); count = 0; }
             }
             if(count > 0) hints.push(count);
             return hints.length ? hints : [0];
@@ -302,16 +416,18 @@
 
         function renderBoard(level) {
             boardEl.innerHTML = '';
+            // Row hints: based on grid rows
             const rowHints = level.grid.map(row => calculateHints(row));
-            const colHints = Array(level.size).fill().map((_, j) => calculateHints(level.grid.map(row => row[j])));
+            // Col hints: based on grid cols
+            const colHints = Array(level.cols).fill().map((_, j) => calculateHints(level.grid.map(row => row[j])));
 
             const table = document.createElement('table');
             table.style.borderCollapse = 'separate';
             table.style.borderSpacing = '0';
             
-            // Header
+            // Header Row (Col hints)
             const trHead = document.createElement('tr');
-            trHead.appendChild(document.createElement('td')); 
+            trHead.appendChild(document.createElement('td')); // Corner cell
             colHints.forEach((hints, c) => {
                 const td = document.createElement('td');
                 td.className = "text-center align-bottom pb-1 px-1 min-w-[25px] select-none";
@@ -328,9 +444,10 @@
             });
             table.appendChild(trHead);
 
-            // Body
-            for(let r=0; r<level.size; r++) {
+            // Body Rows
+            for(let r=0; r<level.rows; r++) {
                 const tr = document.createElement('tr');
+                // Left Hint (Row hint)
                 const tdHint = document.createElement('td');
                 tdHint.className = "text-right pr-2 h-8 whitespace-nowrap align-middle select-none";
                 tdHint.id = `hint-row-${r}`;
@@ -341,56 +458,20 @@
                 });
                 tr.appendChild(tdHint);
 
-                for(let c=0; c<level.size; c++) {
+                // Grid Cells
+                for(let c=0; c<level.cols; c++) {
                     const td = document.createElement('td');
-                    td.className = "w-8 h-8 border border-slate-600 bg-slate-900 cursor-pointer nonogram-cell";
+                    td.className = "w-7 h-7 md:w-8 md:h-8 border border-slate-600 bg-slate-900 cursor-pointer nonogram-cell";
                     td.dataset.r = r; td.dataset.c = c; td.id = `cell-${r}-${c}`;
-                    if((c+1)%5===0 && c!==level.size-1) td.style.borderRight = "2px solid #94a3b8";
-                    if((r+1)%5===0 && r!==level.size-1) td.style.borderBottom = "2px solid #94a3b8";
+                    // Thick borders every 5 cells
+                    if((c+1)%5===0 && c!==level.cols-1) td.style.borderRight = "2px solid #94a3b8";
+                    if((r+1)%5===0 && r!==level.rows-1) td.style.borderBottom = "2px solid #94a3b8";
                     tr.appendChild(td);
                 }
                 table.appendChild(tr);
             }
             boardEl.appendChild(table);
         }
-
-        // --- BOARD CONTROL (PAN/ZOOM/CENTER) ---
-
-        function centerBoard() {
-            const boardRect = boardEl.getBoundingClientRect();
-            const viewRect = viewportEl.getBoundingClientRect();
-            
-            // Tính scale để vừa khít màn hình nếu bảng quá to
-            const padding = 40;
-            const contentW = boardEl.offsetWidth;
-            const contentH = boardEl.offsetHeight;
-            const availW = viewRect.width - padding;
-            const availH = viewRect.height - padding;
-            
-            let newScale = Math.min(availW / contentW, availH / contentH);
-            if (newScale > 1.5) newScale = 1.5; // Không zoom quá to
-            if (newScale < 0.5) newScale = 0.5;
-            
-            state.scale = newScale;
-            
-            // Tính toán vị trí center
-            // Transform origin là 0 0, nên translate cần đưa về giữa
-            state.panX = (viewRect.width - contentW * state.scale) / 2;
-            state.panY = (viewRect.height - contentH * state.scale) / 2;
-            
-            updateTransform();
-        }
-
-        function zoom(delta) {
-            state.scale = Math.max(0.3, Math.min(3, state.scale + delta));
-            updateTransform();
-        }
-
-        function updateTransform() {
-            boardEl.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
-        }
-
-        // --- GAMEPLAY INPUT ---
 
         function onPointerDown(e) {
             if(state.isWin) return;
@@ -406,19 +487,16 @@
         }
 
         function startAction(x, y, target, isRightClick) {
-            state.isDragging = true;
-            state.lastX = x; state.lastY = y;
+            state.isDragging = true; state.lastX = x; state.lastY = y;
             const cell = target ? target.closest('td[data-r]') : null;
-
             if (state.tool === 'pan' || !cell) {
                 state.actionType = 'pan';
                 viewportEl.classList.add('cursor-grabbing');
                 return;
             }
-
+            saveState();
             state.actionType = 'draw';
-            const r = parseInt(cell.dataset.r);
-            const c = parseInt(cell.dataset.c);
+            const r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
             const useCross = isRightClick || state.drawMode === 'cross';
             state.intention = (useCross ? (state.grid[r][c] === 2 ? 0 : 2) : (state.grid[r][c] === 1 ? 0 : 1));
             applyMove(r, c);
@@ -434,14 +512,12 @@
         }
         function onTouchMove(e) {
             if (!state.isDragging) return;
-            const t = e.touches[0];
-            moveAction(t.clientX, t.clientY, document.elementFromPoint(t.clientX, t.clientY));
+            moveAction(e.touches[0].clientX, e.touches[0].clientY, document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY));
         }
 
         function moveAction(x, y, target) {
             if (state.actionType === 'pan') {
-                state.panX += x - state.lastX;
-                state.panY += y - state.lastY;
+                state.panX += x - state.lastX; state.panY += y - state.lastY;
                 state.lastX = x; state.lastY = y;
                 updateTransform();
             } else if (state.actionType === 'draw' && target) {
@@ -473,262 +549,226 @@
         function updateCellVisual(r, c) {
             const cell = document.getElementById(`cell-${r}-${c}`);
             if(!cell) return;
-            cell.className = `w-8 h-8 border border-slate-600 bg-slate-900 cursor-pointer nonogram-cell ${state.grid[r][c] === 1 ? 'cell-filled' : ''} ${state.grid[r][c] === 2 ? 'cell-crossed' : ''}`;
-            // Re-apply highlight if needed (handled by mousemove usually but good for consistency)
+            const level = levels[state.levelIdx];
+            let cls = `w-7 h-7 md:w-8 md:h-8 border border-slate-600 bg-slate-900 cursor-pointer nonogram-cell`;
+            if (state.grid[r][c] === 1) cls += ' cell-filled';
+            else if (state.grid[r][c] === 2) cls += ' cell-crossed';
+            if (cell.classList.contains('guide-active')) cls += ' guide-active';
+            
+            cell.className = cls;
+            if((c+1)%5===0 && c!==level.cols-1) cell.style.borderRight = "2px solid #94a3b8";
+            if((r+1)%5===0 && r!==level.rows-1) cell.style.borderBottom = "2px solid #94a3b8";
         }
 
         function highlightGuides(r, c) {
-            document.querySelectorAll('.cell-highlight-guide').forEach(el => el.classList.remove('cell-highlight-guide'));
-            const size = levels[state.levelIdx].size;
-            for(let j=0; j<size; j++) document.getElementById(`cell-${r}-${j}`)?.classList.add('cell-highlight-guide');
-            for(let i=0; i<size; i++) document.getElementById(`cell-${i}-${c}`)?.classList.add('cell-highlight-guide');
+            document.querySelectorAll('.guide-active').forEach(el => el.classList.remove('guide-active'));
+            const level = levels[state.levelIdx];
+            // Highlight entire row
+            for(let j=0; j<level.cols; j++) {
+                const el = document.getElementById(`cell-${r}-${j}`);
+                if(el) el.classList.add('guide-active');
+            }
+            // Highlight entire col
+            for(let i=0; i<level.rows; i++) {
+                const el = document.getElementById(`cell-${i}-${c}`);
+                if(el) el.classList.add('guide-active');
+            }
         }
 
         function checkLineComplete(r, c) {
             const target = levels[state.levelIdx].grid;
-            const size = target.length;
+            const level = levels[state.levelIdx];
             
-            // Check Row
-            let rOk = true; for(let j=0; j<size; j++) if((state.grid[r][j]===1) !== (target[r][j]===1)) { rOk = false; break; }
-            const rEl = document.getElementById(`hint-row-${r}`);
-            rEl.querySelectorAll('.hint-num').forEach(el => el.classList.toggle('hint-completed', rOk));
-
-            // Check Col
-            let cOk = true; for(let i=0; i<size; i++) if((state.grid[i][c]===1) !== (target[i][c]===1)) { cOk = false; break; }
-            const cEl = document.getElementById(`hint-col-${c}`);
-            cEl.querySelectorAll('.hint-num').forEach(el => el.classList.toggle('hint-completed', cOk));
+            // Check Row r
+            if(r !== -1) {
+                let rOk = true; 
+                for(let j=0; j<level.cols; j++) if((state.grid[r][j]===1) !== (target[r][j]===1)) { rOk = false; break; }
+                const rEl = document.getElementById(`hint-row-${r}`);
+                if(rEl) rEl.querySelectorAll('.hint-num').forEach(el => el.classList.toggle('hint-completed', rOk));
+            }
+            // Check Col c
+            if(c !== -1) {
+                let cOk = true; 
+                for(let i=0; i<level.rows; i++) if((state.grid[i][c]===1) !== (target[i][c]===1)) { cOk = false; break; }
+                const cEl = document.getElementById(`hint-col-${c}`);
+                if(cEl) cEl.querySelectorAll('.hint-num').forEach(el => el.classList.toggle('hint-completed', cOk));
+            }
         }
 
-        // --- LOGICAL HINTS SYSTEM ---
-
+        function centerBoard() {
+            const boardRect = boardEl.getBoundingClientRect();
+            const viewRect = viewportEl.getBoundingClientRect();
+            const padding = 40;
+            let newScale = Math.min((viewRect.width-padding)/boardEl.offsetWidth, (viewRect.height-padding)/boardEl.offsetHeight);
+            state.scale = Math.min(Math.max(newScale, 0.5), 1.5);
+            state.panX = (viewRect.width - boardEl.offsetWidth * state.scale) / 2;
+            state.panY = (viewRect.height - boardEl.offsetHeight * state.scale) / 2;
+            updateTransform();
+        }
+        function zoom(d) { state.scale = Math.max(0.3, Math.min(3, state.scale + d)); updateTransform(); }
+        function updateTransform() { boardEl.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; }
+        
         function getLogicalHint() {
             if(state.isWin) return;
             const level = levels[state.levelIdx];
-            const size = level.size;
             const target = level.grid;
             const user = state.grid;
-
-            // Helper: Get possibilities for a line
-            // Returns array where: 1=Must Fill, 0=Must Empty, -1=Unknown
-            function solveLine(length, hints) {
-                let validPerms = [];
-                function generate(idx, hintIdx, currentLine) {
-                    if(hintIdx === hints.length) {
-                        // Check if remaining space can be empty
-                        for(let k=idx; k<length; k++) currentLine[k] = 0;
-                        validPerms.push([...currentLine]);
-                        return;
+            
+            // Solver: Generate all valid permutations for a line of length 'len' with hints 'hints'
+            // Returns array[len] where 1=Must Fill, 0=Must Empty, -1=Unknown
+            function solveLine(len, hints) {
+                let valid = [];
+                function gen(idx, hIdx, cur) {
+                    // Base case: used all hints
+                    if(hIdx === hints.length) { 
+                        // Fill rest with 0
+                        for(let k=idx; k<len; k++) cur[k]=0; 
+                        valid.push([...cur]); 
+                        return; 
                     }
-                    const clue = hints[hintIdx];
-                    // Try positions
-                    // Max start index = length - (remaining clues + gaps)
-                    // Simplified: just try all valid positions
-                    for(let i=idx; i <= length - clue; i++) {
-                        // Check if we can place here
-                        // 1. Prev cell must be 0 (or boundary) - handled by `idx` jump
-                        // 2. Next cell must be 0 (or boundary)
-                        let canPlace = true;
-                        if(i + clue < length) {
-                            // Gap required
-                        }
-                        // Actually, simplified recursion:
-                        // Place clue at `i`. Next recursion starts at `i + clue + 1`
-                        // Ensure we fit all remaining clues
+                    let clue = hints[hIdx];
+                    // Try placing clue at position i
+                    // Available range: idx to len - clue - (rem hints + spaces)
+                    // Simplified bound: 
+                    for(let i=idx; i<=len-clue; i++) {
+                        // Calculate remaining space needed
+                        let rem = 0; for(let z=hIdx+1; z<hints.length; z++) rem += hints[z]+1;
+                        if(len-(i+clue+(rem>0?1:0)) < rem-(rem>0?1:0)) continue; // Not enough space
                         
-                        // Remaining minimum length = sum(remaining clues) + (remaining clues - 1)
-                        let remainingLen = 0;
-                        for(let z=hintIdx+1; z<hints.length; z++) remainingLen += hints[z] + 1;
-                        if (length - (i + clue + (remainingLen>0?1:0)) < remainingLen - (remainingLen>0?1:0)) continue; // Not enough space (heuristic)
-
-                        let newLine = [...currentLine];
-                        // Fill gaps before
-                        for(let k=idx; k<i; k++) newLine[k] = 0;
-                        // Fill clue
-                        for(let k=0; k<clue; k++) newLine[i+k] = 1;
-                        // Fill gap after (if not last)
-                        if(i+clue < length) newLine[i+clue] = 0;
-
-                        generate(i + clue + 1, hintIdx + 1, newLine);
+                        let next = [...cur];
+                        // Padding 0s before clue
+                        for(let k=idx; k<i; k++) next[k]=0;
+                        // Fill 1s for clue
+                        for(let k=0; k<clue; k++) next[i+k]=1;
+                        // Space after clue (if not last)
+                        if(i+clue<len) next[i+clue]=0;
+                        
+                        gen(i+clue+1, hIdx+1, next);
                     }
                 }
-                // Very naive generator - optimized for small puzzles (<=15)
-                // For 10x10 it's instant.
-                generate(0, 0, Array(length).fill(0));
-
-                if(validPerms.length === 0) return Array(length).fill(-1); // Should not happen if puzzle valid
-
-                // Intersect
-                let result = Array(length).fill(-1);
-                for(let i=0; i<length; i++) {
-                    let allOne = true, allZero = true;
-                    for(let p of validPerms) {
-                        if(p[i] === 0) allOne = false;
-                        if(p[i] === 1) allZero = false;
+                gen(0,0,Array(len).fill(0));
+                
+                if(valid.length===0) return Array(len).fill(-1); // Should not happen if puzzle valid
+                
+                let res = Array(len).fill(-1);
+                for(let i=0; i<len; i++) {
+                    let all1=true, all0=true;
+                    for(let v of valid) { 
+                        if(v[i]===0) all1=false; 
+                        if(v[i]===1) all0=false; 
                     }
-                    if(allOne) result[i] = 1;
-                    else if(allZero) result[i] = 0;
+                    if(all1) res[i]=1; else if(all0) res[i]=0;
                 }
-                return result;
+                return res;
             }
 
-            // 1. Scan Rows for Logical deductions
-            for(let r=0; r<size; r++) {
-                const hints = calculateHints(target[r]);
-                const deduction = solveLine(size, hints);
-                for(let c=0; c<size; c++) {
-                    // If logic says MUST FILL but user hasn't -> Hint
-                    if(deduction[c] === 1 && user[r][c] !== 1) {
-                        flashCell(r, c);
-                        showToast(`Hàng ${r+1} có gợi ý [${hints.join(', ')}]. Dựa trên quy luật giao thoa, ô này chắc chắn phải TÔ.`);
-                        return;
+            // Check Rows (Length = cols)
+            for(let r=0; r<level.rows; r++) {
+                let deduction = solveLine(level.cols, calculateHints(target[r]));
+                for(let c=0; c<level.cols; c++) {
+                    if(deduction[c]===1 && user[r][c]!==1) {
+                        flashCell(r,c); showToast(`Hàng ${r+1}: Logic cho thấy ô này phải TÔ.`); return;
                     }
-                    // If logic says MUST EMPTY but user hasn't crossed -> Hint
-                    if(deduction[c] === 0 && user[r][c] !== 2 && user[r][c] !== 0) {
-                         // Only suggest X if user filled it wrongly. 
-                         // If it's empty, suggesting X is weak hint, but valid.
-                         // Let's prioritize Fills first.
+                    // Could also hint for Empty (Cross), but let's stick to Fill for now
+                }
+            }
+            // Check Cols (Length = rows)
+            for(let c=0; c<level.cols; c++) {
+                let colArr=[], tCol=[]; 
+                for(let r=0; r<level.rows; r++) tCol.push(target[r][c]);
+                let deduction = solveLine(level.rows, calculateHints(tCol));
+                for(let r=0; r<level.rows; r++) {
+                    if(deduction[r]===1 && user[r][c]!==1) {
+                        flashCell(r,c); showToast(`Cột ${c+1}: Logic cho thấy ô này phải TÔ.`); return;
                     }
                 }
             }
-
-            // 2. Scan Cols
-            for(let c=0; c<size; c++) {
-                const col = []; for(let r=0; r<size; r++) col.push(target[r][c]);
-                const hints = calculateHints(col);
-                const deduction = solveLine(size, hints);
-                for(let r=0; r<size; r++) {
-                    if(deduction[r] === 1 && user[r][c] !== 1) {
-                        flashCell(r, c);
-                        showToast(`Cột ${c+1} có gợi ý [${hints.join(', ')}]. Logic cho thấy ô này phải TÔ.`);
-                        return;
-                    }
-                }
-            }
-
-            // 3. Fallback: Find a simple "Line Complete" hint (Filling Xs)
-            for(let r=0; r<size; r++) {
-                const hints = calculateHints(target[r]);
-                // Check if filled count matches hint sum (naive check)
-                let fillCount = user[r].filter(x=>x===1).length;
-                let hintSum = hints.reduce((a,b)=>a+b, 0);
-                if(fillCount === hintSum) {
-                    // Check if the arrangement is actually correct first
-                    let isCorrectArrangement = JSON.stringify(calculateHints(user[r])) === JSON.stringify(hints);
-                    if(isCorrectArrangement) {
-                        // Find empty spot to X
-                        for(let c=0; c<size; c++) {
-                            if(user[r][c] === 0) {
-                                state.grid[r][c] = 2; updateCellVisual(r,c); flashCell(r,c);
-                                showToast(`Hàng ${r+1} đã đủ số ô đen. Hãy đánh dấu X vào các ô trống còn lại.`);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 4. Last Resort: Reveal a random cell
-            showToast("Hệ thống chưa tìm thấy bước đi logic đơn giản. Đây là một gợi ý ngẫu nhiên.");
-            let moves = [];
-            for(let i=0; i<size; i++) for(let j=0; j<size; j++) if(user[i][j]===0 && target[i][j]===1) moves.push({r:i,c:j});
+            
+            // Fallback random
+            let moves=[]; 
+            for(let i=0; i<level.rows; i++) 
+                for(let j=0; j<level.cols; j++) 
+                    if(user[i][j]===0 && target[i][j]===1) moves.push({r:i,c:j});
+            
             if(moves.length) {
-                const m = moves[Math.floor(Math.random()*moves.length)];
-                state.grid[m.r][m.c] = 1; updateCellVisual(m.r,m.c); flashCell(m.r,m.c); checkLineComplete(m.r,m.c);
-            }
+                saveState(); const m = moves[Math.floor(Math.random()*moves.length)];
+                state.grid[m.r][m.c]=1; updateCellVisual(m.r,m.c); flashCell(m.r,m.c); checkLineComplete(m.r,m.c);
+                showToast("Gợi ý ngẫu nhiên (chưa tìm thấy logic đơn giản).");
+            } else showToast("Bạn đã tô đủ các ô cần thiết. Hãy kiểm tra các ô trống.");
         }
 
-        // --- ANSWER REVEAL ---
         function showAnswer() {
-            if(!confirm("Bạn có chắc muốn xem toàn bộ đáp án? Sẽ mất đi sự thú vị đó!")) return;
-            const target = levels[state.levelIdx].grid;
-            const size = target.length;
-            
-            // Fill grid with target
-            for(let i=0; i<size; i++) {
-                for(let j=0; j<size; j++) {
+            if(!confirm("Bạn có chắc muốn xem toàn bộ đáp án?")) return;
+            saveState();
+            const level = levels[state.levelIdx];
+            const target = level.grid;
+            for(let i=0; i<level.rows; i++) {
+                for(let j=0; j<level.cols; j++) {
                     state.grid[i][j] = target[i][j];
                     updateCellVisual(i, j);
                 }
             }
-            // Update hint visuals (cross out numbers)
-            for(let i=0; i<size; i++) for(let j=0; j<size; j++) checkLineComplete(i, j);
+            for(let i=0; i<level.rows; i++) checkLineComplete(i, -1);
+            for(let j=0; j<level.cols; j++) checkLineComplete(-1, j);
+            checkWin();
         }
-
-        function showToast(msg) {
-            const t = document.getElementById('hint-toast');
-            document.getElementById('hint-text').innerText = msg;
-            t.classList.remove('hidden');
-            // Reset anim
-            t.classList.remove('toast-anim');
-            void t.offsetWidth; 
-            t.classList.add('toast-anim');
-            
-            setTimeout(() => t.classList.add('hidden'), 5000);
-        }
-
-        function flashCell(r, c) {
-            const cell = document.getElementById(`cell-${r}-${c}`);
-            if(cell) { cell.classList.add('hint-anim'); setTimeout(()=>cell.classList.remove('hint-anim'), 800); }
-        }
-
-        // --- WIN SYSTEM ---
 
         function checkWin() {
             if(state.isWin) return;
-            const target = levels[state.levelIdx].grid;
-            const size = state.grid.length;
-            for(let i=0; i<size; i++) for(let j=0; j<size; j++) if((state.grid[i][j]===1) !== (target[i][j]===1)) return;
+            const level = levels[state.levelIdx];
+            const target = level.grid;
+            for(let i=0; i<level.rows; i++) 
+                for(let j=0; j<level.cols; j++) 
+                    if((state.grid[i][j]===1) !== (target[i][j]===1)) return;
             
-            // Win!
             state.isWin = true;
-            document.getElementById('level-name-display').innerText = levels[state.levelIdx].name;
-            document.getElementById('show-win-btn').classList.add('hidden');
+            document.getElementById('level-name-display').innerText = level.name;
             toggleWinOverlay(true);
         }
 
         function toggleWinOverlay(show, forceHide=false) {
-            const overlay = document.getElementById('win-overlay');
-            const btn = document.getElementById('show-win-btn');
-            
-            if(forceHide) {
-                overlay.classList.add('hidden');
-                btn.classList.add('hidden');
-                return;
-            }
-
-            if(show) {
-                overlay.classList.remove('hidden');
-                btn.classList.add('hidden');
-            } else {
-                overlay.classList.add('hidden');
-                if(state.isWin) btn.classList.remove('hidden'); // Show peek button
-            }
+            const el = document.getElementById('win-overlay');
+            if(forceHide) { el.classList.add('translate-y-full', 'opacity-0'); setTimeout(()=>el.classList.add('hidden'),500); }
+            else if(show) { el.classList.remove('hidden'); setTimeout(()=>el.classList.remove('translate-y-full','opacity-0'),10); }
+            else { el.classList.add('translate-y-full', 'opacity-0'); setTimeout(()=>el.classList.add('hidden'),500); }
         }
-
+        function toggleLevelMenu() {
+            const m = document.getElementById('level-menu-modal'), c = document.getElementById('level-menu-content');
+            if(m.classList.contains('hidden')) { 
+                m.classList.remove('hidden'); 
+                document.getElementById('menu-subtitle').innerText = `Hiện có ${levels.length} màn chơi`;
+                setTimeout(()=>{ m.classList.remove('opacity-0'); c.classList.remove('scale-95'); },10); 
+            }
+            else { m.classList.add('opacity-0'); c.classList.add('scale-95'); setTimeout(()=>m.classList.add('hidden'),300); }
+        }
         function toggleRules() {
-            const el = document.getElementById('rules-modal');
-            el.classList.toggle('hidden');
+            const m = document.getElementById('rules-modal'), c = document.getElementById('rules-content');
+            if(m.classList.contains('hidden')) { m.classList.remove('hidden'); setTimeout(()=>{ m.classList.remove('opacity-0'); c.classList.remove('scale-95'); },10); }
+            else { m.classList.add('opacity-0'); c.classList.add('scale-95'); setTimeout(()=>m.classList.add('hidden'),300); }
         }
-
+        function showToast(msg) {
+            const t = document.getElementById('hint-toast'); document.getElementById('hint-text').innerText = msg;
+            t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),4000);
+        }
+        function flashCell(r, c) {
+            const cell = document.getElementById(`cell-${r}-${c}`);
+            if(cell) { cell.classList.add('hint-anim'); setTimeout(()=>cell.classList.remove('hint-anim'),800); }
+        }
         function nextLevel() {
-            let next = state.levelIdx + 1;
-            if (next >= levels.length) next = 0;
-            loadLevel(next);
+            let next = state.levelIdx + 1; if(next >= levels.length) next = 0; loadLevel(next);
         }
-        function replayLevel() { loadLevel(state.levelIdx); }
-        function resetGame() { replayLevel(); }
         function setTool(t) {
             state.tool = t;
-            document.getElementById('tool-draw').className = t === 'draw' ? "btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1" : "btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1 transition-colors";
-            document.getElementById('tool-pan').className = t === 'pan' ? "btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1" : "btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1 transition-colors";
-            document.getElementById('draw-modes').style.opacity = t === 'draw' ? '1' : '0.3';
-            viewportEl.style.cursor = t === 'draw' ? 'crosshair' : 'grab';
+            document.getElementById('tool-draw').className = t==='draw'?"btn-tool btn-active px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium":"btn-tool px-4 py-2 rounded-lg text-slate-400 hover:text-white text-xs flex items-center gap-1.5 font-medium transition-colors";
+            document.getElementById('tool-pan').className = t==='pan'?"btn-tool btn-active px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium":"btn-tool px-4 py-2 rounded-lg text-slate-400 hover:text-white text-xs flex items-center gap-1.5 font-medium transition-colors";
+            document.getElementById('draw-modes').style.opacity = t==='draw'?'1':'0.3';
+            viewportEl.style.cursor = t==='draw'?'crosshair':'grab';
         }
         function setDrawMode(m) {
             state.drawMode = m;
-            document.getElementById('mode-fill').className = m === 'fill' ? "btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1" : "btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1";
-            document.getElementById('mode-cross').className = m === 'cross' ? "btn-tool btn-active px-3 py-1.5 rounded text-xs flex items-center gap-1" : "btn-tool px-3 py-1.5 rounded text-slate-400 hover:text-white text-xs flex items-center gap-1";
-            if(state.tool !== 'draw') setTool('draw');
+            document.getElementById('mode-fill').className = m==='fill'?"btn-tool btn-active px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium":"btn-tool px-4 py-2 rounded-lg text-slate-400 hover:text-white text-xs flex items-center gap-1.5 font-medium";
+            document.getElementById('mode-cross').className = m==='cross'?"btn-tool btn-active px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 font-medium":"btn-tool px-4 py-2 rounded-lg text-slate-400 hover:text-white text-xs flex items-center gap-1.5 font-medium";
+            if(state.tool!=='draw') setTool('draw');
         }
 
         init();
