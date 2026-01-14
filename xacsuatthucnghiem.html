@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phòng Thí Nghiệm Xác Suất Lớp 6</title>
+    <title>Phòng Thí Nghiệm Xác Suất Lớp 6 (Nâng Cấp)</title>
     
     <!-- Tải React và ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -46,12 +46,12 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 2px; }
         
         /* Dice Faces Transforms */
-        .face-1 { transform: rotateY(0deg) translateZ(50px); }
-        .face-2 { transform: rotateY(180deg) translateZ(50px); }
-        .face-3 { transform: rotateY(90deg) translateZ(50px); }
-        .face-4 { transform: rotateY(-90deg) translateZ(50px); }
-        .face-5 { transform: rotateX(90deg) translateZ(50px); }
-        .face-6 { transform: rotateX(-90deg) translateZ(50px); }
+        .face-1 { transform: rotateY(0deg) translateZ(40px); }
+        .face-2 { transform: rotateY(180deg) translateZ(40px); }
+        .face-3 { transform: rotateY(90deg) translateZ(40px); }
+        .face-4 { transform: rotateY(-90deg) translateZ(40px); }
+        .face-5 { transform: rotateX(90deg) translateZ(40px); }
+        .face-6 { transform: rotateX(-90deg) translateZ(40px); }
 
         /* Coin Faces */
         .coin-front { transform: rotateY(0deg) translateZ(1px); }
@@ -63,9 +63,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
 
-        // --- ICON COMPONENTS (Thay thế Lucide-React để chạy trên web đơn giản) ---
+        // --- ICON COMPONENTS ---
         const IconBase = ({ d, size = 24, className = "", color="currentColor" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {d}
@@ -81,15 +81,16 @@
         const ArrowRightIcon = (props) => <IconBase {...props} d={<><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></>} />;
         const CalculatorIcon = (props) => <IconBase {...props} d={<><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></>} />;
         const ZapIcon = (props) => <IconBase {...props} d={<><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></>} />;
+        const SettingsIcon = (props) => <IconBase {...props} d={<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>} />;
 
         // --- SHARED COMPONENTS ---
 
-        const Card = ({ title, children, className = "" }) => (
-            <div className={`bg-white rounded-2xl shadow-xl p-6 border border-indigo-100 ${className} overflow-hidden flex flex-col`}>
+        const Card = ({ title, children, className = "", icon: Icon }) => (
+            <div className={`bg-white rounded-2xl shadow-xl p-6 border border-indigo-100 ${className} overflow-hidden flex flex-col h-full`}>
                 <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center gap-2 border-b border-indigo-50 pb-2">
-                {title}
+                {Icon && <Icon size={20} className="text-indigo-600"/>} {title}
                 </h3>
-                <div className="flex-1">
+                <div className="flex-1 flex flex-col">
                 {children}
                 </div>
             </div>
@@ -100,17 +101,17 @@
             
             return (
                 <div className="w-full mt-2 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
-                <div className="flex items-end justify-between h-40 gap-4 pb-2 border-b-2 border-slate-300">
+                <div className="flex items-end justify-between h-40 gap-2 pb-2 border-b-2 border-slate-300 overflow-x-auto custom-scrollbar">
                     {data.map((item, idx) => {
                     const height = total === 0 ? 0 : (item.value / maxVal) * 100;
                     return (
-                        <div key={idx} className="flex flex-col items-center flex-1 h-full justify-end group">
+                        <div key={idx} className="flex flex-col items-center min-w-[40px] flex-1 h-full justify-end group">
                         <div className="relative w-full flex flex-col items-center justify-end h-full">
-                            <span className="text-xs font-bold text-slate-600 mb-1 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-white px-2 py-1 rounded shadow-sm border border-slate-200 whitespace-nowrap z-10 pointer-events-none">
+                            <span className="text-[10px] md:text-xs font-bold text-slate-600 mb-1 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-white px-2 py-1 rounded shadow-sm border border-slate-200 whitespace-nowrap z-10 pointer-events-none">
                             {item.value} lần
                             </span>
                             <div 
-                            className="w-full md:w-4/5 rounded-t-md transition-all duration-500 ease-out border-t border-x border-black/5 shadow-sm relative hover:brightness-110"
+                            className="w-full md:w-4/5 rounded-t-sm transition-all duration-500 ease-out border-t border-x border-black/5 shadow-sm relative hover:brightness-110"
                             style={{ 
                                 height: `${height === 0 ? 2 : height}%`, 
                                 backgroundColor: item.colorCode || '#6366f1',
@@ -118,18 +119,18 @@
                             }}
                             >
                                 {height > 15 && (
-                                    <span className="absolute bottom-1 w-full text-center text-[10px] font-bold text-white/90 truncate px-1">
+                                    <span className="absolute bottom-1 w-full text-center text-[10px] font-bold text-white/90 truncate px-0.5">
                                         {item.value}
                                     </span>
                                 )}
                             </div>
                         </div>
-                        <span className="text-xs font-bold mt-2 text-slate-700 text-center leading-tight truncate w-full" title={item.label}>{item.label}</span>
+                        <span className="text-[10px] md:text-xs font-bold mt-2 text-slate-700 text-center leading-tight truncate w-full" title={item.label}>{item.label}</span>
                         </div>
                     );
                     })}
                 </div>
-                <div className="text-center text-xs text-slate-400 mt-1 italic">Biểu đồ số lần xuất hiện</div>
+                <div className="text-center text-xs text-slate-400 mt-1 italic">Biểu đồ tần số xuất hiện</div>
                 </div>
             );
         };
@@ -147,7 +148,7 @@
                         return (
                         <div key={idx} className="flex items-center text-sm gap-2 bg-white/70 p-2 rounded hover:bg-white transition-colors border border-transparent hover:border-indigo-100">
                             <div className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm" style={{ backgroundColor: item.colorCode }}></div>
-                            <span className="font-semibold text-slate-700 w-20 truncate" title={item.label}>{item.label}:</span>
+                            <span className="font-semibold text-slate-700 w-24 truncate" title={item.label}>{item.label}:</span>
                             <div className="flex items-center gap-1 font-mono text-slate-800 flex-1 justify-end">
                             <span className="text-gray-400 text-[10px] mr-1 hidden sm:inline">{item.value}/{total} ≈</span>
                             <span className="font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded text-xs">{percent}%</span>
@@ -160,10 +161,10 @@
             );
         }
 
-        const FastForwardControls = ({ onBulkRun, disabled }) => (
+        const FastForwardControls = ({ onBulkRun, disabled, label = "Chạy nhanh" }) => (
             <div className="mt-4 pt-4 border-t border-slate-200">
                 <div className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide flex items-center gap-1">
-                <ZapIcon size={14} className="text-yellow-500 fill-yellow-500" /> Chạy thực nghiệm nhanh:
+                <ZapIcon size={14} className="text-yellow-500 fill-yellow-500" /> {label}:
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {[10, 50, 100, 200, 500, 1000].map(num => (
@@ -183,190 +184,223 @@
             </div>
         );
 
-        // --- MODULES ---
-
-        // 1. TUNG ĐỒNG XU
-        const CoinToss = () => {
-            const [isFlipping, setIsFlipping] = useState(false);
-            const [result, setResult] = useState(null); 
-            const [counts, setCounts] = useState({ S: 0, N: 0 });
+        // --- COMPONENT CON TUNG ĐỒNG XU RIÊNG LẺ ---
+        const SingleCoin = ({ id, result, isFlipping, onAnimationEnd }) => {
             const coinRef = useRef(null);
+            
+            useEffect(() => {
+                if (isFlipping) {
+                    if (coinRef.current) {
+                        coinRef.current.style.animation = 'none';
+                        void coinRef.current.offsetWidth;
+                        coinRef.current.style.animation = 'toss-coin 1s ease-in-out forwards';
+                    }
+                    const timer = setTimeout(() => {
+                        if (coinRef.current) {
+                            coinRef.current.style.animation = 'none';
+                            const finalRotate = result === 'S' ? 0 : 180;
+                            const randomTilt = Math.random() * 20 - 10;
+                            coinRef.current.style.transform = `rotateY(${finalRotate}deg) rotateZ(${randomTilt}deg)`;
+                        }
+                        if(onAnimationEnd) onAnimationEnd(id);
+                    }, 1000);
+                    return () => clearTimeout(timer);
+                } else if (result === null) {
+                     if (coinRef.current) coinRef.current.style.transform = 'rotateY(0deg)';
+                }
+            }, [isFlipping, result, id, onAnimationEnd]);
+
+            return (
+                <div className="perspective-800 w-24 h-24 mx-2 my-2 flex items-center justify-center">
+                    <div ref={coinRef} className="w-20 h-20 relative preserve-3d transition-transform duration-500">
+                        <div className="absolute inset-0 rounded-full bg-yellow-400 border-2 border-yellow-600 flex items-center justify-center backface-hidden shadow-lg coin-front">
+                            <span className="text-2xl font-black text-yellow-800">S</span>
+                        </div>
+                        <div className="absolute inset-0 rounded-full bg-yellow-400 border-2 border-yellow-600 flex items-center justify-center backface-hidden coin-back shadow-lg">
+                            <span className="text-2xl font-black text-yellow-800">N</span>
+                        </div>
+                        <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-yellow-700 transform -translate-x-1/2 rotateY(90deg)"></div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 1. MODULE: TUNG ĐỒNG XU (NÂNG CẤP)
+        const CoinToss = () => {
+            const [numCoins, setNumCoins] = useState(1);
+            const [isFlipping, setIsFlipping] = useState(false);
+            const [currentResults, setCurrentResults] = useState([]); 
+            const [history, setHistory] = useState({}); // Lưu tần số của các biến cố (số mặt sấp)
+
+            useEffect(() => {
+                // Reset khi đổi số lượng đồng xu
+                setCurrentResults(Array(numCoins).fill(null));
+                setHistory({});
+            }, [numCoins]);
 
             const toss = () => {
                 if (isFlipping) return;
                 setIsFlipping(true);
-                setResult(null);
-                const outcome = Math.random() < 0.5 ? 'S' : 'N';
                 
-                if (coinRef.current) {
-                    coinRef.current.style.animation = 'none';
-                    void coinRef.current.offsetWidth;
-                    coinRef.current.style.animation = 'toss-coin 1s ease-in-out forwards';
-                }
+                // Sinh kết quả
+                const newResults = Array(numCoins).fill(null).map(() => Math.random() < 0.5 ? 'S' : 'N');
+                setCurrentResults(newResults);
 
+                // Sau 1s animation, ghi nhận kết quả
                 setTimeout(() => {
-                if (coinRef.current) {
-                    coinRef.current.style.animation = 'none';
-                    const finalRotate = outcome === 'S' ? 0 : 180;
-                    const randomTilt = Math.random() * 20 - 10;
-                    coinRef.current.style.transform = `rotateY(${finalRotate}deg) rotateZ(${randomTilt}deg)`;
-                }
-                setResult(outcome);
-                setCounts(prev => ({ ...prev, [outcome]: prev[outcome] + 1 }));
-                setIsFlipping(false);
+                    const headsCount = newResults.filter(r => r === 'S').length;
+                    setHistory(prev => ({
+                        ...prev,
+                        [headsCount]: (prev[headsCount] || 0) + 1
+                    }));
+                    setIsFlipping(false);
                 }, 1000);
             };
 
             const runBulk = (n) => {
                 if (isFlipping) return;
-                let newS = 0;
-                let newN = 0;
+                
+                const newHistory = { ...history };
                 for (let i = 0; i < n; i++) {
-                    Math.random() < 0.5 ? newS++ : newN++;
+                    let headsCount = 0;
+                    for(let c = 0; c < numCoins; c++) {
+                        if (Math.random() < 0.5) headsCount++;
+                    }
+                    newHistory[headsCount] = (newHistory[headsCount] || 0) + 1;
                 }
-                setCounts(prev => ({ S: prev.S + newS, N: prev.N + newN }));
-                setResult(null); 
-                if (coinRef.current) coinRef.current.style.transform = 'rotateY(0deg)'; 
+                
+                setHistory(newHistory);
+                setCurrentResults(Array(numCoins).fill(null)); 
             };
 
             const reset = () => {
-                setCounts({ S: 0, N: 0 });
-                setResult(null);
-                if (coinRef.current) coinRef.current.style.transform = 'rotateY(0deg)';
+                setHistory({});
+                setCurrentResults(Array(numCoins).fill(null));
             };
 
-            const total = counts.S + counts.N;
-            const chartData = [
-                { label: 'Sấp (S)', value: counts.S, colorCode: '#eab308' }, 
-                { label: 'Ngửa (N)', value: counts.N, colorCode: '#6366f1' }  
-            ];
+            // Tính tổng số lần thử (chứ không phải tổng số đồng xu đã tung)
+            const totalTrials = Object.values(history).reduce((a, b) => a + b, 0);
+
+            // Tạo dữ liệu cho biểu đồ
+            const chartData = useMemo(() => {
+                if (numCoins === 1) {
+                    // Chế độ 1 đồng xu: Hiển thị Sấp / Ngửa như cũ
+                    return [
+                        { label: 'Sấp (S)', value: history[1] || 0, colorCode: '#eab308' },
+                        { label: 'Ngửa (N)', value: history[0] || 0, colorCode: '#6366f1' }
+                    ];
+                } else {
+                    // Chế độ nhiều đồng xu: Hiển thị số lượng mặt sấp (0S, 1S, 2S...)
+                    const data = [];
+                    for (let i = 0; i <= numCoins; i++) {
+                        data.push({
+                            label: `${i} Sấp`,
+                            value: history[i] || 0,
+                            colorCode: i === numCoins ? '#eab308' : i === 0 ? '#6366f1' : '#10b981'
+                        });
+                    }
+                    return data;
+                }
+            }, [history, numCoins]);
 
             return (
                 <div className="grid lg:grid-cols-2 gap-6 h-full">
                 <Card title="Thí nghiệm: Tung Đồng Xu" className="bg-gradient-to-br from-indigo-50 to-white min-h-[400px]">
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                        <div className="perspective-800 h-48 flex items-center justify-center w-full my-4">
-                        <div ref={coinRef} className="w-32 h-32 relative preserve-3d transition-transform duration-500">
-                            <div className="absolute inset-0 rounded-full bg-yellow-400 border-4 border-yellow-600 flex items-center justify-center backface-hidden shadow-xl coin-front">
-                            <div className="w-24 h-24 rounded-full border-2 border-yellow-600/50 flex items-center justify-center bg-yellow-300">
-                                <span className="text-4xl font-black text-yellow-800">S</span>
-                            </div>
-                            </div>
-                            <div className="absolute inset-0 rounded-full bg-yellow-400 border-4 border-yellow-600 flex items-center justify-center backface-hidden coin-back shadow-xl">
-                            <div className="w-24 h-24 rounded-full border-2 border-yellow-600/50 flex items-center justify-center bg-yellow-300">
-                                <span className="text-4xl font-black text-yellow-800">N</span>
-                            </div>
-                            </div>
-                            <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-yellow-700 transform -translate-x-1/2 rotateY(90deg)"></div>
-                        </div>
+                    
+                    {/* Controls */}
+                    <div className="bg-white/80 p-3 rounded-xl mb-4 flex items-center justify-between border border-indigo-100 shadow-sm">
+                        <label className="text-sm font-bold text-indigo-800 flex items-center gap-2">
+                            <SettingsIcon size={16}/> Số lượng đồng xu:
+                        </label>
+                        <select 
+                            value={numCoins} 
+                            onChange={(e) => setNumCoins(Number(e.target.value))}
+                            disabled={isFlipping}
+                            className="bg-indigo-50 border border-indigo-200 text-indigo-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-1.5 font-bold w-20 text-center"
+                        >
+                            {[1,2,3,4,5,6,8,10].map(n => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="flex-1 flex flex-col items-center justify-center min-h-[200px]">
+                        <div className="flex flex-wrap justify-center content-center max-w-full gap-1">
+                            {Array(numCoins).fill(0).map((_, idx) => (
+                                <SingleCoin 
+                                    key={idx} 
+                                    id={idx} 
+                                    result={currentResults[idx]} 
+                                    isFlipping={isFlipping} 
+                                />
+                            ))}
                         </div>
                         
-                        <div className="h-8 mb-4">
-                        {isFlipping ? <span className="text-indigo-500 font-semibold animate-pulse">Đang tung...</span> : 
-                            result ? <span className="text-2xl font-bold text-indigo-700 animate-bounce block">Mặt {result === 'S' ? 'SẤP' : 'NGỬA'}</span> : 
-                            <span className="text-gray-400">Sẵn sàng</span>}
+                        <div className="h-8 mt-4 mb-2 text-center">
+                            {isFlipping ? <span className="text-indigo-500 font-semibold animate-pulse">Đang tung {numCoins} đồng xu...</span> : 
+                             currentResults[0] !== null ? 
+                             <span className="text-lg font-bold text-indigo-700 animate-in fade-in">
+                                Kết quả: {currentResults.filter(r=>r==='S').length} Sấp - {currentResults.filter(r=>r==='N').length} Ngửa
+                             </span> : 
+                             <span className="text-gray-400">Sẵn sàng</span>}
                         </div>
 
                         <button 
-                        onClick={toss} 
-                        disabled={isFlipping}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900 font-bold py-3 px-8 rounded-full shadow-lg shadow-yellow-500/30 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 text-lg"
+                            onClick={toss} 
+                            disabled={isFlipping}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900 font-bold py-3 px-8 rounded-full shadow-lg shadow-yellow-500/30 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 text-lg uppercase"
                         >
-                        <RotateCcwIcon size={20} className={isFlipping ? "animate-spin" : ""} /> TUNG 1 LẦN
+                            <RotateCcwIcon size={20} className={isFlipping ? "animate-spin" : ""} /> TUNG {numCoins} ĐỒNG XU
                         </button>
                     </div>
                 </Card>
 
-                <Card title="Thống kê & Tính toán">
+                <Card title="Thống kê & Tính toán" icon={BarChart3Icon}>
                     <div className="flex justify-between mb-4 items-center bg-slate-50 p-2 rounded-lg border border-slate-100">
-                    <span className="text-sm font-medium text-slate-600">Tổng lần tung: <strong className="text-indigo-700 text-lg">{total}</strong></span>
+                    <span className="text-sm font-medium text-slate-600">Tổng số lượt tung: <strong className="text-indigo-700 text-lg">{totalTrials}</strong></span>
                     <button onClick={reset} className="text-xs text-red-500 hover:bg-red-50 px-3 py-1 rounded border border-red-200 transition-colors">Làm lại</button>
                     </div>
 
-                    <SimpleBarChart data={chartData} total={total} />
-                    <ProbabilityFormulaDisplay data={chartData} total={total} />
-                    <FastForwardControls onBulkRun={runBulk} disabled={isFlipping} />
+                    <SimpleBarChart data={chartData} total={totalTrials} />
+                    <ProbabilityFormulaDisplay data={chartData} total={totalTrials} />
+                    <FastForwardControls onBulkRun={runBulk} disabled={isFlipping} label={`Tung nhanh ${numCoins} xu`} />
                 </Card>
                 </div>
             );
         };
 
-        // 2. GIEO XÚC XẮC
-        const DiceRoll = () => {
-            const [rolling, setRolling] = useState(false);
-            const [face, setFace] = useState(1);
-            const [history, setHistory] = useState([0, 0, 0, 0, 0, 0]); 
+        // --- COMPONENT XÚC XẮC RIÊNG LẺ ---
+        const SingleDice = ({ id, result, isRolling }) => {
             const cubeRef = useRef(null);
-
-            const roll = () => {
-                if (rolling) return;
-                setRolling(true);
-                
-                const newFace = Math.floor(Math.random() * 6) + 1;
-                let finalX = 0, finalY = 0;
-                const rotations = { 1: [0, 0], 2: [0, 180], 3: [0, -90], 4: [0, 90], 5: [-90, 0], 6: [90, 0] };
-                [finalX, finalY] = rotations[newFace];
-                const extraSpinX = 720 * (Math.floor(Math.random()*2) + 1); 
-                const extraSpinY = 720 * (Math.floor(Math.random()*2) + 1);
-
-                if (cubeRef.current) {
-                cubeRef.current.style.transition = "transform 1.5s cubic-bezier(0.15, 0.45, 0.15, 1.05)"; 
-                cubeRef.current.style.transform = `rotateX(${finalX + extraSpinX}deg) rotateY(${finalY + extraSpinY}deg)`;
+            
+            useEffect(() => {
+                if (isRolling) {
+                    if (cubeRef.current) {
+                        const finalX = Math.random() * 720 + 360;
+                        const finalY = Math.random() * 720 + 360;
+                        cubeRef.current.style.transition = "transform 1.5s cubic-bezier(0.15, 0.45, 0.15, 1.05)"; 
+                        cubeRef.current.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
+                    }
+                } else {
+                    if (cubeRef.current && result) {
+                        const rotations = { 1: [0, 0], 2: [0, 180], 3: [0, -90], 4: [0, 90], 5: [-90, 0], 6: [90, 0] };
+                        const [rx, ry] = rotations[result];
+                        cubeRef.current.style.transition = "transform 0.2s ease-out";
+                        cubeRef.current.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+                    } else if (result === null && cubeRef.current) {
+                         cubeRef.current.style.transform = `rotateX(-20deg) rotateY(20deg)`;
+                    }
                 }
+            }, [isRolling, result]);
 
-                setTimeout(() => {
-                setFace(newFace);
-                setHistory(prev => {
-                    const newHist = [...prev];
-                    newHist[newFace - 1]++;
-                    return newHist;
-                });
-                setRolling(false);
-                }, 1500);
-            };
-
-            const runBulk = (n) => {
-                if (rolling) return;
-                const newHistory = [...history];
-                for(let i=0; i<n; i++) {
-                    const val = Math.floor(Math.random() * 6); // 0-5
-                    newHistory[val]++;
-                }
-                setHistory(newHistory);
-                if (cubeRef.current) {
-                    cubeRef.current.style.transition = "none";
-                    cubeRef.current.style.transform = "rotateX(0deg) rotateY(0deg)";
-                    setFace(1); 
-                }
-            };
-
-            const reset = () => {
-                setHistory([0,0,0,0,0,0]);
-                if (cubeRef.current) {
-                    cubeRef.current.style.transition = "transform 0.5s ease";
-                    cubeRef.current.style.transform = "rotateX(0deg) rotateY(0deg)";
-                }
-            };
-
-            const total = history.reduce((a, b) => a + b, 0);
-            const chartData = history.map((val, idx) => ({ 
-                label: `Mặt ${idx+1}`, 
-                value: val,
-                colorCode: '#ef4444' 
-            }));
-
-            const Dot = () => <div className="w-2.5 h-2.5 bg-white rounded-full shadow-inner"></div>;
+            const Dot = () => <div className="w-2 h-2 md:w-2.5 md:h-2.5 bg-white rounded-full shadow-inner"></div>;
             const Face = ({ className, children }) => (
-                <div className={`absolute w-[100px] h-[100px] border-2 border-red-900/20 bg-red-600 rounded-xl shadow-[inset_0_0_15px_rgba(0,0,0,0.3)] flex flex-col justify-center items-center ${className} backface-hidden`}>
+                <div className={`absolute w-[80px] h-[80px] border-2 border-red-900/20 bg-red-600 rounded-xl shadow-[inset_0_0_15px_rgba(0,0,0,0.3)] flex flex-col justify-center items-center ${className} backface-hidden`}>
                 {children}
                 </div>
             );
 
             return (
-                <div className="grid lg:grid-cols-2 gap-6 h-full">
-                <Card title="Thí nghiệm: Gieo Xúc Xắc" className="bg-gradient-to-br from-red-50 to-white min-h-[400px]">
-                    <div className="flex-1 flex flex-col items-center justify-center perspective-800">
-                    <div className="relative w-[100px] h-[100px] preserve-3d mb-10" ref={cubeRef} style={{ transform: 'rotateX(-20deg) rotateY(20deg)' }}>
+                <div className="perspective-800 w-[80px] h-[80px] m-4 flex items-center justify-center">
+                    <div className="relative w-full h-full preserve-3d" ref={cubeRef} style={{ transform: 'rotateX(-20deg) rotateY(20deg)' }}>
                         <Face className="face-1"><div className="w-full h-full flex items-center justify-center"><Dot /></div></Face>
                         <Face className="face-2"><div className="w-full h-full flex justify-between p-2"><Dot /><div className="self-end"><Dot /></div></div></Face>
                         <Face className="face-3"><div className="w-full h-full flex justify-between p-2"><Dot /><div className="self-center"><Dot /></div><div className="self-end"><Dot /></div></div></Face>
@@ -374,47 +408,178 @@
                         <Face className="face-5"><div className="w-full h-full flex justify-between p-2"><div className="flex flex-col justify-between"><Dot /><Dot /></div><div className="self-center"><Dot /></div><div className="flex flex-col justify-between"><Dot /><Dot /></div></div></Face>
                         <Face className="face-6"><div className="w-full h-full flex justify-between p-2"><div className="flex flex-col justify-between"><Dot /><Dot /><Dot /></div><div className="flex flex-col justify-between"><Dot /><Dot /><Dot /></div></div></Face>
                     </div>
-                    <button 
-                        onClick={roll} 
-                        disabled={rolling}
-                        className="mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-12 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-2 transform active:scale-95 transition-all"
+                </div>
+            )
+        }
+
+        // 2. MODULE: GIEO XÚC XẮC (NÂNG CẤP)
+        const DiceRoll = () => {
+            const [numDice, setNumDice] = useState(1);
+            const [rolling, setRolling] = useState(false);
+            const [currentFaces, setCurrentFaces] = useState([]);
+            const [history, setHistory] = useState({}); // Lưu tần số của các biến cố (Tổng điểm hoặc Mặt)
+
+            useEffect(() => {
+                setCurrentFaces(Array(numDice).fill(1));
+                setHistory({});
+            }, [numDice]);
+
+            const roll = () => {
+                if (rolling) return;
+                setRolling(true);
+                
+                const newFaces = Array(numDice).fill(0).map(() => Math.floor(Math.random() * 6) + 1);
+
+                setTimeout(() => {
+                    setCurrentFaces(newFaces);
+                    
+                    if (numDice === 1) {
+                        const face = newFaces[0];
+                        setHistory(prev => ({ ...prev, [face]: (prev[face] || 0) + 1 }));
+                    } else {
+                        // Nhiều xúc xắc: Biến cố là TỔNG ĐIỂM
+                        const sum = newFaces.reduce((a, b) => a + b, 0);
+                        setHistory(prev => ({ ...prev, [sum]: (prev[sum] || 0) + 1 }));
+                    }
+                    
+                    setRolling(false);
+                }, 1500);
+            };
+
+            const runBulk = (n) => {
+                if (rolling) return;
+                const newHistory = { ...history };
+                for(let i=0; i<n; i++) {
+                    if (numDice === 1) {
+                        const val = Math.floor(Math.random() * 6) + 1;
+                        newHistory[val] = (newHistory[val] || 0) + 1;
+                    } else {
+                        let sum = 0;
+                        for (let d=0; d < numDice; d++) {
+                            sum += Math.floor(Math.random() * 6) + 1;
+                        }
+                        newHistory[sum] = (newHistory[sum] || 0) + 1;
+                    }
+                }
+                setHistory(newHistory);
+                setCurrentFaces(Array(numDice).fill(null)); 
+            };
+
+            const reset = () => {
+                setHistory({});
+                setCurrentFaces(Array(numDice).fill(null));
+            };
+
+            const totalTrials = Object.values(history).reduce((a, b) => a + b, 0);
+            
+            const chartData = useMemo(() => {
+                if (numDice === 1) {
+                    // 1 Xúc xắc: Hiển thị Mặt 1 - 6
+                    return [1, 2, 3, 4, 5, 6].map(val => ({
+                        label: `Mặt ${val}`,
+                        value: history[val] || 0,
+                        colorCode: '#ef4444'
+                    }));
+                } else {
+                    // Nhiều xúc xắc: Hiển thị Tổng điểm (min = numDice, max = numDice * 6)
+                    const min = numDice;
+                    const max = numDice * 6;
+                    const data = [];
+                    for (let i = min; i <= max; i++) {
+                        data.push({
+                            label: `Tổng ${i}`,
+                            value: history[i] || 0,
+                            colorCode: '#ef4444'
+                        });
+                    }
+                    return data;
+                }
+            }, [history, numDice]);
+
+            return (
+                <div className="grid lg:grid-cols-2 gap-6 h-full">
+                <Card title="Thí nghiệm: Gieo Xúc Xắc" className="bg-gradient-to-br from-red-50 to-white min-h-[400px]">
+                    
+                    {/* Controls */}
+                    <div className="bg-white/80 p-3 rounded-xl mb-4 flex items-center justify-between border border-red-100 shadow-sm">
+                        <label className="text-sm font-bold text-red-800 flex items-center gap-2">
+                            <SettingsIcon size={16}/> Số lượng xúc xắc:
+                        </label>
+                        <select 
+                            value={numDice} 
+                            onChange={(e) => setNumDice(Number(e.target.value))}
+                            disabled={rolling}
+                            className="bg-red-50 border border-red-200 text-red-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block p-1.5 font-bold w-20 text-center"
                         >
-                        <DicesIcon size={24} className={rolling ? "animate-bounce" : ""} /> GIEO 1 LẦN
+                            {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                        <div className="flex flex-wrap justify-center mb-6">
+                            {Array(numDice).fill(0).map((_, idx) => (
+                                <SingleDice key={idx} id={idx} result={currentFaces[idx]} isRolling={rolling} />
+                            ))}
+                        </div>
+                        
+                        <div className="h-8 mb-4 text-center">
+                            {rolling ? <span className="text-red-500 font-semibold animate-bounce">Đang gieo {numDice} xúc xắc...</span> :
+                             currentFaces[0] ? <span className="font-bold text-red-700">Tổng điểm: {currentFaces.reduce((a,b)=>a+b,0)}</span> : null
+                            }
+                        </div>
+
+                        <button 
+                            onClick={roll} 
+                            disabled={rolling}
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-12 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-2 transform active:scale-95 transition-all uppercase"
+                        >
+                        <DicesIcon size={24} className={rolling ? "animate-bounce" : ""} /> GIEO {numDice} XÚC XẮC
                         </button>
                     </div>
                 </Card>
 
-                <Card title="Thống kê & Tính toán">
+                <Card title="Thống kê & Tính toán" icon={BarChart3Icon}>
                     <div className="flex justify-between items-center mb-4 bg-slate-50 p-2 rounded-lg border border-slate-100">
-                    <span className="text-sm font-medium text-slate-600">Tổng: <strong className="text-red-600 text-lg">{total}</strong></span>
+                    <span className="text-sm font-medium text-slate-600">Tổng số lần gieo: <strong className="text-red-600 text-lg">{totalTrials}</strong></span>
                     <button onClick={reset} className="text-xs text-red-500 hover:underline">Xóa lịch sử</button>
                     </div>
                     
-                    <SimpleBarChart data={chartData} total={total} />
-                    <ProbabilityFormulaDisplay data={chartData} total={total} />
-                    <FastForwardControls onBulkRun={runBulk} disabled={rolling} />
+                    <SimpleBarChart data={chartData} total={totalTrials} />
+                    <ProbabilityFormulaDisplay data={chartData} total={totalTrials} />
+                    <FastForwardControls onBulkRun={runBulk} disabled={rolling} label={`Gieo nhanh ${numDice} xúc xắc`} />
                 </Card>
                 </div>
             );
         };
 
-        // 3. BỐC BI
+        // 3. MODULE: BỐC BI (NÂNG CẤP)
         const BallDraw = () => {
-            const initialBalls = [
-                { id: 1, color: 'red', label: 'Đỏ', css: 'bg-red-500', hex: '#ef4444' },
-                { id: 2, color: 'red', label: 'Đỏ', css: 'bg-red-500', hex: '#ef4444' },
-                { id: 3, color: 'red', label: 'Đỏ', css: 'bg-red-500', hex: '#ef4444' },
-                { id: 4, color: 'blue', label: 'Xanh', css: 'bg-blue-500', hex: '#3b82f6' },
-                { id: 5, color: 'blue', label: 'Xanh', css: 'bg-blue-500', hex: '#3b82f6' },
-                { id: 6, color: 'yellow', label: 'Vàng', css: 'bg-yellow-400', hex: '#facc15' },
-            ];
+            // Cấu hình số lượng bi
+            const [config, setConfig] = useState({ red: 3, blue: 2, yellow: 1, green: 0 });
+            
+            // Tạo mảng bi dựa trên config
+            const initialBalls = useMemo(() => {
+                let balls = [];
+                let id = 1;
+                for(let i=0; i<config.red; i++) balls.push({ id: id++, color: 'red', label: 'Đỏ', css: 'bg-red-500', hex: '#ef4444' });
+                for(let i=0; i<config.blue; i++) balls.push({ id: id++, color: 'blue', label: 'Xanh', css: 'bg-blue-500', hex: '#3b82f6' });
+                for(let i=0; i<config.yellow; i++) balls.push({ id: id++, color: 'yellow', label: 'Vàng', css: 'bg-yellow-400', hex: '#facc15' });
+                for(let i=0; i<config.green; i++) balls.push({ id: id++, color: 'green', label: 'Lục', css: 'bg-green-500', hex: '#22c55e' });
+                return balls;
+            }, [config]);
 
             const [boxState, setBoxState] = useState('idle'); 
             const [pickedBall, setPickedBall] = useState(null);
-            const [stats, setStats] = useState({ red: 0, blue: 0, yellow: 0 });
+            const [stats, setStats] = useState({ red: 0, blue: 0, yellow: 0, green: 0 });
+
+            const updateConfig = (color, val) => {
+                const num = Math.max(0, Math.min(10, Number(val))); // Giới hạn 0-10 bi mỗi loại
+                setConfig(prev => ({ ...prev, [color]: num }));
+                reset(); // Reset thống kê khi đổi cấu hình
+            };
 
             const pickBall = () => {
-                if (boxState === 'shaking' || boxState === 'picked') return;
+                if (boxState === 'shaking' || boxState === 'picked' || initialBalls.length === 0) return;
                 setBoxState('shaking');
                 setPickedBall(null);
 
@@ -427,19 +592,22 @@
             };
 
             const runBulk = (n) => {
-                if (boxState === 'shaking') return;
+                if (boxState === 'shaking' || initialBalls.length === 0) return;
                 if (boxState === 'picked') setBoxState('idle'); 
                 setPickedBall(null);
 
-                let r=0, b=0, y=0;
+                let counts = { red: 0, blue: 0, yellow: 0, green: 0 };
                 for(let i=0; i<n; i++) {
                     const rand = Math.floor(Math.random() * initialBalls.length);
                     const color = initialBalls[rand].color;
-                    if(color === 'red') r++;
-                    else if(color === 'blue') b++;
-                    else y++;
+                    counts[color]++;
                 }
-                setStats(prev => ({ red: prev.red + r, blue: prev.blue + b, yellow: prev.yellow + y }));
+                setStats(prev => ({ 
+                    red: prev.red + counts.red, 
+                    blue: prev.blue + counts.blue, 
+                    yellow: prev.yellow + counts.yellow,
+                    green: prev.green + counts.green 
+                }));
             };
 
             const closeBox = () => {
@@ -448,52 +616,83 @@
             };
 
             const reset = () => {
-                setStats({ red: 0, blue: 0, yellow: 0 });
+                setStats({ red: 0, blue: 0, yellow: 0, green: 0 });
                 setPickedBall(null);
                 setBoxState('idle');
             };
 
-            const total = stats.red + stats.blue + stats.yellow;
+            const total = stats.red + stats.blue + stats.yellow + stats.green;
+            
+            // Chỉ hiển thị biểu đồ cho các màu có bi
             const chartData = [
-                { label: 'Bi Đỏ', value: stats.red, colorCode: '#ef4444' },
-                { label: 'Bi Xanh', value: stats.blue, colorCode: '#3b82f6' },
-                { label: 'Bi Vàng', value: stats.yellow, colorCode: '#facc15' }
-            ];
+                { key: 'red', label: 'Bi Đỏ', colorCode: '#ef4444' },
+                { key: 'blue', label: 'Bi Xanh', colorCode: '#3b82f6' },
+                { key: 'yellow', label: 'Bi Vàng', colorCode: '#facc15' },
+                { key: 'green', label: 'Bi Lục', colorCode: '#22c55e' }
+            ].filter(item => config[item.key] > 0 || stats[item.key] > 0).map(item => ({
+                ...item,
+                value: stats[item.key]
+            }));
 
             return (
                 <div className="grid lg:grid-cols-2 gap-6 h-full">
                 <Card title="Thí nghiệm: Bốc Bi Ngẫu Nhiên" className="bg-gradient-to-br from-indigo-50 to-white min-h-[400px]">
-                    <div className="flex-1 flex flex-col items-center justify-center relative">
+                    
+                    {/* Configuration Panel */}
+                    <div className="bg-white/80 p-3 rounded-xl mb-4 border border-indigo-100 shadow-sm">
+                        <div className="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-1"><SettingsIcon size={12}/> Số lượng bi trong hộp:</div>
+                        <div className="grid grid-cols-4 gap-2">
+                            {['red', 'blue', 'yellow', 'green'].map(color => {
+                                const colors = { red: 'bg-red-100 text-red-700', blue: 'bg-blue-100 text-blue-700', yellow: 'bg-yellow-100 text-yellow-700', green: 'bg-green-100 text-green-700'};
+                                const labels = { red: 'Đỏ', blue: 'Xanh', yellow: 'Vàng', green: 'Lục'};
+                                return (
+                                    <div key={color} className="flex flex-col items-center">
+                                        <label className={`text-[10px] font-bold px-2 py-0.5 rounded-t w-full text-center ${colors[color]}`}>{labels[color]}</label>
+                                        <input 
+                                            type="number" 
+                                            min="0" max="10" 
+                                            value={config[color]} 
+                                            onChange={(e) => updateConfig(color, e.target.value)}
+                                            className="w-full text-center border border-slate-200 rounded-b p-1 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        />
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 flex flex-col items-center justify-center relative min-h-[250px]">
                         
                         {/* Box Visualization */}
-                        <div className="relative w-full h-64 flex items-end justify-center mb-8">
+                        <div className="relative w-full h-56 flex items-end justify-center mb-6">
                             <div 
-                                className={`relative w-56 h-48 bg-gray-800 rounded-b-3xl rounded-t-lg overflow-hidden border-4 border-gray-700 shadow-2xl flex flex-wrap content-end justify-center p-4 gap-2 transition-transform ${boxState === 'shaking' ? 'animate-[shake-box_0.5s_infinite]' : ''}`}
+                                className={`relative w-64 h-48 bg-gray-800 rounded-b-3xl rounded-t-lg overflow-hidden border-4 border-gray-700 shadow-2xl flex flex-wrap content-end justify-center p-4 gap-1 transition-transform ${boxState === 'shaking' ? 'animate-[shake-box_0.5s_infinite]' : ''}`}
                             >
                                 {initialBalls.map((b, i) => {
                                     const isPicked = boxState === 'picked' && pickedBall?.id === b.id;
                                     return (
                                         <div 
                                             key={b.id} 
-                                            className={`w-10 h-10 rounded-full ${b.css} shadow-[inset_-4px_-4px_6px_rgba(0,0,0,0.3)] border border-white/20 transition-all duration-300 ${boxState === 'shaking' ? 'animate-[jiggle-ball_0.3s_infinite]' : ''} ${isPicked ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}`}
-                                            style={{ animationDelay: `${i * 0.1}s` }}
+                                            className={`w-8 h-8 rounded-full ${b.css} shadow-[inset_-3px_-3px_5px_rgba(0,0,0,0.3)] border border-white/20 transition-all duration-300 ${boxState === 'shaking' ? 'animate-[jiggle-ball_0.3s_infinite]' : ''} ${isPicked ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}`}
+                                            style={{ animationDelay: `${i * 0.05}s` }}
                                         ></div>
                                     )
                                 })}
                                 
+                                {initialBalls.length === 0 && <span className="text-gray-500 text-sm self-center pb-12">Hộp rỗng</span>}
                                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none"></div>
                             </div>
 
-                            {/* Picked Ball Animation - Appearing Outside */}
+                            {/* Picked Ball Animation */}
                             {boxState === 'picked' && pickedBall && (
                             <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                                <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px] rounded-3xl animate-in fade-in duration-300"></div>
+                                <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] rounded-3xl animate-in fade-in duration-300"></div>
                                 <div className="relative flex flex-col items-center animate-in zoom-in slide-in-from-bottom-24 duration-700 ease-out">
-                                    <div className={`w-24 h-24 rounded-full ${pickedBall.css} shadow-[inset_-8px_-8px_12px_rgba(0,0,0,0.3),0_20px_25px_rgba(0,0,0,0.2)] border-4 border-white flex items-center justify-center`}>
-                                        <span className="text-white font-bold text-lg drop-shadow-md">{pickedBall.label}</span>
+                                    <div className={`w-20 h-20 rounded-full ${pickedBall.css} shadow-[inset_-6px_-6px_10px_rgba(0,0,0,0.3),0_20px_25px_rgba(0,0,0,0.2)] border-4 border-white flex items-center justify-center`}>
+                                        <span className="text-white font-bold text-sm drop-shadow-md">{pickedBall.label}</span>
                                     </div>
-                                    <div className="mt-4 bg-white px-6 py-2 rounded-full shadow-xl text-indigo-700 font-bold border-2 border-indigo-100 animate-bounce">
-                                    Đã bốc ra ngoài!
+                                    <div className="mt-2 bg-white px-4 py-1 rounded-full shadow-xl text-indigo-700 font-bold border border-indigo-100 animate-bounce text-sm">
+                                    Ra màu {pickedBall.label}!
                                     </div>
                                 </div>
                             </div>
@@ -507,8 +706,8 @@
                         ) : (
                             <button 
                             onClick={pickBall} 
-                            disabled={boxState === 'shaking'}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-indigo-500/30 flex items-center gap-2 disabled:opacity-70 text-lg hover:scale-105 transition-transform"
+                            disabled={boxState === 'shaking' || initialBalls.length === 0}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-indigo-500/30 flex items-center gap-2 disabled:opacity-50 text-lg hover:scale-105 transition-transform"
                             >
                             <BoxIcon size={20} className={boxState === 'shaking' ? 'animate-bounce' : ''} /> 
                             {boxState === 'shaking' ? 'Đang lắc...' : 'BỐC 1 BI'}
@@ -517,7 +716,7 @@
                     </div>
                 </Card>
 
-                <Card title="Thống kê & Tính toán">
+                <Card title="Thống kê & Tính toán" icon={BarChart3Icon}>
                     <div className="flex justify-between items-center mb-4 bg-slate-50 p-2 rounded-lg border border-slate-100">
                     <span className="text-sm font-medium text-slate-600">Tổng lần bốc: <strong className="text-indigo-600 text-lg">{total}</strong></span>
                     <button onClick={reset} className="text-xs text-red-500 hover:underline">Xóa thống kê</button>
@@ -531,76 +730,173 @@
             );
         };
 
-        // 4. VÒNG QUAY
+        // 4. MODULE: VÒNG QUAY (NÂNG CẤP)
         const Spinner = () => {
+            const [numSegments, setNumSegments] = useState(4);
             const [rotation, setRotation] = useState(0);
             const [spinning, setSpinning] = useState(false);
-            const [stats, setStats] = useState([0, 0, 0, 0]); 
+            const [stats, setStats] = useState({}); // Object { label: count }
             
-            const segments = [
-                { color: '#EF4444', label: '1', text: 'Đỏ' },
-                { color: '#3B82F6', label: '2', text: 'Xanh' },
-                { color: '#10B981', label: '3', text: 'Lục' },
-                { color: '#F59E0B', label: '4', text: 'Vàng' }
-            ];
+            // Generate segments based on number
+            const segments = useMemo(() => {
+                const colors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6', '#F97316', '#84CC16', '#06B6D4', '#64748B'];
+                const segs = [];
+                for(let i=0; i < numSegments; i++) {
+                    segs.push({ 
+                        id: i,
+                        color: colors[i % colors.length], 
+                        label: `${i+1}`, 
+                        text: `Ô ${i+1}` 
+                    });
+                }
+                return segs;
+            }, [numSegments]);
+
+            // Reset stats when segments change
+            useEffect(() => {
+                const initStats = {};
+                segments.forEach(s => initStats[s.label] = 0);
+                setStats(initStats);
+                setRotation(0);
+            }, [segments]);
+
+            // Helper to describe arc path
+            const getCoordinatesForPercent = (percent) => {
+                const x = Math.cos(2 * Math.PI * percent);
+                const y = Math.sin(2 * Math.PI * percent);
+                return [x, y];
+            }
 
             const spin = () => {
                 if (spinning) return;
                 setSpinning(true);
                 
                 const randomDeg = Math.floor(Math.random() * 360);
-                const extraSpins = 1800; 
+                const extraSpins = 1440; // 4 vòng
                 const newRotation = rotation + extraSpins + randomDeg;
                 setRotation(newRotation);
                 
                 setTimeout(() => {
-                setSpinning(false);
-                const normalizedRot = newRotation % 360;
-                let winningIndex = 0;
-                if (normalizedRot < 90) winningIndex = 3; 
-                else if (normalizedRot < 180) winningIndex = 2; 
-                else if (normalizedRot < 270) winningIndex = 1; 
-                else winningIndex = 0; 
-                
-                setStats(prev => {
-                    const n = [...prev];
-                    n[winningIndex]++;
-                    return n;
-                });
+                    setSpinning(false);
+                    const normalizedRot = newRotation % 360;
+                    // Tính toán ô thắng: 
+                    // Góc quay theo chiều kim đồng hồ. Mũi tên ở trên cùng (270 độ hoặc -90 độ trong hệ tọa độ SVG chuẩn, nhưng CSS rotate xoay cả thẻ div).
+                    // Đơn giản hóa: Góc mũi tên là cố định ở trên. Vòng quay xoay `normalizedRot`.
+                    // Góc hiệu dụng của mũi tên so với vòng quay là: (360 - normalizedRot) % 360.
+                    // Mỗi segment chiếm 360/n độ.
+                    
+                    const degreesPerSeg = 360 / numSegments;
+                    const effectiveAngle = (360 - normalizedRot) % 360; 
+                    
+                    // Vị trí segment 0 bắt đầu từ góc -90 (top) nếu vẽ chuẩn, nhưng ta vẽ segment 0 từ 0 độ.
+                    // Ta cần điều chỉnh logic dựa trên cách vẽ SVG.
+                    // Trong SVG dưới: Segment 0 bắt đầu từ 0 độ (bên phải 3h) và quét theo chiều kim đồng hồ.
+                    // Mũi tên ở trên cùng (tương ứng 270 độ hoặc -90 độ).
+                    // Góc mũi tên so với điểm bắt đầu (0 độ) là 270.
+                    // Do vòng quay xoay `normalizedRot`, góc mũi tên trúng là (270 - normalizedRot + 360) % 360.
+                    
+                    const hitAngle = (270 - normalizedRot + 3600) % 360;
+                    const winningIndex = Math.floor(hitAngle / degreesPerSeg);
+                    
+                    const winner = segments[winningIndex];
+                    if (winner) {
+                        setStats(prev => ({ ...prev, [winner.label]: (prev[winner.label] || 0) + 1 }));
+                    }
                 }, 3000);
             };
             
             const runBulk = (n) => {
                 if (spinning) return;
-                const newStats = [...stats];
+                const newStats = { ...stats };
                 for(let i=0; i<n; i++) {
-                    const winIdx = Math.floor(Math.random() * 4);
-                    newStats[winIdx]++;
+                    const winIdx = Math.floor(Math.random() * numSegments);
+                    const label = segments[winIdx].label;
+                    newStats[label] = (newStats[label] || 0) + 1;
                 }
                 setStats(newStats);
             };
 
             const reset = () => {
-                setStats([0,0,0,0]);
+                const initStats = {};
+                segments.forEach(s => initStats[s.label] = 0);
+                setStats(initStats);
                 setRotation(0);
             };
             
-            const total = stats.reduce((a,b) => a+b, 0);
-            const chartData = segments.map((seg, i) => ({
+            const total = Object.values(stats).reduce((a,b) => a+b, 0);
+            const chartData = segments.map((seg) => ({
                 label: seg.text,
-                value: stats[i],
+                value: stats[seg.label] || 0,
                 colorCode: seg.color
             }));
+
+            // Vẽ hình quạt SVG
+            const renderWheel = () => {
+                const totalSegs = segments.length;
+                const degPerSeg = 360 / totalSegs;
+                
+                return segments.map((seg, i) => {
+                    const startAngle = i * degPerSeg;
+                    const endAngle = (i + 1) * degPerSeg;
+                    
+                    // Convert to radians
+                    const startRad = (startAngle * Math.PI) / 180;
+                    const endRad = (endAngle * Math.PI) / 180;
+                    
+                    const x1 = 50 + 50 * Math.cos(startRad);
+                    const y1 = 50 + 50 * Math.sin(startRad);
+                    const x2 = 50 + 50 * Math.cos(endRad);
+                    const y2 = 50 + 50 * Math.sin(endRad);
+                    
+                    // Large arc flag
+                    const largeArcFlag = degPerSeg > 180 ? 1 : 0;
+                    
+                    const pathData = `M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+
+                    // Text position (approximate center of pie slice)
+                    const midAngle = startAngle + degPerSeg / 2;
+                    const midRad = (midAngle * Math.PI) / 180;
+                    const tx = 50 + 35 * Math.cos(midRad);
+                    const ty = 50 + 35 * Math.sin(midRad);
+
+                    return (
+                        <g key={seg.id}>
+                            <path d={pathData} fill={seg.color} stroke="white" strokeWidth="0.5" />
+                            <text x={tx} y={ty} fill="white" fontSize="6" fontWeight="bold" textAnchor="middle" dominantBaseline="middle" transform={`rotate(${midAngle+90}, ${tx}, ${ty})`}>
+                                {seg.label}
+                            </text>
+                        </g>
+                    );
+                });
+            }
 
             return (
                 <div className="grid lg:grid-cols-2 gap-6 h-full">
                 <Card title="Thí nghiệm: Vòng Quay May Mắn" className="bg-gradient-to-br from-green-50 to-white min-h-[400px]">
+                    
+                    <div className="bg-white/80 p-3 rounded-xl mb-4 flex items-center justify-between border border-green-100 shadow-sm">
+                        <label className="text-sm font-bold text-green-800 flex items-center gap-2">
+                            <SettingsIcon size={16}/> Số ô chia:
+                        </label>
+                        <select 
+                            value={numSegments} 
+                            onChange={(e) => setNumSegments(Number(e.target.value))}
+                            disabled={spinning}
+                            className="bg-green-50 border border-green-200 text-green-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-1.5 font-bold w-20 text-center"
+                        >
+                            {[2,3,4,5,6,8,10,12].map(n => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                    </div>
+
                     <div className="flex-1 flex flex-col items-center justify-center">
                         <div className="relative mb-8 scale-110">
+                            {/* Pointer */}
                             <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 drop-shadow-lg">
-                                <div className="w-8 h-10 bg-gray-800 clip-path-polygon-[50%_100%,_0%_0%,_100%_0%] rounded-t-sm"></div>
+                                <div className="w-8 h-10 bg-gray-800 clip-path-polygon-[50%_100%,_0%_0%,_100%_0%] rounded-t-sm" style={{clipPath: 'polygon(50% 100%, 0% 0%, 100% 0%)'}}></div>
                                 <div className="w-2 h-2 bg-white rounded-full absolute top-1 left-1/2 -translate-x-1/2"></div>
                             </div>
+                            
+                            {/* Wheel */}
                             <div 
                             className="w-64 h-64 rounded-full overflow-hidden border-8 border-white shadow-[0_0_20px_rgba(0,0,0,0.1)] relative"
                             style={{ 
@@ -608,30 +904,28 @@
                                 transition: 'transform 3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
                             }}
                             >
-                            <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-0">
-                                <path d="M50 50 L50 0 A50 50 0 0 1 100 50 Z" fill="#EF4444" />
-                                <path d="M50 50 L100 50 A50 50 0 0 1 50 100 Z" fill="#3B82F6" />
-                                <path d="M50 50 L50 100 A50 50 0 0 1 0 50 Z" fill="#10B981" />
-                                <path d="M50 50 L0 50 A50 50 0 0 1 50 0 Z" fill="#F59E0B" />
+                            <svg viewBox="0 0 100 100" className="w-full h-full">
+                                {renderWheel()}
                             </svg>
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-md z-10 flex items-center justify-center">
                                 <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                             </div>
                             </div>
-                            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-32 h-16 bg-gray-200 -z-10 rounded-t-full clip-path-polygon-[20%_0%,_80%_0%,_100%_100%,_0%_100%]"></div>
+                            {/* Stand */}
+                            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-32 h-16 bg-gray-200 -z-10 rounded-t-full" style={{clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)'}}></div>
                         </div>
                         
                         <button 
                             onClick={spin} 
                             disabled={spinning}
-                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-12 rounded-full shadow-lg shadow-green-500/30 active:scale-95 transition-transform disabled:opacity-50 disabled:scale-100 text-lg"
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-12 rounded-full shadow-lg shadow-green-500/30 active:scale-95 transition-transform disabled:opacity-50 disabled:scale-100 text-lg uppercase"
                         >
                             {spinning ? 'Đang quay...' : 'QUAY 1 LẦN'}
                         </button>
                     </div>
                 </Card>
                 
-                <Card title="Thống kê & Tính toán">
+                <Card title="Thống kê & Tính toán" icon={BarChart3Icon}>
                     <div className="flex justify-between items-center mb-4 bg-slate-50 p-2 rounded-lg border border-slate-100">
                     <span className="text-sm font-medium text-slate-600">Lượt quay: <strong className="text-green-600 text-lg">{total}</strong></span>
                     <button onClick={reset} className="text-xs text-red-500 hover:underline">Làm lại</button>
@@ -697,7 +991,8 @@
                     </main>
 
                     <footer className="mt-16 text-center text-gray-400 text-sm pb-8">
-						© Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io                    </footer>
+                        © Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương - daytoanthayhoang.github.io
+                    </footer>
                 </div>
                 </div>
             );
