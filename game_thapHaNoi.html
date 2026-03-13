@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mô Phỏng Tháp Hà Nội 3D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Nhúng Three.js qua Import Map -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+    
+    <!-- Thêm KaTeX để hiển thị công thức Toán học -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        /* Ngăn chặn các thao tác cuộn/zoom mặc định của trình duyệt khi chạm vào màn hình game */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #0f172a; touch-action: none; user-select: none; -webkit-user-select: none; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
+        .pointer-events-auto { pointer-events: auto; }
+        
+        /* Hiệu ứng bóng mượt cho UI */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        /* Tùy chỉnh thanh trượt (slider) */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #475569;
+            border-radius: 4px;
+        }
+        
+        /* Tùy chỉnh thanh cuộn cho bảng lý thuyết để thao tác mượt trên thiết bị cảm ứng */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.5); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="text-slate-100 font-sans">
+
+    <!-- Container chứa đồ họa 3D -->
+    <div id="canvas-container"></div>
+
+    <!-- Lớp giao diện người dùng -->
+    <div id="ui-layer" class="p-4 sm:p-6 md:p-8">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-start pointer-events-auto">
+            <div class="glass-panel p-4 rounded-2xl">
+                <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Tháp Hà Nội 3D</h1>
+                <p class="text-slate-300 text-sm sm:text-base mt-1" id="move-counter">Số bước: 0 / Tối thiểu: 7</p>
+            </div>
+            
+            <div class="glass-panel p-4 rounded-2xl flex flex-col items-center min-w-[120px]">
+                <label for="disk-slider" class="text-sm font-semibold text-slate-300 mb-2">Số tầng: <span id="disk-count-display" class="text-white font-bold text-lg">3</span></label>
+                <input type="range" id="disk-slider" min="3" max="8" value="3" class="w-full">
+            </div>
+        </div>
+
+        <!-- Thông báo chiến thắng -->
+        <div id="win-message" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 glass-panel p-8 rounded-3xl text-center pointer-events-auto">
+            <h2 class="text-4xl font-bold text-green-400 mb-2">Chúc Mừng! 🎉</h2>
+            <p class="text-lg text-slate-200" id="win-stats">Bạn đã hoàn thành với 0 bước.</p>
+            <button id="btn-play-again" class="mt-6 px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 rounded-full font-bold text-white shadow-lg transform transition active:scale-95">
+                Chơi lại
+            </button>
+        </div>
+
+        <!-- Các nút điều khiển dưới cùng -->
+        <div class="flex justify-center gap-3 sm:gap-6 pointer-events-auto mb-4 sm:mb-8 flex-wrap">
+            <button id="btn-reset" class="px-5 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-semibold shadow-lg flex items-center gap-2 transition active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Làm mới
+            </button>
+            <button id="btn-hint" class="px-5 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2 transition active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg>
+                Gợi ý 1 bước
+            </button>
+            <button id="btn-auto" class="px-5 py-3 bg-purple-600 hover:bg-purple-500 rounded-xl font-semibold shadow-lg shadow-purple-500/30 flex items-center gap-2 transition active:scale-95">
+                <svg id="icon-play" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span id="text-auto">Tự động giải</span>
+            </button>
+            <!-- Nút mở bảng Lý thuyết -->
+            <button id="btn-theory" class="px-5 py-3 bg-amber-600 hover:bg-amber-500 rounded-xl font-semibold shadow-lg shadow-amber-500/30 flex items-center gap-2 transition active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                Lý thuyết
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Lý thuyết (Hiển thị nổi trên nền 3D) -->
+    <div id="theory-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-md opacity-0 transition-opacity duration-300 pointer-events-auto">
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="theory-content">
+            
+            <!-- Header Modal -->
+            <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/80">
+                <h2 class="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#amber-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="amber-grad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fbbf24" /><stop offset="100%" stop-color="#f97316" /></linearGradient></defs><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Hành Trình Khám Phá Tháp Hà Nội
+                </h2>
+                <button id="btn-close-theory" class="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            
+            <!-- Nội dung cuộn -->
+            <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar text-slate-200 space-y-8 text-base sm:text-lg leading-relaxed">
+                
+                <!-- Thử thách 1 -->
+                <section>
+                    <h3 class="text-xl font-bold text-green-400 mb-3 flex items-center gap-2">📍 Thử thách 1: Lời nguyền Đền Benares</h3>
+                    <div class="bg-slate-700/30 p-5 rounded-xl border border-slate-600/50">
+                        <p class="mb-3">Người ta kể rằng ở Ấn Độ có một ngôi đền, nơi các nhà sư đang phải di chuyển <strong>64 đĩa vàng</strong> trên 3 cọc kim cương. Luật di chuyển: mỗi lần 1 đĩa, đĩa nhỏ luôn nằm trên đĩa lớn.</p>
+                        <p class="mb-3 text-orange-300 font-semibold">Lời nguyền nói rằng: Khi chiếc đĩa cuối cùng được chuyển xong, thế giới sẽ tận thế!</p>
+                        <div class="bg-slate-800 p-4 rounded-lg border-l-4 border-green-500 mt-4">
+                            <strong>❓ Câu hỏi cho bạn:</strong> Liệu chúng ta có cần phải lo lắng về ngày tận thế đó không? Hãy giữ câu hỏi này và cùng đi tìm lời giải nhé!
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Thử thách 2 -->
+                <section>
+                    <h3 class="text-xl font-bold text-yellow-400 mb-3 flex items-center gap-2">📍 Thử thách 2: Đi tìm Quy luật (Thực nghiệm)</h3>
+                    <p class="mb-4">Nhà toán học không bao giờ đoán bừa. Hãy dùng mô hình 3D, thử giải với số tầng tăng dần và đếm số bước đi tối thiểu (\( H_n \)).</p>
+                    
+                    <div class="flex items-center gap-3 mb-4 text-blue-300 bg-blue-900/20 p-3 rounded-lg w-fit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                        <strong>Nhiệm vụ:</strong> Điền vào chỗ trống
+                    </div>
+                    
+                    <ul class="list-disc ml-6 space-y-2 mb-4">
+                        <li>1 đĩa \(\rightarrow\) Cần <span class="inline-block w-8 border-b-2 border-slate-400 text-center">?</span> bước</li>
+                        <li>2 đĩa \(\rightarrow\) Cần <span class="inline-block w-8 border-b-2 border-slate-400 text-center">?</span> bước</li>
+                        <li>3 đĩa \(\rightarrow\) Cần <span class="inline-block w-8 border-b-2 border-slate-400 text-center">?</span> bước</li>
+                        <li>4 đĩa \(\rightarrow\) Cần <span class="inline-block w-8 border-b-2 border-slate-400 text-center">?</span> bước</li>
+                    </ul>
+
+                    <details class="group bg-slate-700/50 rounded-xl border border-slate-600/50 mt-4">
+                        <summary class="cursor-pointer p-4 font-semibold text-yellow-300 hover:text-yellow-200 list-none flex items-center justify-between">
+                            <span>💡 Xem Gợi ý & Đáp án</span>
+                            <span class="transition group-open:rotate-180">▼</span>
+                        </summary>
+                        <div class="p-4 border-t border-slate-600/50 text-slate-300">
+                            <p>Bạn đã tìm ra dãy số: <strong>1, 3, 7, 15...</strong> chưa?</p>
+                            <p class="mt-2 text-blue-300"><em>Mẹo:</em> Hãy thử cộng thêm 1 vào mỗi con số trong dãy trên. Bạn thấy điều gì quen thuộc?</p>
+                            <div class="mt-4 bg-blue-900/30 p-4 rounded-lg text-center">
+                                <p>Đó chính là dãy các lũy thừa của 2: \( 2, 4, 8, 16... \)</p>
+                                <p class="text-xl font-bold text-white mt-2">Dự đoán công thức tổng quát: \( H_n = 2^n - 1 \)</p>
+                            </div>
+                        </div>
+                    </details>
+                </section>
+
+                <!-- Thử thách 3 -->
+                <section>
+                    <h3 class="text-xl font-bold text-orange-400 mb-3 flex items-center gap-2">📍 Thử thách 3: Tư duy "Chia để trị" (Đại số)</h3>
+                    <p class="mb-4">Chúng ta đã đoán được công thức \( H_n = 2^n - 1 \), nhưng làm sao để <strong>chứng minh</strong> nó luôn đúng?</p>
+                    
+                    <div class="bg-slate-700/30 p-5 rounded-xl border border-slate-600/50 mb-4">
+                        <strong class="text-orange-300 block mb-2">🤔 Hãy tưởng tượng:</strong>
+                        <p>Mục tiêu lớn nhất của bạn là chuyển được đĩa to nhất (đĩa dưới cùng) sang cọc đích.</p>
+                        <p class="mt-2">Để chiếc đĩa to bự này có thể tự do di chuyển, <strong>toàn bộ các đĩa nhỏ hơn nó phải nằm ở đâu?</strong></p>
+                    </div>
+
+                    <details class="group bg-slate-700/50 rounded-xl border border-slate-600/50">
+                        <summary class="cursor-pointer p-4 font-semibold text-orange-300 hover:text-orange-200 list-none flex items-center justify-between">
+                            <span>💡 Lời giải Toán học</span>
+                            <span class="transition group-open:rotate-180">▼</span>
+                        </summary>
+                        <div class="p-4 border-t border-slate-600/50 text-slate-300">
+                            <p>Đúng vậy! Mọi đĩa nhỏ hơn phải "né" sang cọc phụ.</p>
+                            <ul class="list-decimal ml-6 mt-3 space-y-2">
+                                <li><strong>Bước 1:</strong> Chuyển \( (n-1) \) đĩa sang cọc phụ \(\rightarrow\) Giả sử mất \( H_{n-1} \) bước.</li>
+                                <li><strong>Bước 2:</strong> Chuyển đĩa to nhất sang cọc đích \(\rightarrow\) Mất đúng <strong>1</strong> bước.</li>
+                                <li><strong>Bước 3:</strong> Chuyển lại \( (n-1) \) đĩa từ cọc phụ về cọc đích \(\rightarrow\) Mất thêm \( H_{n-1} \) bước nữa.</li>
+                            </ul>
+                            <div class="text-center bg-slate-800 p-4 rounded-lg mt-4 text-xl font-bold text-orange-400">
+                                Phương trình truy hồi: \( H_n = 2H_{n-1} + 1 \)
+                            </div>
+                        </div>
+                    </details>
+                </section>
+
+                <!-- Thử thách 4 -->
+                <section>
+                    <h3 class="text-xl font-bold text-red-400 mb-3 flex items-center gap-2">📍 Thử thách 4: Lời giải cho Đền Benares</h3>
+                    <p class="mb-4">Bây giờ bạn đã có công thức trong tay. Hãy quay lại câu chuyện ban đầu.</p>
+                    <div class="bg-red-900/20 p-5 rounded-xl border border-red-500/30">
+                        <p>Với 64 đĩa, số bước cần thiết là: \( H_{64} = 2^{64} - 1 \)</p>
+                        <p class="mt-3">Con số này xấp xỉ <strong>18.44 tỷ tỷ bước</strong> (\( 18.44 \times 10^{18} \)).</p>
+                        <p class="mt-3 font-semibold text-red-300">Nếu mỗi giây các nhà sư chuyển được 1 đĩa và không bao giờ đi sai, họ sẽ mất bao nhiêu năm?</p>
+                    </div>
+                    
+                    <details class="group bg-slate-700/50 rounded-xl border border-slate-600/50 mt-4">
+                        <summary class="cursor-pointer p-4 font-semibold text-red-300 hover:text-red-200 list-none flex items-center justify-between">
+                            <span>💡 Xem kết quả</span>
+                            <span class="transition group-open:rotate-180">▼</span>
+                        </summary>
+                        <div class="p-4 border-t border-slate-600/50 text-slate-300">
+                            <p>Họ sẽ mất khoảng <strong>585 tỷ năm</strong> để hoàn thành!</p>
+                            <p class="mt-2 text-green-400">Vũ trụ của chúng ta mới hình thành khoảng 13.8 tỷ năm. Vậy nên chúng ta hoàn toàn yên tâm tận hưởng cuộc sống, thế giới chưa tận thế đâu! 🎉</p>
+                        </div>
+                    </details>
+                </section>
+
+                <!-- Mở rộng -->
+                <section>
+                    <h3 class="text-xl font-bold text-purple-400 mb-3 flex items-center gap-2">📍 Mở rộng: Bạn có biết?</h3>
+                    <div class="grid sm:grid-cols-2 gap-6">
+                        <div class="bg-slate-700/30 p-5 rounded-xl border border-slate-600/50 hover:bg-slate-700/50 transition-colors">
+                            <h4 class="font-bold text-white text-lg mb-2">🤖 Tư duy Đệ quy (Tin học)</h4>
+                            <p class="text-slate-300 text-sm mb-3">Logic "Chia để trị" ở Thử thách 3 chính là cách máy tính giải bài toán này. Khái niệm này gọi là Đệ Quy (Recursion).</p>
+                            <p class="text-slate-300 text-sm"><em>Hãy bấm nút "Tự động giải" trên màn hình và quan sát xem máy tính có đi đúng trình tự 3 bước đó không nhé!</em></p>
+                        </div>
+                        <div class="bg-slate-700/30 p-5 rounded-xl border border-slate-600/50 hover:bg-slate-700/50 transition-colors">
+                            <h4 class="font-bold text-white text-lg mb-2">🔺 Tam giác Sierpiński</h4>
+                            <p class="text-slate-300 text-sm">Nếu bạn lấy một tờ giấy, vẽ các dấu chấm đại diện cho các trạng thái của tháp, rồi nối các trạng thái có thể đi tới nhau bằng các đường thẳng...</p>
+                            <p class="text-purple-300 text-sm font-semibold mt-2">Bức tranh thu được sẽ là một Fractal nổi tiếng: Tam giác Sierpiński!</p>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic chính của ứng dụng -->
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- CẤU HÌNH CƠ BẢN ---
+        const CONSTANTS = {
+            PEG_SPACING: 6,       // Khoảng cách giữa các cọc
+            PEG_HEIGHT: 10,       // Chiều cao cọc
+            PEG_RADIUS: 0.25,     // Bán kính cọc
+            DISK_HEIGHT: 0.8,     // Độ dày đĩa
+            BASE_WIDTH: 22,       // Chiều dài đế
+            BASE_DEPTH: 6,        // Chiều rộng đế
+            BASE_HEIGHT: 0.5,     // Độ dày đế
+            COLORS: [
+                0xef4444, // Red
+                0xf97316, // Orange
+                0xeab308, // Yellow
+                0x22c55e, // Green
+                0x06b6d4, // Cyan
+                0x3b82f6, // Blue
+                0x8b5cf6, // Violet
+                0xd946ef  // Fuchsia
+            ]
+        };
+
+        // --- TRẠNG THÁI TRÒ CHƠI ---
+        let state = {
+            numDisks: 3,
+            pegs: [[], [], []], // Mỗi mảng chứa các đối tượng mô tả đĩa { id, size, mesh }
+            moveCount: 0,
+            isAnimating: false,
+            isAutoPlaying: false,
+            autoPlayTimeout: null,
+            hasWon: false
+        };
+
+        // --- HỆ THỐNG TWEENING (Tạo hiệu ứng chuyển động mượt mà không cần thư viện ngoài) ---
+        const tweens = [];
+        function tween(obj, targetProps, duration, onComplete) {
+            const startProps = {};
+            for (let key in targetProps) startProps[key] = obj[key];
+            tweens.push({
+                obj, startProps, targetProps, duration,
+                startTime: performance.now(), onComplete
+            });
+        }
+        function updateTweens(time) {
+            for (let i = tweens.length - 1; i >= 0; i--) {
+                const t = tweens[i];
+                let progress = (time - t.startTime) / t.duration;
+                if (progress >= 1) progress = 1;
+                
+                // Ease In Out Quad
+                const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                
+                for (let key in t.targetProps) {
+                    t.obj[key] = t.startProps[key] + (t.targetProps[key] - t.startProps[key]) * ease;
+                }
+                
+                if (progress === 1) {
+                    if (t.onComplete) t.onComplete();
+                    tweens.splice(i, 1);
+                }
+            }
+        }
+
+        // --- THREE.JS SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        // Không dùng fog để giữ hiệu ứng rõ ràng cho dạy học
+        
+        // Camera cố định góc nhìn từ trên chéo xuống, tối ưu cho tương tác bảng cảm ứng
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 18, 25);
+        camera.lookAt(0, 4, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Tối ưu hiệu năng
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        // Ánh sáng
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        dirLight.shadow.camera.left = -15;
+        dirLight.shadow.camera.right = 15;
+        dirLight.shadow.camera.top = 10;
+        dirLight.shadow.camera.bottom = -10;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        scene.add(dirLight);
+
+        const fillLight = new THREE.DirectionalLight(0xaabbff, 0.3);
+        fillLight.position.set(-10, 10, -10);
+        scene.add(fillLight);
+
+        // --- XÂY DỰNG VẬT THỂ ---
+        const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
+        const pegMaterial = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4, metalness: 0.2 });
+        const pegHighlightMaterial = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.2, emissive: 0x1d4ed8, emissiveIntensity: 0.5 });
+        
+        let diskMeshes = [];
+        let pegsMeshes = [];
+        let baseMesh;
+
+        function createEnvironment() {
+            // Đế chính
+            const baseGeo = new THREE.BoxGeometry(CONSTANTS.BASE_WIDTH, CONSTANTS.BASE_HEIGHT, CONSTANTS.BASE_DEPTH);
+            // Bo tròn nhẹ mép bằng cách chia lưới (tùy chọn, để đơn giản ta dùng Box)
+            baseMesh = new THREE.Mesh(baseGeo, baseMaterial);
+            baseMesh.position.y = -CONSTANTS.BASE_HEIGHT / 2;
+            baseMesh.receiveShadow = true;
+            scene.add(baseMesh);
+
+            // 3 Cọc
+            const pegGeo = new THREE.CylinderGeometry(CONSTANTS.PEG_RADIUS, CONSTANTS.PEG_RADIUS, CONSTANTS.PEG_HEIGHT, 16);
+            
+            for (let i = 0; i < 3; i++) {
+                const peg = new THREE.Mesh(pegGeo, pegMaterial);
+                peg.position.set(getPegX(i), CONSTANTS.PEG_HEIGHT / 2, 0);
+                peg.castShadow = true;
+                peg.receiveShadow = true;
+                scene.add(peg);
+                
+                // Thêm vòng sáng mờ dưới chân cọc để highlight khi kéo thả
+                const ringGeo = new THREE.TorusGeometry(1.5, 0.1, 8, 32);
+                const ring = new THREE.Mesh(ringGeo, pegMaterial.clone());
+                ring.rotation.x = -Math.PI / 2;
+                ring.position.set(getPegX(i), 0.1, 0);
+                ring.visible = false; // Chỉ hiện khi có đĩa đang drag phía trên
+                scene.add(ring);
+                
+                pegsMeshes.push({ cylinder: peg, highlightRing: ring });
+            }
+        }
+
+        function getPegX(index) {
+            return (index - 1) * CONSTANTS.PEG_SPACING;
+        }
+
+        function createDisks() {
+            // Xóa đĩa cũ
+            diskMeshes.forEach(mesh => scene.remove(mesh));
+            diskMeshes = [];
+            state.pegs = [[], [], []];
+
+            const maxRadius = 2.5;
+            const minRadius = 0.8;
+            const radiusStep = (maxRadius - minRadius) / (Math.max(state.numDisks - 1, 1));
+
+            for (let i = 0; i < state.numDisks; i++) {
+                const size = state.numDisks - i; // Kích thước logic (số càng lớn đĩa càng to)
+                const radius = minRadius + (size - 1) * radiusStep;
+                
+                // Dùng Cylinder có viền mềm (Torus phụ trợ hoặc Cylinder chia segment)
+                const geo = new THREE.CylinderGeometry(radius, radius, CONSTANTS.DISK_HEIGHT, 32);
+                const mat = new THREE.MeshStandardMaterial({ 
+                    color: CONSTANTS.COLORS[(size - 1) % CONSTANTS.COLORS.length],
+                    roughness: 0.3,
+                    metalness: 0.1
+                });
+                
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                mesh.userData = { size: size, id: i, originalColor: mat.color.getHex() };
+                
+                scene.add(mesh);
+                diskMeshes.push(mesh);
+                
+                // Khởi tạo tất cả đĩa ở cọc 0 (cọc đầu tiên)
+                state.pegs[0].push({ size, mesh });
+            }
+            
+            positionDisks(false); // Xếp đĩa vào vị trí không cần animation
+        }
+
+        function positionDisks(animate = false) {
+            for (let p = 0; p < 3; p++) {
+                const pegDisks = state.pegs[p];
+                for (let i = 0; i < pegDisks.length; i++) {
+                    const disk = pegDisks[i];
+                    const targetX = getPegX(p);
+                    const targetY = i * CONSTANTS.DISK_HEIGHT + CONSTANTS.DISK_HEIGHT / 2;
+                    
+                    if (animate) {
+                        tween(disk.mesh.position, { x: targetX, y: targetY, z: 0 }, 300);
+                    } else {
+                        disk.mesh.position.set(targetX, targetY, 0);
+                    }
+                }
+            }
+        }
+
+        // --- TƯƠNG TÁC (DRAG & DROP) ---
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        
+        // Một mặt phẳng vô hình song song với camera để tính toán vị trí di chuyển trong 3D
+        const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); 
+        let dragInfo = null; // { mesh, sourcePegIndex, startPointerPos, startMeshPos }
+
+        function onPointerDown(event) {
+            if (state.isAnimating || state.isAutoPlaying || state.hasWon) return;
+
+            // Xử lý tọa độ cho cả chuột và cảm ứng
+            const clientX = event.clientX !== undefined ? event.clientX : event.touches[0].clientX;
+            const clientY = event.clientY !== undefined ? event.clientY : event.touches[0].clientY;
+
+            pointer.x = (clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(diskMeshes);
+
+            if (intersects.length > 0) {
+                const hitMesh = intersects[0].object;
+                
+                // Kiểm tra xem đĩa này có nằm trên cùng của một cọc không
+                let foundPeg = -1;
+                let isTopDisk = false;
+                
+                for (let i = 0; i < 3; i++) {
+                    const disks = state.pegs[i];
+                    if (disks.length > 0 && disks[disks.length - 1].mesh === hitMesh) {
+                        foundPeg = i;
+                        isTopDisk = true;
+                        break;
+                    }
+                }
+
+                if (isTopDisk) {
+                    // Bắt đầu drag
+                    document.body.style.cursor = 'grabbing';
+                    
+                    // Nâng đĩa lên khỏi cọc
+                    const liftHeight = CONSTANTS.PEG_HEIGHT + 2;
+                    tween(hitMesh.position, { y: liftHeight }, 150);
+                    
+                    // Cập nhật mặt phẳng kéo (drag plane) ngay tại vị trí z hiện tại
+                    dragPlane.setFromNormalAndCoplanarPoint(
+                        new THREE.Vector3(0, 0, 1), 
+                        new THREE.Vector3(0, 0, hitMesh.position.z)
+                    );
+
+                    hitMesh.material.emissive.setHex(0x333333); // Làm sáng nhẹ khi cầm
+
+                    dragInfo = {
+                        mesh: hitMesh,
+                        sourcePegIndex: foundPeg,
+                        size: hitMesh.userData.size
+                    };
+                }
+            }
+        }
+
+        function onPointerMove(event) {
+            if (!dragInfo) return;
+            
+            const clientX = event.clientX !== undefined ? event.clientX : event.touches[0].clientX;
+            const clientY = event.clientY !== undefined ? event.clientY : event.touches[0].clientY;
+
+            pointer.x = (clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(pointer, camera);
+            const targetPos = new THREE.Vector3();
+            raycaster.ray.intersectPlane(dragPlane, targetPos);
+            
+            if (targetPos) {
+                // Di chuyển đĩa theo tọa độ X, giữ nguyên Y ở trên cao
+                dragInfo.mesh.position.x = targetPos.x;
+                
+                // Tính xem đang ở gần cọc nào nhất để highlight
+                const closestPeg = getClosestPeg(targetPos.x);
+                highlightPeg(closestPeg);
+            }
+        }
+
+        function onPointerUp(event) {
+            if (!dragInfo) return;
+            document.body.style.cursor = 'default';
+
+            const mesh = dragInfo.mesh;
+            const sourcePeg = dragInfo.sourcePegIndex;
+            const targetPeg = getClosestPeg(mesh.position.x);
+            
+            mesh.material.emissive.setHex(0x000000); // Tắt sáng
+            highlightPeg(-1); // Tắt highlight
+
+            // Kiểm tra tính hợp lệ của nước đi
+            const targetPegDisks = state.pegs[targetPeg];
+            const isValidMove = targetPegDisks.length === 0 || targetPegDisks[targetPegDisks.length - 1].size > dragInfo.size;
+
+            if (isValidMove && sourcePeg !== targetPeg) {
+                // Thực hiện di chuyển logic
+                const diskObj = state.pegs[sourcePeg].pop();
+                state.pegs[targetPeg].push(diskObj);
+                
+                state.moveCount++;
+                updateUI();
+                
+                // Animation rơi xuống cọc mới
+                const targetY = (state.pegs[targetPeg].length - 1) * CONSTANTS.DISK_HEIGHT + CONSTANTS.DISK_HEIGHT / 2;
+                const targetX = getPegX(targetPeg);
+                
+                state.isAnimating = true;
+                tween(mesh.position, { x: targetX }, 100, () => {
+                    tween(mesh.position, { y: targetY }, 200, () => {
+                        state.isAnimating = false;
+                        checkWinCondition();
+                    });
+                });
+            } else {
+                // Quay về cọc cũ
+                const targetY = (state.pegs[sourcePeg].length - 1) * CONSTANTS.DISK_HEIGHT + CONSTANTS.DISK_HEIGHT / 2;
+                const targetX = getPegX(sourcePeg);
+                
+                state.isAnimating = true;
+                tween(mesh.position, { x: targetX }, 150, () => {
+                    tween(mesh.position, { y: targetY }, 200, () => {
+                        state.isAnimating = false;
+                    });
+                });
+            }
+
+            dragInfo = null;
+        }
+
+        function getClosestPeg(x) {
+            if (x < -CONSTANTS.PEG_SPACING / 2) return 0;
+            if (x > CONSTANTS.PEG_SPACING / 2) return 2;
+            return 1;
+        }
+
+        function highlightPeg(index) {
+            pegsMeshes.forEach((peg, i) => {
+                if (i === index) {
+                    peg.cylinder.material = pegHighlightMaterial;
+                    peg.highlightRing.visible = true;
+                    peg.highlightRing.material.color.setHex(0x3b82f6);
+                } else {
+                    peg.cylinder.material = pegMaterial;
+                    peg.highlightRing.visible = false;
+                }
+            });
+        }
+
+        // --- LOGIC DI CHUYỂN & THUẬT TOÁN ---
+
+        // Hàm chung để thực hiện 1 bước di chuyển có animation
+        function animateMove(fromPegIndex, toPegIndex, callback) {
+            if (state.pegs[fromPegIndex].length === 0) {
+                if(callback) callback();
+                return;
+            }
+
+            state.isAnimating = true;
+            const diskObj = state.pegs[fromPegIndex].pop();
+            const mesh = diskObj.mesh;
+            
+            // Logic state update
+            state.pegs[toPegIndex].push(diskObj);
+            state.moveCount++;
+            updateUI();
+
+            const targetX = getPegX(toPegIndex);
+            const targetY = (state.pegs[toPegIndex].length - 1) * CONSTANTS.DISK_HEIGHT + CONSTANTS.DISK_HEIGHT / 2;
+            const liftHeight = CONSTANTS.PEG_HEIGHT + 2;
+
+            // Chuỗi animation: Nâng Lên -> Chạy Ngang -> Hạ Xuống
+            tween(mesh.position, { y: liftHeight }, 200, () => {
+                tween(mesh.position, { x: targetX }, 300, () => {
+                    tween(mesh.position, { y: targetY }, 200, () => {
+                        state.isAnimating = false;
+                        checkWinCondition();
+                        if (callback) callback();
+                    });
+                });
+            });
+        }
+
+        // Sinh danh sách bước đi tối ưu từ TRẠNG THÁI HIỆN TẠI đến đích (cọc 2)
+        function calculateOptimalMoves() {
+            // Lấy kích thước các đĩa hiện có ở các cọc
+            // Chuyển format mảng logic: pegsLogic[pegIndex] = mảng các số nguyên (size đĩa)
+            const pLogic = [[], [], []];
+            for(let i=0; i<3; i++) {
+                pLogic[i] = state.pegs[i].map(d => d.size);
+            }
+            
+            let moves = [];
+            
+            // Thuật toán đệ quy tổng quát để chuyển đĩa n về cọc đích target
+            function getMoves(pegs, n, targetPeg) {
+                if (n === 0) return;
+                
+                // Tìm xem đĩa n đang ở cọc nào
+                let currentPeg = -1;
+                for (let i = 0; i < 3; i++) {
+                    if (pegs[i].includes(n)) {
+                        currentPeg = i; break;
+                    }
+                }
+                
+                if (currentPeg === targetPeg) {
+                    // Đĩa n đã đúng vị trí, tiếp tục giải n-1 về target
+                    getMoves(pegs, n - 1, targetPeg);
+                } else {
+                    // Phải chuyển n-1 đĩa cản trở sang cọc trung gian (aux)
+                    let auxPeg = 3 - currentPeg - targetPeg;
+                    getMoves(pegs, n - 1, auxPeg);
+                    
+                    // Di chuyển đĩa n
+                    moves.push({ from: currentPeg, to: targetPeg });
+                    
+                    // Cập nhật trạng thái ảo để tính tiếp
+                    pegs[currentPeg] = pegs[currentPeg].filter(s => s !== n);
+                    pegs[targetPeg].push(n);
+                    
+                    // Sau đó chuyển n-1 đĩa từ aux về target
+                    // Lúc này các đĩa n-1 đang tạo thành một tháp hoàn chỉnh tại auxPeg
+                    generateStandardMoves(n - 1, auxPeg, targetPeg, currentPeg);
+                }
+            }
+            
+            // Hàm sinh bước đi tiêu chuẩn từ tháp hoàn chỉnh
+            function generateStandardMoves(n, start, target, aux) {
+                if (n === 0) return;
+                generateStandardMoves(n - 1, start, aux, target);
+                moves.push({ from: start, to: target });
+                // Cập nhật mảng ảo (không thực sự cần thiết vì ở bước này ta biết chắc chắn tháp hoàn chỉnh)
+                generateStandardMoves(n - 1, aux, target, start);
+            }
+
+            getMoves(pLogic, state.numDisks, 2); // Cọc đích là cọc index 2
+            return moves;
+        }
+
+        function executeHint() {
+            if (state.isAnimating || state.isAutoPlaying || state.hasWon) return;
+            const moves = calculateOptimalMoves();
+            if (moves.length > 0) {
+                const move = moves[0];
+                animateMove(move.from, move.to);
+            }
+        }
+
+        function toggleAutoPlay() {
+            if (state.hasWon || state.isAnimating) return;
+            
+            const btnText = document.getElementById('text-auto');
+            const icon = document.getElementById('icon-play');
+            
+            if (state.isAutoPlaying) {
+                // Dừng
+                state.isAutoPlaying = false;
+                clearTimeout(state.autoPlayTimeout);
+                btnText.textContent = "Tự động giải";
+                icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>'; // Play icon
+            } else {
+                // Bắt đầu
+                state.isAutoPlaying = true;
+                btnText.textContent = "Dừng giải";
+                icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'; // Pause icon
+                playNextAutoMove();
+            }
+        }
+
+        function playNextAutoMove() {
+            if (!state.isAutoPlaying) return;
+            
+            const moves = calculateOptimalMoves();
+            if (moves.length === 0) {
+                // Đã giải xong
+                toggleAutoPlay();
+                return;
+            }
+            
+            const move = moves[0];
+            animateMove(move.from, move.to, () => {
+                // Đợi một chút trước khi thực hiện bước tiếp theo để người xem dễ theo dõi
+                state.autoPlayTimeout = setTimeout(playNextAutoMove, 200);
+            });
+        }
+
+        function resetGame() {
+            state.hasWon = false;
+            state.moveCount = 0;
+            state.isAutoPlaying = false;
+            state.isAnimating = false;
+            clearTimeout(state.autoPlayTimeout);
+            
+            // Reset UI auto button
+            document.getElementById('text-auto').textContent = "Tự động giải";
+            document.getElementById('icon-play').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+            
+            document.getElementById('win-message').classList.add('hidden');
+            createDisks();
+            updateUI();
+        }
+
+        function checkWinCondition() {
+            if (state.pegs[2].length === state.numDisks) {
+                state.hasWon = true;
+                if (state.isAutoPlaying) toggleAutoPlay();
+                
+                document.getElementById('win-stats').textContent = `Bạn đã hoàn thành với ${state.moveCount} bước.`;
+                document.getElementById('win-message').classList.remove('hidden');
+            }
+        }
+
+        // --- GIAO DIỆN VÀ SỰ KIỆN ---
+
+        function updateUI() {
+            const minMoves = Math.pow(2, state.numDisks) - 1;
+            document.getElementById('move-counter').textContent = `Số bước: ${state.moveCount} / Tối thiểu: ${minMoves}`;
+        }
+
+        // Lắng nghe sự kiện UI
+        document.getElementById('disk-slider').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            document.getElementById('disk-count-display').textContent = val;
+            state.numDisks = val;
+            resetGame();
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', resetGame);
+        document.getElementById('btn-hint').addEventListener('click', executeHint);
+        document.getElementById('btn-auto').addEventListener('click', toggleAutoPlay);
+        document.getElementById('btn-play-again').addEventListener('click', resetGame);
+
+        // --- LOGIC GIAO DIỆN MODAL LÝ THUYẾT ---
+        const theoryModal = document.getElementById('theory-modal');
+        const theoryContent = document.getElementById('theory-content');
+        
+        document.getElementById('btn-theory').addEventListener('click', () => {
+            theoryModal.classList.remove('hidden');
+            // Timeout nhỏ để đảm bảo transition CSS hoạt động (Fade-in & Scale-up)
+            setTimeout(() => {
+                theoryModal.classList.remove('opacity-0');
+                theoryContent.classList.remove('scale-95');
+                theoryContent.classList.add('scale-100');
+            }, 10);
+            
+            // Render định dạng Toán Học (KaTeX) nếu chưa được render
+            if (!theoryModal.dataset.rendered) {
+                if (window.renderMathInElement) {
+                    renderMathInElement(theoryModal, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '\\[', right: '\\]', display: true},
+                            {left: '$', right: '$', display: false},
+                            {left: '\\(', right: '\\)', display: false}
+                        ],
+                        throwOnError: false,
+                        errorColor: '#f87171'
+                    });
+                }
+                theoryModal.dataset.rendered = "true";
+            }
+        });
+
+        function closeTheoryModal() {
+            theoryModal.classList.add('opacity-0');
+            theoryContent.classList.remove('scale-100');
+            theoryContent.classList.add('scale-95');
+            // Chờ CSS animation hoàn thành trước khi ẩn hẳn
+            setTimeout(() => {
+                theoryModal.classList.add('hidden');
+            }, 300);
+        }
+
+        document.getElementById('btn-close-theory').addEventListener('click', closeTheoryModal);
+        
+        // Nhấn ra vùng tối bên ngoài để đóng Modal
+        theoryModal.addEventListener('click', (e) => {
+            if (e.target === theoryModal) closeTheoryModal();
+        });
+
+        // Lắng nghe sự kiện Canvas (Touch & Mouse)
+        // Dùng pointer events để hỗ trợ cả chuột và touch
+        renderer.domElement.addEventListener('pointerdown', onPointerDown);
+        renderer.domElement.addEventListener('pointermove', onPointerMove);
+        renderer.domElement.addEventListener('pointerup', onPointerUp);
+        renderer.domElement.addEventListener('pointercancel', onPointerUp);
+
+        // Responsive window
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- KHỞI TẠO VÀ RENDER LOOP ---
+        createEnvironment();
+        createDisks();
+        updateUI();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            updateTweens(performance.now());
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+
+    </script>
+</body>
+</html>

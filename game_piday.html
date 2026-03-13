@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Thí Nghiệm Kim Buffon - Ngày Số Pi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8fafc;
+        }
+        .canvas-wrapper {
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .pi-symbol {
+            font-family: 'Times New Roman', Times, serif;
+        }
+        /* Custom scrollbar for fun facts */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        /* Hiệu ứng bay cho popup */
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0.5) rotate(0deg); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(-20vh) scale(1.5) rotate(360deg); opacity: 0; }
+        }
+        .particle {
+            position: absolute;
+            bottom: -50px;
+            animation: float linear infinite;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-md py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-white text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold shadow-inner">
+                    <span class="pi-symbol">π</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">Thí Nghiệm Kim Buffon</h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <p class="text-indigo-200 text-sm">Chào mừng Ngày Số Pi (14/3)!</p>
+                        <button onclick="openPiDayModal()" class="bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded text-xs transition-colors border border-white/30 backdrop-blur flex items-center gap-1 shadow-sm">
+                            🎉 <span class="hidden sm:inline">Mở Lời Chúc</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="hidden md:block text-right">
+                <p class="text-lg font-mono font-bold text-yellow-300">3.14159265...</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
+        
+        <!-- Left Column: Canvas & Controls -->
+        <div class="w-full lg:w-2/3 flex flex-col gap-4">
+            
+            <!-- Canvas Container -->
+            <div class="bg-white p-2 rounded-xl shadow-lg border border-slate-200 relative">
+                <div class="absolute top-4 left-4 bg-white/80 backdrop-blur px-3 py-1 rounded-md shadow text-sm font-semibold text-slate-600 border border-slate-200">
+                    Khoảng cách (D) = Chiều dài kim (L)
+                </div>
+                <div class="w-full h-[500px] canvas-wrapper rounded-lg overflow-hidden border-2 border-slate-100" id="canvas-container">
+                    <canvas id="buffonCanvas" class="w-full h-full cursor-crosshair"></canvas>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                    Bảng Điều Khiển
+                </h2>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="dropNeedles(1)" class="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg border border-indigo-200 transition-colors">
+                        Thả 1 kim
+                    </button>
+                    <button onclick="dropNeedles(10)" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg border border-blue-200 transition-colors">
+                        Thả 10 kim
+                    </button>
+                    <button onclick="dropNeedles(100)" class="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold py-2 px-4 rounded-lg border border-teal-200 transition-colors">
+                        Thả 100 kim
+                    </button>
+                    <button onclick="dropNeedles(1000)" class="flex-1 bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold py-2 px-4 rounded-lg border border-purple-200 transition-colors">
+                        Thả 1,000 kim
+                    </button>
+                    <button onclick="resetExperiment()" class="flex-1 bg-red-50 hover:bg-red-100 text-red-700 font-semibold py-2 px-4 rounded-lg border border-red-200 transition-colors">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Stats & Information -->
+        <div class="w-full lg:w-1/3 flex flex-col gap-6">
+            
+            <!-- Statistics Panel -->
+            <div class="bg-indigo-600 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 text-white/10 text-9xl font-bold pi-symbol">π</div>
+                <h2 class="text-xl font-bold mb-4 relative z-10">Kết Quả Thống Kê</h2>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6 relative z-10">
+                    <div class="bg-indigo-700/50 p-3 rounded-lg border border-indigo-500/50">
+                        <p class="text-indigo-200 text-sm">Tổng số kim (N)</p>
+                        <p class="text-2xl font-bold" id="stat-total">0</p>
+                    </div>
+                    <div class="bg-indigo-700/50 p-3 rounded-lg border border-indigo-500/50">
+                        <p class="text-indigo-200 text-sm">Kim cắt vạch (C)</p>
+                        <p class="text-2xl font-bold text-pink-300" id="stat-crossed">0</p>
+                    </div>
+                </div>
+
+                <div class="bg-white text-slate-800 p-5 rounded-xl text-center shadow-inner relative z-10">
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Số π Ước Lượng</p>
+                    <p class="text-5xl font-extrabold text-indigo-600 font-mono" id="stat-pi">0.0000</p>
+                    <div class="mt-3 flex justify-between items-center text-xs text-slate-500 font-medium bg-slate-100 p-2 rounded-md">
+                        <span>π thực tế ≈ 3.14159</span>
+                        <span id="stat-error" class="text-rose-500">Sai số: 0.00%</span>
+                    </div>
+                </div>
+                
+                <!-- Formula Note -->
+                <div class="mt-4 text-center text-indigo-100 text-sm relative z-10">
+                    Công thức: <span class="font-mono bg-indigo-800 px-2 py-1 rounded text-yellow-300">π ≈ (2 × N) / C</span>
+                </div>
+            </div>
+
+            <!-- Fun Facts & Explanations -->
+            <div class="bg-white flex-grow p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col h-[400px]">
+                <!-- Tabs -->
+                <div class="flex border-b border-slate-200 mb-4">
+                    <button onclick="switchTab('math')" id="tab-math" class="py-2 px-4 font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors">Toán Học</button>
+                    <button onclick="switchTab('funfacts')" id="tab-funfacts" class="py-2 px-4 font-semibold text-slate-500 border-b-2 border-transparent hover:text-indigo-600 transition-colors">Sự Thật Về Pi</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="overflow-y-auto pr-2 flex-grow text-sm text-slate-600" id="content-math">
+                    <h3 class="font-bold text-slate-800 text-base mb-2">Thí nghiệm này là gì?</h3>
+                    <p class="mb-3">Vào thế kỷ 18, nhà toán học người Pháp <strong>Georges-Louis Leclerc, Bá tước de Buffon</strong> đã đặt ra một bài toán xác suất: <em>Nếu bạn thả ngẫu nhiên một chiếc kim lên một tờ giấy có các đường kẻ song song, xác suất để chiếc kim cắt qua một đường kẻ là bao nhiêu?</em></p>
+                    <p class="mb-3">Điều kỳ diệu là, kết quả của bài toán xác suất này lại chứa hằng số <strong>π</strong>!</p>
+                    <h3 class="font-bold text-slate-800 text-base mb-2 mt-4">Giải thích Toán học</h3>
+                    <ul class="list-disc pl-5 space-y-2 mb-3">
+                        <li>Gọi <strong>L</strong> là chiều dài của chiếc kim.</li>
+                        <li>Gọi <strong>D</strong> là khoảng cách giữa hai đường kẻ song song.</li>
+                        <li>Nếu $L \le D$, xác suất ($P$) để một chiếc kim cắt một đường thẳng là: <br>
+                            <span class="block text-center font-mono my-2 text-indigo-700 font-bold bg-indigo-50 py-1 rounded">P = (2 × L) / (π × D)</span>
+                        </li>
+                    </ul>
+                    <p>Trong mô phỏng này, chúng ta đặt chiều dài kim bằng khoảng cách vạch ($L = D$). Do đó, công thức rút gọn lại thành <strong>P = 2 / π</strong>.</p>
+                    <p class="mt-2">Bằng cách thả nhiều kim, ta có thể ước lượng xác suất thực tế là <strong>P ≈ C / N</strong> (Số kim cắt / Tổng số kim). Từ đó suy ra: <strong class="text-indigo-600">π ≈ (2 × N) / C</strong>.</p>
+                </div>
+
+                <div class="overflow-y-auto pr-2 flex-grow text-sm text-slate-600 hidden space-y-4" id="content-funfacts">
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <h4 class="font-bold text-amber-800 flex items-center gap-2">
+                            <span>🥧</span> Tại sao lại là ngày 14/3?
+                        </h4>
+                        <p class="text-amber-700 mt-1">Ở định dạng ngày tháng của Mỹ (tháng/ngày), ngày 14 tháng 3 được viết là <strong>3/14</strong>, khớp với 3 chữ số đầu tiên và quan trọng nhất của số Pi (3.14).</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <h4 class="font-bold text-blue-800 flex items-center gap-2">
+                            <span>🎂</span> Sinh nhật của thiên tài
+                        </h4>
+                        <p class="text-blue-700 mt-1">Ngày số Pi cũng chính là ngày sinh của nhà vật lý vĩ đại <strong>Albert Einstein</strong> (14/03/1879) và cũng là ngày mất của <strong>Stephen Hawking</strong> (14/03/2018).</p>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+                        <h4 class="font-bold text-emerald-800 flex items-center gap-2">
+                            <span>♾️</span> Con số vô hạn
+                        </h4>
+                        <p class="text-emerald-700 mt-1">Pi là một số vô tỉ, nghĩa là nó có vô hạn các chữ số thập phân và không bao giờ lặp lại theo chu kỳ. Năm 2022, máy tính đã tính được Pi đến <strong>100 nghìn tỷ</strong> chữ số!</p>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                        <h4 class="font-bold text-purple-800 flex items-center gap-2">
+                            <span>🕒</span> "Ngày số Pi siêu hạng"
+                        </h4>
+                        <p class="text-purple-700 mt-1">Năm 2015 đã tạo ra một Ngày số Pi đặc biệt nhất trong thế kỷ. Vào lúc 9 giờ 26 phút 53 giây ngày 14/3/15, thời gian ghi theo chuẩn Mỹ là <strong>3/14/15 9:26:53</strong>, khớp với 10 chữ số đầu của Pi!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-4 text-slate-500 text-sm mt-auto">
+        <p>Phát triển cho Câu lạc bộ Toán học • Chúc mừng Ngày Số Pi!</p>
+    </footer>
+
+    <!-- Popup Chúc Mừng Ngày Số Pi -->
+    <div id="pi-day-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <!-- Nền mờ -->
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closePiDayModal()"></div>
+        
+        <!-- Vùng chứa các hạt bay -->
+        <div id="particles-container" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+
+        <!-- Nội dung Popup -->
+        <div class="bg-white rounded-2xl shadow-2xl z-10 p-8 max-w-3xl w-full mx-4 relative text-center transform scale-95 opacity-0 transition-all duration-300" id="pi-day-content">
+            <button onclick="closePiDayModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-3xl font-extrabold text-indigo-600 mb-2">Chúc Mừng Ngày Số Pi!</h2>
+            <p class="text-slate-500 font-semibold mb-6">14 Tháng 3 - Bạn sẽ chọn trải nghiệm nào ❤️</p>
+            
+            <!-- Khu vực chèn ảnh -->
+            <div class="relative w-full h-80 mb-6 bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center border-2 border-dashed border-indigo-200 group cursor-pointer" onclick="openLightbox(document.getElementById('piday-image').src)">
+                <!-- Chèn ảnh piday.png ở đây. Ảnh dự phòng sẽ hiển thị nếu chưa có file -->
+                <img id="piday-image" src="./game_piday.png" alt="[Ảnh Ngày Pi]" onerror="this.src='https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?q=80&w=600&auto=format&fit=crop'; this.onerror=null;" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105">
+            </div>
+            
+            <p class="text-slate-600 mb-6">Chúc Câu lạc bộ Toán học có một ngày lễ thật vui vẻ, tràn đầy niềm đam mê với những con số và hình học!</p>
+            <button onclick="closePiDayModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform hover:scale-105 w-full">
+                Khám Phá Thí Nghiệm
+            </button>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal (Phóng to ảnh 80%) -->
+    <div id="lightbox-modal" class="fixed inset-0 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <!-- Nền đen mờ -->
+        <div class="absolute inset-0 bg-black/90 cursor-pointer" onclick="closeLightbox()"></div>
+        
+        <!-- Khung ảnh 80% -->
+        <div class="relative z-10 w-[80vw] h-[80vh] flex items-center justify-center">
+            <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl transform scale-95 transition-transform duration-300">
+            <button onclick="closeLightbox()" class="absolute -top-12 right-0 text-white/70 hover:text-white transition-colors bg-white/10 p-2 rounded-full">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Script for Simulation Logic -->
+    <script>
+        // --- Canvas & Context Setup ---
+        const canvasContainer = document.getElementById('canvas-container');
+        const canvas = document.getElementById('buffonCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- State Variables ---
+        let needles = [];
+        let totalNeedles = 0;
+        let crossedNeedles = 0;
+        
+        // D: Distance between lines, L: Length of needle. We set D = L.
+        const D = 60; 
+        const L = 60;
+
+        // Colors
+        const COLOR_LINE = '#cbd5e1'; // slate-300
+        const COLOR_NEEDLE_NORMAL = 'rgba(56, 189, 248, 0.7)'; // sky-400 with alpha
+        const COLOR_NEEDLE_CROSSED = 'rgba(244, 63, 94, 0.9)'; // rose-500 with alpha
+
+        // --- Resize and Initialize ---
+        function resizeCanvas() {
+            canvas.width = canvasContainer.clientWidth;
+            canvas.height = canvasContainer.clientHeight;
+            drawEverything();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- Drawing Logic ---
+        function drawLines() {
+            ctx.strokeStyle = COLOR_LINE;
+            ctx.lineWidth = 2;
+            
+            // Draw horizontal lines
+            const numLines = Math.floor(canvas.height / D) + 1;
+            for (let i = 0; i <= numLines; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * D);
+                ctx.lineTo(canvas.width, i * D);
+                ctx.stroke();
+            }
+        }
+
+        function drawNeedle(needle) {
+            ctx.beginPath();
+            
+            // Calculate end points from center (x, y)
+            const dx = (L / 2) * Math.cos(needle.angle);
+            const dy = (L / 2) * Math.sin(needle.angle);
+            
+            ctx.moveTo(needle.x - dx, needle.y - dy);
+            ctx.lineTo(needle.x + dx, needle.y + dy);
+            
+            ctx.strokeStyle = needle.crossed ? COLOR_NEEDLE_CROSSED : COLOR_NEEDLE_NORMAL;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            // Optional: Draw center point
+            // ctx.beginPath();
+            // ctx.arc(needle.x, needle.y, 2, 0, Math.PI * 2);
+            // ctx.fillStyle = needle.crossed ? '#9f1239' : '#0369a1';
+            // ctx.fill();
+        }
+
+        function drawEverything() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawLines();
+            // Draw all stored needles
+            for (let needle of needles) {
+                drawNeedle(needle);
+            }
+        }
+
+        // --- Simulation Logic ---
+        function dropNeedles(count) {
+            for (let i = 0; i < count; i++) {
+                // Random center point
+                // Add padding so needles don't fall off the sides
+                const padding = L / 2;
+                const x = padding + Math.random() * (canvas.width - 2 * padding);
+                const y = Math.random() * canvas.height;
+                
+                // Random angle between 0 and PI
+                const angle = Math.random() * Math.PI;
+
+                // Check for intersection
+                // The distance from the center 'y' to the nearest horizontal line (k*D)
+                const nearestLineY = Math.round(y / D) * D;
+                const distToLine = Math.abs(y - nearestLineY);
+
+                // Vertical projection of half the needle
+                const verticalHalf = (L / 2) * Math.sin(angle);
+                
+                const crossed = distToLine <= verticalHalf;
+
+                const needle = { x, y, angle, crossed };
+                
+                // Optimization: Keep array size reasonable so browser doesn't crash on resize redraws
+                if (needles.length < 20000) {
+                    needles.push(needle);
+                }
+                
+                // Draw instantly if it's not a massive batch to keep UI responsive
+                // Or just draw everything at the end. For performance, we'll draw new ones directly
+                drawNeedle(needle);
+
+                totalNeedles++;
+                if (crossed) crossedNeedles++;
+            }
+
+            updateStats();
+        }
+
+        function updateStats() {
+            // Update Text
+            document.getElementById('stat-total').textContent = totalNeedles.toLocaleString('vi-VN');
+            document.getElementById('stat-crossed').textContent = crossedNeedles.toLocaleString('vi-VN');
+
+            // Calculate Pi
+            let piEstimate = 0;
+            if (crossedNeedles > 0) {
+                // Formula: Pi = (2 * L * N) / (D * C). Since L = D, Pi = 2 * N / C
+                piEstimate = (2 * totalNeedles) / crossedNeedles;
+                
+                // Format to 5 decimal places
+                document.getElementById('stat-pi').textContent = piEstimate.toFixed(5);
+                
+                // Calculate Error
+                const error = Math.abs(Math.PI - piEstimate) / Math.PI * 100;
+                const errorEl = document.getElementById('stat-error');
+                errorEl.textContent = `Sai số: ${error.toFixed(2)}%`;
+                
+                // Color coding error
+                if(error < 1) errorEl.className = "text-emerald-500 font-bold";
+                else if (error < 5) errorEl.className = "text-amber-500 font-bold";
+                else errorEl.className = "text-rose-500 font-bold";
+
+            } else {
+                document.getElementById('stat-pi').textContent = "0.0000";
+                document.getElementById('stat-error').textContent = "Sai số: -";
+            }
+        }
+
+        function resetExperiment() {
+            needles = [];
+            totalNeedles = 0;
+            crossedNeedles = 0;
+            updateStats();
+            drawEverything();
+        }
+
+        // --- UI Interactions ---
+        function switchTab(tabId) {
+            // Hide all
+            document.getElementById('content-math').classList.add('hidden');
+            document.getElementById('content-funfacts').classList.add('hidden');
+            
+            // Reset tabs styling
+            document.getElementById('tab-math').className = "py-2 px-4 font-semibold text-slate-500 border-b-2 border-transparent hover:text-indigo-600 transition-colors";
+            document.getElementById('tab-funfacts').className = "py-2 px-4 font-semibold text-slate-500 border-b-2 border-transparent hover:text-indigo-600 transition-colors";
+
+            // Show active
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).className = "py-2 px-4 font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
+        }
+
+        // Add interactive drawing via click
+        canvas.addEventListener('click', (e) => {
+            // Small Easter egg: clicking drops 1 needle exactly at mouse location (random angle)
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const angle = Math.random() * Math.PI;
+
+            const nearestLineY = Math.round(y / D) * D;
+            const distToLine = Math.abs(y - nearestLineY);
+            const verticalHalf = (L / 2) * Math.sin(angle);
+            const crossed = distToLine <= verticalHalf;
+
+            const needle = { x, y, angle, crossed };
+            if (needles.length < 20000) needles.push(needle);
+            drawNeedle(needle);
+
+            totalNeedles++;
+            if (crossed) crossedNeedles++;
+            updateStats();
+        });
+
+        // --- Popup & Particles Logic ---
+        function openPiDayModal() {
+            const modal = document.getElementById('pi-day-modal');
+            const content = document.getElementById('pi-day-content');
+            modal.classList.remove('hidden');
+            
+            // Animation mở popup
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            createParticles();
+        }
+
+        function closePiDayModal() {
+            const modal = document.getElementById('pi-day-modal');
+            const content = document.getElementById('pi-day-content');
+            
+            // Animation đóng popup
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('particles-container').innerHTML = ''; // Xóa các hạt bay
+            }, 300);
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            container.innerHTML = ''; // Làm sạch trước khi tạo mới
+            const symbols = ['π', '❤️', '∞', '∑', '∫', '≈', '∆', 'e', '√', '3.14'];
+            const colors = ['text-pink-400', 'text-indigo-400', 'text-amber-400', 'text-emerald-400', 'text-blue-400', 'text-rose-500'];
+            
+            const numParticles = window.innerWidth < 768 ? 25 : 50; // Ít hạt hơn trên thiết bị nhỏ
+
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.innerHTML = symbol;
+                particle.className = `particle text-2xl md:text-4xl font-bold ${color} select-none opacity-80`;
+                
+                // Randomize vị trí ngang, thời gian bay và độ trễ
+                const left = Math.random() * 100;
+                const duration = 4 + Math.random() * 6; // 4-10 giây
+                const delay = Math.random() * 3;
+                
+                particle.style.left = `${left}%`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // --- Lightbox Logic ---
+        function openLightbox(src) {
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            
+            modal.classList.remove('hidden');
+            // Kích hoạt reflow để CSS transition hoạt động mượt mà
+            void modal.offsetWidth;
+            
+            modal.classList.remove('opacity-0');
+            modal.classList.add('opacity-100');
+            img.classList.remove('scale-95');
+            img.classList.add('scale-100');
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            img.classList.remove('scale-100');
+            img.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                img.src = ''; // Làm rỗng source khi ẩn để tránh nháy ảnh cũ cho lần mở sau
+            }, 300); // Khớp với thời gian transition
+        }
+
+        // Initialize
+        setTimeout(() => {
+            resizeCanvas();
+            // Drop a few initial needles to make it look active
+            dropNeedles(50);
+            
+            // Tự động mở popup chúc mừng sau khi tải trang 1 giây
+            setTimeout(openPiDayModal, 1000);
+        }, 100);
+
+    </script>
+</body>
+</html>
