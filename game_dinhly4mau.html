@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thử thách: Định lý 4 màu</title>
+    <!-- Nhúng Tailwind CSS để style giao diện -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Nhúng thư viện icon Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* CSS tuỳ chỉnh thêm nếu cần */
+        .color-btn.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 4px white, 0 0 0 6px #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 md:p-8 selection:bg-blue-200">
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Thử thách: Định lý 4 màu
+            </h1>
+            <p class="text-slate-600 max-w-2xl mx-auto text-sm md:text-base">
+                <strong>Luật chơi:</strong> Dùng tối đa 4 màu để tô kín bản đồ sao cho <strong>không có hai vùng nào chung biên giới mà có cùng màu</strong>. (Hai vùng chỉ chạm nhau ở 1 điểm đỉnh thì vẫn được phép cùng màu).
+            </p>
+        </div>
+
+        <!-- Cấp độ -->
+        <div id="level-container" class="flex justify-center gap-2 md:gap-4 flex-wrap">
+            <!-- Nút cấp độ sẽ được tạo bằng JS -->
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            
+            <!-- Vùng Bản Đồ -->
+            <div class="flex-1 w-full bg-white p-4 rounded-3xl shadow-sm border border-slate-200 flex flex-col items-center relative overflow-hidden">
+                
+                <!-- SVG Filter cho hiệu ứng nét vẽ (wobble) -->
+                <svg width="0" height="0" class="absolute">
+                    <filter id="wobble">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+                    </filter>
+                </svg>
+
+                <svg viewBox="0 0 500 500" class="w-full h-auto max-w-lg aspect-square">
+                    <g id="map-group" filter="url(#wobble)">
+                        <!-- Các path của bản đồ sẽ được tạo ở đây -->
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Bảng điều khiển -->
+            <div class="w-full md:w-80 space-y-6 flex-shrink-0">
+                
+                <!-- Khay màu -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                    <h3 class="font-bold text-slate-700 text-center">Bảng Màu</h3>
+                    <div id="color-palette" class="flex justify-center gap-4">
+                        <!-- Màu sẽ được tạo bằng JS -->
+                    </div>
+                </div>
+
+                <!-- Các Nút Chức Năng -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="checkMap()" class="flex items-center justify-center gap-2 bg-slate-800 text-white p-3 rounded-xl hover:bg-slate-700 transition font-medium shadow-sm">
+                        <i data-lucide="check" class="w-5 h-5"></i> Kiểm tra
+                    </button>
+                    <button onclick="getHint()" class="flex items-center justify-center gap-2 bg-blue-100 text-blue-700 p-3 rounded-xl hover:bg-blue-200 transition font-medium shadow-sm">
+                        <i data-lucide="lightbulb" class="w-5 h-5"></i> Gợi ý
+                    </button>
+                    <button onclick="resetMap()" class="flex items-center justify-center gap-2 bg-slate-100 text-slate-700 p-3 rounded-xl hover:bg-slate-200 transition font-medium shadow-sm">
+                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Làm lại
+                    </button>
+                    <button onclick="solveMap()" class="flex items-center justify-center gap-2 bg-amber-100 text-amber-700 p-3 rounded-xl hover:bg-amber-200 transition font-medium shadow-sm">
+                        <i data-lucide="award" class="w-5 h-5"></i> Đáp án
+                    </button>
+                </div>
+
+                <!-- Khung Thông Báo -->
+                <div id="message-box" class="p-4 rounded-xl text-sm font-medium leading-relaxed border flex items-start gap-3 hidden">
+                    <i data-lucide="help-circle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+                    <p id="message-text"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic JavaScript -->
+    <script>
+        // Cấu hình ban đầu
+        const COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#eab308']; // Đỏ, Xanh dương, Xanh lá, Vàng
+        const LEVELS = [
+            { id: 0, name: 'Dễ', rings: [1, 5], radii: [80, 230], offsets: [0, 0] },
+            { id: 1, name: 'Trung bình', rings: [1, 5, 7], radii: [60, 145, 230], offsets: [0, 0, 0.07] },
+            { id: 2, name: 'Khó', rings: [1, 5, 7, 11], radii: [45, 105, 165, 230], offsets: [0, 0, 0.07, 0.03] }
+        ];
+
+        // Trạng thái ứng dụng
+        let currentLevel = 0;
+        let selectedColor = 0;
+        let regionColors = {};
+        let regions = [];
+        let conflicts = [];
+
+        // Hàm tạo đường dẫn SVG (SVG Path)
+        function getSectorPath(cx, cy, rIn, rOut, a1, a2) {
+            if (rIn === 0 && Math.abs(a2 - a1 - 2 * Math.PI) < 0.01) {
+                return `M ${cx + rOut} ${cy} A ${rOut} ${rOut} 0 1 1 ${cx - rOut} ${cy} A ${rOut} ${rOut} 0 1 1 ${cx + rOut} ${cy} Z`;
+            }
+            const pIn1 = { x: cx + rIn * Math.cos(a1), y: cy + rIn * Math.sin(a1) };
+            const pOut1 = { x: cx + rOut * Math.cos(a1), y: cy + rOut * Math.sin(a1) };
+            const pOut2 = { x: cx + rOut * Math.cos(a2), y: cy + rOut * Math.sin(a2) };
+            const pIn2 = { x: cx + rIn * Math.cos(a2), y: cy + rIn * Math.sin(a2) };
+            const largeArc = (a2 - a1) > Math.PI ? 1 : 0;
+
+            if (rIn === 0) {
+                return `M ${cx} ${cy} L ${pOut1.x} ${pOut1.y} A ${rOut} ${rOut} 0 ${largeArc} 1 ${pOut2.x} ${pOut2.y} Z`;
+            }
+            return `M ${pIn1.x} ${pIn1.y} L ${pOut1.x} ${pOut1.y} A ${rOut} ${rOut} 0 ${largeArc} 1 ${pOut2.x} ${pOut2.y} L ${pIn2.x} ${pIn2.y} A ${rIn} ${rIn} 0 ${largeArc} 0 ${pIn1.x} ${pIn1.y} Z`;
+        }
+
+        // Tạo cấu trúc bản đồ dựa trên cấp độ
+        function generateRegions() {
+            const config = LEVELS[currentLevel];
+            regions = [];
+            
+            for (let r = 0; r < config.rings.length; r++) {
+                const n = config.rings[r];
+                const off = config.offsets[r];
+                for (let s = 0; s < n; s++) {
+                    const mid = ((s + 0.5) / n + off) % 1.0;
+                    const len = 1.0 / n;
+                    const rIn = r === 0 ? 0 : config.radii[r - 1];
+                    const rOut = config.radii[r];
+                    const a1 = (s / n + off) * 2 * Math.PI;
+                    const a2 = ((s + 1) / n + off) * 2 * Math.PI;
+                    
+                    regions.push({
+                        id: `r${r}_s${s}`,
+                        ring: r,
+                        sector: s,
+                        mid: mid,
+                        len: len,
+                        path: getSectorPath(250, 250, rIn, rOut, a1, a2),
+                        adjacent: []
+                    });
+                }
+            }
+
+            // Tính toán láng giềng
+            for (let i = 0; i < regions.length; i++) {
+                for (let j = i + 1; j < regions.length; j++) {
+                    const rA = regions[i];
+                    const rB = regions[j];
+                    let isAdj = false;
+
+                    if (rA.ring === rB.ring) {
+                        const diff = Math.abs(rA.sector - rB.sector);
+                        const N = config.rings[rA.ring];
+                        if (diff === 1 || diff === N - 1) isAdj = true;
+                    } else if (Math.abs(rA.ring - rB.ring) === 1) {
+                        let dist = Math.abs(rA.mid - rB.mid);
+                        dist = Math.min(dist, 1.0 - dist);
+                        if (dist < (rA.len + rB.len) / 2 - 0.005) {
+                            isAdj = true;
+                        }
+                    }
+
+                    if (isAdj) {
+                        rA.adjacent.push(rB.id);
+                        rB.adjacent.push(rA.id);
+                    }
+                }
+            }
+        }
+
+        // Cập nhật giao diện (Mức độ)
+        function renderLevels() {
+            const container = document.getElementById('level-container');
+            container.innerHTML = '';
+            LEVELS.forEach(lvl => {
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-full font-medium transition-all ${
+                    currentLevel === lvl.id
+                        ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                        : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100'
+                }`;
+                btn.innerText = `Cấp độ ${lvl.id + 1}: ${lvl.name}`;
+                btn.onclick = () => {
+                    currentLevel = lvl.id;
+                    regionColors = {};
+                    conflicts = [];
+                    generateRegions();
+                    renderLevels();
+                    renderMap();
+                    showMessage("Chọn một màu bên dưới và bắt đầu tô kín bản đồ!", "info");
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // Cập nhật giao diện (Bảng màu)
+        function renderColors() {
+            const container = document.getElementById('color-palette');
+            container.innerHTML = '';
+            COLORS.forEach((color, index) => {
+                const btn = document.createElement('button');
+                btn.className = `w-12 h-12 rounded-full shadow-inner transition-transform duration-200 flex items-center justify-center hover:scale-105 color-btn ${selectedColor === index ? 'selected' : ''}`;
+                btn.style.backgroundColor = color;
+                btn.onclick = () => {
+                    selectedColor = index;
+                    renderColors();
+                };
+                
+                // Thêm icon check nếu được chọn
+                if (selectedColor === index) {
+                    btn.innerHTML = `<i data-lucide="check" class="text-white drop-shadow-md w-6 h-6"></i>`;
+                }
+                
+                container.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        // Vẽ bản đồ
+        function renderMap() {
+            const group = document.getElementById('map-group');
+            group.innerHTML = '';
+            
+            regions.forEach(region => {
+                const colorIndex = regionColors[region.id];
+                const fillColor = colorIndex !== undefined ? COLORS[colorIndex] : '#f8fafc';
+                const isConflict = conflicts.includes(region.id);
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', region.path);
+                path.setAttribute('fill', fillColor);
+                path.setAttribute('stroke', isConflict ? '#ef4444' : '#1e293b');
+                path.setAttribute('stroke-width', isConflict ? '8' : '3');
+                path.setAttribute('stroke-linejoin', 'round');
+                path.setAttribute('class', 'transition-colors duration-200 cursor-pointer hover:opacity-80');
+                
+                path.onclick = () => {
+                    if (regionColors[region.id] === selectedColor) {
+                        delete regionColors[region.id];
+                    } else {
+                        regionColors[region.id] = selectedColor;
+                    }
+                    conflicts = [];
+                    hideMessage();
+                    renderMap();
+                };
+                
+                group.appendChild(path);
+            });
+        }
+
+        // Hiển thị thông báo
+        function showMessage(msg, type) {
+            const box = document.getElementById('message-box');
+            const text = document.getElementById('message-text');
+            
+            box.classList.remove('hidden', 'bg-green-50', 'border-green-200', 'text-green-800', 'bg-red-50', 'border-red-200', 'text-red-800', 'bg-blue-50', 'border-blue-200', 'text-blue-800');
+            
+            if (type === 'success') box.classList.add('bg-green-50', 'border-green-200', 'text-green-800');
+            else if (type === 'error') box.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+            else box.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-800');
+            
+            text.innerText = msg;
+        }
+
+        function hideMessage() {
+            document.getElementById('message-box').classList.add('hidden');
+        }
+
+        // Chức năng: Kiểm tra
+        function checkMap() {
+            conflicts = [];
+            for (const region of regions) {
+                const color = regionColors[region.id];
+                if (color !== undefined) {
+                    for (const adjId of region.adjacent) {
+                        if (regionColors[adjId] === color) {
+                            conflicts.push(region.id);
+                            conflicts.push(adjId);
+                        }
+                    }
+                }
+            }
+
+            if (conflicts.length > 0) {
+                conflicts = [...new Set(conflicts)];
+                showMessage("Oops! Có một số vùng cạnh nhau đang bị trùng màu (xem viền đỏ).", "error");
+            } else if (Object.keys(regionColors).length < regions.length) {
+                showMessage(`Bạn đang làm tốt, nhưng vẫn còn ${regions.length - Object.keys(regionColors).length} vùng chưa được tô màu!`, "info");
+            } else {
+                showMessage("🎉 Xuất sắc! Bạn đã chứng minh thành công định lý 4 màu cho bản đồ này!", "success");
+            }
+            renderMap();
+        }
+
+        // Chức năng: Gợi ý
+        function getHint() {
+            let hasConflict = false;
+            for (const region of regions) {
+                const color = regionColors[region.id];
+                if (color !== undefined) {
+                    for (const adjId of region.adjacent) {
+                        if (regionColors[adjId] === color) hasConflict = true;
+                    }
+                }
+            }
+            
+            if (hasConflict) {
+                showMessage("Bản đồ đang có lỗi trùng màu, hãy sửa các vùng lỗi trước khi nhận gợi ý nhé!", "error");
+                return;
+            }
+
+            const uncolored = regions.filter(r => regionColors[r.id] === undefined);
+            if (uncolored.length === 0) {
+                showMessage("Bạn đã tô xong rồi! Hãy nhấn nút Kiểm tra kết quả.", "success");
+                return;
+            }
+
+            for (const region of uncolored) {
+                const usedColors = new Set();
+                for (const adjId of region.adjacent) {
+                    if (regionColors[adjId] !== undefined) {
+                        usedColors.add(regionColors[adjId]);
+                    }
+                }
+                
+                const available = [0, 1, 2, 3].filter(c => !usedColors.has(c));
+                if (available.length > 0) {
+                    regionColors[region.id] = available[0];
+                    showMessage("💡 Đã gợi ý tô thêm 1 vùng hợp lệ cho bạn!", "info");
+                    renderMap();
+                    return;
+                }
+            }
+
+            showMessage("Bế tắc! Những màu bạn đã tô khiến các vùng còn lại không thể tô tiếp mà không bị trùng. Bạn thử làm lại xem!", "error");
+        }
+
+        // Chức năng: Đáp án (Backtracking)
+        function solveMap() {
+            const tempColors = {};
+            const backtrack = (index) => {
+                if (index === regions.length) return true;
+                const region = regions[index];
+                
+                for (let c = 0; c < 4; c++) {
+                    let isValid = true;
+                    for (const adjId of region.adjacent) {
+                        if (tempColors[adjId] === c) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                    if (isValid) {
+                        tempColors[region.id] = c;
+                        if (backtrack(index + 1)) return true;
+                        delete tempColors[region.id];
+                    }
+                }
+                return false;
+            };
+
+            if (backtrack(0)) {
+                regionColors = tempColors;
+                conflicts = [];
+                showMessage("✅ Đây là một đáp án hoàn chỉnh để bạn tham khảo!", "success");
+                renderMap();
+            } else {
+                showMessage("Bản đồ này có cấu trúc bất thường, không tìm thấy đáp án!", "error");
+            }
+        }
+
+        // Chức năng: Làm lại
+        function resetMap() {
+            regionColors = {};
+            conflicts = [];
+            showMessage("Bản đồ đã được làm mới, bắt đầu lại nào!", "info");
+            renderMap();
+        }
+
+        // Khởi tạo lần đầu
+        window.onload = () => {
+            generateRegions();
+            renderLevels();
+            renderColors();
+            renderMap();
+            lucide.createIcons();
+            showMessage("Chọn một màu bên dưới và bắt đầu tô kín bản đồ!", "info");
+        };
+
+    </script>
+</body>
+</html>

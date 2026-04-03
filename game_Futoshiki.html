@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futoshiki - CLB Toán Học</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* Light green background */
+            background-image: radial-gradient(#bbf7d0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        /* Hide number input arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .cell-input {
+            caret-color: transparent;
+        }
+        .cell-input:focus {
+            caret-color: #2563eb;
+        }
+        
+        /* Custom Animations */
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+        @keyframes successPulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        .board-success {
+            animation: successPulse 1.5s infinite;
+            border-color: #22c55e !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-green-600 text-white shadow-md py-4 px-6 text-center">
+        <h1 class="text-3xl font-extrabold tracking-tight">🧩 Thử Thách Futoshiki</h1>
+        <p class="text-green-100 text-sm mt-1 font-semibold">Câu Lạc Bộ Toán Học THCS NGUYỄN AN KHƯƠNG</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center py-8 px-4 w-full max-w-3xl mx-auto">
+        
+        <!-- Controls & Level Selector -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-green-100 w-full mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center space-x-2">
+                    <label for="level-select" class="font-bold text-gray-700">Cấp độ:</label>
+                    <select id="level-select" onchange="changeLevel(this.value)" class="bg-green-50 border border-green-300 text-green-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2.5 font-bold outline-none cursor-pointer">
+                        <option value="0">🌱 Dễ (4x4)</option>
+                        <option value="1">🌿 Trung bình (5x5)</option>
+                        <option value="2">🔥 Khó (6x6)</option>
+                    </select>
+                </div>
+                
+                <!-- Question Navigation -->
+                <div class="flex items-center bg-gray-100 rounded-lg p-1 shadow-inner">
+                    <button onclick="prevQuestion()" class="p-2 text-gray-600 hover:text-green-600 hover:bg-white rounded transition-colors active:scale-95" title="Câu trước">
+                        ◀
+                    </button>
+                    <span id="question-indicator" class="font-bold text-sm px-3 text-gray-700 min-w-[75px] text-center">Câu 1/1</span>
+                    <button onclick="nextQuestion()" class="p-2 text-gray-600 hover:text-green-600 hover:bg-white rounded transition-colors active:scale-95" title="Câu tiếp theo">
+                        ▶
+                    </button>
+                </div>
+            </div>
+            
+            <button onclick="openInstructions()" class="text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 py-2 px-4 rounded-lg transition-colors flex items-center gap-1">
+                📖 Hướng dẫn
+            </button>
+        </div>
+
+        <!-- The Game Board -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border-4 border-green-500 mb-8 transition-all" id="board-wrapper">
+            <div id="grid-container" class="grid gap-1 sm:gap-2 justify-center items-center w-max mx-auto select-none">
+                <!-- Cells will be generated here by JS -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap justify-center gap-3 w-full">
+            <button onclick="resetBoard()" class="flex-1 min-w-[120px] bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-xl transition-all shadow-sm active:scale-95">
+                🔄 Làm lại
+            </button>
+            <button onclick="showAnswer()" class="flex-1 min-w-[150px] bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-bold py-3 px-6 rounded-xl transition-all shadow-sm active:scale-95">
+                💡 Hiện full đáp án
+            </button>
+            <button onclick="checkAnswers()" class="flex-1 min-w-[140px] sm:flex-none sm:w-auto bg-green-500 hover:bg-green-600 text-white font-extrabold py-3 px-8 rounded-xl transition-all shadow-lg shadow-green-200 active:scale-95">
+                🔍 Kiểm tra
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-4 text-center text-gray-500 text-sm font-semibold">
+        Thiết kế cho Câu Lạc Bộ Toán Học THCS NGUYỄN AN KHƯƠNG
+    </footer>
+
+    <!-- Instructions Modal -->
+    <div id="instructions-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex justify-center items-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform scale-95 transition-transform duration-300" id="instructions-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">📖 Cách chơi Futoshiki</h2>
+                <button onclick="closeInstructions()" class="text-gray-400 hover:text-red-500 text-2xl font-bold p-2">&times;</button>
+            </div>
+            <div class="space-y-4 text-gray-600 font-medium leading-relaxed">
+                <p>Futoshiki là một trò chơi giải đố logic đến từ Nhật Bản. Luật chơi vô cùng đơn giản:</p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>Điền các chữ số từ <strong>1 đến N</strong> vào lưới (N là kích thước của bảng, ví dụ bảng 4x4 thì điền từ 1-4).</li>
+                    <li>Mỗi chữ số chỉ được xuất hiện <strong>DUY NHẤT một lần</strong> trên mỗi hàng và mỗi cột.</li>
+                    <li>Phải tôn trọng các dấu bất đẳng thức <strong>(&gt; và &lt;)</strong> được đặt giữa các ô. (Ví dụ ô có dấu &gt; chỉ sang ô bên cạnh thì số bên này phải lớn hơn số bên kia).</li>
+                </ul>
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 text-sm text-blue-800 mt-4">
+                    💡 <strong>Mẹo:</strong> Hãy bắt đầu từ những ô có sẵn số hoặc những ô bị kẹp giữa nhiều dấu bất đẳng thức nhất!
+                </div>
+            </div>
+            <button onclick="closeInstructions()" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-colors">
+                Đã hiểu, chơi ngay!
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Message Container -->
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div id="toast-content" class="px-6 py-3 rounded-full shadow-lg font-bold text-sm sm:text-base whitespace-nowrap flex items-center gap-2">
+            <span id="toast-icon"></span>
+            <span id="toast-message"></span>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Puzzle Data Definitions
+        const levelsData = [
+            {
+                // Level 0: Dễ (4x4)
+                size: 4,
+                puzzles: [
+                    {
+                        initial: [[0, 0, 0, 2], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+                        solution: [[1, 3, 4, 2], [4, 2, 1, 3], [2, 4, 3, 1], [3, 1, 2, 4]],
+                        horiz: [[-1, 0, 1], [1, 0, -1], [-1, 1, 0], [0, -1, -1]],
+                        vert: [[-1, 0, 1, 0], [0, -1, 0, 1], [-1, 1, 0, 0]]
+                    },
+                    {
+                        initial: [[0, 0, 4, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 4]],
+                        solution: [[2, 1, 4, 3], [3, 4, 1, 2], [4, 2, 3, 1], [1, 3, 2, 4]],
+                        horiz: [[1, 0, 1], [0, 1, -1], [1, 0, 0], [0, 0, -1]],
+                        vert: [[-1, 0, 1, 0], [0, 1, -1, 0], [1, 0, 0, -1]]
+                    }
+                ]
+            },
+            {
+                // Level 1: Trung bình (5x5)
+                size: 5,
+                puzzles: [
+                    {
+                        initial: [[0, 0, 0, 0, 2], [0, 0, 3, 0, 0], [0, 1, 0, 0, 0], [0, 0, 0, 0, 0], [4, 0, 0, 0, 0]],
+                        solution: [[3, 4, 5, 1, 2], [1, 2, 3, 4, 5], [5, 1, 2, 3, 4], [2, 3, 4, 5, 1], [4, 5, 1, 2, 3]],
+                        horiz: [[-1, 0, 1, 0], [0, -1, 0, -1], [1, 0, -1, 0], [0, -1, 0, 1], [-1, 1, 0, 0]],
+                        vert: [[1, 0, 1, 0, -1], [0, 1, 0, 1, 0], [1, 0, -1, 0, 1], [0, -1, 0, 1, 0]]
+                    },
+                    {
+                        initial: [[1, 0, 0, 0, 0], [0, 0, 4, 0, 0], [0, 0, 0, 0, 2], [0, 5, 0, 0, 0], [0, 0, 0, 3, 0]],
+                        solution: [[1, 2, 3, 4, 5], [2, 3, 4, 5, 1], [3, 4, 5, 1, 2], [4, 5, 1, 2, 3], [5, 1, 2, 3, 4]],
+                        horiz: [[-1, 0, 0, -1], [0, -1, 0, 0], [0, 0, 1, 0], [-1, 0, 1, 0], [1, 0, 0, -1]],
+                        vert: [[-1, 0, 0, 0, 1], [0, -1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 1, 0, 0, -1]]
+                    }
+                ]
+            },
+            {
+                // Level 2: Khó (6x6)
+                size: 6,
+                puzzles: [
+                    {
+                        initial: [[0, 0, 0, 0, 0, 2], [0, 0, 0, 4, 0, 0], [5, 0, 0, 0, 0, 0], [0, 0, 4, 0, 0, 0], [0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 2, 0]],
+                        solution: [[3, 4, 5, 6, 1, 2], [1, 2, 3, 4, 5, 6], [5, 6, 1, 2, 3, 4], [2, 3, 4, 5, 6, 1], [6, 1, 2, 3, 4, 5], [4, 5, 6, 1, 2, 3]],
+                        horiz: [[-1, 0, 0, 1, 0], [0, -1, 0, -1, 0], [0, 1, -1, 0, 0], [0, 0, -1, 0, 1], [1, 0, 0, -1, 0], [-1, 0, 1, 0, 0]],
+                        vert: [[1, 0, 1, 0, -1, 0], [-1, 0, 0, 1, 0, 1], [0, 1, -1, 0, -1, 0], [-1, 0, 1, 0, 1, 0], [0, -1, 0, 1, 0, 1]]
+                    },
+                    {
+                        initial: [[0, 0, 0, 0, 0, 1], [0, 0, 3, 0, 0, 0], [0, 0, 0, 0, 6, 0], [3, 0, 0, 0, 0, 0], [0, 0, 0, 5, 0, 0], [0, 6, 0, 0, 0, 0]],
+                        solution: [[6, 5, 4, 3, 2, 1], [5, 4, 3, 2, 1, 6], [4, 3, 2, 1, 6, 5], [3, 2, 1, 6, 5, 4], [2, 1, 6, 5, 4, 3], [1, 6, 5, 4, 3, 2]],
+                        horiz: [[1, 0, 1, 0, 1], [0, 1, 0, 0, -1], [1, 0, 0, -1, 0], [0, 0, -1, 0, 1], [1, -1, 0, 1, 0], [-1, 0, 1, 0, 0]],
+                        vert: [[1, 0, 0, 1, 0, -1], [0, 1, 0, 0, -1, 0], [1, 0, 1, -1, 0, 1], [0, 1, -1, 0, 1, 0], [1, -1, 0, 1, 0, 0]]
+                    }
+                ]
+            }
+        ];
+
+        // Game State
+        let currentLevelIdx = 0;
+        let currentPuzzleIdx = 0;
+        let boardState = [];
+        let isGameSolved = false;
+
+        // Initialization
+        window.onload = () => {
+            loadLevel(0);
+        };
+
+        function changeLevel(idx) {
+            currentPuzzleIdx = 0; // Đặt lại về câu đầu tiên của cấp độ
+            loadLevel(parseInt(idx));
+        }
+
+        function loadLevel(levelIdx) {
+            currentLevelIdx = levelIdx;
+            loadPuzzle(currentPuzzleIdx);
+        }
+
+        function loadPuzzle(puzzleIdx) {
+            currentPuzzleIdx = puzzleIdx;
+            const level = levelsData[currentLevelIdx];
+            const puzzle = level.puzzles[puzzleIdx];
+            
+            // Deep copy initial state
+            boardState = puzzle.initial.map(row => [...row]);
+            isGameSolved = false;
+            document.getElementById('board-wrapper').classList.remove('board-success');
+            
+            // Update UI indicator
+            document.getElementById('question-indicator').innerText = `Câu ${puzzleIdx + 1}/${level.puzzles.length}`;
+            
+            renderBoard();
+        }
+
+        function nextQuestion() {
+            const level = levelsData[currentLevelIdx];
+            if (currentPuzzleIdx < level.puzzles.length - 1) {
+                loadPuzzle(currentPuzzleIdx + 1);
+            } else {
+                showMessage("Bạn đang ở câu cuối cùng của cấp độ này!", "warning");
+            }
+        }
+
+        function prevQuestion() {
+            if (currentPuzzleIdx > 0) {
+                loadPuzzle(currentPuzzleIdx - 1);
+            } else {
+                showMessage("Đây là câu hỏi đầu tiên!", "warning");
+            }
+        }
+
+        function resetBoard() {
+            if(confirm("Bạn có chắc muốn làm lại câu này từ đầu không?")) {
+                loadPuzzle(currentPuzzleIdx);
+            }
+        }
+
+        function showAnswer() {
+            if(confirm("Bạn có muốn xem full đáp án không? Toàn bộ ô sẽ được điền.")) {
+                const level = levelsData[currentLevelIdx];
+                const puzzle = level.puzzles[currentPuzzleIdx];
+                boardState = puzzle.solution.map(row => [...row]);
+                renderBoard();
+                showMessage("Đã hiển thị full đáp án!", "warning");
+                isGameSolved = true;
+            }
+        }
+
+        function renderBoard() {
+            const container = document.getElementById('grid-container');
+            const level = levelsData[currentLevelIdx];
+            const puzzle = level.puzzles[currentPuzzleIdx];
+            const size = level.size;
+            
+            container.innerHTML = '';
+            // Set dynamic grid columns based on size (cells + spaces for signs)
+            container.style.gridTemplateColumns = `repeat(${size * 2 - 1}, auto)`;
+
+            for (let r = 0; r < size * 2 - 1; r++) {
+                for (let c = 0; c < size * 2 - 1; c++) {
+                    const div = document.createElement('div');
+
+                    // 1. Render Cells (even r, even c)
+                    if (r % 2 === 0 && c % 2 === 0) {
+                        const row = r / 2;
+                        const col = c / 2;
+                        const val = boardState[row][col];
+                        const isInitial = puzzle.initial[row][col] !== 0;
+
+                        if (isInitial) {
+                            div.className = 'w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center bg-green-100 text-green-900 font-extrabold rounded-lg text-xl sm:text-2xl border-2 border-green-400 shadow-inner select-none';
+                            div.innerText = val;
+                        } else {
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.inputMode = 'numeric';
+                            input.maxLength = 1;
+                            input.id = `cell-${row}-${col}`;
+                            
+                            // Base styling for input cells
+                            input.className = 'w-10 h-10 sm:w-14 sm:h-14 text-center text-blue-700 font-extrabold rounded-lg text-xl sm:text-2xl border-2 border-blue-200 bg-white focus:border-blue-500 focus:bg-blue-50 focus:outline-none shadow-sm transition-all cell-input placeholder-gray-200';
+                            
+                            input.value = val === 0 ? '' : val;
+                            input.dataset.r = row;
+                            input.dataset.c = col;
+                            
+                            input.addEventListener('input', handleInput);
+                            // Auto select contents on click for fast typing
+                            input.addEventListener('focus', function() { this.select(); });
+                            
+                            div.appendChild(input);
+                        }
+                    } 
+                    // 2. Render Horizontal Signs (even r, odd c)
+                    else if (r % 2 === 0 && c % 2 !== 0) {
+                        const row = r / 2;
+                        const col = Math.floor(c / 2);
+                        const sign = puzzle.horiz[row][col];
+                        div.className = 'flex items-center justify-center font-bold text-gray-400 text-lg sm:text-2xl w-3 sm:w-4';
+                        if (sign === 1) div.innerText = '>';
+                        else if (sign === -1) div.innerText = '<';
+                    } 
+                    // 3. Render Vertical Signs (odd r, even c)
+                    else if (r % 2 !== 0 && c % 2 === 0) {
+                        const row = Math.floor(r / 2);
+                        const col = c / 2;
+                        const sign = puzzle.vert[row][col];
+                        div.className = 'flex items-center justify-center font-bold text-gray-400 text-lg sm:text-2xl h-3 sm:h-4 w-full';
+                        // Rotate < and > to make crisp vertical arrows
+                        if (sign === 1) { // top > bottom (v)
+                            div.innerHTML = '<span style="display:inline-block; transform: rotate(90deg)">></span>';
+                        } else if (sign === -1) { // top < bottom (^)
+                            div.innerHTML = '<span style="display:inline-block; transform: rotate(90deg)"><</span>';
+                        }
+                    } 
+                    // 4. Render empty corners (odd r, odd c)
+                    else {
+                        div.className = 'w-3 h-3 sm:w-4 sm:h-4';
+                    }
+
+                    container.appendChild(div);
+                }
+            }
+        }
+
+        function handleInput(e) {
+            if (isGameSolved) {
+                document.getElementById('board-wrapper').classList.remove('board-success');
+                isGameSolved = false;
+            }
+
+            const input = e.target;
+            let val = parseInt(input.value);
+            const r = parseInt(input.dataset.r);
+            const c = parseInt(input.dataset.c);
+            const size = levelsData[currentLevelIdx].size;
+
+            // Remove error styling on edit
+            clearErrors();
+
+            if (isNaN(val) || val < 1 || val > size) {
+                input.value = '';
+                boardState[r][c] = 0;
+            } else {
+                boardState[r][c] = val;
+            }
+        }
+
+        function clearErrors() {
+            const inputs = document.querySelectorAll('.cell-input');
+            inputs.forEach(inp => {
+                inp.classList.remove('bg-red-50', 'border-red-500', 'text-red-600', 'animate-pulse');
+                // Restore original styling classes
+                inp.classList.add('border-blue-200', 'text-blue-700', 'bg-white');
+            });
+        }
+
+        function markError(r, c) {
+            const input = document.getElementById(`cell-${r}-${c}`);
+            if (input) { // Initial cells don't have inputs
+                input.classList.remove('border-blue-200', 'text-blue-700', 'bg-white');
+                input.classList.add('bg-red-50', 'border-red-500', 'text-red-600');
+            }
+        }
+
+        function checkAnswers() {
+            clearErrors();
+            const level = levelsData[currentLevelIdx];
+            const puzzle = level.puzzles[currentPuzzleIdx];
+            const size = level.size;
+            let isFull = true;
+            let hasError = false;
+
+            // 1. Check if board is fully filled
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    if (boardState[r][c] === 0) {
+                        isFull = false;
+                    }
+                }
+            }
+
+            if (!isFull) {
+                showMessage("Bạn cần điền số vào tất cả các ô trống nhé!", "warning");
+                return;
+            }
+
+            // 2. Check Rows and Cols uniqueness
+            for (let i = 0; i < size; i++) {
+                let rowSeen = {};
+                let colSeen = {};
+                for (let j = 0; j < size; j++) {
+                    // Row check
+                    let rVal = boardState[i][j];
+                    if (rowSeen[rVal]) {
+                        hasError = true;
+                        markError(i, j);
+                        markError(i, rowSeen[rVal].col);
+                    } else {
+                        rowSeen[rVal] = {col: j};
+                    }
+
+                    // Col check
+                    let cVal = boardState[j][i];
+                    if (colSeen[cVal]) {
+                        hasError = true;
+                        markError(j, i);
+                        markError(colSeen[cVal].row, i);
+                    } else {
+                        colSeen[cVal] = {row: j};
+                    }
+                }
+            }
+
+            // 3. Check Horizontal Constraints
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size - 1; c++) {
+                    const sign = puzzle.horiz[r][c];
+                    const left = boardState[r][c];
+                    const right = boardState[r][c+1];
+                    if (sign === 1 && left <= right) { // Left must be > Right
+                        hasError = true; markError(r, c); markError(r, c+1);
+                    }
+                    if (sign === -1 && left >= right) { // Left must be < Right
+                        hasError = true; markError(r, c); markError(r, c+1);
+                    }
+                }
+            }
+
+            // 4. Check Vertical Constraints
+            for (let r = 0; r < size - 1; r++) {
+                for (let c = 0; c < size; c++) {
+                    const sign = puzzle.vert[r][c];
+                    const top = boardState[r][c];
+                    const bottom = boardState[r+1][c];
+                    if (sign === 1 && top <= bottom) { // Top must be > Bottom
+                        hasError = true; markError(r, c); markError(r+1, c);
+                    }
+                    if (sign === -1 && top >= bottom) { // Top must be < Bottom
+                        hasError = true; markError(r, c); markError(r+1, c);
+                    }
+                }
+            }
+
+            // 5. Result
+            if (hasError) {
+                showMessage("Còn vài lỗi sai kìa, hãy kiểm tra các ô màu đỏ nhé!", "error");
+            } else {
+                showMessage("Tuyệt vời! Bạn đã hoàn thành xuất sắc!", "success");
+                isGameSolved = true;
+                document.getElementById('board-wrapper').classList.add('board-success');
+                // Lock inputs
+                const inputs = document.querySelectorAll('.cell-input');
+                inputs.forEach(inp => inp.blur());
+            }
+        }
+
+        // --- UI Utilities ---
+        
+        let toastTimeout;
+        function showMessage(msg, type) {
+            const toast = document.getElementById('toast');
+            const content = document.getElementById('toast-content');
+            const icon = document.getElementById('toast-icon');
+            const text = document.getElementById('toast-message');
+
+            clearTimeout(toastTimeout);
+            toast.classList.remove('hidden');
+            content.className = 'px-6 py-3 rounded-full shadow-lg font-bold text-sm sm:text-base flex items-center gap-2 transform transition-all';
+            
+            if (type === 'success') {
+                content.classList.add('bg-green-500', 'text-white');
+                icon.innerText = '🎉';
+            } else if (type === 'error') {
+                content.classList.add('bg-red-500', 'text-white');
+                icon.innerText = '❌';
+            } else {
+                content.classList.add('bg-yellow-400', 'text-yellow-900');
+                icon.innerText = '⚠️';
+            }
+
+            text.innerText = msg;
+            toast.classList.add('toast-animate');
+
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('toast-animate');
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        function openInstructions() {
+            const modal = document.getElementById('instructions-modal');
+            const content = document.getElementById('instructions-content');
+            modal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeInstructions() {
+            const modal = document.getElementById('instructions-modal');
+            const content = document.getElementById('instructions-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // match duration
+        }
+
+    </script>
+</body>
+</html>

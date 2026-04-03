@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thử thách 4 Chữ Số 4</title>
+    <!-- Tích hợp Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tích hợp Font Awesome cho icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Ẩn thanh cuộn nhưng vẫn cho phép cuộn */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 pb-12">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-20">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-sm flex items-center justify-center w-11 h-11">
+                    <i class="fa-solid fa-trophy text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-indigo-900 tracking-tight">Thử thách 4 Chữ Số 4</h1>
+                    <p class="text-sm text-slate-500 font-medium">Câu lạc bộ Toán học</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <div class="text-center">
+                    <span id="total-solved" class="block text-3xl font-black text-indigo-600">0/22</span>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Đã giải mã</span>
+                </div>
+                <button onclick="resetProgress()" class="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md transition-colors text-sm font-semibold">
+                    <i class="fa-solid fa-rotate-left"></i> Làm mới
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-6">
+        
+        <!-- INTERACTIVE SANDBOX - Phòng thí nghiệm -->
+        <section class="mb-10 bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+            <div class="bg-slate-800 p-4 flex items-center justify-between text-white flex-wrap gap-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-emerald-400 text-xl"></i>
+                    <h2 class="font-bold text-lg tracking-wide">Khu vực ghép phép tính</h2>
+                </div>
+                
+                <!-- Trình điều khiển mục tiêu -->
+                <div class="flex items-center bg-slate-700/80 rounded-lg p-1 border border-slate-600 shadow-inner">
+                    <span class="text-sm font-semibold text-slate-300 px-3 hidden sm:inline">Đang giải mã mục tiêu:</span>
+                    <button onclick="changeTarget(-1)" class="p-1 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors">
+                        <i class="fa-solid fa-chevron-left text-lg w-5 h-5 flex items-center justify-center"></i>
+                    </button>
+                    <div class="w-14 text-center" id="target-display-container">
+                        <!-- Rendered via JS -->
+                    </div>
+                    <button onclick="changeTarget(1)" class="p-1 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors">
+                        <i class="fa-solid fa-chevron-right text-lg w-5 h-5 flex items-center justify-center"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-5 md:p-6 bg-slate-50/50">
+                
+                <!-- 1. KHO SỐ 4 TRỰC QUAN -->
+                <div class="mb-6">
+                    <p class="text-center text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">
+                        Kho khối số (Nhấn vào khối để dùng)
+                    </p>
+                    <div class="flex justify-center gap-4 md:gap-8" id="blocks-container">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- 2. MÀN HÌNH HIỂN THỊ PHÉP TÍNH -->
+                <div class="bg-white border-2 border-slate-300 rounded-xl p-4 min-h-[100px] flex flex-col justify-center items-center relative overflow-hidden mb-6 shadow-inner">
+                    <div class="w-full text-center overflow-x-auto whitespace-nowrap scrollbar-hide py-2" id="screen-display">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Hộp thông báo -->
+                <div id="calc-message-container">
+                    <!-- Rendered via JS -->
+                </div>
+
+                <!-- 3. BẢNG CÔNG CỤ TÁCH BIỆT -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" id="tools-container">
+                    <!-- Rendered via JS -->
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CÁC TAB CHỨC NĂNG -->
+        <div class="mb-6 space-y-4">
+            <div class="flex flex-wrap gap-2" id="tabs-container">
+                <!-- Rendered via JS -->
+            </div>
+            
+            <!-- Level Description Alert -->
+            <div id="level-desc-container">
+                <!-- Rendered via JS -->
+            </div>
+        </div>
+
+        <!-- Puzzles Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="puzzles-grid">
+            <!-- Rendered via JS -->
+        </div>
+
+    </main>
+
+    <script>
+        // --- DỮ LIỆU ---
+        const PUZZLES = [
+            { id: 0, level: 1, hint: "Trừ hai số giống nhau", answer: "44 - 44 = 0" },
+            { id: 1, level: 1, hint: "Chia hai số giống nhau", answer: "44 ÷ 44 = 1" },
+            { id: 2, level: 1, hint: "Tạo ra phép tính 1 + 1", answer: "(4 ÷ 4) + (4 ÷ 4) = 2" },
+            { id: 3, level: 1, hint: "Tạo số 12 rồi chia", answer: "(4 + 4 + 4) ÷ 4 = 3" },
+            { id: 4, level: 1, hint: "Cộng với số 0", answer: "4 + (4 - 4) × 4 = 4" },
+            { id: 5, level: 1, hint: "Tạo số 20 rồi chia", answer: "(4 × 4 + 4) ÷ 4 = 5" },
+            { id: 6, level: 1, hint: "Tạo phép tính 2 + 4", answer: "((4 + 4) ÷ 4) + 4 = 6" },
+            { id: 7, level: 1, hint: "Tạo số 11 rồi trừ đi 4", answer: "(44 ÷ 4) - 4 = 7" },
+            { id: 8, level: 1, hint: "Triệt tiêu một số 4", answer: "4 + 4 + 4 - 4 = 8" },
+            { id: 9, level: 1, hint: "Tạo phép tính 8 + 1", answer: "4 + 4 + (4 ÷ 4) = 9" },
+            { id: 10, level: 1, hint: "Tạo số 40 rồi chia", answer: "(44 - 4) ÷ 4 = 10" },
+            { id: 11, level: 2, hint: "Dùng căn bậc hai tạo số 2 (mẫu số bằng 4)", answer: "44 ÷ (√4 + √4) = 11" },
+            { id: 12, level: 2, hint: "Tạo số 48 rồi chia", answer: "(44 + 4) ÷ 4 = 12" },
+            { id: 13, level: 2, hint: "Tạo phép tính 11 + 2", answer: "(44 ÷ 4) + √4 = 13" },
+            { id: 14, level: 2, hint: "Tạo phép tính 12 + 2", answer: "4 + 4 + 4 + √4 = 14" },
+            { id: 15, level: 2, hint: "Tạo phép tính 16 - 1", answer: "(4 × 4) - (4 ÷ 4) = 15" },
+            { id: 16, level: 2, hint: "Cộng tất cả lại", answer: "4 + 4 + 4 + 4 = 16" },
+            { id: 17, level: 3, hint: "Tạo phép tính 16 + 1", answer: "(4 × 4) + (4 ÷ 4) = 17" },
+            { id: 18, level: 3, hint: "Tạo phép tính 20 - 2", answer: "(4 × 4) + 4 - √4 = 18" },
+            { id: 19, level: 3, hint: "Sử dụng 4! = 24 (24 - 4 - 1)", answer: "4! - 4 - (4 ÷ 4) = 19" },
+            { id: 20, level: 3, hint: "Tạo phép tính 5 × 4", answer: "((4 ÷ 4) + 4) × 4 = 20" },
+            { id: 21, level: 3, hint: "Sử dụng 4! = 24 (24 - 4 + 1)", answer: "4! - 4 + (4 ÷ 4) = 21" }
+        ];
+
+        const LEVEL_INFO = {
+            1: { name: "Khởi động", color: "bg-blue-100 text-blue-800 border-blue-300", badge: "bg-blue-500", desc: "Dùng +, -, ×, ÷ và ghép số (44)" },
+            2: { name: "Vượt chướng ngại vật", color: "bg-orange-100 text-orange-800 border-orange-300", badge: "bg-orange-500", desc: "Được dùng thêm Căn bậc hai (√4 = 2)" },
+            3: { name: "Bứt phá", color: "bg-purple-100 text-purple-800 border-purple-300", badge: "bg-purple-500", desc: "Được dùng thêm Giai thừa (4! = 24)" }
+        };
+
+        const TOKEN_MATH_MAP = {
+            '4': '4', '44': '44', '√4': '2', '4!': '24',
+            '+': '+', '-': '-', '×': '*', '÷': '/', '(': '(', ')': ')'
+        };
+
+        // --- STATE ---
+        let activeTab = 'ALL';
+        let solvedState = {};
+        let hintState = {};
+        let answerState = {};
+        let activeTarget = 0;
+        let tokens = [];
+        let calcStatus = null; // 'success', 'error', 'info', null
+        let calcMsg = "";
+        let foursCount = 0;
+
+        // --- CORE FUNCTIONS ---
+        function updateFoursCount() {
+            let count = 0;
+            tokens.forEach(t => {
+                if (t === '4' || t === '√4' || t === '4!') count += 1;
+                if (t === '44') count += 2;
+            });
+            foursCount = count;
+        }
+
+        function renderAll() {
+            updateFoursCount();
+            renderHeader();
+            renderSandbox();
+            renderTabs();
+            renderPuzzles();
+        }
+
+        // --- HANDLERS ---
+        function toggleSolved(id) {
+            solvedState[id] = !solvedState[id];
+            renderAll();
+        }
+
+        function toggleHint(id) {
+            hintState[id] = !hintState[id];
+            renderPuzzles();
+        }
+
+        function toggleAnswer(id) {
+            answerState[id] = !answerState[id];
+            renderPuzzles();
+        }
+
+        function resetProgress() {
+            if (confirm("Thầy có chắc chắn muốn làm mới toàn bộ tiến trình không?")) {
+                solvedState = {};
+                hintState = {};
+                answerState = {};
+                handleClearCalc();
+            }
+        }
+
+        function setActiveTab(tab) {
+            activeTab = tab;
+            renderAll();
+        }
+
+        function setActiveTargetAndScroll(id) {
+            activeTarget = id;
+            handleClearCalc();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function changeTarget(direction) {
+            let newTarget = activeTarget + direction;
+            if (newTarget < 0) newTarget = 21;
+            if (newTarget > 21) newTarget = 0;
+            activeTarget = newTarget;
+            handleClearCalc();
+        }
+
+        function handleAddToken(token) {
+            tokens.push(token);
+            calcStatus = null;
+            calcMsg = "";
+            renderAll();
+        }
+
+        function handleBackspace() {
+            tokens.pop();
+            calcStatus = null;
+            calcMsg = "";
+            renderAll();
+        }
+
+        function handleClearCalc() {
+            tokens = [];
+            calcStatus = null;
+            calcMsg = "";
+            renderAll();
+        }
+
+        function handleEvaluate() {
+            if (tokens.length === 0) return;
+
+            if (foursCount !== 4) {
+                calcStatus = 'error';
+                calcMsg = `Lỗi luật chơi: Bạn đang dùng ${foursCount} chữ số 4. Cần dùng CHÍNH XÁC 4 chữ số 4!`;
+                renderAll();
+                return;
+            }
+
+            try {
+                const mathStr = tokens.map(t => TOKEN_MATH_MAP[t]).join(' ');
+                // Tính toán an toàn
+                const result = Function(`'use strict'; return (${mathStr})`)();
+
+                if (!Number.isFinite(result) || Number.isNaN(result)) {
+                    throw new Error("Invalid Math");
+                }
+
+                if (result === activeTarget) {
+                    calcStatus = 'success';
+                    calcMsg = `Tuyệt vời! Biểu thức bằng ${result}. Bạn đã giải mã thành công Mục tiêu ${activeTarget}!`;
+                    solvedState[activeTarget] = true;
+                } else if (Number.isInteger(result) && result >= 0 && result <= 21) {
+                    calcStatus = 'info';
+                    calcMsg = `Bất ngờ chưa! Kết quả là ${result}. Bạn vô tình giải được mục tiêu ${result}, nhưng mục tiêu đang chọn là ${activeTarget}!`;
+                    solvedState[result] = true;
+                } else {
+                    calcStatus = 'error';
+                    calcMsg = `Kết quả biểu thức là: ${result}. Chưa khớp với mục tiêu ${activeTarget}, hãy thử lại nhé!`;
+                }
+            } catch (error) {
+                calcStatus = 'error';
+                calcMsg = "Lỗi cú pháp toán học. Vui lòng kiểm tra lại phép tính hoặc dấu ngoặc!";
+            }
+            renderAll();
+        }
+
+        // --- RENDERERS ---
+        function renderHeader() {
+            const totalSolved = Object.values(solvedState).filter(Boolean).length;
+            document.getElementById('total-solved').innerText = `${totalSolved}/22`;
+        }
+
+        function renderSandbox() {
+            // Target display
+            const targetColor = solvedState[activeTarget] ? 'text-emerald-400' : 'text-amber-400';
+            document.getElementById('target-display-container').innerHTML = `
+                <span class="text-2xl font-black ${targetColor}">${activeTarget}</span>
+            `;
+
+            // Blocks (Kho 4 khối)
+            let blocksHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const isAvailable = i < 4 - foursCount;
+                if (isAvailable) {
+                    blocksHTML += `
+                        <button onclick="handleAddToken('4')" class="relative w-16 h-16 md:w-24 md:h-24 rounded-2xl text-4xl md:text-5xl font-black flex items-center justify-center transition-all duration-200 bg-blue-500 text-white shadow-[0_8px_0_#1d4ed8] hover:translate-y-[2px] hover:shadow-[0_6px_0_#1d4ed8] active:translate-y-[8px] active:shadow-none cursor-pointer">
+                            4
+                        </button>
+                    `;
+                } else {
+                    blocksHTML += `
+                        <button disabled class="relative w-16 h-16 md:w-24 md:h-24 rounded-2xl text-4xl md:text-5xl font-black flex items-center justify-center bg-slate-200 text-slate-400 border-2 border-dashed border-slate-300 pointer-events-none opacity-50">
+                            4
+                        </button>
+                    `;
+                }
+            }
+            document.getElementById('blocks-container').innerHTML = blocksHTML;
+
+            // Screen Display
+            const screenEl = document.getElementById('screen-display');
+            if (tokens.length === 0) {
+                screenEl.innerHTML = `<span class="text-slate-300 text-2xl font-sans tracking-normal">Chạm vào khối số 4 hoặc phép toán để bắt đầu</span>`;
+            } else {
+                screenEl.innerHTML = `<span class="text-4xl md:text-5xl font-mono text-slate-800 tracking-widest">${tokens.join(' ')}</span>`;
+            }
+
+            // Message
+            const msgContainer = document.getElementById('calc-message-container');
+            if (calcMsg) {
+                let bgClass, iconHtml;
+                if (calcStatus === 'success') {
+                    bgClass = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+                    iconHtml = '<i class="fa-solid fa-trophy"></i>';
+                } else if (calcStatus === 'error') {
+                    bgClass = 'bg-rose-50 border-rose-200 text-rose-800';
+                    iconHtml = '<i class="fa-solid fa-square-xmark text-lg"></i>';
+                } else {
+                    bgClass = 'bg-blue-50 border-blue-200 text-blue-800';
+                    iconHtml = '<i class="fa-solid fa-lightbulb"></i>';
+                }
+                msgContainer.innerHTML = `
+                    <div class="mb-6 p-4 rounded-lg border flex items-start gap-3 animate-in fade-in ${bgClass}">
+                        <div class="mt-0.5 text-lg">${iconHtml}</div>
+                        <div class="font-semibold text-sm leading-relaxed">${calcMsg}</div>
+                    </div>
+                `;
+            } else {
+                msgContainer.innerHTML = '';
+            }
+
+            // Tools (Bảng công cụ)
+            const btn44Disabled = (4 - foursCount < 2) ? 'disabled class="flex-1 py-2 bg-orange-200 text-orange-900 font-bold rounded shadow-sm opacity-40 flex flex-col items-center justify-center"' : 'class="flex-1 py-2 bg-orange-200 hover:bg-orange-300 text-orange-900 font-bold rounded shadow-sm flex flex-col items-center justify-center transition-colors"';
+            const btnSqrtDisabled = (4 - foursCount < 1) ? 'disabled class="flex-1 py-2 bg-orange-200 text-orange-900 font-bold rounded shadow-sm opacity-40 flex flex-col items-center justify-center"' : 'class="flex-1 py-2 bg-orange-200 hover:bg-orange-300 text-orange-900 font-bold rounded shadow-sm flex flex-col items-center justify-center transition-colors"';
+            const btnFactDisabled = (4 - foursCount < 1) ? 'disabled class="flex-1 py-2 bg-orange-200 text-orange-900 font-bold rounded shadow-sm opacity-40 flex flex-col items-center justify-center"' : 'class="flex-1 py-2 bg-orange-200 hover:bg-orange-300 text-orange-900 font-bold rounded shadow-sm flex flex-col items-center justify-center transition-colors"';
+
+            document.getElementById('tools-container').innerHTML = `
+                <!-- Cột 1: Biến đổi -->
+                <div class="bg-orange-50 border border-orange-100 rounded-xl p-4 flex flex-col justify-center">
+                    <p class="text-xs font-bold text-orange-800 uppercase text-center mb-3">Ghép & Biến đổi</p>
+                    <div class="flex gap-2 h-full">
+                        <button onclick="handleAddToken('44')" ${btn44Disabled}>
+                            <span class="text-xl">44</span>
+                            <span class="text-[10px] font-normal uppercase opacity-75">-2 khối</span>
+                        </button>
+                        <button onclick="handleAddToken('√4')" ${btnSqrtDisabled}>
+                            <span class="text-xl">√4</span>
+                            <span class="text-[10px] font-normal uppercase opacity-75">-1 khối</span>
+                        </button>
+                        <button onclick="handleAddToken('4!')" ${btnFactDisabled}>
+                            <span class="text-xl">4!</span>
+                            <span class="text-[10px] font-normal uppercase opacity-75">-1 khối</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Phép toán -->
+                <div class="bg-slate-100 border border-slate-200 rounded-xl p-4 flex flex-col justify-center">
+                    <p class="text-xs font-bold text-slate-500 uppercase text-center mb-3">Phép toán & Ngoặc</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="handleAddToken('+')" class="py-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-800 font-bold text-2xl rounded shadow-sm transition-colors">+</button>
+                        <button onclick="handleAddToken('-')" class="py-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-800 font-bold text-2xl rounded shadow-sm transition-colors">-</button>
+                        <button onclick="handleAddToken('×')" class="py-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-800 font-bold text-2xl rounded shadow-sm transition-colors">×</button>
+                        <button onclick="handleAddToken('÷')" class="py-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-800 font-bold text-2xl rounded shadow-sm transition-colors">÷</button>
+                        <button onclick="handleAddToken('(')" class="py-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-800 font-bold text-xl rounded shadow-sm transition-colors">(</button>
+                        <button onclick="handleAddToken(')')" class="py-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-800 font-bold text-xl rounded shadow-sm transition-colors">)</button>
+                    </div>
+                </div>
+
+                <!-- Cột 3: Hành động -->
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex flex-col gap-2">
+                    <div class="flex gap-2 flex-1">
+                        <button onclick="handleBackspace()" class="flex-1 bg-white border border-slate-200 text-rose-600 font-semibold rounded shadow-sm hover:bg-rose-50 active:bg-rose-100 flex items-center justify-center gap-2 transition-colors">
+                            <i class="fa-solid fa-delete-left"></i> Xoá 1
+                        </button>
+                        <button onclick="handleClearCalc()" class="flex-1 bg-white border border-slate-200 text-slate-600 font-semibold rounded shadow-sm hover:bg-slate-100 active:bg-slate-200 transition-colors">
+                            Làm lại
+                        </button>
+                    </div>
+                    <button onclick="handleEvaluate()" class="flex-1 mt-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg rounded shadow-[0_4px_0_#047857] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
+                        Kiểm tra <span class="text-2xl">=</span>
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderTabs() {
+            let tabsHTML = `
+                <button onclick="setActiveTab('ALL')" class="px-4 py-2 rounded-lg font-semibold transition-all ${activeTab === 'ALL' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}">
+                    Tất cả (22)
+                </button>
+            `;
+            
+            [1, 2, 3].forEach(lvl => {
+                const info = LEVEL_INFO[lvl];
+                const activeClass = activeTab === lvl ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200';
+                tabsHTML += `
+                    <button onclick="setActiveTab(${lvl})" class="px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${activeClass}">
+                        <span class="w-3 h-3 rounded-full ${info.badge}"></span>
+                        Level ${lvl}: ${info.name}
+                    </button>
+                `;
+            });
+            document.getElementById('tabs-container').innerHTML = tabsHTML;
+
+            const descContainer = document.getElementById('level-desc-container');
+            if (activeTab !== 'ALL') {
+                const info = LEVEL_INFO[activeTab];
+                descContainer.innerHTML = `
+                    <div class="p-4 rounded-lg border ${info.color}">
+                        <p class="font-semibold flex items-center gap-2"><i class="fa-solid fa-circle-question"></i> Quyền trợ giúp Level ${activeTab}:</p>
+                        <p class="mt-1 text-sm">${info.desc}</p>
+                    </div>
+                `;
+            } else {
+                descContainer.innerHTML = '';
+            }
+        }
+
+        function renderPuzzles() {
+            const filteredPuzzles = activeTab === 'ALL' ? PUZZLES : PUZZLES.filter(p => p.level === activeTab);
+            let html = '';
+
+            filteredPuzzles.forEach(puzzle => {
+                const isSolved = solvedState[puzzle.id];
+                const isHintOpen = hintState[puzzle.id];
+                const isAnswerOpen = answerState[puzzle.id];
+                const lvlInfo = LEVEL_INFO[puzzle.level];
+                const isTargetActive = activeTarget === puzzle.id;
+
+                const borderClass = isSolved ? 'border-emerald-400 shadow-md bg-emerald-50/20' : 'border-slate-200 shadow-sm hover:shadow-md';
+                const iconClass = isSolved ? 'text-emerald-500 hover:text-emerald-600' : 'text-slate-300 hover:text-slate-400';
+                const checkIcon = isSolved ? '<i class="fa-solid fa-circle-check text-2xl"></i>' : '<i class="fa-regular fa-circle text-2xl"></i>';
+                const trophyBg = isSolved ? `<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center opacity-10 pointer-events-none"><i class="fa-solid fa-trophy text-emerald-600" style="font-size: 80px;"></i></div>` : '';
+                const targetNumClass = isSolved ? 'text-emerald-600' : 'text-slate-800';
+
+                const targetBtnClass = isTargetActive 
+                    ? 'bg-amber-400 text-amber-900 border border-amber-500 shadow-amber-200 cursor-default'
+                    : 'bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer';
+
+                html += `
+                    <div class="relative bg-white rounded-xl border-2 transition-all duration-300 flex flex-col ${borderClass}">
+                        <!-- Card Header -->
+                        <div class="flex justify-between items-start p-4 pb-2">
+                            <span class="text-xs font-bold px-2 py-1 rounded-md text-white shadow-sm ${lvlInfo.badge}">
+                                Level ${puzzle.level}
+                            </span>
+                            <button onclick="toggleSolved(${puzzle.id})" class="transition-colors ${iconClass}" title="Đánh dấu thủ công">
+                                ${checkIcon}
+                            </button>
+                        </div>
+
+                        <!-- Target Number -->
+                        <div class="text-center py-4 flex-grow relative">
+                            ${trophyBg}
+                            <div class="text-sm text-slate-500 font-semibold uppercase tracking-widest mb-1">Mục tiêu</div>
+                            <div class="text-6xl font-black ${targetNumClass}">
+                                ${puzzle.id}
+                            </div>
+                        </div>
+
+                        <!-- Actions & Reveal Areas -->
+                        <div class="p-4 border-t border-slate-100 bg-slate-50/80 rounded-b-xl space-y-3">
+                            
+                            <!-- Solve Button -->
+                            <button onclick="setActiveTargetAndScroll(${puzzle.id})" class="w-full py-2 flex justify-center items-center gap-2 rounded-md font-bold text-sm transition-all shadow-sm ${targetBtnClass}">
+                                <i class="fa-solid fa-crosshairs"></i>
+                                ${isTargetActive ? "Đang chọn mục tiêu này" : "Giải mục tiêu này"}
+                            </button>
+
+                            <!-- Hint Section -->
+                            <div>
+                                <button onclick="toggleHint(${puzzle.id})" class="flex items-center gap-2 text-sm font-semibold text-amber-600 hover:text-amber-700 w-full">
+                                    <i class="fa-solid fa-lightbulb"></i>
+                                    ${isHintOpen ? "Ẩn gợi ý" : "Xem gợi ý"}
+                                </button>
+                                ${isHintOpen ? `<div class="mt-2 text-sm text-amber-900 bg-amber-100/80 p-3 rounded-md italic border border-amber-200 animate-in fade-in">${puzzle.hint}</div>` : ''}
+                            </div>
+
+                            <!-- Answer Section -->
+                            <div>
+                                <button onclick="toggleAnswer(${puzzle.id})" class="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 w-full">
+                                    <i class="fa-solid ${isAnswerOpen ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                                    ${isAnswerOpen ? "Ẩn đáp án" : "Hiện đáp án tham khảo"}
+                                </button>
+                                ${isAnswerOpen ? `<div class="mt-2 text-lg text-center font-bold text-slate-800 bg-white border-2 border-indigo-100 py-2 px-3 rounded-md shadow-sm animate-in fade-in tracking-wider">${puzzle.answer}</div>` : ''}
+                            </div>
+
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('puzzles-grid').innerHTML = html;
+        }
+
+        // Khởi chạy ứng dụng
+        renderAll();
+
+    </script>
+</body>
+</html>
