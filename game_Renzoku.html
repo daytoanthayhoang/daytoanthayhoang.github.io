@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Renzoku - CLB Toán Học</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#bbf7d0 1px, transparent 1px);
+            background-size: 20px 20px;
+            touch-action: manipulation;
+        }
+
+        /* Grid Animations & Styles */
+        .cell {
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+        }
+        .cell.selected {
+            background-color: #dbeafe !important; /* blue-100 */
+            border-color: #3b82f6 !important; /* blue-500 */
+            box-shadow: inset 0 0 0 2px #3b82f6;
+        }
+        .cell.highlighted {
+            background-color: #e0f2fe; /* light blue */
+        }
+        .cell.error {
+            background-color: #fef2f2 !important; /* red-50 */
+            color: #dc2626 !important; /* red-600 */
+            border-color: #ef4444 !important; /* red-500 */
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+            40%, 60% { transform: translate3d(3px, 0, 0); }
+        }
+
+        /* Notes grid */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            width: 100%;
+            height: 100%;
+            padding: 2px;
+            pointer-events: none;
+        }
+        .note-num {
+            font-size: 0.65rem;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-weight: 700;
+        }
+        @media (min-width: 640px) {
+            .note-num { font-size: 0.8rem; }
+        }
+
+        /* Dots */
+        .dot {
+            background-color: #1f2937; /* gray-800 */
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        .dot-h { width: 12px; height: 12px; margin: 0 auto; }
+        .dot-v { width: 12px; height: 12px; margin: auto 0; }
+        
+        @media (min-width: 640px) {
+            .dot-h, .dot-v { width: 16px; height: 16px; }
+        }
+
+        /* Hide Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #22c55e;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-800 pb-10">
+
+    <!-- Header -->
+    <header class="bg-green-600 text-white shadow-md py-3 px-4 text-center sticky top-0 z-20">
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">🧩 Renzoku - Soduku Liên Hoàn</h1>
+        <p class="text-green-100 text-xs sm:text-sm mt-1 font-semibold">Câu Lạc Bộ Toán Học THCS NGUYỄN AN KHƯƠNG</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center py-4 px-2 sm:px-4 w-full max-w-lg mx-auto relative">
+        
+        <!-- Controls Top -->
+        <div class="w-full flex flex-wrap items-center justify-between bg-white p-3 rounded-2xl shadow-sm border border-green-200 mb-4 gap-3">
+            <div class="flex items-center gap-2">
+                <select id="level-select" class="bg-green-50 border border-green-300 text-green-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 font-bold p-2 outline-none cursor-pointer">
+                    <option value="4">🌱 Dễ (4x4)</option>
+                    <option value="5" selected>🌿 Vừa (5x5)</option>
+                    <option value="6">🔥 Khó (6x6)</option>
+                </select>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="text-center bg-gray-100 px-3 py-1 rounded-lg">
+                    <div class="text-xs text-gray-500 font-bold uppercase tracking-wider">Thời gian</div>
+                    <div id="timer" class="font-mono font-bold text-gray-800 text-lg">00:00</div>
+                </div>
+                <button onclick="openInstructions()" class="w-9 h-9 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors shadow-sm" title="Hướng dẫn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- The Game Board -->
+        <div class="bg-white p-4 sm:p-6 rounded-3xl shadow-lg border-4 border-green-500 mb-4 w-full relative overflow-hidden" id="board-container">
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="absolute inset-0 bg-white/90 z-20 flex flex-col justify-center items-center backdrop-blur-sm hidden">
+                <div class="loader mb-3"></div>
+                <p class="text-green-700 font-bold text-sm animate-pulse">Đang tạo màn chơi mới...</p>
+            </div>
+            
+            <div id="grid" class="mx-auto w-max select-none">
+                <!-- Board generated by JS -->
+            </div>
+        </div>
+
+        <!-- Toolbar (Draft mode & Actions) -->
+        <div class="w-full flex justify-between items-center mb-4 px-1 gap-2">
+            <button id="btn-draft" onclick="toggleDraftMode()" class="flex-1 flex justify-center items-center gap-2 py-3 px-4 rounded-xl font-bold transition-all border-2 border-gray-200 bg-white text-gray-600 hover:bg-gray-50 active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                <span id="draft-text">Ghi chú: TẮT</span>
+            </button>
+            <button onclick="eraseCell()" class="w-14 flex justify-center items-center py-3 rounded-xl font-bold transition-all border-2 border-red-200 bg-red-50 text-red-600 hover:bg-red-100 active:scale-95" title="Xóa ô">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" /></svg>
+            </button>
+        </div>
+
+        <!-- Virtual Numpad -->
+        <div id="numpad" class="grid grid-cols-6 gap-2 w-full mb-6">
+            <!-- Buttons generated by JS based on size -->
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="flex flex-wrap justify-center gap-3 w-full">
+            <button onclick="startNewGame()" class="flex-1 min-w-[120px] bg-green-100 hover:bg-green-200 text-green-800 font-bold py-3 px-4 rounded-xl transition-all shadow-sm active:scale-95 flex justify-center items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                Tạo màn mới
+            </button>
+            <button onclick="checkGame()" class="flex-1 min-w-[120px] bg-green-500 hover:bg-green-600 text-white font-extrabold py-3 px-4 rounded-xl transition-all shadow-lg shadow-green-200 active:scale-95 flex justify-center items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                Kiểm tra
+            </button>
+        </div>
+    </main>
+	    <!-- Footer -->
+    <footer class="py-4 text-center text-gray-500 text-sm font-semibold">
+        Thiết kế cho Câu Lạc Bộ Toán Học THCS NGUYỄN AN KHƯƠNG. HNT Education.
+    </footer>
+    <!-- Instructions Modal -->
+    <div id="instructions-modal" class="fixed inset-0 bg-gray-900/60 z-50 hidden flex justify-center items-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-green-700">📖 Luật chơi Renzoku</h2>
+                <button onclick="closeInstructions()" class="text-gray-400 hover:text-red-500 p-1 bg-gray-100 rounded-full">&times;</button>
+            </div>
+            <div class="space-y-3 text-gray-700 text-sm font-medium leading-relaxed">
+                <p><strong>Renzoku</strong> (hay Consecutive Sudoku) là một câu đố logic thú vị:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Điền số từ <strong>1 đến N</strong> vào mỗi ô (N là kích thước lưới).</li>
+                    <li>Mỗi số xuất hiện <strong>DUY NHẤT một lần</strong> trên mỗi hàng và cột.</li>
+                    <li><span class="text-green-600 font-bold">LUẬT QUAN TRỌNG:</span> Dấu chấm đen (<span class="inline-block w-2 h-2 bg-gray-800 rounded-full align-middle"></span>) giữa 2 ô cho biết 2 số trong đó là <strong>HAI SỐ LIÊN TIẾP</strong> (VD: 2 & 3, hoặc 5 & 4).</li>
+                    <li><span class="text-red-600 font-bold">LUẬT ẨN:</span> Nếu giữa 2 ô <strong>KHÔNG CÓ</strong> dấu chấm, chúng <strong>KHÔNG ĐƯỢC</strong> là số liên tiếp!</li>
+                </ul>
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 text-blue-800 mt-2">
+                    💡 <strong>Mẹo:</strong> Sử dụng nút "Ghi chú" (Cái bút) để nháp các số có thể điền vào ô.
+                </div>
+            </div>
+			<p class="text-sm text-gray-500 mt-4">
+                    Nguồn tham khảo: 
+                    <a href="https://www.puzzle-futoshiki.com/renzoku-4x4-easy/" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 underline transition-colors">
+                        Puzzle Renzoku
+                    </a>
+                </p>
+            <button onclick="closeInstructions()" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-colors">
+                Đã hiểu, chơi ngay!
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="fixed inset-0 bg-gray-900/40 z-50 hidden flex justify-center items-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-xs w-full p-6 text-center transform transition-all scale-95 opacity-0" id="alert-content">
+            <div id="alert-icon" class="text-5xl mb-3"></div>
+            <h3 id="alert-title" class="text-xl font-bold text-gray-800 mb-2"></h3>
+            <p id="alert-msg" class="text-gray-600 mb-6 text-sm"></p>
+            <button onclick="closeAlert()" id="alert-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 rounded-xl transition-colors">Đóng</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- GAME STATE ---
+        let currentSize = 5;
+        let solution = [];
+        let puzzle = [];
+        let playerGrid = [];
+        let notesGrid = []; // Array of arrays containing set of notes
+        let hDots = []; // horizontal dots (size x size-1)
+        let vDots = []; // vertical dots (size-1 x size)
+        
+        let selectedCell = null; // {r, c}
+        let isDraftMode = false;
+        
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let isGameActive = false;
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            // Check for saved state (optional, skipping for pure generator first)
+            document.getElementById('level-select').addEventListener('change', (e) => {
+                startNewGame();
+            });
+            document.addEventListener('keydown', handleKeyboardInput);
+            startNewGame();
+        };
+
+        // --- ALGORITHM: PUZZLE GENERATOR ---
+        
+        // 1. Generate random valid Latin Square
+        function generateSolutionGrid(size) {
+            let grid = Array(size).fill().map(() => Array(size).fill(0));
+            
+            function fill(r, c) {
+                if (r === size) return true;
+                if (c === size) return fill(r + 1, 0);
+
+                let nums = Array.from({length: size}, (_, i) => i + 1);
+                nums.sort(() => Math.random() - 0.5); // Shuffle
+
+                for (let num of nums) {
+                    // Check Latin Square rule
+                    let valid = true;
+                    for (let i = 0; i < size; i++) {
+                        if (grid[r][i] === num || grid[i][c] === num) {
+                            valid = false;
+                            break;
+                        }
+                    }
+                    if (valid) {
+                        grid[r][c] = num;
+                        if (fill(r, c + 1)) return true;
+                        grid[r][c] = 0;
+                    }
+                }
+                return false;
+            }
+            fill(0, 0);
+            return grid;
+        }
+
+        // 2. Generate dots based on solution
+        function extractDots(grid, size) {
+            let h = Array(size).fill().map(() => Array(size-1).fill(false));
+            let v = Array(size-1).fill().map(() => Array(size).fill(false));
+
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size - 1; c++) {
+                    if (Math.abs(grid[r][c] - grid[r][c+1]) === 1) h[r][c] = true;
+                }
+            }
+            for (let r = 0; r < size - 1; r++) {
+                for (let c = 0; c < size; c++) {
+                    if (Math.abs(grid[r][c] - grid[r+1][c]) === 1) v[r][c] = true;
+                }
+            }
+            return { h, v };
+        }
+
+        // 3. Solver to check if puzzle has unique solution (Rule: Dots = consecutive, No dot = not consecutive)
+        function solveCount(grid, hD, vD, size, limit = 2) {
+            let count = 0;
+            let iterations = 0;
+
+            function checkRules(r, c, num) {
+                // Check Row/Col
+                for (let i = 0; i < size; i++) {
+                    if (grid[r][i] === num) return false;
+                    if (grid[i][c] === num) return false;
+                }
+                // Check Dots constraints (Left)
+                if (c > 0 && grid[r][c-1] !== 0) {
+                    let isConsec = Math.abs(num - grid[r][c-1]) === 1;
+                    if (hD[r][c-1] !== isConsec) return false;
+                }
+                // Check Dots constraints (Right)
+                if (c < size - 1 && grid[r][c+1] !== 0) {
+                    let isConsec = Math.abs(num - grid[r][c+1]) === 1;
+                    if (hD[r][c] !== isConsec) return false;
+                }
+                // Check Dots constraints (Top)
+                if (r > 0 && grid[r-1][c] !== 0) {
+                    let isConsec = Math.abs(num - grid[r-1][c]) === 1;
+                    if (vD[r-1][c] !== isConsec) return false;
+                }
+                // Check Dots constraints (Bottom)
+                if (r < size - 1 && grid[r+1][c] !== 0) {
+                    let isConsec = Math.abs(num - grid[r+1][c]) === 1;
+                    if (vD[r][c] !== isConsec) return false;
+                }
+                return true;
+            }
+
+            function solve(r, c) {
+                if (count >= limit || iterations > 5000) return; // Prevent hanging on complex grids
+                iterations++;
+                
+                if (r === size) { count++; return; }
+                if (c === size) { solve(r + 1, 0); return; }
+                if (grid[r][c] !== 0) { solve(r, c + 1); return; }
+
+                for (let num = 1; num <= size; num++) {
+                    if (checkRules(r, c, num)) {
+                        grid[r][c] = num;
+                        solve(r, c + 1);
+                        grid[r][c] = 0;
+                    }
+                }
+            }
+            solve(0, 0);
+            return count;
+        }
+
+        // 4. Main Generation Wrapper
+        async function generateGame() {
+            currentSize = parseInt(document.getElementById('level-select').value);
+            
+            // Allow UI to update loading state
+            await new Promise(r => setTimeout(r, 50)); 
+
+            solution = generateSolutionGrid(currentSize);
+            let dots = extractDots(solution, currentSize);
+            hDots = dots.h;
+            vDots = dots.v;
+
+            puzzle = solution.map(row => [...row]);
+            
+            // Create list of cells to dig
+            let cells = [];
+            for (let r = 0; r < currentSize; r++) {
+                for (let c = 0; c < currentSize; c++) cells.push({r, c});
+            }
+            cells.sort(() => Math.random() - 0.5);
+
+            // Determine max digs to ensure performance and playability
+            // 4x4 can be fully dug usually. 5x5 mostly. 6x6 might take long, limit it.
+            let maxDigs = currentSize === 6 ? 28 : cells.length; 
+            let dug = 0;
+
+            for (let cell of cells) {
+                if (dug >= maxDigs) break;
+                let temp = puzzle[cell.r][cell.c];
+                puzzle[cell.r][cell.c] = 0;
+                
+                // Clone for solver
+                let clone = puzzle.map(row => [...row]);
+                let numSols = solveCount(clone, hDots, vDots, currentSize);
+                
+                if (numSols !== 1) {
+                    // Revert if not unique or took too long (0 sols means it timed out in iterations)
+                    puzzle[cell.r][cell.c] = temp;
+                } else {
+                    dug++;
+                }
+            }
+
+            // Init Player Grid & Notes
+            playerGrid = puzzle.map(row => [...row]);
+            notesGrid = Array(currentSize).fill().map(() => Array(currentSize).fill().map(() => []));
+            selectedCell = null;
+            
+            document.getElementById('loading-overlay').classList.add('hidden');
+            renderBoard();
+            buildNumpad();
+            startTimer();
+            isGameActive = true;
+        }
+
+        function startNewGame() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            isGameActive = false;
+            clearInterval(timerInterval);
+            // Use setTimeout to allow DOM to show loader before blocking thread
+            setTimeout(generateGame, 10);
+        }
+
+        // --- UI & RENDERING ---
+
+        function renderBoard() {
+            const gridEl = document.getElementById('grid');
+            gridEl.innerHTML = '';
+            
+            // Set CSS Grid based on size (cells + gaps for dots)
+            gridEl.style.display = 'grid';
+            gridEl.style.gridTemplateColumns = `repeat(${currentSize * 2 - 1}, auto)`;
+            gridEl.style.gap = '2px';
+
+            const cellSizeClass = currentSize === 4 ? 'w-12 h-12 sm:w-16 sm:h-16 text-3xl' : 
+                                  currentSize === 5 ? 'w-10 h-10 sm:w-14 sm:h-14 text-2xl' : 
+                                                      'w-8 h-8 sm:w-12 sm:h-12 text-xl sm:text-2xl';
+
+            for (let r = 0; r < currentSize * 2 - 1; r++) {
+                for (let c = 0; c < currentSize * 2 - 1; c++) {
+                    const el = document.createElement('div');
+
+                    // 1. Cell (Even r, Even c)
+                    if (r % 2 === 0 && c % 2 === 0) {
+                        let row = r / 2;
+                        let col = c / 2;
+                        let val = playerGrid[row][col];
+                        let isGiven = puzzle[row][col] !== 0;
+
+                        el.className = `cell flex items-center justify-center font-bold rounded-lg border-2 select-none relative ${cellSizeClass}`;
+                        el.dataset.r = row;
+                        el.dataset.c = col;
+                        el.id = `cell-${row}-${col}`;
+
+                        if (isGiven) {
+                            el.classList.add('bg-gray-100', 'text-gray-800', 'border-gray-300');
+                            el.innerText = val;
+                        } else {
+                            el.classList.add('bg-white', 'text-blue-600', 'border-blue-100');
+                            if (val !== 0) {
+                                el.innerText = val;
+                            } else {
+                                // Render Notes
+                                let notes = notesGrid[row][col];
+                                if (notes.length > 0) {
+                                    let notesContainer = document.createElement('div');
+                                    notesContainer.className = 'notes-grid';
+                                    for(let i=1; i<=currentSize; i++) {
+                                        let noteNum = document.createElement('div');
+                                        noteNum.className = 'note-num';
+                                        if (notes.includes(i)) noteNum.innerText = i;
+                                        notesContainer.appendChild(noteNum);
+                                    }
+                                    el.appendChild(notesContainer);
+                                }
+                            }
+                            // Add click listener
+                            el.onclick = () => selectCell(row, col);
+                        }
+                    }
+                    // 2. Horizontal Gap (Even r, Odd c)
+                    else if (r % 2 === 0 && c % 2 !== 0) {
+                        let row = r / 2;
+                        let col = Math.floor(c / 2);
+                        el.className = `flex justify-center items-center w-2 sm:w-3`;
+                        if (hDots[row][col]) {
+                            el.innerHTML = `<div class="dot dot-h"></div>`;
+                        }
+                    }
+                    // 3. Vertical Gap (Odd r, Even c)
+                    else if (r % 2 !== 0 && c % 2 === 0) {
+                        let row = Math.floor(r / 2);
+                        let col = c / 2;
+                        el.className = `flex justify-center items-center h-2 sm:h-3 w-full`;
+                        if (vDots[row][col]) {
+                            el.innerHTML = `<div class="dot dot-v"></div>`;
+                        }
+                    }
+                    // 4. Empty Corner (Odd r, Odd c)
+                    else {
+                        el.className = `w-2 h-2 sm:w-3 sm:h-3`;
+                    }
+
+                    gridEl.appendChild(el);
+                }
+            }
+            updateHighlight();
+        }
+
+        function buildNumpad() {
+            const numpad = document.getElementById('numpad');
+            numpad.innerHTML = '';
+            // Change grid cols based on size
+            numpad.className = `grid gap-2 w-full mb-6 ${currentSize === 6 ? 'grid-cols-6' : currentSize === 5 ? 'grid-cols-5' : 'grid-cols-4 max-w-[250px] mx-auto'}`;
+
+            for (let i = 1; i <= currentSize; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'bg-white border-2 border-gray-200 text-gray-700 font-bold text-xl sm:text-2xl py-3 rounded-xl hover:bg-gray-50 active:bg-gray-200 active:scale-95 shadow-sm transition-all';
+                btn.innerText = i;
+                btn.onclick = () => inputNumber(i);
+                numpad.appendChild(btn);
+            }
+        }
+
+        // --- INTERACTION ---
+
+        function selectCell(r, c) {
+            if (!isGameActive) return;
+            selectedCell = {r, c};
+            updateHighlight();
+        }
+
+        function updateHighlight() {
+            // Remove old highlights
+            document.querySelectorAll('.cell').forEach(el => {
+                el.classList.remove('selected', 'highlighted', 'error');
+            });
+
+            if (!selectedCell) return;
+
+            let sr = selectedCell.r;
+            let sc = selectedCell.c;
+            let selectedVal = playerGrid[sr][sc];
+
+            // Add new highlights
+            document.querySelectorAll('.cell').forEach(el => {
+                if(!el.dataset.r) return;
+                let r = parseInt(el.dataset.r);
+                let c = parseInt(el.dataset.c);
+                
+                // Highlight same row/col
+                if (r === sr || c === sc) {
+                    el.classList.add('highlighted');
+                }
+                
+                // Highlight same number (if filled)
+                if (selectedVal !== 0 && playerGrid[r][c] === selectedVal) {
+                    el.classList.add('highlighted');
+                }
+            });
+
+            // Highlight selected cell specifically
+            const selectedEl = document.getElementById(`cell-${sr}-${sc}`);
+            if (selectedEl) {
+                selectedEl.classList.add('selected');
+                selectedEl.classList.remove('highlighted');
+            }
+        }
+
+        function toggleDraftMode() {
+            isDraftMode = !isDraftMode;
+            const btn = document.getElementById('btn-draft');
+            const text = document.getElementById('draft-text');
+            if (isDraftMode) {
+                btn.classList.replace('border-gray-200', 'border-blue-400');
+                btn.classList.replace('text-gray-600', 'text-blue-600');
+                btn.classList.replace('bg-white', 'bg-blue-50');
+                text.innerText = 'Ghi chú: BẬT';
+            } else {
+                btn.classList.replace('border-blue-400', 'border-gray-200');
+                btn.classList.replace('text-blue-600', 'text-gray-600');
+                btn.classList.replace('bg-blue-50', 'bg-white');
+                text.innerText = 'Ghi chú: TẮT';
+            }
+        }
+
+        function handleKeyboardInput(e) {
+            if (!isGameActive || !selectedCell) return;
+            
+            const key = e.key;
+            if (key >= '1' && key <= currentSize.toString()) {
+                inputNumber(parseInt(key));
+            } else if (key === 'Backspace' || key === 'Delete' || key === '0') {
+                eraseCell();
+            } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+                e.preventDefault();
+                moveSelection(key);
+            }
+        }
+
+        function moveSelection(direction) {
+            let r = selectedCell.r;
+            let c = selectedCell.c;
+            if (direction === 'ArrowUp' && r > 0) r--;
+            if (direction === 'ArrowDown' && r < currentSize - 1) r++;
+            if (direction === 'ArrowLeft' && c > 0) c--;
+            if (direction === 'ArrowRight' && c < currentSize - 1) c++;
+            
+            // Skip given cells optionally, or just let them be selectable
+            selectCell(r, c);
+        }
+
+        function inputNumber(num) {
+            if (!selectedCell) return;
+            let r = selectedCell.r;
+            let c = selectedCell.c;
+            
+            // Prevent editing given cells
+            if (puzzle[r][c] !== 0) return;
+
+            if (isDraftMode) {
+                // If cell has a main value, clear it first when drafting
+                if (playerGrid[r][c] !== 0) {
+                    playerGrid[r][c] = 0;
+                }
+                let notes = notesGrid[r][c];
+                if (notes.includes(num)) {
+                    notesGrid[r][c] = notes.filter(n => n !== num);
+                } else {
+                    notes.push(num);
+                    notes.sort();
+                }
+            } else {
+                // Normal mode
+                if (playerGrid[r][c] === num) {
+                    playerGrid[r][c] = 0; // Toggle off
+                } else {
+                    playerGrid[r][c] = num;
+                    notesGrid[r][c] = []; // Clear notes
+                }
+            }
+            renderBoard();
+            
+            // Auto check if board is full
+            let isFull = true;
+            for(let i=0; i<currentSize; i++){
+                for(let j=0; j<currentSize; j++){
+                    if(playerGrid[i][j] === 0) isFull = false;
+                }
+            }
+            if(isFull && !isDraftMode) {
+                checkGame(true); // silent check first
+            }
+        }
+
+        function eraseCell() {
+            if (!selectedCell) return;
+            let r = selectedCell.r;
+            let c = selectedCell.c;
+            if (puzzle[r][c] !== 0) return;
+
+            playerGrid[r][c] = 0;
+            notesGrid[r][c] = [];
+            renderBoard();
+        }
+
+        // --- VALIDATION ---
+
+        function checkGame(silent = false) {
+            if (!isGameActive) return;
+            
+            // Clear previous errors
+            document.querySelectorAll('.cell').forEach(el => el.classList.remove('error'));
+
+            let hasEmpty = false;
+            let errors = [];
+
+            // 1. Check Row/Col Duplicates & Empty
+            for (let r = 0; r < currentSize; r++) {
+                for (let c = 0; c < currentSize; c++) {
+                    let val = playerGrid[r][c];
+                    if (val === 0) {
+                        hasEmpty = true;
+                        continue;
+                    }
+                    // Check Row
+                    for(let i = 0; i < currentSize; i++) {
+                        if(i !== c && playerGrid[r][i] === val) {
+                            errors.push({r, c}); errors.push({r, c: i});
+                        }
+                    }
+                    // Check Col
+                    for(let i = 0; i < currentSize; i++) {
+                        if(i !== r && playerGrid[i][c] === val) {
+                            errors.push({r, c}); errors.push({r: i, c});
+                        }
+                    }
+                }
+            }
+
+            // 2. Check Dots (Consecutive & Non-Consecutive)
+            for (let r = 0; r < currentSize; r++) {
+                for (let c = 0; c < currentSize; c++) {
+                    let val = playerGrid[r][c];
+                    if (val === 0) continue;
+
+                    // Right
+                    if (c < currentSize - 1 && playerGrid[r][c+1] !== 0) {
+                        let rightVal = playerGrid[r][c+1];
+                        let isConsec = Math.abs(val - rightVal) === 1;
+                        if (hDots[r][c] !== isConsec) {
+                            errors.push({r, c}); errors.push({r, c: c+1});
+                        }
+                    }
+                    // Bottom
+                    if (r < currentSize - 1 && playerGrid[r+1][c] !== 0) {
+                        let botVal = playerGrid[r+1][c];
+                        let isConsec = Math.abs(val - botVal) === 1;
+                        if (vDots[r][c] !== isConsec) {
+                            errors.push({r, c}); errors.push({r: r+1, c});
+                        }
+                    }
+                }
+            }
+
+            if (errors.length > 0) {
+                // Highlight errors
+                errors.forEach(err => {
+                    let el = document.getElementById(`cell-${err.r}-${err.c}`);
+                    if(el) el.classList.add('error');
+                });
+                if (!silent) showAlert("Có lỗi sai!", "Vui lòng kiểm tra lại các ô màu đỏ.", "error");
+                return false;
+            }
+
+            if (hasEmpty) {
+                if (!silent) showAlert("Chưa xong!", "Bạn cần điền đầy đủ số vào tất cả các ô.", "warning");
+                return false;
+            }
+
+            // Win!
+            clearInterval(timerInterval);
+            isGameActive = false;
+            selectedCell = null;
+            updateHighlight(); // clear highlight
+            
+            // Success animation
+            const container = document.getElementById('board-container');
+            container.classList.add('ring-8', 'ring-green-400', 'ring-opacity-50', 'transition-all');
+            setTimeout(() => container.classList.remove('ring-8'), 1500);
+
+            let timeStr = document.getElementById('timer').innerText;
+            showAlert("Tuyệt vời!", `Bạn đã giải thành công lưới ${currentSize}x${currentSize} trong thời gian ${timeStr}!`, "success");
+            return true;
+        }
+
+        // --- TIMER ---
+        function startTimer() {
+            clearInterval(timerInterval);
+            secondsElapsed = 0;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            let m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+            let s = (secondsElapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `${m}:${s}`;
+        }
+
+        // --- MODALS ---
+        function openInstructions() {
+            document.getElementById('instructions-modal').classList.remove('hidden');
+        }
+        function closeInstructions() {
+            document.getElementById('instructions-modal').classList.add('hidden');
+        }
+
+        function showAlert(title, msg, type) {
+            const modal = document.getElementById('alert-modal');
+            const content = document.getElementById('alert-content');
+            const icon = document.getElementById('alert-icon');
+            const btn = document.getElementById('alert-btn');
+            
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-msg').innerText = msg;
+            
+            if (type === 'success') {
+                icon.innerText = '🎉';
+                btn.className = 'w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2.5 rounded-xl transition-colors';
+            } else if (type === 'error') {
+                icon.innerText = '❌';
+                btn.className = 'w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-xl transition-colors';
+            } else {
+                icon.innerText = '⚠️';
+                btn.className = 'w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2.5 rounded-xl transition-colors';
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+
+        function closeAlert() {
+            const modal = document.getElementById('alert-modal');
+            const content = document.getElementById('alert-content');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+    </script>
+</body>
+</html>
