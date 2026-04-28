@@ -9,72 +9,47 @@ const DB_DE = {
     }
 };
 
-let nextStepFunc = null;
+// Biến lưu trữ controller của bảng vẽ hiện tại
+window.currentBoardCtrl = null;
 
-// Hàm in dòng text hướng dẫn ra bảng đen
 function renderSolutionLog(htmlContent, isFirst = false) {
     const board = document.getElementById('solution-board');
     if (!board) return;
-    
     if (isFirst) board.innerHTML = '';
     
     const div = document.createElement('div');
     div.className = 'p-3 bg-slate-800 rounded-lg border-l-4 border-teal-500 mt-2';
     div.innerHTML = htmlContent;
     board.appendChild(div);
-    
     board.scrollTop = board.scrollHeight;
-
-    // Render MathJax
-    if (window.MathJax) {
-        MathJax.typesetPromise([div]);
-    }
+    if (window.MathJax) MathJax.typesetPromise([div]);
 }
 
-// Hàm tải đề và reset bảng vẽ
 function loadDe(maDe) {
-    console.log("Đang tải đề số:", maDe);
-    
-    // 1. Cập nhật Text đề bài
-    document.getElementById('problem-content').innerHTML = DB_DE[maDe]?.text || "Lỗi nội dung";
+    document.getElementById('problem-content').innerHTML = DB_DE[maDe]?.text || "";
     if (window.MathJax) MathJax.typesetPromise([document.getElementById('problem-content')]);
 
-    // 2. Xóa sạch bảng vẽ JSXGraph an toàn
-    if (JXG.boards['box']) {
-        JXG.JSXGraph.freeBoard(JXG.boards['box']);
-    }
+    if (JXG.boards['box']) JXG.JSXGraph.freeBoard(JXG.boards['box']);
+    renderSolutionLog(`<div class="text-slate-400 italic text-center">Bắt đầu vẽ hình. Hãy nhấn "Vẽ bước tiếp theo".</div>`, true);
 
-    // 3. Khởi tạo hình vẽ
-    renderSolutionLog(`<div class="text-slate-400 italic text-center">Bắt đầu phân tích hình vẽ. Hãy nhấn "Vẽ bước tiếp theo".</div>`, true);
-
-    try {
-        if (maDe === '1') {
-            nextStepFunc = veDe01('box', renderSolutionLog);
-            console.log("Khởi tạo JSXGraph thành công!");
-        }
-    } catch (error) {
-        console.error("Lỗi khi vẽ hình:", error);
-        renderSolutionLog("<span class='text-red-500'>Lỗi khởi tạo thư viện vẽ hình. Vui lòng F5 (tải lại trang).</span>", false);
+    if (maDe === '1') {
+        window.currentBoardCtrl = veDe01('box', renderSolutionLog);
     }
 }
 
-// Bắt sự kiện
-document.getElementById('chonDe').addEventListener('change', (e) => {
-    loadDe(e.target.value);
-});
-
+// Bắt sự kiện Dropdown & Nút Vẽ
+document.getElementById('chonDe').addEventListener('change', (e) => loadDe(e.target.value));
 document.getElementById('btnStep').addEventListener('click', () => {
-    if (nextStepFunc) {
-        nextStepFunc();
-    } else {
-        console.log("Chưa có hàm vẽ bước tiếp theo.");
-    }
+    if (window.currentBoardCtrl) window.currentBoardCtrl.nextStep();
 });
 
-// Chờ HTML load xong mới chạy để tránh lỗi
+// Bắt sự kiện Xoay/Lật
+document.getElementById('btnFlipX').addEventListener('click', () => { if(window.currentBoardCtrl) window.currentBoardCtrl.flipX(); });
+document.getElementById('btnFlipY').addEventListener('click', () => { if(window.currentBoardCtrl) window.currentBoardCtrl.flipY(); });
+document.getElementById('btnRot30').addEventListener('click', () => { if(window.currentBoardCtrl) window.currentBoardCtrl.rotate(30); });
+document.getElementById('btnRot45').addEventListener('click', () => { if(window.currentBoardCtrl) window.currentBoardCtrl.rotate(45); });
+document.getElementById('btnRot90').addEventListener('click', () => { if(window.currentBoardCtrl) window.currentBoardCtrl.rotate(90); });
+
 window.addEventListener('DOMContentLoaded', () => {
-    // Đợi thêm 200ms để chắc chắn div #box đã sẵn sàng
-    setTimeout(() => {
-        loadDe('1');
-    }, 200);
+    setTimeout(() => loadDe('1'), 200);
 });
