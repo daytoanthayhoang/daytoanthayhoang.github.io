@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Toán 7 HK2 - Bài 3 (Cộng trừ đa thức)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdfa;
+            background-image: radial-gradient(#99f6e4 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .chalkboard {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border: 8px solid #64748b;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        .math-text { font-family: 'Times New Roman', Times, serif; }
+        
+        .poly-input {
+            width: 50px;
+            text-align: center;
+            background: #334155;
+            border: 2px solid #475569;
+            color: #fff;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .poly-input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            background: #0f172a;
+        }
+        .poly-input.correct {
+            border-color: #22c55e;
+            background: #14532d;
+        }
+        .poly-input.wrong {
+            border-color: #ef4444;
+            background: #7f1d1d;
+        }
+
+        /* Checkbox styling */
+        .checkbox-wrapper input:checked + div {
+            background-color: #0ea5e9;
+            border-color: #0ea5e9;
+        }
+        .checkbox-wrapper input:checked + div svg {
+            display: block;
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar for Solution Area */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+
+    <!-- CẤU HÌNH PDF -->
+    <script>
+        const pdfConfig = {
+            isAvailable: true,
+            fileName: "7_hk2_bai3_congtrudathuc.pdf" 
+        };
+
+        function initPdfButton() {
+            const btn = document.getElementById('pdf-btn');
+            if(pdfConfig.isAvailable) {
+                btn.classList.remove('hidden');
+                btn.onclick = () => {
+                    const link = document.createElement('a');
+                    link.href = pdfConfig.fileName;
+                    link.download = pdfConfig.fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen py-8 px-4 flex justify-center">
+    <div class="max-w-6xl w-full"> <!-- Mở rộng max-w để chứa 2 cột -->
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-teal-800 mb-3 tracking-tight">
+                <i class="fas fa-subscript mr-2"></i>Ôn tập Toán 7 - HK2
+            </h1>
+            <p class="text-xl font-bold text-teal-600 bg-teal-100 inline-block px-4 py-1 rounded-full shadow-sm">
+                Bài 3: Cộng Trừ Đa Thức Một Biến
+            </p>
+        </div>
+
+        <!-- Cấu hình và Thống kê -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="md:col-span-2 bg-white rounded-2xl p-5 shadow-lg border border-teal-100">
+                <h3 class="font-bold text-gray-700 mb-3"><i class="fas fa-cog mr-2"></i>Chọn nội dung luyện tập:</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label class="checkbox-wrapper flex items-center cursor-pointer">
+                        <input type="checkbox" id="part1" class="hidden" checked>
+                        <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center mr-2 transition-colors">
+                            <svg class="w-3 h-3 text-white hidden pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Phần 1: Đề chính thức</span>
+                    </label>
+                    <label class="checkbox-wrapper flex items-center cursor-pointer">
+                        <input type="checkbox" id="part2" class="hidden" checked>
+                        <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center mr-2 transition-colors">
+                            <svg class="w-3 h-3 text-white hidden pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Phần 2: Đề tham khảo</span>
+                    </label>
+                    <label class="checkbox-wrapper flex items-center cursor-pointer">
+                        <input type="checkbox" id="part3" class="hidden" checked>
+                        <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center mr-2 transition-colors">
+                            <svg class="w-3 h-3 text-white hidden pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <span class="text-sm font-bold text-purple-600"><i class="fas fa-skull mr-1"></i>Phần 3: Đầu lâu</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-5 shadow-lg border border-teal-100 flex flex-col justify-center">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-gray-600">Đang đúng liên tiếp:</span>
+                    <span id="streak" class="text-xl font-black text-orange-500">0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-green-600 font-bold"><i class="fas fa-check-circle mr-1"></i>Đúng: <span id="correct-total">0</span></span>
+                    <span class="text-red-600 font-bold"><i class="fas fa-times-circle mr-1"></i>Sai: <span id="wrong-total">0</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng đen: CHIA LÀM 2 CỘT -->
+        <div class="chalkboard p-4 md:p-6 relative">
+            <!-- Nút Tải PDF -->
+            <button id="pdf-btn" class="hidden absolute top-4 right-4 bg-teal-600 hover:bg-teal-500 text-white p-2 rounded-lg shadow transition-colors z-10" title="Tải file PDF">
+                <i class="fas fa-file-pdf"></i>
+            </button>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- ================= CỘT TRÁI: ĐỀ BÀI VÀ TƯƠNG TÁC ================= -->
+                <div class="flex flex-col border-b lg:border-b-0 lg:border-r border-slate-600 pb-6 lg:pb-0 lg:pr-6">
+                    <!-- Nguồn đề bài -->
+                    <div id="source-badge" class="inline-block bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 w-max">
+                        Đang tải...
+                    </div>
+                    
+                    <!-- Đề bài -->
+                    <div class="text-lg md:text-xl font-bold mb-4">
+                        Cho hai đa thức:
+                        <div class="text-yellow-300 my-3 ml-2 lg:ml-4 overflow-x-auto" id="problem-text"></div>
+                    </div>
+
+                    <!-- Vùng tương tác -->
+                    <div class="bg-slate-800 bg-opacity-70 p-4 rounded-xl border border-slate-600 mb-6">
+                        <p class="text-sm text-slate-300 mb-4 italic"><i class="fas fa-info-circle mr-1"></i>Hãy tính kết quả và nhập hệ số tương ứng. Nếu khuyết bậc, hãy nhập 0.</p>
+                        
+                        <!-- Câu a -->
+                        <div class="mb-5 overflow-x-auto pb-2">
+                            <div class="font-bold text-sky-300 mb-2 whitespace-nowrap" id="reqA-label">a) Tính ...</div>
+                            <div id="input-area-A" class="flex flex-wrap items-center gap-2 font-math text-lg w-max"></div>
+                        </div>
+
+                        <!-- Câu b -->
+                        <div class="overflow-x-auto pb-2">
+                            <div class="font-bold text-pink-300 mb-2 whitespace-nowrap" id="reqB-label">b) Tính ...</div>
+                            <div id="input-area-B" class="flex flex-wrap items-center gap-2 font-math text-lg w-max"></div>
+                        </div>
+                    </div>
+
+                    <!-- Các nút bấm -->
+                    <div class="flex flex-wrap gap-3 justify-center mb-4">
+                        <button onclick="checkAnswers()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 px-4 rounded-lg shadow-lg border-b-4 border-emerald-700 active:border-b-0 active:translate-y-1 transition-all">
+                            <i class="fas fa-check mr-2"></i>Nộp bài
+                        </button>
+                        <button onclick="showNextStep()" class="bg-amber-500 hover:bg-amber-400 text-white font-bold py-2 px-4 rounded-lg shadow-lg border-b-4 border-amber-700 active:border-b-0 active:translate-y-1 transition-all">
+                            <i class="fas fa-lightbulb mr-2"></i>Gợi ý / Trình bày
+                        </button>
+                        <button onclick="generateProblem()" class="bg-sky-500 hover:bg-sky-400 text-white font-bold py-2 px-4 rounded-lg shadow-lg border-b-4 border-sky-700 active:border-b-0 active:translate-y-1 transition-all">
+                            <i class="fas fa-redo mr-2"></i>Bài mới
+                        </button>
+                    </div>
+
+                    <!-- Phản hồi -->
+                    <div id="feedback" class="hidden mt-2 p-3 rounded-lg font-bold text-center"></div>
+                </div>
+
+                <!-- ================= CỘT PHẢI: HƯỚNG DẪN GIẢI ================= -->
+                <div class="flex flex-col h-[500px]">
+                    <div class="flex justify-between items-center mb-3 border-b border-slate-600 pb-2">
+                        <h3 class="text-xl font-bold text-teal-400 tracking-wide">
+                            <i class="fas fa-book-open mr-2"></i>Hướng dẫn giải
+                        </h3>
+                        <span class="text-xs font-normal text-slate-400 animate-pulse" id="scroll-indicator" style="display: none;">
+                            Tự động cuộn <i class="fas fa-angle-double-down ml-1"></i>
+                        </span>
+                    </div>
+                    
+                    <!-- Khu vực trình bày bài giải có Scroll -->
+                    <div id="solution-container" class="flex-1 overflow-y-auto custom-scrollbar pr-2 pb-4">
+                        <div id="solution-area" class="space-y-4 text-lg">
+                            <div class="text-slate-400 italic text-center mt-10" id="empty-sol-msg">
+                                <i class="fas fa-chalkboard-teacher text-4xl mb-3 opacity-50 block"></i>
+                                Nhấn "Gợi ý / Trình bày" để xem các bước giải chi tiết.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gợi ý phụ -->
+    <div id="hint-modal" class="fixed inset-0 bg-slate-900 bg-opacity-80 flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 shadow-2xl transform scale-95 transition-transform duration-300" id="hint-content-box">
+            <h3 class="text-xl font-bold text-teal-800 mb-4 border-b pb-2"><i class="fas fa-magic mr-2"></i>Gợi ý nhóm các hạng tử</h3>
+            <div id="hint-text" class="text-lg text-gray-800 font-math mb-6"></div>
+            <div class="text-right">
+                <button onclick="closeHint()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CƠ SỞ DỮ LIỆU ---
+        const DATABASE = [
+            // NHÓM 1: CHÍNH THỨC
+            { id: 'O1', part: 1, source: 'Đề chính thức Hóc Môn 2024-2025', v: 'x', p1N: 'A', p2N: 'B', p1: {2:-1, 1:2, 0:1}, p2: {2:4, 1:0, 0:-1}, reqA: ['A','B','+'], reqB: ['A','B','-'] },
+            { id: 'O2', part: 1, source: 'Đề chính thức Hóc Môn 2023-2024', v: 'x', p1N: 'P', p2N: 'Q', p1: {2:3, 1:5, 0:-3}, p2: {2:-1, 1:-2, 0:7}, reqA: ['P','Q','+'], reqB: ['P','Q','-'] },
+            { id: 'O3', part: 1, source: 'Đề minh họa Hóc Môn 2024-2025', v: 'x', p1N: 'P', p2N: 'Q', p1: {2:9, 1:-2, 0:4}, p2: {2:1, 1:3, 0:-7}, reqA: ['P','Q','+'], reqB: ['P','Q','-'] },
+            { id: 'O4', part: 1, source: 'Đề tham khảo Hóc Môn 2022-2023', v: 'x', p1N: 'A', p2N: 'B', p1: {2:3, 1:2, 0:-5}, p2: {2:-8, 1:-7, 0:5}, reqA: ['A','B','+'], reqB: ['A','B','-'] },
+            // NHÓM 2: THAM KHẢO
+            { id: 'R1', part: 2, source: 'Đề 1 - THCS Bùi Văn Thủ', v: 'x', p1N: 'M', p2N: 'N', p1: {2:-2, 1:3, 0:-6}, p2: {2:3, 1:1, 0:5}, reqA: ['M','N','+'], reqB: ['N','M','-'] }, // N-M
+            { id: 'R2', part: 2, source: 'Đề 2 - THCS Đỗ Văn Dậy', v: 'x', p1N: 'M', p2N: 'N', p1: {2:3, 1:9, 0:-12}, p2: {2:-8, 1:-9, 0:5}, reqA: ['M','N','+'], reqB: ['M','N','-'] },
+            { id: 'R3', part: 2, source: 'Đề 3 - THCS Đặng Công Bỉnh', v: 'x', p1N: 'P', p2N: 'Q', p1: {2:2, 1:3, 0:-2}, p2: {2:1, 1:5, 0:7}, reqA: ['P','Q','+'], reqB: ['P','Q','-'] },
+            { id: 'R4', part: 2, source: 'Đề 4 - THCS Tô Ký', v: 'x', p1N: 'A', p2N: 'B', p1: {2:6, 1:2, 0:-10}, p2: {2:-2, 1:-7, 0:10}, reqA: ['A','B','+'], reqB: ['A','B','-'] },
+            { id: 'R5', part: 2, source: 'Đề 5 - THCS Đặng Thúc Vịnh', v: 'x', p1N: 'A', p2N: 'B', p1: {2:-2, 1:4, 0:7}, p2: {2:5, 1:2, 0:3}, reqA: ['A','B','+'], reqB: ['A','B','-'] },
+            { id: 'R6', part: 2, source: 'Đề 6 - THCS Nguyễn T.M.Khai', v: 'x', p1N: 'M', p2N: 'N', p1: {2:-2, 1:3, 0:-1}, p2: {2:-3, 1:-1, 0:2}, reqA: ['M','N','+'], reqB: ['M','N','-'] },
+            { id: 'R7', part: 2, source: 'Đề 7 - THCS Lý Chính Thắng 1', v: 'x', p1N: 'A', p2N: 'B', p1: {2:5, 1:2, 0:-3}, p2: {2:-2, 1:1, 0:5}, reqA: ['A','B','+'], reqB: ['A','B','-'] },
+            { id: 'R8', part: 2, source: 'Đề 8 - THCS Phan Công Hớn', v: 'x', p1N: 'M', p2N: 'N', p1: {2:-2, 1:3, 0:-1}, p2: {2:4, 1:1, 0:-2}, reqA: ['M','N','+'], reqB: ['M','N','-'] },
+            { id: 'R9', part: 2, source: 'Đề 9 - THCS Tân Xuân', v: 'x', p1N: 'M', p2N: 'N', p1: {2:-7, 1:5, 0:3}, p2: {2:-5, 1:-1, 0:-6}, reqA: ['M','N','+'], reqB: ['M','N','-'] },
+            { id: 'R10', part: 2, source: 'Đề 10 - THCS Hà Huy Tập', v: 'x', p1N: 'M', p2N: 'N', p1: {2:3, 1:4, 0:-2}, p2: {2:-5, 1:1, 0:-10}, reqA: ['M','N','+'], reqB: ['M','N','-'] },
+            { id: 'R11', part: 2, source: 'Đề 11 - THCS Nguyễn An Khương', v: 'x', p1N: 'M', p2N: 'N', p1: {2:-4, 1:1, 0:-1}, p2: {2:10, 1:4, 0:7}, reqA: ['M','N','+'], reqB: ['N','M','-'] }, // N-M
+            { id: 'R12', part: 2, source: 'Đề 12 - THCS Nguyễn Văn Bứa', v: 'x', p1N: 'P', p2N: 'Q', p1: {2:3, 1:2, 0:-1}, p2: {2:-3, 1:-1, 0:2}, reqA: ['P','Q','+'], reqB: ['P','Q','-'] },
+            { id: 'R13', part: 2, source: 'Đề 13 - THCS Tam Đông 1', v: 'x', p1N: 'M', p2N: 'N', p1: {2:-3, 1:-1, 0:5}, p2: {2:4, 1:1, 0:-2}, reqA: ['M','N','+'], reqB: ['M','N','-'] },
+            { id: 'R14', part: 2, source: 'Đề 14 - THCS Tre Việt (Bậc 4)', v: 'x', p1N: 'H', p2N: 'Q', p1: {4:2, 3:-3, 2:6, 1:-3, 0:9}, p2: {4:3, 3:-1, 2:8, 1:-1, 0:0}, reqA: ['H','Q','+'], reqB: ['Q','H','-'] }, // Q-H
+            { id: 'R15', part: 2, source: 'Đề 15 - THCS Đông Thạnh', v: 'x', p1N: 'M', p2N: 'N', p1: {2:3, 1:1, 0:-5}, p2: {2:-2, 1:-1, 0:1}, reqA: ['M','N','+'], reqB: ['M','N','-'] },
+            { id: 'R16', part: 2, source: 'Đề 16 - THCS Nguyễn Hồng Đào', v: 'x', p1N: 'P', p2N: 'Q', p1: {3:-2, 2:5, 1:-1, 0:0}, p2: {3:-2, 2:3, 1:1, 0:-9}, reqA: ['Q','P','+'], reqB: ['Q','P','-'] }, // Q+P, Q-P
+            { id: 'R17', part: 2, source: 'Đề 17 - THCS Xuân Thới Thượng', v: 'y', p1N: 'M', p2N: 'N', p1: {2:5, 1:-4, 0:6}, p2: {2:-4, 1:1, 0:-10}, reqA: ['M','N','+'], reqB: ['M','N','-'] }
+        ];
+
+        // --- CÁC HÀM XỬ LÝ ĐA THỨC ---
+        function getDegrees(poly) {
+            return Object.keys(poly).map(Number).sort((a,b) => b-a);
+        }
+
+        function maxDegree(p1, p2) {
+            return Math.max(...getDegrees(p1), ...getDegrees(p2));
+        }
+
+        function polyToTex(poly, v = 'x', wrapInParen = false) {
+            let degs = getDegrees(poly);
+            let terms = [];
+            for (let d of degs) {
+                let c = poly[d];
+                if (c === 0) continue;
+                let term = '';
+                if (c < 0) term += (terms.length === 0) ? '-' : ' - ';
+                else term += (terms.length === 0) ? '' : ' + ';
+                
+                let absC = Math.abs(c);
+                if (d === 0) {
+                    term += absC;
+                } else {
+                    if (absC !== 1) term += absC;
+                    term += v;
+                    if (d > 1) term += '^' + d;
+                }
+                terms.push(term);
+            }
+            let res = terms.length === 0 ? '0' : terms.join('');
+            if (wrapInParen) return `\\left(${res}\\right)`;
+            return res;
+        }
+
+        function expandNegativeTex(poly, v = 'x') {
+            let degs = getDegrees(poly);
+            let terms = [];
+            for (let d of degs) {
+                let c = poly[d];
+                if (c === 0) continue;
+                let term = '';
+                // Đổi dấu
+                if (c > 0) term += ' - ';
+                else term += ' + ';
+                
+                let absC = Math.abs(c);
+                if (d === 0) {
+                    term += absC;
+                } else {
+                    if (absC !== 1) term += absC;
+                    term += v;
+                    if (d > 1) term += '^' + d;
+                }
+                terms.push(term);
+            }
+            return terms.join('');
+        }
+
+        function calcPoly(p1, p2, op) {
+            let res = {};
+            let maxD = maxDegree(p1, p2);
+            for (let d = maxD; d >= 0; d--) {
+                let c1 = p1[d] || 0;
+                let c2 = p2[d] || 0;
+                res[d] = op === '+' ? c1 + c2 : c1 - c2;
+            }
+            return res;
+        }
+
+        function generateTermGroupTex(pLeft, pRight, op, v) {
+            let maxD = maxDegree(pLeft, pRight);
+            let groups = [];
+            for (let d = maxD; d >= 0; d--) {
+                let c1 = pLeft[d] || 0;
+                let c2 = pRight[d] || 0;
+                if (c1 === 0 && c2 === 0) continue;
+                
+                let val2 = op === '+' ? c2 : -c2;
+                let term1 = '', term2 = '';
+
+                // format term1
+                if (c1 !== 0) {
+                    let absC1 = Math.abs(c1);
+                    if (c1 < 0) term1 += '-';
+                    if (d === 0) term1 += absC1;
+                    else { if (absC1 !== 1) term1 += absC1; term1 += v; if (d > 1) term1 += '^' + d; }
+                }
+
+                // format term2
+                if (c2 !== 0) {
+                    let sign = val2 > 0 ? '+' : '-';
+                    let absC2 = Math.abs(val2);
+                    term2 += sign + ' ';
+                    if (d === 0) term2 += absC2;
+                    else { if (absC2 !== 1) term2 += absC2; term2 += v; if (d > 1) term2 += '^' + d; }
+                }
+
+                // Push vào mảng nhóm
+                if (c1 !== 0 && c2 !== 0) {
+                    groups.push(`\\left(${term1} ${term2}\\right)`);
+                } else if (c1 !== 0) {
+                    groups.push(`${term1}`);
+                } else if (c2 !== 0) {
+                    let cleanTerm2 = term2.replace(/^\+ /, ''); // Xóa dấu + thừa nếu đứng một mình
+                    groups.push(`${cleanTerm2}`);
+                }
+            }
+            return groups.join(' + ').replace(/\+ \-/g, '- '); // Sửa lỗi hiển thị + -x^2 thành - x^2
+        }
+
+        // --- STATE QUẢN LÝ ỨNG DỤNG ---
+        let currentProb = null;
+        let isAnswered = false;
+        let statsEnabled = true;
+        let stepIndex = 0;
+        let streak = 0, correctTotal = 0, wrongTotal = 0;
+        let autoPlayTimer = null;
+
+        // Sinh số ngẫu nhiên
+        function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        function mutatePoly(poly) {
+            let res = {};
+            let maxD = Math.max(...getDegrees(poly));
+            for (let d in poly) {
+                res[d] = (poly[d] || 0) + rnd(-3, 3);
+            }
+            if (res[maxD] === 0) res[maxD] = poly[maxD] > 0 ? 1 : -1;
+            return res;
+        }
+
+        function generateRandomPart3() {
+            const vars = ['x', 'y', 't'];
+            const names = [['P', 'Q'], ['A', 'B'], ['M', 'N'], ['H', 'K']];
+            const v = vars[rnd(0, 2)];
+            const [n1, n2] = names[rnd(0, 3)];
+            
+            let maxD = rnd(2, 4);
+            let p1 = {}, p2 = {};
+            for(let d=0; d<=maxD; d++) {
+                if(rnd(0,10) > 3) p1[d] = rnd(-9, 9);
+                if(rnd(0,10) > 3) p2[d] = rnd(-9, 9);
+            }
+            if(!p1[maxD]) p1[maxD] = rnd(1,5) * (rnd(0,1)?1:-1);
+            if(!p2[maxD]) p2[maxD] = rnd(1,5) * (rnd(0,1)?1:-1);
+
+            return {
+                id: 'P3', part: 3, source: 'Đề phát triển thêm (Đầu lâu)', v: v,
+                p1N: n1, p2N: n2, p1: p1, p2: p2,
+                reqA: [n1, n2, '+'], reqB: rnd(0,1) ? [n1, n2, '-'] : [n2, n1, '-']
+            };
+        }
+
+        function generateProblem() {
+            if (autoPlayTimer) clearInterval(autoPlayTimer);
+            
+            let p1 = document.getElementById('part1').checked;
+            let p2 = document.getElementById('part2').checked;
+            let p3 = document.getElementById('part3').checked;
+
+            if (!p1 && !p2 && !p3) {
+                alert("Vui lòng chọn ít nhất một phần để luyện tập!");
+                document.getElementById('part1').checked = true;
+                p1 = true;
+            }
+
+            let pool = [];
+            if (p1) pool = pool.concat(DATABASE.filter(d => d.part === 1));
+            if (p2) pool = pool.concat(DATABASE.filter(d => d.part === 2));
+
+            let isPart3 = false;
+            if (p3) {
+                if (pool.length === 0) isPart3 = true;
+                else if (Math.random() < 0.5) isPart3 = true;
+            }
+
+            let baseProb;
+            let isRandomMode = false;
+
+            if (isPart3) {
+                baseProb = generateRandomPart3();
+                isRandomMode = true; // Luôn random ở part 3
+            } else {
+                baseProb = pool[rnd(0, pool.length - 1)];
+                isRandomMode = Math.random() < 0.5;
+            }
+
+            // Copy data
+            currentProb = JSON.parse(JSON.stringify(baseProb));
+
+            if (isRandomMode && !isPart3) {
+                currentProb.p1 = mutatePoly(currentProb.p1);
+                currentProb.p2 = mutatePoly(currentProb.p2);
+                currentProb.source += " (Đã sinh số ngẫu nhiên)";
+                document.getElementById('source-badge').className = "inline-block bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 w-max";
+            } else if (isPart3) {
+                document.getElementById('source-badge').className = "inline-block bg-black text-white text-xs font-bold px-3 py-1 rounded-full mb-4 shadow-[0_0_10px_red] w-max";
+                currentProb.source = '<i class="fas fa-skull mr-1 text-red-500"></i> ' + currentProb.source;
+            } else {
+                document.getElementById('source-badge').className = "inline-block bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 w-max";
+            }
+
+            // Xác định left/right theo yêu cầu
+            let reqA_left = currentProb.reqA[0] === currentProb.p1N ? currentProb.p1 : currentProb.p2;
+            let reqA_right = currentProb.reqA[1] === currentProb.p1N ? currentProb.p1 : currentProb.p2;
+            currentProb.ansA = calcPoly(reqA_left, reqA_right, '+');
+            currentProb.maxDA = maxDegree(reqA_left, reqA_right);
+
+            let reqB_left = currentProb.reqB[0] === currentProb.p1N ? currentProb.p1 : currentProb.p2;
+            let reqB_right = currentProb.reqB[1] === currentProb.p1N ? currentProb.p1 : currentProb.p2;
+            currentProb.ansB = calcPoly(reqB_left, reqB_right, '-');
+            currentProb.maxDB = maxDegree(reqB_left, reqB_right);
+
+            stepIndex = 0;
+            isAnswered = false;
+            statsEnabled = true;
+
+            renderUI();
+        }
+
+        function createInputRow(maxD, v, prefix) {
+            let html = '';
+            for (let d = maxD; d >= 0; d--) {
+                html += `<input type="text" id="${prefix}-${d}" class="poly-input flex-shrink-0" placeholder="0">`;
+                if (d > 0) {
+                    html += `<span class="text-white mx-1">${v}${d>1?'^'+d:''}</span>`;
+                    html += `<span class="text-slate-400 mx-1">+</span>`;
+                }
+            }
+            return html;
+        }
+
+        function renderUI() {
+            document.getElementById('source-badge').innerHTML = currentProb.source;
+            document.getElementById('feedback').classList.add('hidden');
+            
+            // Reset solution area
+            let solArea = document.getElementById('solution-area');
+            solArea.innerHTML = `
+                <div class="text-slate-400 italic text-center mt-10" id="empty-sol-msg">
+                    <i class="fas fa-chalkboard-teacher text-4xl mb-3 opacity-50 block"></i>
+                    Nhấn "Gợi ý / Trình bày" để xem các bước giải chi tiết.
+                </div>
+            `;
+            document.getElementById('scroll-indicator').style.display = 'none';
+
+            let p1Tex = `$$${currentProb.p1N}(${currentProb.v}) = ${polyToTex(currentProb.p1, currentProb.v)}$$`;
+            let p2Tex = `$$${currentProb.p2N}(${currentProb.v}) = ${polyToTex(currentProb.p2, currentProb.v)}$$`;
+            document.getElementById('problem-text').innerHTML = p1Tex + p2Tex;
+
+            // Labels
+            let labelA = `${currentProb.reqA[0]}(${currentProb.v}) + ${currentProb.reqA[1]}(${currentProb.v}) = `;
+            let labelB = `${currentProb.reqB[0]}(${currentProb.v}) - ${currentProb.reqB[1]}(${currentProb.v}) = `;
+            document.getElementById('reqA-label').innerHTML = `a) Tính $${labelA}$`;
+            document.getElementById('reqB-label').innerHTML = `b) Tính $${labelB}$`;
+
+            // Inputs
+            document.getElementById('input-area-A').innerHTML = createInputRow(currentProb.maxDA, currentProb.v, 'ansA');
+            document.getElementById('input-area-B').innerHTML = createInputRow(currentProb.maxDB, currentProb.v, 'ansB');
+
+            MathJax.typesetPromise();
+        }
+
+        function checkAnswers() {
+            if (isAnswered) return;
+            let allCorrect = true;
+
+            // Check A
+            for (let d = currentProb.maxDA; d >= 0; d--) {
+                let inp = document.getElementById(`ansA-${d}`);
+                let val = parseInt(inp.value.trim());
+                if (isNaN(val)) val = 0; // Trống = 0
+                let correctVal = currentProb.ansA[d] || 0;
+                
+                if (val === correctVal) {
+                    inp.classList.add('correct'); inp.classList.remove('wrong');
+                } else {
+                    inp.classList.add('wrong'); inp.classList.remove('correct');
+                    allCorrect = false;
+                }
+            }
+
+            // Check B
+            for (let d = currentProb.maxDB; d >= 0; d--) {
+                let inp = document.getElementById(`ansB-${d}`);
+                let val = parseInt(inp.value.trim());
+                if (isNaN(val)) val = 0;
+                let correctVal = currentProb.ansB[d] || 0;
+                
+                if (val === correctVal) {
+                    inp.classList.add('correct'); inp.classList.remove('wrong');
+                } else {
+                    inp.classList.add('wrong'); inp.classList.remove('correct');
+                    allCorrect = false;
+                }
+            }
+
+            let fb = document.getElementById('feedback');
+            fb.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-800', 'bg-blue-100', 'text-blue-800');
+
+            if (allCorrect) {
+                if (statsEnabled) {
+                    streak++; correctTotal++;
+                    fb.innerHTML = '<i class="fas fa-crown"></i> Xuất sắc! Kết quả hoàn toàn chính xác.';
+                    fb.classList.add('bg-green-100', 'text-green-800');
+                    updateStatsUI();
+                } else {
+                    fb.innerHTML = '<i class="fas fa-check"></i> Chính xác! (Không tính điểm vì đã xem gợi ý)';
+                    fb.classList.add('bg-blue-100', 'text-blue-800');
+                }
+                isAnswered = true;
+                
+                // Show solutions automatically
+                stepIndex = 0;
+                document.getElementById('scroll-indicator').style.display = 'inline-block';
+                autoPlayTimer = setInterval(() => {
+                    if (stepIndex <= 9) showNextStep();
+                    else {
+                        clearInterval(autoPlayTimer);
+                        document.getElementById('scroll-indicator').style.display = 'none';
+                    }
+                }, 400); 
+            } else {
+                fb.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Có lỗi sai. Vui lòng kiểm tra lại dấu hoặc tính toán!`;
+                fb.classList.add('bg-red-100', 'text-red-700');
+                if (statsEnabled) {
+                    streak = 0; wrongTotal++;
+                    updateStatsUI();
+                }
+            }
+        }
+
+        // --- RENDER BAREM TRÌNH BÀY TỪNG BƯỚC CÓ SCROLL ---
+        function showNextStep() {
+            statsEnabled = false; // Tắt tính điểm nếu xem hướng dẫn
+            let solArea = document.getElementById('solution-area');
+            let v = currentProb.v;
+
+            // Xóa message rỗng nếu mới bấm bước đầu
+            let emptyMsg = document.getElementById('empty-sol-msg');
+            if(emptyMsg) emptyMsg.remove();
+            
+            let pALeft = currentProb.reqA[0] === currentProb.p1N ? currentProb.p1 : currentProb.p2;
+            let pARight = currentProb.reqA[1] === currentProb.p1N ? currentProb.p1 : currentProb.p2;
+            let exprA = `${currentProb.reqA[0]}(${v}) + ${currentProb.reqA[1]}(${v})`;
+
+            let pBLeft = currentProb.reqB[0] === currentProb.p1N ? currentProb.p1 : currentProb.p2;
+            let pBRight = currentProb.reqB[1] === currentProb.p1N ? currentProb.p1 : currentProb.p2;
+            let exprB = `${currentProb.reqB[0]}(${v}) - ${currentProb.reqB[1]}(${v})`;
+
+            let div = document.createElement('div');
+            div.className = 'fade-in text-slate-200 mb-1 overflow-x-auto';
+
+            // ================= CÂU A =================
+            if (stepIndex === 0) {
+                let header = document.createElement('div');
+                header.className = 'font-bold text-sky-300 mt-2 border-b border-slate-600 pb-1 mb-2 fade-in';
+                header.innerHTML = 'Câu a)';
+                solArea.appendChild(header);
+                
+                // Bước 1: Ghi lại đề
+                div.innerHTML = `$$${exprA} = ${polyToTex(pALeft, v, true)} + ${polyToTex(pARight, v, true)}$$`;
+                solArea.appendChild(div);
+            } 
+            else if (stepIndex === 1) {
+                // Bước 2: Bỏ ngoặc
+                let rightSide = polyToTex(pARight, v, false);
+                if (!rightSide.startsWith('-')) rightSide = '+' + rightSide;
+                div.innerHTML = `$$= ${polyToTex(pALeft, v, false)} ${rightSide}$$`;
+                solArea.appendChild(div);
+            }
+            else if (stepIndex === 2) {
+                // Bước 3: Sắp xếp và nhóm
+                div.innerHTML = `$$= ${generateTermGroupTex(pALeft, pARight, '+', v)}$$`;
+                solArea.appendChild(div);
+            }
+            else if (stepIndex === 3) {
+                // Bước 4: Thực hiện tính
+                div.innerHTML = `$$= ${polyToTex(currentProb.ansA, v)}$$`;
+                solArea.appendChild(div);
+            }
+            else if (stepIndex === 4) {
+                // Bước 5: Kết luận
+                div.className = 'fade-in text-emerald-300 font-bold mb-4';
+                div.innerHTML = `Vậy $${exprA} = ${polyToTex(currentProb.ansA, v)}$ <span class="float-right text-sm text-yellow-400 opacity-70 mt-1">0.5đ</span>`;
+                solArea.appendChild(div);
+            }
+
+            // ================= CÂU B =================
+            else if (stepIndex === 5) {
+                let header = document.createElement('div');
+                header.className = 'font-bold text-pink-300 mt-4 border-b border-slate-600 pb-1 mb-2 fade-in';
+                header.innerHTML = 'Câu b)';
+                solArea.appendChild(header);
+
+                // Bước 1: Ghi lại đề
+                div.innerHTML = `$$${exprB} = ${polyToTex(pBLeft, v, true)} - ${polyToTex(pBRight, v, true)}$$`;
+                solArea.appendChild(div);
+            }
+            else if (stepIndex === 6) {
+                // Bước 2: Bỏ ngoặc (Đổi dấu)
+                div.innerHTML = `$$= ${polyToTex(pBLeft, v, false)} ${expandNegativeTex(pBRight, v)}$$`;
+                solArea.appendChild(div);
+            }
+            else if (stepIndex === 7) {
+                // Bước 3: Sắp xếp và nhóm
+                div.innerHTML = `$$= ${generateTermGroupTex(pBLeft, pBRight, '-', v)}$$`;
+                solArea.appendChild(div);
+            }
+            else if (stepIndex === 8) {
+                // Bước 4: Thực hiện tính
+                div.innerHTML = `$$= ${polyToTex(currentProb.ansB, v)}$$`;
+                solArea.appendChild(div);
+            }
+            else if (stepIndex === 9) {
+                // Bước 5: Kết luận
+                div.className = 'fade-in text-emerald-300 font-bold mb-2';
+                div.innerHTML = `Vậy $${exprB} = ${polyToTex(currentProb.ansB, v)}$ <span class="float-right text-sm text-yellow-400 opacity-70 mt-1">0.5đ</span>`;
+                solArea.appendChild(div);
+            }
+
+            if (stepIndex <= 9) {
+                stepIndex++;
+                
+                // Render MathJax và Auto Scroll
+                MathJax.typesetPromise().then(() => {
+                    const scrollContainer = document.getElementById('solution-container');
+                    scrollContainer.scrollTo({
+                        top: scrollContainer.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        }
+
+        // --- MODAL HINT GỢI Ý ---
+        function showHintModal(texContent) {
+            const modal = document.getElementById('hint-modal');
+            const box = document.getElementById('hint-content-box');
+            document.getElementById('hint-text').innerHTML = texContent;
+            
+            modal.classList.remove('hidden');
+            // Force reflow
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+
+            MathJax.typesetPromise();
+        }
+
+        function closeHint() {
+            const modal = document.getElementById('hint-modal');
+            const box = document.getElementById('hint-content-box');
+            modal.classList.add('opacity-0');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        function updateStatsUI() {
+            document.getElementById('streak').innerText = streak;
+            document.getElementById('correct-total').innerText = correctTotal;
+            document.getElementById('wrong-total').innerText = wrongTotal;
+        }
+
+        window.onload = function() {
+            initPdfButton();
+            generateProblem();
+        };
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Toán 7 HK2 - Bài 4 (Nhân chia đa thức)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdfa; /* teal-50 */
+            background-image: radial-gradient(#ccfbf1 1px, transparent 1px); /* teal-100 */
+            background-size: 20px 20px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(17, 94, 89, 0.1), 0 8px 10px -6px rgba(17, 94, 89, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #14b8a6; border-radius: 4px; } /* teal-500 */
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #0d9488; } /* teal-600 */
+        
+        .step-item {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: slideUp 0.4s ease forwards;
+        }
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .checkbox-wrapper-46 input[type="checkbox"] {
+            display: none;
+            visibility: hidden;
+        }
+        .checkbox-wrapper-46 .cbx {
+            margin: auto;
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: pointer;
+        }
+        .checkbox-wrapper-46 .cbx span {
+            display: inline-block;
+            vertical-align: middle;
+            transform: translate3d(0, 0, 0);
+        }
+        .checkbox-wrapper-46 .cbx span:first-child {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            transform: scale(1);
+            vertical-align: middle;
+            border: 1px solid #9098A9;
+            transition: all 0.2s ease;
+        }
+        .checkbox-wrapper-46 .cbx span:first-child svg {
+            position: absolute;
+            top: 3px;
+            left: 2px;
+            fill: none;
+            stroke: #FFFFFF;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 16px;
+            stroke-dashoffset: 16px;
+            transition: all 0.3s ease;
+            transition-delay: 0.1s;
+            transform: translate3d(0, 0, 0);
+        }
+        .checkbox-wrapper-46 .cbx span:first-child:before {
+            content: "";
+            width: 100%;
+            height: 100%;
+            background: #0d9488; /* teal-600 */
+            display: block;
+            transform: scale(0);
+            opacity: 1;
+            border-radius: 50%;
+        }
+        .checkbox-wrapper-46 .cbx span:last-child {
+            padding-left: 8px;
+        }
+        .checkbox-wrapper-46 .cbx:hover span:first-child {
+            border-color: #0d9488;
+        }
+        .checkbox-wrapper-46 input[type="checkbox"]:checked + .cbx span:first-child {
+            background: #0d9488;
+            border-color: #0d9488;
+            animation: wave-46 0.4s ease;
+        }
+        .checkbox-wrapper-46 input[type="checkbox"]:checked + .cbx span:first-child svg {
+            stroke-dashoffset: 0;
+        }
+        .checkbox-wrapper-46 input[type="checkbox"]:checked + .cbx span:first-child:before {
+            transform: scale(3.5);
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+        @keyframes wave-46 {
+            50% { transform: scale(0.9); }
+        }
+
+        /* Print Settings */
+        @media print {
+            body { background: none; }
+            header, .no-print { display: none !important; }
+            main { flex-direction: column !important; height: auto !important; overflow: visible !important; }
+            .w-5\/12, .w-7\/12 { width: 100% !important; margin-bottom: 20px; }
+            .glass-panel { box-shadow: none; border: 1px solid #e2e8f0; }
+            #solution-board { overflow: visible !important; color: #1e293b !important; }
+            .bg-slate-800 { background-color: #ffffff !important; }
+            .bg-slate-900 { background-color: #f8fafc !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+            .text-slate-100 { color: #0f172a !important; }
+            /* Hiển thị rõ các chú thích khi in */
+            .text-teal-300 { color: #475569 !important; font-weight: bold; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-teal-600 text-white shadow-lg z-10 flex-shrink-0">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-calculator text-2xl"></i>
+                <h1 class="text-xl font-bold uppercase tracking-wide">Ôn Tập Cuối Kỳ II - Toán 7 (CTST)</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-sm font-semibold bg-teal-800 px-4 py-1.5 rounded-full flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap"></i> Bài 4: Nhân, Chia Đa Thức
+                </div>
+                <button onclick="window.print()" id="btn-pdf" class="text-sm font-semibold bg-teal-500 hover:bg-teal-400 px-4 py-1.5 rounded-full flex items-center gap-2 transition-colors shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-print"></i> In Đề / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 flex gap-4 overflow-hidden">
+        
+        <!-- Cột trái: Điều khiển & Đề bài -->
+        <div class="w-5/12 flex flex-col gap-4 h-full">
+            
+            <!-- Bảng cài đặt -->
+            <div class="glass-panel rounded-2xl p-5 shadow-sm flex-shrink-0 no-print">
+                <h2 class="text-lg font-bold text-teal-800 border-b-2 border-teal-100 pb-2 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-teal-600"></i> Chế độ luyện tập
+                </h2>
+                
+                <div class="space-y-3">
+                    <div class="checkbox-wrapper-46">
+                        <input type="checkbox" id="part1" class="mode-checkbox" checked onchange="handleCheckboxChange()">
+                        <label for="part1" class="cbx">
+                            <span><svg width="12px" height="10px" viewbox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span>
+                            <span class="font-semibold text-slate-700">Phần 1: Đề chính thức/Minh họa (HM)</span>
+                        </label>
+                    </div>
+                    <div class="checkbox-wrapper-46">
+                        <input type="checkbox" id="part2" class="mode-checkbox" checked onchange="handleCheckboxChange()">
+                        <label for="part2" class="cbx">
+                            <span><svg width="12px" height="10px" viewbox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span>
+                            <span class="font-semibold text-slate-700">Phần 2: Đề tham khảo các trường (1-17)</span>
+                        </label>
+                    </div>
+                    <div class="checkbox-wrapper-46">
+                        <input type="checkbox" id="part3" class="mode-checkbox" onchange="handleCheckboxChange()">
+                        <label for="part3" class="cbx">
+                            <span><svg width="12px" height="10px" viewbox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg></span>
+                            <span class="font-bold text-red-600">Phần 3: Phát triển thêm <i class="fa-solid fa-skull"></i></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mt-5 grid grid-cols-2 gap-3">
+                    <button onclick="generateProblem()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate"></i> Tạo đề mới
+                    </button>
+                    <button onclick="startStepByStep()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-magic"></i> Gợi ý giải
+                    </button>
+                </div>
+            </div>
+
+            <!-- Khung Đề bài -->
+            <div class="glass-panel rounded-2xl p-5 shadow-sm flex-1 flex flex-col relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-teal-400 to-emerald-500"></div>
+                <div class="flex justify-between items-center border-b-2 border-slate-100 pb-2 mb-4">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-book-open text-teal-600"></i> Đề Bài
+                    </h2>
+                    <span id="problem-source" class="text-xs font-bold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md border border-slate-200">
+                        Nguồn đề
+                    </span>
+                </div>
+                
+                <div id="problem-content" class="flex-1 overflow-y-auto custom-scrollbar text-lg pr-2">
+                    <!-- Nội dung đề bài render bằng MathJax -->
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-sm font-semibold text-slate-500 no-print">
+                    <div><i class="fa-solid fa-fire text-orange-500"></i> Chuỗi: <span id="streak">0</span></div>
+                    <div><i class="fa-solid fa-check text-green-500"></i> Đúng: <span id="correct-total">0</span></div>
+                    <div><i class="fa-solid fa-xmark text-red-500"></i> Sai: <span id="wrong-total">0</span></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Cột phải: Bảng đen hướng dẫn giải -->
+        <div class="w-7/12 glass-panel rounded-2xl shadow-sm flex flex-col relative overflow-hidden bg-slate-800 border-slate-700">
+            <!-- Header Bảng đen -->
+            <div class="bg-slate-900 text-slate-200 p-3 flex justify-between items-center border-b border-slate-700 flex-shrink-0 z-10">
+                <h2 class="font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-chalkboard-user text-teal-400"></i> Hướng dẫn Trình bày
+                </h2>
+                <div class="flex gap-2 no-print">
+                    <button onclick="showNextStep('a')" id="btn-step-a" class="hidden text-xs bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded transition-colors shadow-sm">
+                        Tiếp tục Câu A <i class="fa-solid fa-forward-step ml-1"></i>
+                    </button>
+                    <button onclick="showNextStep('b')" id="btn-step-b" class="hidden text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded transition-colors shadow-sm">
+                        Tiếp tục Câu B <i class="fa-solid fa-forward-step ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Nội dung Bảng đen -->
+            <div id="solution-board" class="flex-1 overflow-y-auto p-6 font-mono text-slate-100 custom-scrollbar relative">
+                <!-- Watermark -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none no-print">
+                    <i class="fa-solid fa-calculator text-[15rem]"></i>
+                </div>
+                
+                <div id="solution-content-a" class="text-lg leading-relaxed space-y-4 mb-8">
+                    <div class="text-slate-500 italic text-center mt-20 no-print">Nhấn "Gợi ý giải" để xem hướng dẫn từng bước.</div>
+                </div>
+                
+                <div id="solution-content-b" class="text-lg leading-relaxed space-y-4 border-t border-slate-700 pt-6 hidden">
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Hint Gợi Ý -->
+    <div id="hint-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 hidden transition-opacity duration-300 no-print">
+        <div id="hint-content-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300">
+            <div class="bg-amber-100 border-b border-amber-200 px-5 py-3 flex justify-between items-center">
+                <h3 class="font-bold text-amber-800 flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i> Lời khuyên trước khi giải
+                </h3>
+                <button onclick="closeHint()" class="text-amber-700 hover:text-amber-900 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5 text-slate-700 space-y-4 text-base" id="hint-text">
+                <!-- Hint content -->
+            </div>
+            <div class="bg-slate-50 px-5 py-3 border-t border-slate-100 text-right">
+                <button onclick="closeHint()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-1.5 px-4 rounded-lg transition-colors">
+                    Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN LOGIC -->
+    <script>
+        // --- 1. CORE MATH ENGINE (Phân số & Đa thức) ---
+        function gcd(a, b) {
+            a = Math.abs(a); b = Math.abs(b);
+            while (b) { let temp = b; b = a % b; a = temp; }
+            return a;
+        }
+
+        class Frac {
+            constructor(n, d = 1) {
+                if (d === 0) throw new Error("Mẫu số không thể bằng 0");
+                if (d < 0) { n = -n; d = -d; }
+                let g = gcd(n, d);
+                this.n = n / g;
+                this.d = d / g;
+            }
+            add(f) { return new Frac(this.n * f.d + f.n * this.d, this.d * f.d); }
+            sub(f) { return new Frac(this.n * f.d - f.n * this.d, this.d * f.d); }
+            mul(f) { return new Frac(this.n * f.n, this.d * f.d); }
+            div(f) { return new Frac(this.n * f.d, this.d * f.n); }
+            isZero() { return this.n === 0; }
+            isPositive() { return this.n > 0; }
+            isNegative() { return this.n < 0; }
+            abs() { return new Frac(Math.abs(this.n), this.d); }
+            
+            toLatex(showPlus = false, isCoeff = false) {
+                if (this.isZero()) return "0";
+                let sign = this.isNegative() ? "-" : (showPlus ? "+" : "");
+                let absN = Math.abs(this.n);
+                
+                if (this.d === 1) {
+                    if (isCoeff && absN === 1) return sign === "-" ? "-" : (showPlus ? "+" : "");
+                    return sign + absN;
+                }
+                return sign + "\\frac{" + absN + "}{" + this.d + "}";
+            }
+            
+            toRawLatex() {
+                if (this.d === 1) return this.n < 0 ? `(${this.n})` : `${this.n}`;
+                return this.n < 0 ? `\\left(-\\frac{${Math.abs(this.n)}}{${this.d}}\\right)` : `\\frac{${this.n}}{${this.d}}`;
+            }
+        }
+
+        class Term {
+            constructor(c_n, c_d, deg) {
+                this.coeff = new Frac(c_n, c_d);
+                this.deg = deg;
+            }
+            toLatex(isFirst = false) {
+                if (this.coeff.isZero()) return "";
+                let cStr = this.coeff.toLatex(!isFirst, this.deg > 0);
+                if (cStr === "+" && this.deg > 0) cStr = "+ ";
+                else if (cStr === "-" && this.deg > 0) cStr = "- ";
+                else if (cStr !== "" && this.deg > 0 && !cStr.endsWith(" ")) cStr += "";
+
+                if (this.deg === 0) return this.coeff.toLatex(!isFirst, false);
+                if (this.deg === 1) return cStr + "x";
+                return cStr + "x^" + this.deg;
+            }
+            toRawLatex() {
+                let cStr = this.coeff.toRawLatex();
+                if (this.deg === 0) return cStr;
+                if (this.deg === 1) return (cStr==='1'||cStr==='(1)')?'x':(cStr==='-1'||cStr==='(-1)')?'(-x)': cStr + "x";
+                return (cStr==='1'||cStr==='(1)')?`x^{${this.deg}}`:(cStr==='-1'||cStr==='(-1)')?`(-x^{${this.deg}})`: cStr + "x^" + this.deg;
+            }
+        }
+
+        class Poly {
+            constructor(terms = []) {
+                this.terms = terms.filter(t => !t.coeff.isZero());
+            }
+            toLatex() {
+                if (this.terms.length === 0) return "0";
+                let sorted = [...this.terms].sort((a, b) => b.deg - a.deg);
+                let latex = "";
+                for (let i = 0; i < sorted.length; i++) {
+                    latex += sorted[i].toLatex(i === 0) + " ";
+                }
+                return latex.trim();
+            }
+        }
+
+        function t(n, d, deg) { return new Term(n, d, deg); }
+
+        // --- 2. DATA BANK (CÁC ĐỀ THI) ---
+        const DB = {
+            part1: [
+                { id: "HM_24_25", src: "Đề chính thức Hóc Môn 2024-2025", 
+                  a: { p1: [t(3,1,1), t(-2,1,0)], p2: [t(2,1,1), t(3,1,0)] },
+                  b: { divd: [t(6,1,3), t(-2,1,2), t(9,1,1)], divs: t(3,1,1) } },
+                { id: "HM_23_24", src: "Đề chính thức Hóc Môn 2023-2024", 
+                  a: { p1: [t(2,1,1), t(1,1,0)], p2: [t(1,1,1), t(-4,1,0)] },
+                  b: { divd: [t(9,1,3), t(-15,1,2), t(7,1,1)], divs: t(3,1,1) } },
+                { id: "HM_MH_24_25", src: "Đề minh họa Hóc Môn 2024-2025", 
+                  a: { p1: [t(3,1,1), t(-2,1,0)], p2: [t(2,1,1), t(1,1,0)] },
+                  b: { divd: [t(1,2,3), t(-2,1,2), t(1,1,1)], divs: t(-1,4,1) } },
+                { id: "HM_22_23", src: "Đề tham khảo HK2 Hóc Môn 2022-2023", 
+                  a: { p1: [t(2,1,1), t(-3,1,0)], p2: [t(4,1,1), t(5,1,0)] },
+                  b: { divd: [t(8,1,3), t(-10,1,2), t(7,1,1)], divs: t(2,1,1) } }
+            ],
+            part2: [
+                { id: "D1", src: "Đề 1 - THCS Bùi Văn Thủ", a: { p1: [t(1,1,1), t(-3,1,0)], p2: [t(4,1,1), t(5,1,0)] }, b: { divd: [t(15,1,5), t(-6,1,2), t(3,1,1)], divs: t(3,1,1) } },
+                { id: "D2", src: "Đề 2 - THCS Đỗ Văn Dậy", a: { p1: [t(4,1,1), t(-5,1,0)], p2: [t(3,1,1), t(-2,1,0)] }, b: { divd: [t(4,15,4), t(-4,5,3), t(4,5,2)], divs: t(-4,5,2) } },
+                { id: "D3", src: "Đề 3 - THCS Đặng Công Bỉnh", a: { p1: [t(1,1,1), t(1,1,0)], p2: [t(2,1,1), t(-3,1,0)] }, b: { divd: [t(1,6,4), t(-5,1,3), t(7,1,1)], divs: t(-1,2,1) } },
+                { id: "D4", src: "Đề 4 - THCS Tô Ký", a: { p1: [t(1,1,1), t(-1,1,0)], p2: [t(3,1,1), t(8,1,0)] }, b: { divd: [t(9,1,3), t(-12,1,2), t(6,1,1)], divs: t(3,1,1) } },
+                { id: "D5", src: "Đề 5 - THCS Đặng Thúc Vịnh", a: { p1: [t(4,1,1), t(3,1,0)], p2: [t(5,1,1), t(-2,1,0)] }, b: { divd: [t(1,3,3), t(4,3,2), t(2,1,1)], divs: t(1,3,1) } },
+                { id: "D6", src: "Đề 6 - THCS Nguyễn Thị Minh Khai", a: { p1: [t(2,1,1), t(-3,1,0)], p2: [t(4,1,1), t(5,1,0)] }, b: { divd: [t(1,3,3), t(-1,6,2), t(3,1,1)], divs: t(4,1,1) } },
+                { id: "D7", src: "Đề 7 - THCS Lý Chính Thắng 1", a: { p1: [t(1,1,1), t(1,1,0)], p2: [t(1,1,1), t(-2,1,0)] }, b: { divd: [t(4,1,3), t(-8,1,2), t(2,1,1)], divs: t(2,1,1) } },
+                { id: "D8", src: "Đề 8 - THCS Phan Công Hớn", a: { p1: [t(2,1,1), t(1,1,0)], p2: [t(1,1,1), t(3,1,0)] }, b: { divd: [t(4,1,3), t(-6,1,2), t(2,1,1)], divs: t(2,1,1) } },
+                { id: "D9", src: "Đề 9 - THCS Tân Xuân", a: { p1: [t(3,1,1), t(-2,1,0)], p2: [t(3,1,1), t(5,1,0)] }, b: { divd: [t(2,1,4), t(-9,1,3), t(-6,1,2)], divs: t(3,1,2) } },
+                { id: "D10", src: "Đề 10 - THCS Hà Huy Tập", a: { p1: [t(4,1,1), t(-3,1,0)], p2: [t(2,1,1), t(1,1,0)] }, b: { divd: [t(-2,3,3), t(1,2,2), t(2,1,1)], divs: t(-2,3,1) } },
+                { id: "D11", src: "Đề 11 - THCS Nguyễn An Khương", a: { p1: [t(2,1,1), t(-3,1,0)], p2: [t(1,1,2), t(2,1,1), t(-7,1,0)] }, b: { divd: [t(1,6,3), t(-2,3,2)], divs: t(-1,3,1) } },
+                { id: "D12", src: "Đề 12 - THCS Nguyễn Văn Bứa", a: { p1: [t(2,1,1), t(-3,1,0)], p2: [t(5,1,1), t(-4,1,0)] }, b: { divd: [t(1,2,3), t(-1,6,2), t(3,1,1)], divs: t(3,1,1) } },
+                { id: "D13", src: "Đề 13 - THCS Tam Đông 1", a: { p1: [t(3,1,1), t(2,1,0)], p2: [t(5,1,1), t(-4,1,0)] }, b: { divd: [t(-1,2,3), t(1,4,2), t(-5,1,1)], divs: t(-1,10,1) } },
+                { id: "D14", src: "Đề 14 - THCS Tre Việt", a: { p1: [t(2,1,1), t(-9,1,0)], p2: [t(1,1,1), t(2,1,0)] }, b: { divd: [t(-1,3,6), t(1,9,5), t(-1,9,4)], divs: t(-3,1,2) } },
+                { id: "D15", src: "Đề 15 - THCS Đông Thạnh", a: { p1: [t(1,1,1), t(-3,1,0)], p2: [t(2,1,1), t(-5,1,0)] }, b: { divd: [t(-2,5,3), t(-5,2,2), t(5,1,1)], divs: t(-5,2,1) } },
+                { id: "D16", src: "Đề 16 - THCS Nguyễn Hồng Đào", a: { p1: [t(1,1,1), t(-1,1,0)], p2: [t(2,1,2), t(-3,1,1), t(1,1,0)] }, b: { divd: [t(-1,2,5), t(1,4,2), t(2,1,1)], divs: t(-1,2,1) } },
+                { id: "D17", src: "Đề 17 - THCS Xuân Thới Thượng", a: { p1: [t(1,1,1), t(-5,1,0)], p2: [t(3,1,1), t(2,1,0)] }, b: { divd: [t(18,1,4), t(-9,1,2), t(15,1,1)], divs: t(-3,2,1) } },
+            ]
+        };
+
+        // --- 3. GENERATOR ENGINE ---
+        function randInt(min, max, excludeZero = true) {
+            let val;
+            do { val = Math.floor(Math.random() * (max - min + 1)) + min; } 
+            while (excludeZero && val === 0);
+            return val;
+        }
+        function randChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function mutateTerm(term, isFraction) {
+            let n = randInt(-6, 6);
+            let d = 1;
+            if (isFraction || Math.random() < 0.3) {
+                d = randChoice([2, 3, 4, 5]);
+            }
+            return t(n, d, term.deg);
+        }
+
+        function mutateProblem(orig, sectionName) {
+            let isFracB = orig.b.divs.coeff.d !== 1 || orig.b.divd.some(t => t.coeff.d !== 1);
+            
+            let p1 = orig.a.p1.map(t => mutateTerm(t, false));
+            let p2 = orig.a.p2.map(t => mutateTerm(t, false));
+            
+            let divd = orig.b.divd.map(t => mutateTerm(t, isFracB));
+            let divs = mutateTerm(orig.b.divs, isFracB);
+
+            return {
+                src: `${orig.src} (Biến thể số liệu)`,
+                isOriginal: false,
+                a: { p1, p2 },
+                b: { divd, divs }
+            };
+        }
+
+        function genAdvanced() {
+            let r = Math.random();
+            let p1, p2, divd, divs;
+            
+            if (r < 0.5) {
+                p1 = [t(randInt(-5,5), randChoice([1,2,3]), 1), t(randInt(-8,8), 1, 0)];
+                p2 = [t(randInt(-5,5), randChoice([1,2,3]), 1), t(randInt(-8,8), 1, 0)];
+            } else {
+                p1 = [t(randInt(-4,4), 1, 1), t(randInt(-5,5), 1, 0)];
+                p2 = [t(randInt(-3,3), 1, 2), t(randInt(-5,5), 1, 1), t(randInt(-6,6), 1, 0)];
+            }
+
+            let degDivs = randChoice([1, 2, 3]);
+            divs = t(randInt(-5,5), randChoice([1,2,3,4]), degDivs);
+            
+            let numTerms = randInt(3, 4);
+            divd = [];
+            let currentDeg = degDivs + randInt(1, 3);
+            for(let i=0; i<numTerms; i++) {
+                divd.push(t(randInt(-9,9), randChoice([1,2,3,4,5]), currentDeg));
+                currentDeg++;
+            }
+            divd.reverse();
+
+            return {
+                src: "Phần 3: Chế độ Phát triển nâng cao (Đầu lâu) 💀",
+                isOriginal: false,
+                a: { p1, p2 },
+                b: { divd, divs }
+            };
+        }
+
+        // --- 4. APP STATE & LOGIC ---
+        let currentProblem = null;
+        let solutionSteps = { a: [], b: [] }; // Mảng lưu objects { latex, note }
+        let currentStepA = 0;
+        let currentStepB = 0;
+        
+        let streak = 0, correctTotal = 0, wrongTotal = 0;
+
+        function handleCheckboxChange() {
+            const p1 = document.getElementById('part1').checked;
+            const p2 = document.getElementById('part2').checked;
+            const p3 = document.getElementById('part3').checked;
+            
+            if (!p1 && !p2 && !p3) {
+                document.getElementById('part1').checked = true;
+            }
+            generateProblem();
+        }
+
+        function generateProblem() {
+            const p1 = document.getElementById('part1').checked;
+            const p2 = document.getElementById('part2').checked;
+            const p3 = document.getElementById('part3').checked;
+
+            let pools = [];
+            if (p1) pools.push({ type: 'part1', data: DB.part1 });
+            if (p2) pools.push({ type: 'part2', data: DB.part2 });
+
+            let prob = null;
+
+            if (p3) {
+                let r = Math.random();
+                if (r < 0.5 || pools.length === 0) {
+                    prob = genAdvanced();
+                } else {
+                    let pool = randChoice(pools);
+                    let orig = randChoice(pool.data);
+                    prob = Math.random() < 0.5 ? orig : mutateProblem(orig, pool.type);
+                }
+            } else {
+                let pool = randChoice(pools);
+                let orig = randChoice(pool.data);
+                prob = Math.random() < 0.5 ? orig : mutateProblem(orig, pool.type);
+            }
+
+            currentProblem = prob;
+            renderProblem();
+            prepareSolutionSteps();
+            resetBoard();
+            updateStatsUI();
+        }
+
+        function renderProblem() {
+            const container = document.getElementById('problem-content');
+            const sourceLabel = document.getElementById('problem-source');
+            
+            let polyA1 = new Poly(currentProblem.a.p1).toLatex();
+            let polyA2 = new Poly(currentProblem.a.p2).toLatex();
+            let polyB1 = new Poly(currentProblem.b.divd).toLatex();
+            let polyB2 = currentProblem.b.divs.toLatex();
+
+            let latexA = `a) \\; (${polyA1})(${polyA2})`;
+            let latexB = `b) \\; (${polyB1}) : ` + (currentProblem.b.divs.coeff.d !== 1 || currentProblem.b.divs.coeff.n < 0 ? `\\left(${polyB2}\\right)` : `(${polyB2})`);
+
+            container.innerHTML = `
+                <div class="mb-4"><strong>Thực hiện phép tính:</strong></div>
+                <div class="pl-4 space-y-4">
+                    <div>$${latexA}$</div>
+                    <div>$${latexB}$</div>
+                </div>
+            `;
+            
+            sourceLabel.innerHTML = currentProblem.src;
+            if(currentProblem.isOriginal === false && !currentProblem.src.includes('Đầu lâu')) {
+                sourceLabel.className = "text-xs font-bold px-2.5 py-1 bg-amber-100 text-amber-700 rounded-md border border-amber-200";
+            } else if (currentProblem.src.includes('Đầu lâu')) {
+                sourceLabel.className = "text-xs font-bold px-2.5 py-1 bg-red-100 text-red-700 rounded-md border border-red-200";
+            } else {
+                sourceLabel.className = "text-xs font-bold px-2.5 py-1 bg-teal-100 text-teal-800 rounded-md border border-teal-200";
+            }
+
+            MathJax.typesetPromise();
+        }
+
+        // --- 5. LOGIC GIẢI TỪNG BƯỚC (BAREM + CHÚ THÍCH) ---
+        function prepareSolutionSteps() {
+            solutionSteps = { a: [], b: [] };
+            
+            // --- CÂU A: NHÂN ---
+            let a_p1 = currentProblem.a.p1;
+            let a_p2 = currentProblem.a.p2;
+            
+            let origA = `(${new Poly(a_p1).toLatex()})(${new Poly(a_p2).toLatex()})`;
+            
+            let expStrs = [];
+            let expandedTerms = [];
+            for (let t1 of a_p1) {
+                for (let t2 of a_p2) {
+                    let r1 = t1.toRawLatex();
+                    let r2 = t2.toRawLatex();
+                    expStrs.push(`${r1} \\cdot ${r2}`);
+                    
+                    let newC = t1.coeff.mul(t2.coeff);
+                    let newDeg = t1.deg + t2.deg;
+                    expandedTerms.push(t(newC.n, newC.d, newDeg));
+                }
+            }
+            let step1Latex = expStrs.join(" + ").replace(/\+ -/g, "- ");
+
+            let pExp = new Poly(expandedTerms);
+            let step2Latex = pExp.toLatex();
+
+            let groupedMap = {};
+            for (let term of expandedTerms) {
+                if (!groupedMap[term.deg]) groupedMap[term.deg] = new Frac(0);
+                groupedMap[term.deg] = groupedMap[term.deg].add(term.coeff);
+            }
+            let finalTermsA = [];
+            for (let deg in groupedMap) {
+                if (!groupedMap[deg].isZero()) finalTermsA.push(t(groupedMap[deg].n, groupedMap[deg].d, parseInt(deg)));
+            }
+            let pFinalA = new Poly(finalTermsA);
+            let step3Latex = pFinalA.toLatex();
+
+            // Đẩy từng bước kèm ghi chú chi tiết
+            solutionSteps.a.push({ latex: `\\text{a) } ${origA}`, note: "" });
+            solutionSteps.a.push({ latex: `= ${step1Latex}`, note: "Nhân phân phối từng hạng tử của đa thức thứ nhất với từng hạng tử của đa thức thứ hai." });
+            if (step1Latex !== step2Latex) {
+                solutionSteps.a.push({ latex: `= ${step2Latex}`, note: "Thực hiện tính kết quả của các phép nhân (chú ý quy tắc dấu)." });
+            }
+            if (step2Latex !== step3Latex) {
+                solutionSteps.a.push({ latex: `= ${step3Latex}`, note: "Thu gọn các hạng tử đồng dạng (cùng số mũ) để ra kết quả cuối cùng." });
+            }
+
+
+            // --- CÂU B: CHIA ---
+            let b_divd = currentProblem.b.divd;
+            let b_divs = currentProblem.b.divs;
+            let divsLatex = b_divs.coeff.d !== 1 || b_divs.coeff.n < 0 ? `\\left(${b_divs.toLatex()}\\right)` : `(${b_divs.toLatex()})`;
+            let origB = `\\text{b) } \\left(${new Poly(b_divd).toLatex()}\\right) : ${divsLatex}`;
+
+            let divStrs = [];
+            let resultTermsB = [];
+            for (let t of b_divd) {
+                let r1 = t.coeff.d !== 1 || t.coeff.n < 0 ? `\\left(${t.toLatex(true)}\\right)` : `(${t.toLatex(true)})`;
+                divStrs.push(`${r1} : ${divsLatex}`);
+                
+                let newC = t.coeff.div(b_divs.coeff);
+                let newDeg = t.deg - b_divs.deg;
+                resultTermsB.push(new Term(newC.n, newC.d, newDeg));
+            }
+            let step1B = divStrs.join(" + ").replace(/\+ -/g, "- ");
+
+            let pFinalB = new Poly(resultTermsB);
+            let step2B = pFinalB.toLatex();
+
+            solutionSteps.b.push({ latex: origB, note: "" });
+            solutionSteps.b.push({ latex: `= ${step1B}`, note: "Lấy từng hạng tử của đa thức bị chia đem chia cho đơn thức." });
+            solutionSteps.b.push({ latex: `= ${step2B}`, note: "Thực hiện phép chia (chia hệ số, trừ số mũ của biến) để ra kết quả." });
+        }
+
+        // --- 6. UI BOARD CONTROLS ---
+        function resetBoard() {
+            document.getElementById('solution-content-a').innerHTML = '';
+            document.getElementById('solution-content-b').innerHTML = '';
+            document.getElementById('solution-content-b').classList.add('hidden');
+            
+            document.getElementById('btn-step-a').classList.add('hidden');
+            document.getElementById('btn-step-b').classList.add('hidden');
+            
+            currentStepA = 0;
+            currentStepB = 0;
+        }
+
+        function startStepByStep() {
+            resetBoard();
+            document.getElementById('btn-step-a').classList.remove('hidden');
+            document.getElementById('btn-step-a').innerHTML = 'Bắt đầu Câu A <i class="fa-solid fa-forward-step ml-1"></i>';
+            showHintModal(
+                `<div class="text-center mb-3">Hệ thống sẽ trình bày từng bước giải kèm theo <strong>lời giải thích chi tiết bên dưới</strong> mỗi công thức.</div>
+                <hr class="my-2 border-amber-200">
+                <strong>Bạn cần nhớ nhanh:</strong><br>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                    <li><strong>Câu a (Nhân):</strong> Dấu cùng loại nhân nhau thành $(+)$, khác loại thành $(-)$. Khi nhân biến: $x^m \\cdot x^n = x^{m+n}$.</li>
+                    <li><strong>Câu b (Chia):</strong> Khi chia biến: $x^m : x^n = x^{m-n}$.</li>
+                </ul>`
+            );
+            
+            streak++;
+            correctTotal++;
+            updateStatsUI();
+        }
+
+        function showNextStep(part) {
+            let container = document.getElementById(`solution-content-${part}`);
+            if (part === 'b' && currentStepB === 0) {
+                container.classList.remove('hidden');
+            }
+
+            let stepData = solutionSteps[part];
+            let currentStepIdx = part === 'a' ? currentStepA : currentStepB;
+
+            if (currentStepIdx < stepData.length) {
+                let stepObj = stepData[currentStepIdx];
+                
+                let div = document.createElement('div');
+                div.className = 'step-item';
+                
+                // Render chú thích cực kỳ rõ ràng nằm ngay trên công thức
+                let noteHtml = stepObj.note ? `<div class="text-sm text-teal-300 font-sans italic mb-1 flex items-start gap-1.5"><i class="fa-solid fa-arrow-turn-down mt-1"></i> <span>${stepObj.note}</span></div>` : "";
+                
+                div.innerHTML = `${noteHtml}<div class="overflow-x-auto overflow-y-hidden py-1">$$ ${stepObj.latex} $$</div>`;
+                
+                container.appendChild(div);
+                MathJax.typesetPromise([div]).then(() => {
+                    let board = document.getElementById('solution-board');
+                    board.scrollTop = board.scrollHeight;
+                });
+
+                if (part === 'a') currentStepA++;
+                else currentStepB++;
+
+                let btn = document.getElementById(`btn-step-${part}`);
+                btn.innerHTML = `Hiện bước ${currentStepIdx + 2} <i class="fa-solid fa-forward-step ml-1"></i>`;
+
+                if (part === 'a' && currentStepA >= stepData.length) {
+                    btn.classList.add('hidden');
+                    let btnB = document.getElementById('btn-step-b');
+                    btnB.classList.remove('hidden');
+                    btnB.innerHTML = 'Bắt đầu Câu B <i class="fa-solid fa-forward-step ml-1"></i>';
+                }
+                
+                if (part === 'b' && currentStepB >= stepData.length) {
+                    document.getElementById('btn-step-b').classList.add('hidden');
+                    setTimeout(() => {
+                        showHintModal(`<strong>Hoàn thành xuất sắc! 🎉</strong><br>Bạn đã xem xong toàn bộ các bước trình bày chuẩn mực theo barem điểm cùng với những chú thích quan trọng. Hãy nhớ trình bày vào bài thi cẩn thận như thế này nhé!`);
+                    }, 600);
+                }
+            }
+        }
+
+        // --- 7. UI UTILS & MODAL HINT ---
+        function showHintModal(htmlContent) {
+            const modal = document.getElementById('hint-modal');
+            const box = document.getElementById('hint-content-box');
+            document.getElementById('hint-text').innerHTML = htmlContent;
+            
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+
+            MathJax.typesetPromise();
+        }
+
+        function closeHint() {
+            const modal = document.getElementById('hint-modal');
+            const box = document.getElementById('hint-content-box');
+            modal.classList.add('opacity-0');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        function updateStatsUI() {
+            document.getElementById('streak').innerText = streak;
+            document.getElementById('correct-total').innerText = correctTotal;
+            document.getElementById('wrong-total').innerText = wrongTotal;
+        }
+
+        function initPdfButton() {
+            console.log("PDF Printer ready");
+        }
+
+        window.onload = function() {
+            initPdfButton();
+            generateProblem();
+        };
+
+    </script>
+</body>
+</html>
