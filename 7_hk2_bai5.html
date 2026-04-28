@@ -90,13 +90,32 @@
             </div>
         </div>
 
-        <div class="w-7/12 glass-panel rounded-2xl shadow-sm flex flex-col relative overflow-hidden bg-slate-800 border-slate-700 p-2">
+		<div class="w-7/12 glass-panel rounded-2xl shadow-sm flex flex-col relative overflow-hidden bg-slate-800 border-slate-700 p-2">
             
-            <div id="box" class="jxgbox w-full h-[55%] mb-2 shadow-inner"></div>
+            <div class="flex flex-wrap gap-2 mb-2 bg-slate-900 p-2 rounded-lg justify-center border border-slate-600 shadow-sm">
+                <button id="btnFlipX" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded text-sm transition-colors">
+                    <i class="fa-solid fa-arrows-left-right text-teal-400 mr-1"></i> Lật ngang
+                </button>
+                <button id="btnFlipY" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded text-sm transition-colors">
+                    <i class="fa-solid fa-arrows-up-down text-teal-400 mr-1"></i> Lật dọc
+                </button>
+                <div class="w-px bg-slate-600 mx-1"></div>
+                <button id="btnRot30" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded text-sm transition-colors">
+                    <i class="fa-solid fa-rotate-right text-amber-400 mr-1"></i> 30°
+                </button>
+                <button id="btnRot45" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded text-sm transition-colors">
+                    <i class="fa-solid fa-rotate-right text-amber-400 mr-1"></i> 45°
+                </button>
+                <button id="btnRot90" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded text-sm transition-colors">
+                    <i class="fa-solid fa-rotate-right text-amber-400 mr-1"></i> 90°
+                </button>
+            </div>
+
+            <div id="box" class="jxgbox w-full h-[50%] mb-2 shadow-inner"></div>
 
             <div class="bg-slate-900 text-slate-200 p-2 rounded-t-lg flex justify-between items-center border-b border-slate-700 flex-shrink-0">
                 <h2 class="font-bold flex items-center gap-2 text-sm">
-                    <i class="fa-solid fa-lightbulb text-amber-400"></i> Phân tích & Gợi ý giải
+                    <i class="fa-solid fa-lightbulb text-amber-400"></i> Phân tích & Gợi ý giải theo Barem
                 </h2>
             </div>
 
