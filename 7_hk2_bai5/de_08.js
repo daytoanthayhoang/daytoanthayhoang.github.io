@@ -4,7 +4,7 @@ export function veDe08(containerId, renderLog) {
     });
 
     let state = { angle: 0, flipX: false, flipY: false };
-    const baseCoords = { B: [0, 0], A: [1, 4], C: [6, 0] }; // Nhọn, AB < AC
+    const baseCoords = { B: [0, 0], A: [1, 4], C: [6, 0] }; 
 
     function getTransformed(ptName) {
         let x = baseCoords[ptName][0], y = baseCoords[ptName][1];
@@ -23,13 +23,10 @@ export function veDe08(containerId, renderLog) {
     const segBC = board.create('segment', [pB, pC], {strokeWidth: 2, strokeColor: '#1e293b', withLabel: false});
     const segCA = board.create('segment', [pC, pA], {strokeWidth: 2, strokeColor: '#1e293b', withLabel: false});
 
-    // M trung điểm AC
     const pM = board.create('midpoint', [pA, pC], {name: 'M', size: 3, color: '#2563eb', visible: false});
     const segBM = board.create('segment', [pB, pM], {strokeWidth: 2, strokeColor: '#2563eb', withLabel: false, visible: false});
-    const hatchAM = board.create('hatch', [board.create('segment',[pA,pM],{visible:false}), 1], {strokeWidth: 2, strokeColor: '#2563eb', tickEndings: [1, 1], visible: false, withLabel: false});
-    const hatchCM = board.create('hatch', [board.create('segment',[pC,pM],{visible:false}), 1], {strokeWidth: 2, strokeColor: '#2563eb', tickEndings: [1, 1], visible: false, withLabel: false});
-
-    // Điểm D (M là trung điểm BD)
+    
+    // Tọa độ toán học thuần túy (Chống sập do lỗi version JSXGraph)
     const pD = board.create('point', [
         () => 2 * pM.X() - pB.X(),
         () => 2 * pM.Y() - pB.Y()
@@ -37,15 +34,13 @@ export function veDe08(containerId, renderLog) {
     
     const segMD = board.create('segment', [pM, pD], {strokeWidth: 2, strokeColor: '#2563eb', dash: 2, withLabel: false, visible: false});
     const segCD = board.create('segment', [pC, pD], {strokeWidth: 2, strokeColor: '#9333ea', withLabel: false, visible: false});
-    const hatchBM = board.create('hatch', [segBM, 2], {strokeWidth: 2, strokeColor: '#2563eb', visible: false, withLabel: false});
-    const hatchMD = board.create('hatch', [segMD, 2], {strokeWidth: 2, strokeColor: '#2563eb', visible: false, withLabel: false});
 
-    // Đường cao AH và điểm E (H là trung điểm AE)
     const lineBC = board.create('line', [pB, pC], {visible: false});
     const pH = board.create('perpendicularpoint', [lineBC, pA], {name: 'H', size: 3, color: '#dc2626', visible: false});
     const segAH = board.create('segment', [pA, pH], {strokeWidth: 2, strokeColor: '#dc2626', withLabel: false, visible: false});
     const angleH = board.create('angle', [pA, pH, pC], {type: 'square', size: 0.3, withLabel: false, strokeColor: '#dc2626', visible: false});
 
+    // Tọa độ E đối xứng A qua H
     const pE = board.create('point', [
         () => 2 * pH.X() - pA.X(),
         () => 2 * pH.Y() - pA.Y()
@@ -55,7 +50,6 @@ export function veDe08(containerId, renderLog) {
     const segBE = board.create('segment', [pB, pE], {strokeWidth: 2, strokeColor: '#ea580c', withLabel: false, visible: false});
     const segEC = board.create('segment', [pE, pC], {strokeWidth: 2, strokeColor: '#16a34a', withLabel: false, visible: false});
 
-    // I trung điểm EC, K giao BC và EM
     const pI = board.create('midpoint', [pE, pC], {name: 'I', size: 3, color: '#16a34a', visible: false});
     const lineEM = board.create('line', [pE, pM], {visible: false});
     const pK = board.create('intersection', [lineBC, lineEM, 0], {name: 'K', size: 3, color: '#16a34a', visible: false});
@@ -71,8 +65,8 @@ export function veDe08(containerId, renderLog) {
         rotate: function(deg) { state.angle = (state.angle + deg) % 360; executeTransform(); },
         nextStep: function() {
             if (step === 1) {
-                pM.setAttribute({visible: true}); segBM.setAttribute({visible: true}); hatchAM.setAttribute({visible: true}); hatchCM.setAttribute({visible: true});
-                pD.setAttribute({visible: true}); segMD.setAttribute({visible: true}); segCD.setAttribute({visible: true}); hatchBM.setAttribute({visible: true}); hatchMD.setAttribute({visible: true});
+                pM.setAttribute({visible: true}); segBM.setAttribute({visible: true});
+                pD.setAttribute({visible: true}); segMD.setAttribute({visible: true}); segCD.setAttribute({visible: true});
                 renderLog(`<div class="mb-2 text-teal-300"><b>Câu a) Chứng minh $\\Delta ABM = \\Delta CDM$ (1.0đ)</b></div>
                 <ul class="list-none space-y-2 pl-2 text-sm border-l-2 border-slate-600 ml-1">
                    <li>- Xét $\\Delta ABM$ và $\\Delta CDM$ có: $AM = CM$ (gt), $\\widehat{AMB} = \\widehat{CMD}$ (đối đỉnh), $BM = DM$ (gt).</li>
