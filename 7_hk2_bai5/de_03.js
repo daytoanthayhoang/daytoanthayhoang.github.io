@@ -31,9 +31,10 @@ export function veDe03(containerId, renderLog) {
     const pN = board.create('point', [() => pC.X() + 0.45 * (pA.X() - pC.X()), () => pC.Y() + 0.45 * (pA.Y() - pC.Y())], {name: 'N', size: 3, color: '#2563eb', visible: false});
     const segMN = board.create('segment', [pM, pN], {strokeWidth: 2, strokeColor: '#2563eb', withLabel: false, visible: false});
 
-    const bisectM = board.create('bisectorlines', [pN, pM, pB], {visible: false});
-    const bisectN = board.create('bisectorlines', [pC, pN, pM], {visible: false});
-    const pQ = board.create('intersection', [bisectM.line1, bisectN.line1, 0], {name: 'Q', size: 3, color: '#9333ea', visible: false});
+    // Cách giải quyết lỗi: Đổi 'bisectorlines' thành 'bisector' chuẩn
+    const bisectM = board.create('bisector', [pN, pM, pB], {visible: false});
+    const bisectN = board.create('bisector', [pC, pN, pM], {visible: false});
+    const pQ = board.create('intersection', [bisectM, bisectN, 0], {name: 'Q', size: 3, color: '#9333ea', visible: false});
     
     const segMQ = board.create('segment', [pM, pQ], {strokeWidth: 2, strokeColor: '#9333ea', dash: 2, withLabel: false, visible: false});
     const segNQ = board.create('segment', [pN, pQ], {strokeWidth: 2, strokeColor: '#9333ea', dash: 2, withLabel: false, visible: false});

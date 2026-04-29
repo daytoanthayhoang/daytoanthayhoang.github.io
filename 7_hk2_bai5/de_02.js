@@ -24,9 +24,10 @@ export function veDe02(containerId, renderLog) {
     const segCA = board.create('segment', [pC, pA], {strokeWidth: 2, strokeColor: '#1e293b', withLabel: false});
     board.create('angle', [pB, pA, pC], {type: 'square', size: 0.4, withLabel: false, strokeColor: '#1e293b'});
 
+    // Cách giải quyết lỗi: Đổi 'bisectorlines' thành 'bisector' chuẩn
     const lineAC = board.create('line', [pA, pC], {visible: false});
-    const bisectorB = board.create('bisectorlines', [pA, pB, pC], {visible: false});
-    const pD = board.create('intersection', [bisectorB.line1, lineAC, 0], {name: 'D', size: 3, color: '#2563eb', visible: false});
+    const bisectorB = board.create('bisector', [pA, pB, pC], {visible: false});
+    const pD = board.create('intersection', [bisectorB, lineAC, 0], {name: 'D', size: 3, color: '#2563eb', visible: false});
     const segBD = board.create('segment', [pB, pD], {strokeWidth: 2, strokeColor: '#2563eb', withLabel: false, visible: false});
     const a1 = board.create('angle', [pA, pB, pD], {radius: 0.8, withLabel: false, visible: false});
     const a2 = board.create('angle', [pD, pB, pC], {radius: 1.0, withLabel: false, visible: false});
