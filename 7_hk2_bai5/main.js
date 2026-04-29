@@ -1,9 +1,16 @@
+import { veDe00 } from './de_00.js';
 import { veDe01 } from './de_01.js';
 import { veDe02 } from './de_02.js';
 import { veDe03 } from './de_03.js';
 import { veDe04 } from './de_04.js';
 
 const DB_DE = {
+    "0": {
+        text: `Cho $\\Delta ABC$ vuông tại A ($AB < AC$) có $AH$ là đường cao. Trên tia $HC$ lấy điểm $D$ sao cho $HD = HB$. Kẻ $CE \\perp AD$ tại $E$. <br><br>
+        <b>a)</b> Chứng minh $\\Delta AHB = \\Delta AHD$ và $\\Delta ABD$ cân.<br>
+        <b>b)</b> Chứng minh $\\widehat{BAH} = \\widehat{ACB}$ và $\\widehat{ECD} = \\widehat{ACB}$.<br>
+        <b>c)</b> Chứng minh $CB$ là tia phân giác của $\\widehat{ACE}$.`
+    },
     "1": {
         text: `Cho $\\Delta ABC$ vuông tại A ($AB < AC$) có $AH$ là đường cao. Trên cạnh $HC$, vẽ điểm $D$ sao cho $AD = AB$. <br><br>
         <b>a)</b> Chứng minh: $\\Delta AHB = \\Delta AHD$.<br>
@@ -59,7 +66,8 @@ function loadDe(maDe) {
 
     renderSolutionLog(`<div class="text-slate-400 italic text-center">Bắt đầu vẽ hình. Hãy nhấn "Vẽ bước tiếp / Xem gợi ý".</div>`, true);
 
-    if (maDe === '1') currentBoardCtrl = veDe01('box', renderSolutionLog);
+    if (maDe === '0') currentBoardCtrl = veDe00('box', renderSolutionLog);
+    else if (maDe === '1') currentBoardCtrl = veDe01('box', renderSolutionLog);
     else if (maDe === '2') currentBoardCtrl = veDe02('box', renderSolutionLog);
     else if (maDe === '3') currentBoardCtrl = veDe03('box', renderSolutionLog);
     else if (maDe === '4') currentBoardCtrl = veDe04('box', renderSolutionLog);
@@ -75,5 +83,6 @@ document.getElementById('btnRot45').addEventListener('click', () => { if(current
 document.getElementById('btnRot90').addEventListener('click', () => { if(currentBoardCtrl) currentBoardCtrl.rotate(90); });
 
 window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => { loadDe('1'); }, 200);
+    // Mặc định load Đề 0 đầu tiên
+    setTimeout(() => { loadDe('0'); }, 200); 
 });
