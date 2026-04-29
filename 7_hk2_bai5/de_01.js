@@ -1,46 +1,35 @@
 export function veDe01(containerId, renderLog) {
     const board = JXG.JSXGraph.initBoard(containerId, {
-        boundingbox: [-5, 8, 12, -5], // Viền rộng để khi xoay không bị lẹm
-        axis: false, 
-        showCopyright: false, 
-        keepaspectratio: true
+        boundingbox: [-5, 8, 12, -5], 
+        axis: false, showCopyright: false, keepaspectratio: true
     });
 
-    // --- 1. TOÁN HỌC MA TRẬN CHO XOAY/LẬT ---
     let state = { angle: 0, flipX: false, flipY: false };
     const baseCoords = { A: [0, 4], B: [0, 0], C: [7, 4] };
 
     function getTransformed(ptName) {
         let x = baseCoords[ptName][0];
         let y = baseCoords[ptName][1];
-        
-        let cx = 3.5, cy = 2; // Tâm xoay
-        let nx = x - cx;
-        let ny = y - cy;
-
+        let cx = 3.5, cy = 2; 
+        let nx = x - cx, ny = y - cy;
         if (state.flipX) nx = -nx;
         if (state.flipY) ny = -ny;
-
         let rad = state.angle * Math.PI / 180;
         let rx = nx * Math.cos(rad) - ny * Math.sin(rad);
         let ry = nx * Math.sin(rad) + ny * Math.cos(rad);
-
         return [rx + cx, ry + cy];
     }
 
-    // --- 2. VẼ CÁC ĐIỂM CƠ BẢN ---
     const pA = board.create('point', getTransformed('A'), {name: 'A', size: 3, color: '#1e293b', label: {offset: [-15, 15]}});
     const pB = board.create('point', getTransformed('B'), {name: 'B', size: 3, color: '#1e293b', label: {offset: [-15, -15]}});
     const pC = board.create('point', getTransformed('C'), {name: 'C', size: 3, color: '#1e293b', label: {offset: [15, 15]}});
     
-    // --- 3. TAM GIÁC & GÓC VUÔNG ---
     const segAB = board.create('segment', [pA, pB], {strokeWidth: 2, strokeColor: '#1e293b', withLabel: false});
     const segBC = board.create('segment', [pB, pC], {strokeWidth: 2, strokeColor: '#1e293b', withLabel: false});
     const segCA = board.create('segment', [pC, pA], {strokeWidth: 2, strokeColor: '#1e293b', withLabel: false});
     
     board.create('angle', [pC, pA, pB], {type: 'square', size: 0.4, withLabel: false, strokeColor: '#1e293b'});
 
-    // --- 4. CÁC ĐỐI TƯỢNG ẨN (Chờ step) ---
     const lineBC = board.create('line', [pB, pC], {visible: false});
     const pH = board.create('perpendicularpoint', [lineBC, pA], {name: 'H', size: 3, color: '#dc2626', label: {offset: [5, -15]}, visible: false});
     const segAH = board.create('segment', [pA, pH], {strokeWidth: 2, strokeColor: '#dc2626', withLabel: false, visible: false});
@@ -67,16 +56,14 @@ export function veDe01(containerId, renderLog) {
     const angleF = board.create('angle', [pA, pF, pC], {type: 'square', size: 0.3, withLabel: false, strokeColor: '#16a34a', visible: false});
     const segDE = board.create('segment', [pD, pE], {strokeWidth: 2, strokeColor: '#9333ea', withLabel: false, visible: false});
 
-    // --- 5. HÀM CẬP NHẬT TỌA ĐỘ KHI XOAY ---
     function executeTransform() {
-        pA.moveTo(getTransformed('A'), 300); // 300ms animation
+        pA.moveTo(getTransformed('A'), 300);
         pB.moveTo(getTransformed('B'), 300);
         pC.moveTo(getTransformed('C'), 300);
     }
 
     let step = 1;
 
-    // --- 6. XUẤT OBJECT ĐIỀU KHIỂN ---
     return {
         flipX: function() { state.flipX = !state.flipX; executeTransform(); },
         flipY: function() { state.flipY = !state.flipY; executeTransform(); },
