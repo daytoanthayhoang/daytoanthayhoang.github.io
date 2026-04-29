@@ -1,5 +1,7 @@
 import { veDe01 } from './de_01.js';
 import { veDe02 } from './de_02.js';
+import { veDe03 } from './de_03.js';
+import { veDe04 } from './de_04.js';
 
 const DB_DE = {
     "1": {
@@ -13,6 +15,18 @@ const DB_DE = {
         <b>a)</b> Chứng minh $\\Delta ABD = \\Delta EBD$.<br>
         <b>b)</b> Tia ED cắt tia BA tại M. Chứng minh $\\Delta MBC$ cân.<br>
         <b>c)</b> Gọi K là trung điểm của MC. Chứng minh ba điểm B, D, K thẳng hàng.`
+    },
+    "3": {
+        text: `Cho $\\Delta ABC$ cân tại A, vẽ AH là đường cao của $\\Delta ABC$. <br><br>
+        <b>a)</b> Chứng minh: $\\Delta AHB = \\Delta AHC$.<br>
+        <b>b)</b> Lấy điểm M nằm giữa A và B. Qua M vẽ đường thẳng song song với BC, đường thẳng này cắt AC tại N. Chứng minh: $\\Delta AMN$ cân.<br>
+        <b>c)</b> Tia phân giác của $\\widehat{BMN}$ cắt tia phân giác của $\\widehat{CNM}$ tại Q. Chứng minh: 3 điểm A, H, Q thẳng hàng.`
+    },
+    "4": {
+        text: `Cho $\\Delta ABC$ vuông tại B ($AB < BC$). Vẽ tia phân giác góc A cắt BC tại M. Qua M, vẽ đường thẳng vuông góc với AC tại D. <br><br>
+        <b>a)</b> Chứng minh: $\\Delta ABM = \\Delta ADM$.<br>
+        <b>b)</b> Hai đường thẳng AB và DM cắt nhau tại E. Chứng minh: $AM \\perp CE$.<br>
+        <b>c)</b> So sánh: $BE$ với $DM$.`
     }
 };
 
@@ -45,18 +59,14 @@ function loadDe(maDe) {
 
     renderSolutionLog(`<div class="text-slate-400 italic text-center">Bắt đầu vẽ hình. Hãy nhấn "Vẽ bước tiếp / Xem gợi ý".</div>`, true);
 
-    if (maDe === '1') {
-        currentBoardCtrl = veDe01('box', renderSolutionLog);
-    } else if (maDe === '2') {
-        currentBoardCtrl = veDe02('box', renderSolutionLog);
-    }
+    if (maDe === '1') currentBoardCtrl = veDe01('box', renderSolutionLog);
+    else if (maDe === '2') currentBoardCtrl = veDe02('box', renderSolutionLog);
+    else if (maDe === '3') currentBoardCtrl = veDe03('box', renderSolutionLog);
+    else if (maDe === '4') currentBoardCtrl = veDe04('box', renderSolutionLog);
 }
 
 document.getElementById('chonDe').addEventListener('change', (e) => loadDe(e.target.value));
-
-document.getElementById('btnStep').addEventListener('click', () => {
-    if (currentBoardCtrl) currentBoardCtrl.nextStep();
-});
+document.getElementById('btnStep').addEventListener('click', () => { if (currentBoardCtrl) currentBoardCtrl.nextStep(); });
 
 document.getElementById('btnFlipX').addEventListener('click', () => { if(currentBoardCtrl) currentBoardCtrl.flipX(); });
 document.getElementById('btnFlipY').addEventListener('click', () => { if(currentBoardCtrl) currentBoardCtrl.flipY(); });
