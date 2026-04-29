@@ -50,18 +50,14 @@ function renderSolutionLog(htmlContent, isFirst = false) {
     board.appendChild(div);
     board.scrollTop = board.scrollHeight;
 
-    if (window.MathJax) {
-        MathJax.typesetPromise([div]);
-    }
+    if (window.MathJax) MathJax.typesetPromise([div]);
 }
 
 function loadDe(maDe) {
     document.getElementById('problem-content').innerHTML = DB_DE[maDe]?.text || "Lỗi nội dung";
     if (window.MathJax) MathJax.typesetPromise([document.getElementById('problem-content')]);
 
-    if (JXG.boards['box']) {
-        JXG.JSXGraph.freeBoard(JXG.boards['box']);
-    }
+    if (JXG.boards['box']) JXG.JSXGraph.freeBoard(JXG.boards['box']);
     document.getElementById('box').innerHTML = ''; 
 
     renderSolutionLog(`<div class="text-slate-400 italic text-center">Bắt đầu vẽ hình. Hãy nhấn "Vẽ bước tiếp / Xem gợi ý".</div>`, true);
@@ -83,6 +79,5 @@ document.getElementById('btnRot45').addEventListener('click', () => { if(current
 document.getElementById('btnRot90').addEventListener('click', () => { if(currentBoardCtrl) currentBoardCtrl.rotate(90); });
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Mặc định load Đề 0 đầu tiên
-    setTimeout(() => { loadDe('0'); }, 200); 
+    setTimeout(() => { loadDe('0'); }, 200); // Mặc định mở Đề 0
 });
