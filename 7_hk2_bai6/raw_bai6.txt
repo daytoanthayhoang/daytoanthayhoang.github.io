@@ -1,0 +1,64 @@
+Dưới đây là tổng hợp toàn bộ các câu hỏi thuộc **Bài 6 (Phần Tự luận)** từ các đề thi trong tài liệu. 
+
+Đây là các câu hỏi thuộc mức độ **Vận dụng cao**, yêu cầu học sinh giải quyết vấn đề thực tiễn thông qua việc mô hình hóa hình học (thường liên quan đến tính chất các đường đồng quy trong tam giác: trung trực, phân giác, trung tuyến). Các bài tập đã được sắp xếp theo đúng mức độ ưu tiên mà bạn yêu cầu.
+
+---
+
+### NHÓM 1: CÁC ĐỀ CHÍNH THỨC VÀ ĐỀ MINH HỌA CẤP HUYỆN (Ưu tiên cao nhất)
+
+**1. Đề chính thức Huyện Hóc Môn năm học 2024 - 2025**,,,,
+*   **Đề bài:** Ba vị trí $M, N, P$ được nối với nhau bởi ba con đường. Người ta tìm được một địa điểm (điểm $I$) trên đường Nguyễn Thái Bình sao cho địa điểm này là giao điểm của hai đường phân giác góc $N$ và góc $P$ của tam giác $MNP$.
+    a) So sánh hai góc $\widehat{NMI}$ và $\widehat{PMI}$?
+    b) Người ta đo được góc $\widehat{NIP}$ bằng $122^\circ$. Em hãy tính số đo góc tạo bởi hai con đường Út Tịch và Cộng Hòa (tức là góc $\widehat{NMP}$).
+
+**2. Đề chính thức Huyện Hóc Môn năm học 2023 - 2024**
+*   **Đề bài:** Bạn Nam muốn vẽ trang trí hình tròn theo mẫu, nhưng khi vẽ đường tròn bạn Nam lại quên xác định tâm của đường tròn. Em hãy nêu cách xác định tâm đường tròn giúp bạn Nam và vẽ lại tâm đường tròn.
+
+**3. Đề minh họa Huyện Hóc Môn năm học 2024 - 2025**,
+*   **Đề bài:** Ba thành phố $A, B, C$ được nối với nhau bởi ba xa lộ tạo thành hình tam giác. Người ta muốn tìm một địa điểm để làm một sân bay sao cho địa điểm này phải **cách đều ba xa lộ** đó. Em hãy xác định vị trí của sân bay thỏa điều kiện trên và giải thích cách thực hiện.
+
+**4. Đề tham khảo HK2 Huyện Hóc Môn năm học 2024 - 2025 (hoặc 22-23)**,
+*   **Đề bài:** Ông Cường đạp xe theo lịch trình tạo thành các đoạn thẳng $AB, BC, CA$. Các điểm $D, E, F$ lần lượt là trung điểm của $BC, AC, AB$, và $G$ là trọng tâm. Ông đổi lịch trình đạp xe từ $B \rightarrow G \rightarrow H \rightarrow B$ ($H$ là điểm đối xứng với $G$ qua $D$). Cho biết trước các khoảng cách $AD = 8,06$ km, $BE = 9,2$ km, $CF = 10,79$ km. Yêu cầu tính tổng quãng đường ông Cường đã đạp xe theo lịch trình mới.
+
+---
+
+### NHÓM 2: ĐỀ THAM KHẢO TỪ CÁC TRƯỜNG THCS (Từ Đề 1 đến Đề 17)
+
+Dạng bài của các trường phần lớn xoay quanh việc ứng dụng tính chất **Giao điểm 3 đường trung trực** (cách đều 3 đỉnh) hoặc **Giao điểm 3 đường phân giác** (cách đều 3 cạnh/đường thẳng). 
+
+**Đề 1 - Trường THCS Bùi Văn Thủ**
+*   **Đề bài:** Có một con suối $a$ và hai làng $M, N$. Tìm bên suối một địa điểm $A$ để xây trạm lấy nước sao cho khoảng cách từ trạm đó tới 2 làng đều bằng nhau. *(Ứng dụng: Giao điểm của đường thẳng a và đường trung trực của đoạn MN).*
+
+**Đề 2 - Trường THCS Đỗ Văn Dậy**
+*   **Đề bài:** Thợ đồ gỗ muốn xác định lại tâm của một cái đĩa hình tròn để trang trí hoa văn. Hãy nêu cách xác định tâm của đĩa.
+
+**Đề 11 - Trường THCS Nguyễn An Khương**
+*   **Đề bài:** Một hồ nước hình tam giác. Cần xây đài phun nước sao cho nước phun ra xa đều về mọi hướng nhưng không vượt quá ranh giới hồ. Trình bày cách xác định vị trí tối ưu. *(Ứng dụng: Cách đều 3 cạnh của hồ $\rightarrow$ Tâm đường tròn nội tiếp / Giao điểm 3 đường phân giác).*
+
+**Đề 17 - Trường THCS Xuân Thới Thượng**,
+*   **Đề bài:** Đặt một cột đèn cao áp trong một công viên hình tam giác nằm tiếp giáp 3 con đường sao cho cột đèn **cách đều 3 con đường**. Giải thích cách thực hiện. *(Ứng dụng: Giao điểm 3 đường phân giác).*
+
+**Đề 7 - Trường THCS Lý Chính Thắng 1**,
+*   **Đề bài:** Ba khu dân cư $A, B, C$ cách đều nhau (tạo thành tam giác đều), trung điểm $BC$ có trạm xăng $M$. Khoảng cách từ trạm xăng đến $A$ là $24$ km. Cần đặt trạm biến áp $G$ **cách đều 3 khu dân cư**. Tính khoảng cách từ trạm biến áp đến mỗi khu dân cư. *(Ứng dụng: Trọng tâm tam giác đều đồng thời là tâm đường tròn ngoại tiếp, tính $AG = \frac{2}{3}AM$).*
+
+**Nhóm các đề có chung một motif "Cách đều 3 điểm/ 3 khu dân cư":**
+*Yêu cầu tìm vị trí sao cho khoảng cách từ vị trí đó đến 3 địa điểm tạo thành tam giác là BẰNG NHAU. Tương ứng với việc tìm **Tâm đường tròn ngoại tiếp tam giác** (giao điểm 3 đường trung trực).*
+*   **Đề 3 (THCS Đặng Công Bỉnh):** Tìm điểm $M$ xây trường học cách đều 3 điểm dân cư $A, B, C$.
+*   **Đề 4 (THCS Tô Ký):** Tìm điểm $M$ xây trường học cách đều 3 điểm dân cư $A, B, C$.
+*   **Đề 5 (THCS Đặng Thúc Vịnh):** Tìm địa điểm $I$ xây trường học cách đều 3 điểm dân cư $D, E, F$.
+*   **Đề 6 (THCS Nguyễn Thị Minh Khai):** Tìm điểm $M$ xây trường học cách đều 3 điểm dân cư $A, B, C$.
+*   **Đề 8 (THCS Phan Công Hớn):** Tìm điểm đặt cẩu tháp sao cho bán kính quay đến 3 điểm $A, B, C$ bằng nhau,.
+*   **Đề 9 (THCS Tân Xuân):** Tìm điểm $M$ xây trường học cách đều 3 điểm dân cư $A, B, C$.
+*   **Đề 10 (THCS Hà Huy Tập):** Xác định vị trí nhà bạn $A$ cách đều 3 tiệm tạp hóa $B, C, D$.
+*   **Đề 12 (THCS Nguyễn Văn Bứa):** Tìm điểm $I$ xây trường học cách đều 3 điểm dân cư $D, E, F$.
+*   **Đề 13 (THCS Tam Đông 1):** Tìm điểm $I$ xây trường học cách đều 3 điểm dân cư $D, E, F$.
+*   **Đề 14 (TH, THCS & THPT Tre Việt):** Tìm địa điểm đặt bức tượng đài cách đều 3 công viên $L, T, H$,.
+*   **Đề 15 (THCS Đông Thạnh):** Chọn vị trí $O$ đào giếng cách đều 3 nhà $A, B, C$ của ba anh em họ Phùng.
+*   **Đề 16 (THCS Nguyễn Hồng Đào):** Chọn vị trí $O$ làm kho hàng cách đều 3 cửa hàng $A, B, C$.
+
+---
+**💡 Phân tích trọng tâm & Mẹo ôn tập Bài 6:**
+Dạng toán thực tế này tuy mang nhiều "lớp áo" khác nhau (tìm trường học, xây đài phun nước, đặt cẩu tháp...) nhưng về bản chất toán học chỉ quy về **3 mô hình duy nhất**:
+1.  **"Cách đều 3 đỉnh/ 3 điểm/ 3 khu dân cư"**: Đây là tính chất của điểm giao nhau của **3 đường trung trực**. Điểm này là tâm đường tròn ngoại tiếp tam giác. (Mô hình phổ biến nhất).
+2.  **"Cách đều 3 cạnh/ 3 con đường/ 3 xa lộ/ không vọt quá ranh giới"**: Đây là tính chất của điểm giao nhau của **3 đường phân giác** trong tam giác. Điểm này là tâm đường tròn nội tiếp.
+3.  **Khôi phục tâm đĩa tròn**: Dựa trên nguyên lý tâm đường tròn ngoại tiếp. Trên viền đĩa lấy 3 điểm bất kỳ $A, B, C$, sau đó vẽ 2 đường trung trực của 2 đoạn thẳng (ví dụ $AB$ và $BC$). Giao điểm của 2 đường trung trực này chính là tâm của cái đĩa tròn.

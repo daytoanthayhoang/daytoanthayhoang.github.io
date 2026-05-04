@@ -1,0 +1,235 @@
+Chào bạn, dưới đây là tổng hợp toàn bộ các câu hỏi thuộc **Bài 5 (Phần Tự luận)** từ các đề thi trong tài liệu. 
+
+Dạng bài này luôn là **Bài toán Hình học tổng hợp**, yêu cầu học sinh vận dụng kiến thức về các trường hợp bằng nhau của tam giác, tính chất các đường đồng quy (trung tuyến, phân giác, trung trực, đường cao), và quan hệ giữa các yếu tố trong tam giác.
+
+Các bài tập đã được sắp xếp theo đúng mức độ ưu tiên mà bạn yêu cầu. *(Lưu ý: Các ký hiệu toán học bị lỗi font trong tài liệu gốc như , ,  đã được tôi khôi phục lại thành $\Delta, \widehat{ }$ cho đúng chuẩn)*.
+
+---
+00. Bài toán mẫu tổng hợp
+Chào bạn, dựa trên hình ảnh bạn cung cấp, tôi đã biên soạn lại thành một **"Phiếu bài tập điền khuyết"** chi tiết. Cấu trúc này được chia nhỏ các ý, rất phù hợp để hướng dẫn học sinh từng bước làm quen với tư duy suy luận, xét tam giác và trình bày chứng minh hình học. 
+
+Dưới đây là phần phiếu bài tập dành cho học sinh và phần đáp án chi tiết dành cho bạn.
+
+---
+
+### PHẦN 1: PHIẾU BÀI TẬP (Dành cho học sinh)
+
+**Đề bài:** Cho $\Delta ABC$ vuông tại $B$ ($AB < BC$) có đường phân giác góc $A$ cắt $BC$ tại $D$. Qua $D$ vẽ đường thẳng vuông góc với $AC$ tại $E$, cắt đường thẳng $AB$ tại $F$. Lấy $G$ là trung điểm $FC$.
+**a) (0.5x2)** Chứng minh $\Delta ABD = \Delta AED$ rồi chứng minh $\Delta BDF = \Delta EDC$.
+**b) (1.5)** Điền tiếp nội dung CÁC CHỨNG MINH theo hướng dẫn.
+
+---
+**BÀI LÀM:**
+
+**a) Chứng minh $\Delta ABD = \Delta AED$ và $\Delta BDF = \Delta EDC$**
+* Xét $\Delta ABD$ vuông tại ...... và $\Delta AED$ vuông tại ...... có:
+    * Cạnh huyền ............ chung
+    * $\widehat{BAD} = \widehat{.........}$ (do $AD$ là tia phân giác của $\widehat{BAC}$)
+    => $\Delta ABD = \Delta AED$ (.........................................................)
+* Từ chứng minh trên suy ra: $AB = ......$ và $BD = ......$ (hai cạnh tương ứng).
+* Xét $\Delta BDF$ vuông tại ...... và $\Delta EDC$ vuông tại ...... có:
+    * $BD = ......$ (chứng minh trên)
+    * $\widehat{BDF} = \widehat{.........}$ (hai góc ...........................)
+    => $\Delta BDF = \Delta EDC$ (.........................................................)
+
+**b) Điền tiếp nội dung CÁC CHỨNG MINH theo hướng dẫn**
+
+*(0.25)* Ta có: $\begin{cases} ...... + ...... = AF \\ ...... + ...... = AC \end{cases}$, mà $AB = ...... (\Delta...... = \Delta......), BF = ...... (\Delta...... = \Delta......)$
+nên **[ $AF = AC$ ]**.
+*(0.5)* *Cách khác: Chứng minh trực tiếp thông qua chứng minh $\Delta AEF = \Delta ABC$*
+Xét $\Delta AEF$ vuông tại ............ và $\Delta ABC$ vuông tại ............ có:
+$\begin{cases} ..................................................... \\ .................................... (..................... = .....................) \end{cases}$
+Nên .................................................., suy ra **[ $AF = AC$ ]**.
+
+*(0.25)* Ta có: $\begin{cases} AB = ...... \text{ (cmt)} \\ DB = ...... \text{ } (\Delta...... = \Delta......) \end{cases}$, nên [ .................. là đường trung trực của .................. ]
+Suy ra **[ $AD \perp BE$ ]**.
+
+*(0.25)* Xét $\Delta AFC$ có:
+......... là đường cao ($......... \perp AF$),
+......... là đường cao ($......... \perp AC$),
+......... và ......... cắt nhau tại $D$.
+Nên **[ $D$ là .............................. của $\Delta AFC$ ]**, suy ra **[ $AD$ là đường cao còn lại của $\Delta AFC$ ]**.
+Do đó, $AD \perp FC$, mà $AD \perp ...... (cmt)$ nên **[ $BE \parallel FC$ ]**.
+
+*(0.25)* Ta có: $\begin{cases} ...... = AC \text{ (cmt)} \\ ...... = DC \text{ } (\Delta...... = \Delta......) \end{cases}$, nên [ .................. là đường trung trực của .................. ]
+Suy ra **[ $AD \perp ............$ tại $G$ là trung điểm của $FC$ ]**. Vậy **[ $A, D, G$ thẳng hàng ]**.
+
+---
+---
+
+### PHẦN 2: ĐÁP ÁN CHI TIẾT 
+
+**a) Chứng minh $\Delta ABD = \Delta AED$ và $\Delta BDF = \Delta EDC$**
+* Xét $\Delta ABD$ vuông tại **$B$** và $\Delta AED$ vuông tại **$E$** có:
+    * Cạnh huyền **$AD$** chung
+    * $\widehat{BAD} = \widehat{\mathbf{EAD}}$ (do $AD$ là tia phân giác của $\widehat{BAC}$)
+    => $\Delta ABD = \Delta AED$ (**cạnh huyền - góc nhọn**).
+* Từ chứng minh trên suy ra: $AB = \mathbf{AE}$ và $BD = \mathbf{ED}$ (hai cạnh tương ứng).
+* Xét $\Delta BDF$ vuông tại **$B$** và $\Delta EDC$ vuông tại **$E$** có:
+    * $BD = \mathbf{ED}$ (chứng minh trên)
+    * $\widehat{BDF} = \widehat{\mathbf{EDC}}$ (hai góc **đối đỉnh**)
+    => $\Delta BDF = \Delta EDC$ (**cạnh góc vuông - góc nhọn kề**).
+
+**b) Điền tiếp nội dung CÁC CHỨNG MINH theo hướng dẫn**
+
+*(0.25)* Ta có: $\begin{cases} \mathbf{AB} + \mathbf{BF} = AF \\ \mathbf{AE} + \mathbf{EC} = AC \end{cases}$, mà $AB = \mathbf{AE} (\Delta\mathbf{ABD} = \Delta\mathbf{AED}), BF = \mathbf{EC} (\Delta\mathbf{BDF} = \Delta\mathbf{EDC})$
+nên **[ $AF = AC$ ]**.
+*(0.5)* *Cách khác: Chứng minh trực tiếp thông qua chứng minh $\Delta AEF = \Delta ABC$*
+Xét $\Delta AEF$ vuông tại **$E$** và $\Delta ABC$ vuông tại **$B$** có:
+$\begin{cases} \widehat{\mathbf{A}} \mathbf{\text{ chung}} \\ \mathbf{AE} = \mathbf{AB} \text{ } (\Delta\mathbf{ABD} = \Delta\mathbf{AED}) \end{cases}$
+Nên **$\Delta AEF = \Delta ABC$ (cạnh góc vuông - góc nhọn kề)**, suy ra **[ $AF = AC$ ]**.
+
+*(0.25)* Ta có: $\begin{cases} AB = \mathbf{AE} \text{ (cmt)} \\ DB = \mathbf{DE} \text{ } (\Delta\mathbf{ABD} = \Delta\mathbf{AED}) \end{cases}$, nên [ **$AD$** là đường trung trực của **$BE$** ]
+Suy ra **[ $AD \perp BE$ ]**.
+
+*(0.25)* Xét $\Delta AFC$ có:
+**$CB$** là đường cao ($ \mathbf{CB} \perp AF$),
+**$FE$** là đường cao ($ \mathbf{FE} \perp AC$),
+**$CB$** và **$FE$** cắt nhau tại $D$.
+Nên **[ $D$ là trực tâm của $\Delta AFC$ ]**, suy ra **[ $AD$ là đường cao còn lại của $\Delta AFC$ ]**.
+Do đó, $AD \perp FC$, mà $AD \perp \mathbf{BE} \text{ (cmt)}$ nên **[ $BE \parallel FC$ ]**.
+
+*(0.25)* Ta có: $\begin{cases} \mathbf{AF} = AC \text{ (cmt)} \\ \mathbf{DF} = DC \text{ } (\Delta\mathbf{BDF} = \Delta\mathbf{EDC}) \end{cases}$, nên [ **$AD$** là đường trung trực của **$FC$** ]
+Suy ra **[ $AD \perp \mathbf{FC}$ tại $G$ là trung điểm của $FC$ ]**. Vậy **[ $A, D, G$ thẳng hàng ]**.
+
+
+### NHÓM 1: CÁC ĐỀ CHÍNH THỨC VÀ ĐỀ MINH HỌA CẤP HUYỆN (Ưu tiên cao nhất)
+
+**1. Đề chính thức Huyện Hóc Môn năm học 2024 - 2025**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A ($AB < AC$) có $AH$ là đường cao. Trên cạnh $HC$, vẽ điểm $D$ sao cho $AD = AB$. 
+    a) Chứng minh: $\Delta AHB = \Delta AHD$.
+    b) Qua $C$ vẽ đường thẳng vuông góc với $AD$ và cắt đường thẳng $AH$ tại $E$. Chứng minh: $ED // AB$.
+    c) Biết $\Delta ACE$ đều. Tính số đo góc $\widehat{ABD}$ và tỉ số giữa hai đoạn thẳng $AB$ với $BC$.
+
+**2. Đề chính thức Huyện Hóc Môn năm học 2023 - 2024**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A, đường phân giác của góc ABC cắt AC tại D. Từ D vẽ $DE \perp BC$.
+    a) Chứng minh $\Delta ABD = \Delta EBD$.
+    b) Tia ED cắt tia BA tại M. Chứng minh $\Delta MBC$ cân.
+    c) Gọi K là trung điểm của MC. Chứng minh ba điểm B, D, K thẳng hàng.
+
+**3. Đề chính thức Huyện Hóc Môn năm học 2022 - 2023**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại B ($AB < BC$). Vẽ tia phân giác góc A cắt BC tại M. Qua M, vẽ đường thẳng vuông góc với AC tại D.
+    a) Chứng minh: $\Delta ABM = \Delta ADM$.
+    b) Hai đường thẳng AB và DM cắt nhau tại E. Chứng minh: $AM \perp CE$.
+    c) So sánh: $BE$ với $DM$.
+
+**4. Đề tham khảo HK2 Huyện Hóc Môn năm học 2024 - 2025**
+*   **Đề bài:** Cho $\Delta ABC$ cân tại A, vẽ AH là đường cao của $\Delta ABC$.
+    a) Chứng minh: $\Delta AHB = \Delta AHC$.
+    b) Lấy điểm M nằm giữa A và B. Qua M vẽ đường thẳng song song với BC, đường thẳng này cắt AC tại N. Chứng minh: $\Delta AMN$ cân.
+    c) Tia phân giác của $\widehat{BMN}$ cắt tia phân giác của $\widehat{CNM}$ tại Q. Chứng minh: 3 điểm A, H, Q thẳng hàng.
+
+---
+
+### NHÓM 2: ĐỀ THAM KHẢO TỪ CÁC TRƯỜNG THCS (Từ Đề 1 đến Đề 17)
+
+**Đề 1 - Trường THCS Bùi Văn Thủ**
+*   **Đề bài:** Cho $\Delta ACE$ vuông tại C ($CE > AC$). Tia phân giác của góc A cắt cạnh CE tại D. Kẻ $DB \perp AE$ tại B.
+    a) Chứng minh: $\Delta ACD = \Delta ABD$. 
+    b) Tia BD cắt tia AC tại H. Chứng minh: $\Delta DHE$ cân.
+    c) Chứng minh: $BC // HE$.
+
+**Đề 2 - Trường THCS Đỗ Văn Dậy**
+*   **Đề bài:** Cho $\Delta ABC$ nhọn ($AB < AC$), tia phân giác của góc BAC cắt BC tại D, trên cạnh AC lấy điểm E sao cho $AB = AE$.
+    a) Chứng minh $\Delta ABD = \Delta AED$. 
+    b) Tia AB cắt tia ED tại F. Chứng minh $\Delta FAC$ cân.
+    c) Gọi M là trung điểm của FC. Chứng minh 3 điểm A, D, C thẳng hàng.
+
+**Đề 3 - Trường THCS Đặng Công Bỉnh**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A ($AB < AC$), tia phân giác của $\widehat{ABC}$ cắt AC tại D. Kẻ $DE \perp BC$ tại E. 
+    a) Chứng minh: $\Delta ABD = \Delta EBD$.
+    b) Gọi M là giao điểm của AB và DE. Chứng minh: $\Delta BCM$ cân tại B.
+    c) Chứng minh: $AD + EC > DM$. *(Lưu ý: Dữ liệu câu c bị lỗi text nhẹ trong văn bản gốc)*
+
+**Đề 4 - Trường THCS Tô Ký**
+*   **Đề bài:** Cho $\Delta ABC$ nhọn có $AB < AC$, gọi M là trung điểm của cạnh AC. Trên tia đối của tia MB lấy điểm D sao cho $MD = MB$.
+    a) Chứng minh: $\Delta ABM = \Delta CDM$.
+    b) Kẻ đường cao AH của $\Delta ABC$, trên tia đối của tia AH lấy điểm E sao cho $HE = HA$. Chứng minh: $CD = BE$. 
+    c) Gọi K là giao điểm của BC và EM, I là trung điểm của EC. Chứng minh: A, K, I thẳng hàng.
+
+**Đề 5 - Trường THCS Đặng Thúc Vịnh**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A. Kẻ đường phân giác BE (E thuộc AC). Qua E, vẽ đường thẳng vuông góc với BC tại H. 
+    b) Chứng minh: $\Delta AEB = \Delta HEB$. *(Trong đề gốc bị thiếu câu a)*
+    c) Chứng minh BE là đường trung trực của AH.
+    d) Gọi K là giao điểm của BA và EH. So sánh: EK với HE.
+
+**Đề 6 - Trường THCS Nguyễn Thị Minh Khai**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A ($AB < AC$). Trên cạnh BC lấy điểm E sao cho $BA = BE$. Qua E kẻ đường thẳng vuông góc với BC cắt cạnh AC tại D.
+    a) Chứng minh: $\Delta ADB = \Delta EDB$.
+    b) So sánh DA và DC. 
+    c) Kéo dài ED cắt tia BA tại F. Gọi I là trung điểm của CF. Chứng minh 3 điểm B, D, I thẳng hàng.
+
+**Đề 7 - Trường THCS Lý Chính Thắng 1**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A ($AB < AC$). Trên cạnh BC lấy điểm D sao cho $BD = BA$. Đường thẳng vuông góc với BC tại D cắt cạnh AC tại M, cắt tia BA tại N.
+    a) Chứng minh $\Delta ABM = \Delta DBM$. 
+    b) Chứng minh $\Delta MNC$ cân.
+    c) Gọi I là trung điểm của CN. Chứng minh ba điểm B, M, I thẳng hàng.
+
+**Đề 8 - Trường THCS Phan Công Hớn**
+*   **Đề bài:** Cho tam giác ABC vuông tại A có BD là tia phân giác của góc B ($D \in AC$). Từ D kẻ $DE \perp BC$ tại E.
+    a) Chứng minh $\Delta ABD = \Delta EBD$. 
+    b) BD cắt AE tại M. Chứng minh $BD \perp AE$ và M là trung điểm của AE.
+    c) Gọi F là trung điểm của BE. Trên BA, lấy K sao cho $BK = BF$. Cạnh AF cắt BM tại G. Chứng minh E, G, K thẳng hàng.
+
+**Đề 9 - Trường THCS Tân Xuân**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A ($AB < AC$). Kẻ đường phân giác của $\widehat{ABC}$ là BD ($D \in AC$). Trên cạnh BC lấy E cho $BA = BE$.
+    a) Chứng minh: $\Delta ABD = \Delta EBD$.
+    b) Gọi K là giao điểm của ED và BA. Chứng minh: $DB + KD > BC$. 
+    c) Chứng minh $AE // KC$.
+
+**Đề 10 - Trường THCS Hà Huy Tập**
+*   **Đề bài:** Cho $\Delta ABC$ cân tại A có hai đường trung tuyến AD và BE cắt nhau tại H.
+    a) Chứng minh $\Delta ABD = \Delta ACD$.
+    b) Qua C kẻ đường thẳng song song với AD và cắt tia BE tại F. Chứng minh $EH = EF$.
+    c) Gọi G là giao điểm của FD và CH. Chứng minh $HG = \frac{2}{3}HE$.
+
+**Đề 11 - Trường THCS Nguyễn An Khương**
+*   **Đề bài:** Cho $\Delta ABC$ cân tại A có $AB > BC$ có AM là đường cao ($M \in BC$). Tia phân giác góc $\widehat{ACB}$ cắt AM tại N. Qua N vẽ đường thẳng vuông góc với AC tại D; ND cắt BC tại E.
+    a) Chứng minh $\Delta CDN = \Delta CMN$.
+    b) Chứng minh $MD // AE$.
+    c) Sắp xếp theo thứ tự tăng dần độ dài: $BM, AN, NM, AD$.
+
+**Đề 12 - Trường THCS Nguyễn Văn Bứa**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A ($AB < AC$). Trên cạnh BC lấy D sao cho $BA = BD$. Đường thẳng qua D vuông góc với BC cắt AC tại E.
+    a) Chứng minh: $\Delta ABE = \Delta DBE$.
+    b) Hai đường thẳng AB và DE cắt nhau tại F. Chứng minh: $BF = BC$.
+    c) Đường thẳng BE cắt CF tại G. Chứng minh: $BG \perp CF$.
+
+**Đề 13 - Trường THCS Tam Đông 1**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A ($AB < AC$), kẻ đường phân giác BE ($E \in AC$) của $\Delta ABC$. Qua E, vẽ đường thẳng vuông góc với BC tại H.
+    a) Chứng minh: $\Delta AEB = \Delta HEB$.
+    b) Chứng minh: BE là đường trung trực của AH.
+    c) Gọi K là giao điểm của đường thẳng BA và đường thẳng HE. So sánh: EK với HE.
+
+**Đề 14 - Trường TH, THCS & THPT Tre Việt**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A ($AB > AC$). Vẽ tia phân giác góc B cắt AC tại H. Qua H, vẽ đường thẳng vuông góc với BC tại E.
+    a) Chứng minh: $\Delta ABH = \Delta EBH$.
+    b) Hai đường thẳng AB và EH cắt nhau tại I. Chứng minh: $BH \perp CI$.
+    c) So sánh: AI với EH.
+
+**Đề 15 - Trường THCS Đông Thạnh**
+*   **Đề bài:** Cho $\Delta ABC$ vuông tại A, kẻ tia phân giác của $\widehat{ABC}$ cắt AC tại I. Kẻ $IK \perp BC$ tại K, gọi E là giao điểm của BA và IK.
+    a) Chứng minh: $\Delta ABI = \Delta KBI$.
+    b) Đường thẳng BI cắt AK và EC lần lượt tại M và N. Chứng minh: $BN \perp EC$.
+    c) So sánh AI và IC.
+
+**Đề 16 - Trường THCS Nguyễn Hồng Đào**
+*   **Đề bài:** Cho $\Delta ABC$ nhọn có đường trung tuyến AD. Gọi M là điểm thuộc tia AD sao cho D là trung điểm của AM.
+    a) Chứng minh $\Delta ADC = \Delta MDB$. Từ đó suy ra $BM // AC$.
+    b) Gọi N là trung điểm của AC. Đường thẳng ND cắt MB tại K. Chứng minh D là trung điểm của KN.
+    c) Gọi I, E lần lượt là trung điểm của AK và AB. Chứng minh ba đường thẳng AD, CE, NI đồng quy.
+
+**Đề 17 - Trường THCS Xuân Thới Thượng**
+*   **Đề bài:** Cho tam giác ABH vuông tại H ($BH < AH$). Trên tia đối của tia HB lấy điểm C sao cho $BH = CH$.
+    a) Chứng minh: $\Delta AHB = \Delta AHC$.
+    b) Gọi M là trung điểm của AC. AH cắt BN tại G. Chứng minh G là trọng tâm của tam giác ABC. *(Lưu ý: Đề gốc không ghi rõ điểm N ở đâu, có thể N là trung điểm của AB)*.
+    c) Giả sử $BM \perp AC$. Tính số đo $\widehat{ABC}$.
+
+---
+**💡 Phân tích chiến thuật làm Bài 5 (Hình học):**
+*   **Câu a:** Thường cực kỳ cơ bản. Hãy tìm ngay hai tam giác cần chứng minh bằng nhau (thường là Cạnh-Góc-Cạnh hoặc Cạnh Huyền-Góc Nhọn nếu là tam giác vuông).
+*   **Câu b:** Đòi hỏi tính chất bắc cầu. Phổ biến nhất là chứng minh tam giác cân, đường trung trực hoặc hai đường thẳng song song/vuông góc dựa trên các góc/cạnh tương ứng bằng nhau rút ra từ câu a.
+*   **Câu c:** Đây là câu phân loại học sinh khá - giỏi. Thường liên quan đến:
+    1. Chứng minh 3 điểm thẳng hàng.
+    2. Chứng minh 3 đường đồng quy (nhờ tính chất trực tâm, trọng tâm).
+    3. So sánh độ dài các cạnh (sử dụng bất đẳng thức tam giác hoặc tính chất đường xiên, hình chiếu). Bạn hãy tập trung vào các định lý về đường trung tuyến và tính chất trực tâm.

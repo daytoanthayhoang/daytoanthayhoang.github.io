@@ -56,6 +56,13 @@ export function veDe01(containerId, renderLog) {
     const angleF = board.create('angle', [pA, pF, pC], {type: 'square', size: 0.3, withLabel: false, strokeColor: '#16a34a', visible: false});
     const segDE = board.create('segment', [pD, pE], {strokeWidth: 2, strokeColor: '#9333ea', withLabel: false, visible: false});
 
+    // CÁC MẢNG MÀU ĐỂ HƯỚNG DẪN TƯ DUY (MẶC ĐỊNH ẨN)
+    const polyAHB = board.create('polygon', [pA, pH, pB], {fillColor: '#fef08a', fillOpacity: 0.5, borders: {visible: false}, visible: false}); // Vàng
+    const polyAHD = board.create('polygon', [pA, pH, pD], {fillColor: '#bbf7d0', fillOpacity: 0.5, borders: {visible: false}, visible: false}); // Xanh lá
+    const polyAEC = board.create('polygon', [pA, pE, pC], {fillColor: '#fbcfe8', fillOpacity: 0.3, borders: {visible: false}, visible: false}); // Hồng
+    const polyABD = board.create('polygon', [pA, pB, pD], {fillColor: '#bfdbfe', fillOpacity: 0.4, borders: {visible: false}, visible: false}); // Xanh dương
+    const polyADC = board.create('polygon', [pA, pD, pC], {fillColor: '#e9d5ff', fillOpacity: 0.4, borders: {visible: false}, visible: false}); // Tím
+
     function executeTransform() {
         pA.moveTo(getTransformed('A'), 300);
         pB.moveTo(getTransformed('B'), 300);
@@ -72,48 +79,100 @@ export function veDe01(containerId, renderLog) {
         nextStep: function() {
             if (step === 1) {
                 pH.setAttribute({visible: true}); segAH.setAttribute({visible: true}); angleH.setAttribute({visible: true});
-                renderLog("<b>Bước 1:</b> Kẻ đường cao $AH \\perp BC$.");
+                renderLog(`<div class="mb-2 text-slate-300"><b>Bước 1:</b> Kẻ đường cao $AH \\perp BC$.</div>`);
                 step++;
             } 
+            // ============ HƯỚNG DẪN CÂU A ============
             else if (step === 2) {
                 pD.setAttribute({visible: true}); segAD.setAttribute({visible: true});
                 hatchAB.setAttribute({visible: true}); hatchAD.setAttribute({visible: true});
                 
+                polyAHB.setAttribute({visible: true}); polyAHD.setAttribute({visible: true});
+                let hintA = `
+                <div class="mb-2 text-amber-300"><i class="fa-solid fa-lightbulb"></i> <b>Hướng dẫn suy luận câu a:</b></div>
+                <ul class="list-none space-y-2 pl-2 text-sm border-l-2 border-amber-500 ml-1 text-slate-300 mb-4">
+                   <li>- Quan sát hai vùng tô màu: $\\Delta AHB$ (vàng) và $\\Delta AHD$ (xanh lá).</li>
+                   <li>- Cả hai đều là <b>tam giác vuông</b> tại $H$. Đã có cạnh huyền $AB = AD$ (đánh dấu đỏ) và cạnh góc vuông $AH$ chung.</li>
+                   <li>$\\Rightarrow$ Hãy dùng trường hợp bằng nhau nào của tam giác vuông để kết luận?</li>
+                </ul>`;
+                renderLog(hintA);
+                step++;
+            } 
+            // ============ LỜI GIẢI CÂU A ============
+            else if (step === 3) {
+                polyAHB.setAttribute({visible: false}); polyAHD.setAttribute({visible: false});
+                
                 let baremA = `
-                <div class="mb-2 text-teal-300"><b>Câu a) Chứng minh $\\Delta AHB = \\Delta AHD$ (1.0đ)</b></div>
+                <div class="mb-2 text-teal-300"><b>a) Chứng minh $\\Delta AHB = \\Delta AHD$ (1.0đ)</b></div>
                 <ul class="list-none space-y-2 pl-2 text-sm border-l-2 border-slate-600 ml-1">
-                   <li>- Xét hai tam giác vuông $AHB$ và $AHD$ có: <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
-                   <li>- $AB = AD$ (gt) <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
-                   <li>- $AH$ là cạnh chung <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
-                   <li class="font-bold text-emerald-400 pt-1">- Vậy $\\Delta AHB = \\Delta AHD$ (ch-cgv) <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
+                   <li><span class="text-amber-400 font-bold">(0.25)</span> Xét $\\Delta AHB$ vuông tại $H$ và $\\Delta AHD$ vuông tại $H$ có:</li>
+                   <li><span class="text-amber-400 font-bold">(0.25)</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$AB = AD$ (giả thiết).</li>
+                   <li><span class="text-amber-400 font-bold">(0.25)</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$AH$ là cạnh chung.</li>
+                   <li class="font-bold text-emerald-400"><span class="text-amber-400 font-bold">(0.25)</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vậy $\\Delta AHB = \\Delta AHD$ (cạnh huyền - cạnh góc vuông).</li>
                 </ul>`;
                 renderLog(baremA);
                 step++;
             } 
-            else if (step === 3) {
+            // ============ HƯỚNG DẪN CÂU B ============
+            else if (step === 4) {
                 pE.setAttribute({visible: true}); segHE.setAttribute({visible: true});
                 segDF.setAttribute({visible: true}); segCE.setAttribute({visible: true});
                 angleF.setAttribute({visible: true}); segDE.setAttribute({visible: true});
                 
+                polyAEC.setAttribute({visible: true});
+                let hintB = `
+                <div class="mb-2 text-amber-300"><i class="fa-solid fa-lightbulb"></i> <b>Hướng dẫn suy luận câu b:</b></div>
+                <ul class="list-none space-y-2 pl-2 text-sm border-l-2 border-amber-500 ml-1 text-slate-300 mb-4">
+                   <li>- Mục tiêu: Chứng minh $ED \\parallel AB$. Vì $AB \\perp AC$, ta hãy thử tìm cách chứng minh <b>$ED \\perp AC$</b>.</li>
+                   <li>- Quan sát $\\Delta AEC$ (vùng màu hồng). Ta có hai đường cao nào đã giao nhau tại $D$?</li>
+                   <li>$\\Rightarrow$ Dựa vào tính chất <b>trực tâm</b>, ta suy ra được gì về đoạn $ED$ chứa đường cao thứ 3?</li>
+                </ul>`;
+                renderLog(hintB);
+                step++;
+            }
+            // ============ LỜI GIẢI CÂU B ============
+            else if (step === 5) {
+                polyAEC.setAttribute({visible: false});
+                
                 let baremB = `
-                <div class="mb-2 text-pink-300"><b>Câu b) Chứng minh $ED \\parallel AB$ (0.75đ)</b></div>
+                <div class="mb-2 text-pink-300"><b>b) Chứng minh $ED \\parallel AB$ (0.75đ)</b></div>
                 <ul class="list-none space-y-2 pl-2 text-sm border-l-2 border-slate-600 ml-1">
-                   <li>- Trong $\\Delta ACD$ có: $AH$ và $CE$ là hai đường cao cắt nhau tại $E$ <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
-                   <li>- Nên $DE$ là đường cao thứ 3 $\\Rightarrow ED \\perp AC$ <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
-                   <li>- Mà $AB \\perp AC$ (do $\\Delta ABC$ vuông tại A) <br><br>
-                   <span class="font-bold text-emerald-400">- Do đó $ED \\parallel AB$.</span> <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
+                   <li><span class="text-amber-400 font-bold">(0.25)</span> Xét $\\Delta AEC$ có: $AD$ là đường cao ($AD \\perp CE$), $CB$ là đường cao ($CB \\perp AE$ tại $H$), $AD$ và $CB$ cắt nhau tại $D$.<br>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Nên <b>$D$ là trực tâm của $\\Delta AEC$</b>.</li>
+                   <li><span class="text-amber-400 font-bold">(0.25)</span> Suy ra <b>$ED$ là đường cao còn lại của $\\Delta AEC$</b>. Do đó $ED \\perp AC$.</li>
+                   <li><span class="text-amber-400 font-bold">(0.25)</span> Mà $AB \\perp AC$ (do $\\Delta ABC$ vuông tại $A$) nên <b>$ED \\parallel AB$</b>.</li>
                 </ul>`;
                 renderLog(baremB);
                 step++;
             }
-            else if (step === 4) {
+            // ============ HƯỚNG DẪN CÂU C ============
+            else if (step === 6) {
+                polyABD.setAttribute({visible: true}); polyADC.setAttribute({visible: true});
+                
+                let hintC = `
+                <div class="mb-2 text-amber-300"><i class="fa-solid fa-lightbulb"></i> <b>Hướng dẫn suy luận câu c:</b></div>
+                <ul class="list-none space-y-2 pl-2 text-sm border-l-2 border-amber-500 ml-1 text-slate-300 mb-4">
+                   <li>- $\\Delta ACE$ đều nên $\\widehat{CAE} = 60^\\circ$. Suy ra góc $\\widehat{C}$ và $\\widehat{B}$ bằng bao nhiêu độ?</li>
+                   <li>- Nhìn vào vùng màu xanh ($\\Delta ABD$): Đã có $AB = AD$, nếu $\\widehat{B} = 60^\\circ$ thì là tam giác gì?</li>
+                   <li>- Nhìn vào vùng màu tím ($\\Delta ADC$): Dùng phép trừ góc để tìm $\\widehat{DAC}$, so sánh với $\\widehat{C}$ để kết luận tam giác cân.</li>
+                   <li>$\\Rightarrow$ Bắc cầu các cạnh bằng nhau để tìm ra được tỉ số cuối cùng.</li>
+                </ul>`;
+                renderLog(hintC);
+                step++;
+            }
+            // ============ LỜI GIẢI CÂU C ============
+            else if (step === 7) {
+                polyABD.setAttribute({visible: false}); polyADC.setAttribute({visible: false});
+                
                 let baremC = `
-                <div class="mb-2 text-purple-300"><b>Câu c) Tính tỉ số giữa AB và BC (0.75đ)</b></div>
+                <div class="mb-2 text-purple-300"><b>c) Tính số đo $\\widehat{ABD}$ và tỉ số giữa $AB$ với $BC$ (0.75đ)</b></div>
                 <ul class="list-none space-y-2 pl-2 text-sm border-l-2 border-slate-600 ml-1">
-                   <li>- Tính được $\\widehat{ABD} = 60^\\circ$ <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
-                   <li>- $\\Rightarrow \\Delta ABD$ đều $\\Rightarrow AB = BD = AD$ (1) <br>
-                   Chứng minh được: $\\Delta ADC$ cân $\\Rightarrow AD = DC$ (2) <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
-                   <li>- Từ (1) và (2) suy ra $\\Rightarrow BC = BD + DC = 2AB$ hay $\\Rightarrow \\frac{AB}{BC} = \\frac{1}{2}$. <span class="float-right text-amber-400 font-bold">0.25đ</span></li>
+                   <li><span class="text-amber-400 font-bold">(0.25)</span> Vì $\\Delta ACE$ đều nên $\\widehat{CAE} = 60^\\circ$. Trong $\\Delta AHC$ vuông tại $H$ có $\\widehat{C} = 90^\\circ - 60^\\circ = 30^\\circ$.<br>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trong $\\Delta ABC$ vuông tại $A$ có $\\widehat{C} = 30^\\circ \\Rightarrow \\widehat{B} = 60^\\circ \\Rightarrow \\widehat{ABD} = 60^\\circ$.</li>
+                   <li><span class="text-amber-400 font-bold">(0.25)</span> Ta có $AB = AD$ và $\\widehat{B} = 60^\\circ \\Rightarrow \\Delta ABD$ đều $\\Rightarrow AB = BD = AD$ (1).<br>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lại có $\\widehat{DAC} = \\widehat{HAC} - \\widehat{HAD} = 60^\\circ - 30^\\circ = 30^\\circ = \\widehat{C} \\Rightarrow \\Delta ADC$ cân tại $D \\Rightarrow AD = DC$ (2).</li>
+                   <li><span class="text-amber-400 font-bold">(0.25)</span> Từ (1) và (2) suy ra $AB = BD = DC$. Mà $BC = BD + DC = 2AB$.<br>
+                   <span class="font-bold text-emerald-400">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vậy tỉ số $\\frac{AB}{BC} = \\frac{1}{2}$.</span></li>
                 </ul>`;
                 renderLog(baremC);
                 step++;
