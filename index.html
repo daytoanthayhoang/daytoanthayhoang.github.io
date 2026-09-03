@@ -2,335 +2,273 @@
 <html lang="vi">
 <head>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-R8KEQ361BV"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-R8KEQ361BV');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R8KEQ361BV"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-R8KEQ361BV');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website Dạy Toán - Thầy Hoàng</title>
-    <!-- Tích hợp Tailwind CSS để làm giao diện hiện đại và chuyên nghiệp -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tích hợp Google Fonts để có phông chữ đẹp -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Sử dụng phông chữ Be Vietnam Pro cho toàn bộ trang web */
-        body {
-            font-family: 'Be Vietnam Pro', sans-serif;
-        }
-        html {
-            scroll-behavior: smooth;
-        }
-        /* Hiệu ứng mượt mà cho các thành phần */
-        .smooth-transform {
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        }
-        .smooth-transform:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        /* --- HIỆU ỨNG NỀN HẠT LIÊN KẾT --- */
-        #particle-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0; /* Đảm bảo canvas nằm dưới nội dung */
-        }
-        /* --- HIỆU ỨNG HIỆN RA KHI CUỘN CHUỘT --- */
-        .scroll-animate {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .scroll-animate.is-visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        html { scroll-behavior: smooth; }
+        .smooth-transform { transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; }
+        .smooth-transform:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        #particle-canvas { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; }
+        .scroll-animate { opacity:0; transform:translateY(30px); transition:opacity .6s ease-out, transform .6s ease-out; }
+        .scroll-animate.is-visible { opacity:1; transform:translateY(0); }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <!-- PHẦN ĐẦU TRANG (HEADER) -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-blue-600">Dạy Toán Thầy Hoàng</a>
-            <!-- Menu cho máy tính -->
-            <nav class="hidden md:flex space-x-8">
-                <a href="#trangchu" class="text-gray-600 hover:text-blue-600 font-medium">Trang Chủ</a>
-                <a href="#thongbao" class="text-gray-600 hover:text-blue-600 font-medium">Thông Báo</a>
-                <a href="#hoclieu" class="text-gray-600 hover:text-blue-600 font-medium">Góc Học Tập</a>
-                <a href="#lienhe" class="text-gray-600 hover:text-blue-600 font-medium">Liên Hệ</a>
-            </nav>
-            <!-- Nút menu cho điện thoại -->
-            <button id="mobile-menu-button" class="md:hidden">
+<header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="#" class="text-2xl font-bold text-blue-600">Dạy Toán Thầy Hoàng</a>
+        <nav class="hidden md:flex space-x-8">
+            <a href="#trangchu" class="text-gray-600 hover:text-blue-600 font-medium">Trang Chủ</a>
+            <a href="#thongbao" class="text-gray-600 hover:text-blue-600 font-medium">Thông Báo</a>
+            <a href="#hoclieu" class="text-gray-600 hover:text-blue-600 font-medium">Góc Học Tập</a>
+            <a href="#lienhe" class="text-gray-600 hover:text-blue-600 font-medium">Liên Hệ</a>
+        </nav>
+        <button id="mobile-menu-button" class="md:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white">
+        <a href="#trangchu" class="block py-2 px-6 text-sm hover:bg-gray-200">Trang Chủ</a>
+        <a href="#thongbao" class="block py-2 px-6 text-sm hover:bg-gray-200">Thông Báo</a>
+        <a href="#hoclieu" class="block py-2 px-6 text-sm hover:bg-gray-200">Góc Học Tập</a>
+        <a href="#lienhe" class="block py-2 px-6 text-sm hover:bg-gray-200">Liên Hệ</a>
+    </div>
+</header>
+
+<main>
+    <section id="trangchu" class="bg-blue-700 text-white relative overflow-hidden">
+        <canvas id="particle-canvas"></canvas>
+        <div class="container mx-auto px-6 py-20 text-center relative z-10">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Chào mừng các em học sinh!</h1>
+            <p class="text-lg md:text-xl mb-6">Nơi chia sẻ tài liệu, thông báo và kiến thức Toán học.</p>
+            <p class="text-lg md:text-xl mb-8 italic text-gray-200">"Cách duy nhất để giỏi toán là tự làm thật nhiều toán!"</p>
+            <a href="https://1drv.ms/f/c/67c40ff835c61dde/EqhPL5Ta8HtLgHKKUIEi0E4BWh8s5ReL0Khy4Hcmm_dXWQ?e=GXzVyP"
+               target="_blank" rel="noopener noreferrer"
+               class="bg-white text-blue-600 font-bold py-3 px-8 rounded-full text-lg hover:bg-gray-200 transition-colors duration-300">
+                Truy cập Kho Học Liệu
+            </a>
+        </div>
+    </section>
+
+    <section id="thongbao" class="py-16 scroll-animate bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-10 text-blue-700">Thông Báo Mới Nhất</h2>
+            <div class="max-w-4xl mx-auto">
+                <iframe id="news-iframe" src="./thong-bao.html" class="w-full border-none overflow-hidden transition-all duration-300" scrolling="no" title="Bảng tin thông báo"></iframe>
+            </div>
+
+            <div id="review-container" class="max-w-4xl mx-auto hidden bg-white rounded-lg shadow-lg p-2 sm:p-4 mt-6 border border-gray-200 relative">
+                <button onclick="closeReview()" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md transition-colors" title="Đóng">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h3 class="text-lg font-bold text-gray-700 mb-2 px-2">Xem trước tài liệu:</h3>
+                <iframe id="review-frame" class="w-full h-96 md:h-[600px]" frameborder="0"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <section id="hoclieu" class="bg-gray-200 py-16 scroll-animate">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-10">Góc Học Tập</h2>
+
+            <!-- Điều chỉnh responsive để 5 thẻ hiển thị cân đối -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+
+                <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
+                    <h3 class="text-2xl font-bold mb-4">Công cụ số hóa Toán</h3>
+                    <p class="text-gray-600 mb-6">Khám phá thư viện công cụ trực quan, phân loại theo từng khối lớp từ 6 đến 9.</p>
+                    <a href="./cong-cu.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
+                    <h3 class="text-2xl font-bold mb-4">Nhóm hỗ trợ thi Violympic</h3>
+                    <p class="text-gray-600 mb-6">Tham gia nhóm Zalo để nhận hỗ trợ và trao đổi về các cuộc thi Violympic.</p>
+                    <a href="./nhomhotro.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
+                    <h3 class="text-2xl font-bold mb-4">Công cụ hỗ trợ lớp học</h3>
+                    <p class="text-gray-600 mb-6">Sử dụng các tiện ích như đồng hồ đếm ngược để quản lý lớp học hiệu quả.</p>
+                    <a href="./hotro-class.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
+                    <h3 class="text-2xl font-bold mb-4">Câu Lạc Bộ Toán Học</h3>
+                    <p class="text-gray-600 mb-6">Không gian mở để khám phá các mô hình toán học thú vị, không giới hạn khối lớp.</p>
+                    <a href="./caulacbo.html" class="text-blue-600 font-semibold hover:underline">Tham gia ngay &rarr;</a>
+                </div>
+
+                <!-- MỚI: Quy tắc điểm cộng -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-lg p-8 text-center smooth-transform border border-blue-200">
+                    <div class="text-4xl mb-3">⭐</div>
+                    <h3 class="text-2xl font-bold mb-4 text-blue-800">Điểm cộng & Recovery</h3>
+                    <p class="text-gray-600 mb-6">Tìm hiểu cách nhận dấu +, Recovery Point và cơ hội phục hồi điểm khi đã chứng minh được sự tiến bộ.</p>
+                    <a href="./quy-tac-diem-cong.html" class="text-blue-700 font-bold hover:underline">Xem quy tắc &rarr;</a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer id="lienhe" class="bg-gray-800 text-white py-10">
+    <div class="container mx-auto px-6 text-center">
+        <h3 class="text-2xl font-bold mb-4">Liên Hệ Với Thầy</h3>
+        <p class="mb-6">Nếu có bất kỳ thắc mắc nào, các em có thể liên hệ với thầy qua các kênh dưới đây.</p>
+        <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
+            <a href="mailto:nguyenviethoang1998@gmail.com" class="flex items-center hover:text-blue-400 transition-colors duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-            </button>
+                <span class="ml-3">nguyenviethoang1998@gmail.com</span>
+            </a>
+
+            <a href="tel:0981685934" class="flex items-center hover:text-blue-400 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <span class="ml-3">0981685934</span>
+            </a>
         </div>
-        <!-- Menu cho điện thoại (ẩn mặc định) -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white">
-            <a href="#trangchu" class="block py-2 px-6 text-sm hover:bg-gray-200">Trang Chủ</a>
-            <a href="#thongbao" class="block py-2 px-6 text-sm hover:bg-gray-200">Thông Báo</a>
-            <a href="#hoclieu" class="block py-2 px-6 text-sm hover:bg-gray-200">Góc Học Tập</a>
-            <a href="#lienhe" class="block py-2 px-6 text-sm hover:bg-gray-200">Liên Hệ</a>
-        </div>
-    </header>
 
-    <!-- PHẦN THÂN TRANG (MAIN CONTENT) -->
-    <main>
-        <!-- 1. BANNER CHÍNH VÀ NÚT TRUY CẬP HỌC LIỆU -->
-        <section id="trangchu" class="bg-blue-700 text-white relative overflow-hidden">
-             <!-- Canvas cho hiệu ứng nền hạt -->
-            <canvas id="particle-canvas"></canvas>
-            <div class="container mx-auto px-6 py-20 text-center relative z-10">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">Chào mừng các em học sinh!</h1>
-                <p class="text-lg md:text-xl mb-6">Nơi chia sẻ tài liệu, thông báo và kiến thức Toán học.</p>
-                <p class="text-lg md:text-xl mb-8 italic text-gray-200">"Cách duy nhất để giỏi toán là tự làm thật nhiều toán!"</p>
-                <a href="https://1drv.ms/f/c/67c40ff835c61dde/EqhPL5Ta8HtLgHKKUIEi0E4BWh8s5ReL0Khy4Hcmm_dXWQ?e=GXzVyP" 
-                   target="_blank" rel="noopener noreferrer"
-                   class="bg-white text-blue-600 font-bold py-3 px-8 rounded-full text-lg hover:bg-gray-200 transition-colors duration-300">
-                    Truy cập Kho Học Liệu
-                </a>
-            </div>
-        </section>
+        <p class="mt-8 text-sm italic text-gray-400">"Cách duy nhất để giỏi là tự làm thật nhiều toán!"</p>
+        <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng. HNT Education</p>
+        <p class="mt-4 text-xs text-gray-500">&copy; Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương</p>
+    </div>
+</footer>
 
-        <!-- 2. PHẦN THÔNG BÁO MỚI NHẤT (ĐÃ CẬP NHẬT DÙNG IFRAME) -->
-        <section id="thongbao" class="py-16 scroll-animate bg-gray-50">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-bold text-center mb-10 text-blue-700">Thông Báo Mới Nhất</h2>
-                
-                <!-- IFRAME CHỨA NỘI DUNG THÔNG BÁO -->
-                <!-- Thay vì sửa code trực tiếp ở đây, nội dung được tải từ file thong-bao.html -->
-                <div class="max-w-4xl mx-auto">
-                    <iframe id="news-iframe" src="./thong-bao.html" class="w-full border-none overflow-hidden transition-all duration-300" scrolling="no" title="Bảng tin thông báo"></iframe>
-                </div>
+<script>
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
-                <!-- Khung hiển thị nội dung ôn tập (dùng chung cho cả iframe gọi ra) -->
-                <div id="review-container" class="max-w-4xl mx-auto hidden bg-white rounded-lg shadow-lg p-2 sm:p-4 mt-6 border border-gray-200 relative">
-                    <button onclick="closeReview()" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md transition-colors" title="Đóng">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                    <h3 class="text-lg font-bold text-gray-700 mb-2 px-2">Xem trước tài liệu:</h3>
-                    <iframe id="review-frame" class="w-full h-96 md:h-[600px]" frameborder="0"></iframe>
-                </div>
+    const reviewContainer = document.getElementById('review-container');
+    const reviewFrame = document.getElementById('review-frame');
 
-            </div>
-        </section>
+    window.showReview = function(url) {
+        reviewFrame.src = url;
+        reviewContainer.classList.remove('hidden');
+        reviewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
 
-        <!-- 3. PHẦN GÓC HỌC TẬP -->
-        <section id="hoclieu" class="bg-gray-200 py-16 scroll-animate">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-bold text-center mb-10">Góc Học Tập</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    
-                    <!-- 1. Công cụ số hóa Toán học -->
-                    <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
-                        <h3 class="text-2xl font-bold mb-4">Công cụ số hóa Toán</h3>
-                        <p class="text-gray-600 mb-6">Khám phá thư viện công cụ trực quan, phân loại theo từng khối lớp từ 6 đến 9.</p>
-                        <a href="./cong-cu.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
-                    </div>
-                    
-                    <!-- 2. Nhóm hỗ trợ -->
-                    <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
-                        <h3 class="text-2xl font-bold mb-4">Nhóm hỗ trợ thi Violympic</h3>
-                        <p class="text-gray-600 mb-6">Tham gia nhóm Zalo để nhận hỗ trợ và trao đổi về các cuộc thi Violympic.</p>
-                        <a href="./nhomhotro.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
-                    </div>
+    window.closeReview = function() {
+        reviewContainer.classList.add('hidden');
+        reviewFrame.src = '';
+    };
 
-                    <!-- 3. Các công cụ hỗ trợ lớp học -->
-                    <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
-                        <h3 class="text-2xl font-bold mb-4">Công cụ hỗ trợ lớp học</h3>
-                        <p class="text-gray-600 mb-6">Sử dụng các tiện ích như đồng hồ đếm ngược để quản lý lớp học hiệu quả.</p>
-                        <a href="./hotro-class.html" class="text-blue-600 font-semibold hover:underline">Xem chi tiết &rarr;</a>
-                    </div>
+    window.addEventListener('message', function(e) {
+        if (e.data.type === 'resize-iframe' && e.data.id === 'news-iframe') {
+            const iframe = document.getElementById('news-iframe');
+            if (iframe) iframe.style.height = e.data.height + 'px';
+        }
+    });
 
-                    <!-- 4. Góc Học Tập 4: Câu Lạc Bộ Toán Học -->
-                    <div class="bg-white rounded-lg shadow-lg p-8 text-center smooth-transform">
-                        <h3 class="text-2xl font-bold mb-4">Câu Lạc Bộ Toán Học</h3>
-                        <p class="text-gray-600 mb-6">Không gian mở để khám phá các mô hình toán học thú vị, không giới hạn khối lớp.</p>
-                        <a href="./caulacbo.html" class="text-blue-600 font-semibold hover:underline">Tham gia ngay &rarr;</a>
-                    </div>
-                    
-                </div>
-            </div>
-        </section>
+    const canvas = document.getElementById('particle-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let particlesArray;
 
-    </main>
+        function setCanvasSize() {
+            const section = document.getElementById('trangchu');
+            canvas.width = section.offsetWidth;
+            canvas.height = section.offsetHeight;
+        }
+        setCanvasSize();
 
-    <!-- PHẦN CUỐI TRANG (FOOTER) -->
-    <footer id="lienhe" class="bg-gray-800 text-white py-10">
-        <div class="container mx-auto px-6 text-center">
-            <h3 class="text-2xl font-bold mb-4">Liên Hệ Với Thầy</h3>
-            <p class="mb-6">Nếu có bất kỳ thắc mắc nào, các em có thể liên hệ với thầy qua các kênh dưới đây.</p>
-            <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
-                <a href="mailto:nguyenviethoang1998@gmail.com" class="flex items-center hover:text-blue-400 transition-colors duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    <span class="ml-3">nguyenviethoang1998@gmail.com</span>
-                </a>
-                <a href="tel:0981685934" class="flex items-center hover:text-blue-400 transition-colors duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                    <span class="ml-3">0981685934</span>
-                </a>
-            </div>
-            <p class="mt-8 text-sm italic text-gray-400">"Cách duy nhất để giỏi là tự làm thật nhiều toán!"</p>
-            <p class="mt-4 text-xs text-gray-500">&copy; 2025 Website Dạy Toán Thầy Hoàng. HNT Education</p>
-            <p class="mt-4 text-xs text-gray-500">&copy; Thầy Nguyễn Việt Hoàng - Trường THCS Nguyễn An Khương</p>
-
-        </div>
-    </footer>
-
-    <!-- SCRIPT ĐỂ XỬ LÝ -->
-    <script>
-        // SCRIPT CHO MENU TRÊN ĐIỆN THOẠI
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        // SCRIPT HIỂN THỊ IFRAME ÔN TẬP
-        const reviewContainer = document.getElementById('review-container');
-        const reviewFrame = document.getElementById('review-frame');
-
-        // Hàm này được gọi từ chính trang này hoặc từ iframe con
-        window.showReview = function(url) {
-            reviewFrame.src = url;
-            reviewContainer.classList.remove('hidden');
-            reviewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY;
+                this.size = size; this.color = color;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fill();
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
         }
 
-        window.closeReview = function() {
-            reviewContainer.classList.add('hidden');
-            reviewFrame.src = '';
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 8000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2.5) + 1;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * .4) - .2;
+                let directionY = (Math.random() * .4) - .2;
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, 'white'));
+            }
         }
 
-        // --- SCRIPT NHẬN THÔNG ĐIỆP TỪ IFRAME ĐỂ RESIZE ---
-        window.addEventListener('message', function(e) {
-            if (e.data.type === 'resize-iframe' && e.data.id === 'news-iframe') {
-                const iframe = document.getElementById('news-iframe');
-                if (iframe) {
-                    iframe.style.height = e.data.height + 'px';
+        function connect() {
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance =
+                        ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
+                        ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    if (distance < (canvas.width / 5) * (canvas.height / 5)) {
+                        let opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = 'rgba(255,255,255,' + opacityValue + ')';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
                 }
             }
-        });
+        }
 
-        // --- SCRIPT CHO HIỆU ỨNG NỀN HẠT LIÊN KẾT ---
-        const canvas = document.getElementById('particle-canvas');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            let particlesArray;
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            for (let i = 0; i < particlesArray.length; i++) particlesArray[i].update();
+            connect();
+        }
 
-            function setCanvasSize() {
-                const section = document.getElementById('trangchu');
-                canvas.width = section.offsetWidth;
-                canvas.height = section.offsetHeight;
-            }
+        window.addEventListener('resize', () => {
             setCanvasSize();
-
-            class Particle {
-                constructor(x, y, directionX, directionY, size, color) {
-                    this.x = x;
-                    this.y = y;
-                    this.directionX = directionX;
-                    this.directionY = directionY;
-                    this.size = size;
-                    this.color = color;
-                }
-                draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                    ctx.fill();
-                }
-                update() {
-                    if (this.x > canvas.width || this.x < 0) {
-                        this.directionX = -this.directionX;
-                    }
-                    if (this.y > canvas.height || this.y < 0) {
-                        this.directionY = -this.directionY;
-                    }
-                    this.x += this.directionX;
-                    this.y += this.directionY;
-                    this.draw();
-                }
-            }
-
-            function init() {
-                particlesArray = [];
-                let numberOfParticles = (canvas.height * canvas.width) / 8000;
-                for (let i = 0; i < numberOfParticles; i++) {
-                    let size = (Math.random() * 2.5) + 1;
-                    let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                    let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                    let directionX = (Math.random() * .4) - .2;
-                    let directionY = (Math.random() * .4) - .2;
-                    let color = 'white';
-                    particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
-                }
-            }
-
-            function connect() {
-                let opacityValue = 1;
-                for (let a = 0; a < particlesArray.length; a++) {
-                    for (let b = a; b < particlesArray.length; b++) {
-                        let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
-                            ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                        if (distance < (canvas.width / 5) * (canvas.height / 5)) {
-                            opacityValue = 1 - (distance / 20000);
-                            ctx.strokeStyle = 'rgba(255,255,255,' + opacityValue + ')';
-                            ctx.lineWidth = 1;
-                            ctx.beginPath();
-                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                            ctx.stroke();
-                        }
-                    }
-                }
-            }
-
-            function animate() {
-                requestAnimationFrame(animate);
-                ctx.clearRect(0, 0, innerWidth, innerHeight);
-                for (let i = 0; i < particlesArray.length; i++) {
-                    particlesArray[i].update();
-                }
-                connect();
-            }
-            
-            window.addEventListener('resize', () => {
-                setCanvasSize();
-                init();
-            });
-            
             init();
-            animate();
-        }
-
-        // --- SCRIPT CHO HIỆU ỨNG CUỘN CHUỘT ---
-        const animatedElements = document.querySelectorAll('.scroll-animate');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                }
-            });
-        }, {
-            threshold: 0.1 
-        });
-        animatedElements.forEach(element => {
-            observer.observe(element);
         });
 
-    </script>
+        init();
+        animate();
+    }
+
+    const animatedElements = document.querySelectorAll('.scroll-animate');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('is-visible');
+        });
+    }, { threshold: 0.1 });
+    animatedElements.forEach(element => observer.observe(element));
+</script>
+
 </body>
 </html>
