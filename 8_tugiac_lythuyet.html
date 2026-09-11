@@ -48,17 +48,18 @@
           </div>
           <div class="grid grid-cols-3 gap-2 text-center shrink-0">
             <div class="bg-white/10 rounded-2xl px-3 py-3"><div class="text-2xl font-extrabold">7</div><div class="text-xs text-indigo-100">loại hình</div></div>
-            <div class="bg-white/10 rounded-2xl px-3 py-3"><div class="text-2xl font-extrabold">40</div><div class="text-xs text-indigo-100">câu hỏi</div></div>
-            <div class="bg-white/10 rounded-2xl px-3 py-3"><div class="text-2xl font-extrabold">5</div><div class="text-xs text-indigo-100">chủ đề</div></div>
+            <div class="bg-white/10 rounded-2xl px-3 py-3"><div id="question-bank-count" class="text-2xl font-extrabold">...</div><div class="text-xs text-indigo-100">câu hỏi</div></div>
+            <div class="bg-white/10 rounded-2xl px-3 py-3"><div id="flash-bank-count" class="text-2xl font-extrabold">...</div><div class="text-xs text-indigo-100">flashcard</div></div>
           </div>
         </div>
       </div>
 
       <div class="p-4 md:p-7">
-        <div class="grid grid-cols-3 gap-2 p-1.5 bg-slate-100 rounded-2xl mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 p-1.5 bg-slate-100 rounded-2xl mb-6">
           <button class="tab-btn active rounded-xl border border-transparent px-3 py-3 font-bold text-sm md:text-base" data-tab="study">📚 Học lý thuyết</button>
           <button class="tab-btn rounded-xl border border-transparent px-3 py-3 font-bold text-sm md:text-base text-slate-700" data-tab="flash">🃏 Flashcard</button>
           <button class="tab-btn rounded-xl border border-transparent px-3 py-3 font-bold text-sm md:text-base text-slate-700" data-tab="quiz">🎯 Trắc nghiệm</button>
+          <button class="tab-btn rounded-xl border border-transparent px-3 py-3 font-bold text-sm md:text-base text-slate-700" data-tab="proofs">✍️ Bài tập nguồn</button>
         </div>
 
         <section id="tab-study" class="tab-panel">
@@ -166,6 +167,16 @@
             </div>
           </div>
         </section>
+
+        <section id="tab-proofs" class="tab-panel hidden">
+          <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 mb-5">
+            <div class="font-extrabold text-amber-950">Ngân hàng bài tập từ file TXT thầy cung cấp</div>
+            <p class="text-sm text-amber-900 mt-1 leading-6">
+              Toàn bộ nội dung đọc được từ file hiện tại được giữ lại ở đây. Riêng <b>Câu 6</b> trong file chỉ còn phần “c. Tứ giác MNPQ là hình chữ nhật”, nên công cụ đánh dấu là <b>nguồn chưa đầy đủ</b> thay vì tự bịa phần bị thiếu.
+            </p>
+          </div>
+          <div id="proof-exercise-grid" class="space-y-4"></div>
+        </section>
       </div>
     </section>
     <p class="text-center text-xs text-slate-400 mt-5">Nội dung bám theo bảng tóm tắt Chương III: Tứ giác do thầy cung cấp.</p>
@@ -217,9 +228,84 @@ const shapes = [
   {
     id:'vuong', name:'Hình vuông', icon:'■', accent:'purple',
     memory:'Chữ nhật + hình thoi',
-    definition:'Tứ giác có bốn góc vuông và bốn cạnh bằng nhau.',
-    properties:['Có mọi tính chất của hình chữ nhật và hình thoi.', 'Hai đường chéo bằng nhau, vuông góc, cắt nhau tại trung điểm và là các đường phân giác của các góc.'],
+    definition:'Tứ giác có bốn góc vuông và bốn cạnh bằng nhau.',    properties:['Có mọi tính chất của hình chữ nhật và hình thoi.', 'Hai đường chéo bằng nhau, vuông góc, cắt nhau tại trung điểm và là các đường phân giác của các góc.'],
     signs:['Hình chữ nhật có hai cạnh kề bằng nhau.', 'Hình chữ nhật có hai đường chéo vuông góc.', 'Hình chữ nhật có một đường chéo là đường phân giác của một góc.', 'Hình thoi có một góc vuông.', 'Hình thoi có hai đường chéo bằng nhau.']
+  }
+];
+
+const proofExercises = [
+  {
+    title:'Câu 6 — phần còn lại trong file nguồn',
+    badge:'Nguồn chưa đầy đủ',
+    source:'Khẳng định nào sau đây là đúng: c. Tứ giác MNPQ là hình chữ nhật.',
+    tasks:[],
+    hints:[
+      'File TXT hiện tại không chứa đề bài và các phương án a, b, d của Câu 6.',
+      'Công cụ chỉ lưu nguyên phần còn đọc được, không suy đoán phần bị thiếu.'
+    ]
+  },
+  {
+    title:'Bài 8 — Hình vuông, đường chéo và các đường song song',
+    badge:'Hình vuông • Hình chữ nhật',
+    source:'Cho hình vuông ABCD. Gọi O là giao điểm của hai đường chéo. Một đường thẳng qua O cắt cạnh AD tại P, cắt cạnh BC tại Q.',
+    tasks:[
+      'a) Chứng minh AP = CQ.',
+      'b) Qua P kẻ Px ⟂ AC, qua Q kẻ Qy ⟂ BD. Gọi M là giao điểm của Px và Qy, E là giao điểm của Px và OA, F là giao điểm của Qy và OB. Tứ giác OFME là hình gì?',
+      'c) Chứng minh điểm M nằm trên cạnh AB.'
+    ],
+    hints:[
+      'Câu a: O là tâm đối xứng của hình vuông; phép quay 180° quanh O đổi A ↔ C, D ↔ B và P ↔ Q.',
+      'Câu b: Trong hình vuông AC ⟂ BD. Vì Px ⟂ AC nên Px ∥ BD; vì Qy ⟂ BD nên Qy ∥ AC. Từ đó nhận ra hai cặp cạnh đối của OFME song song và có một góc vuông.',
+      'Câu c: Đổi các điều kiện vuông góc thành song song với hai đường chéo rồi khai thác kết quả AP = CQ để đưa điểm M về đường thẳng AB.'
+    ]
+  },
+  {
+    title:'Bài 9 — Trực tâm, hình bình hành và hình thang cân',
+    badge:'Hình bình hành • Hình thang cân',
+    source:'Cho tam giác ABC nhọn có AB < AC. Các đường cao BE, CF cắt nhau tại H. Gọi M là trung điểm của BC. Từ B kẻ đường thẳng vuông góc với AB và từ C kẻ đường thẳng vuông góc với AC, hai đường thẳng này cắt nhau tại K.',
+    tasks:[
+      'a) Chứng minh BHCK là hình bình hành.',
+      'b) Chứng minh H, M, K thẳng hàng.',
+      'c) Từ H vẽ HG ⟂ BC. Trên tia HG lấy I sao cho HG = GI. Chứng minh tứ giác BIKC là hình thang cân.',
+      'd) Gọi J là trung điểm của AH. Chứng minh JM ⟂ EF.'
+    ],
+    hints:[
+      'Câu a: BH ⟂ AC và CK ⟂ AC ⇒ BH ∥ CK; CH ⟂ AB và BK ⟂ AB ⇒ CH ∥ BK.',
+      'Câu b: Trong hình bình hành BHCK, hai đường chéo HK và BC cắt nhau tại trung điểm. M đã là trung điểm của BC.',
+      'Câu c: HG = GI và H, G, I thẳng hàng ⇒ G là trung điểm HI. Khai thác đối xứng H qua BC thành I cùng với hình bình hành BHCK để có IK ∥ BC và BI = CK.',
+      'Câu d: J là trung điểm AH, M là trung điểm HK ⇒ JM ∥ AK trong tam giác AHK. Sau đó chứng minh AK ⟂ EF (có thể dùng các góc vuông và tứ giác BFEC nội tiếp).'
+    ]
+  },
+  {
+    title:'Bài 10 — Hình thang cân và trục đối xứng',
+    badge:'Hình thang cân',
+    source:'Cho hình thang cân ABCD có AB ∥ CD và AB < CD. Gọi O là giao điểm của AD và BC, E là giao điểm của AC và BD.',
+    tasks:[
+      'a) Chứng minh tam giác OAB cân tại O.',
+      'b) Chứng minh tam giác ABD bằng tam giác BAC.',
+      'c) Chứng minh EC = ED.',
+      'd) Chứng minh O, E và trung điểm của DC thẳng hàng.'
+    ],
+    hints:[
+      'Câu a: Dùng hai góc kề đáy AB của hình thang cân và các tia OA, OD; OB, OC thẳng hàng.',
+      'Câu b: Khai thác AD = BC, AB chung và hai góc kề đáy bằng nhau.',
+      'Câu c: Dùng tính đối xứng của hình thang cân hoặc các cặp tam giác tạo bởi hai đường chéo.',
+      'Câu d: Sau câu c, E nằm trên đường trung trực của CD. Chứng minh O cũng cách đều C và D; đường trung trực CD đi qua trung điểm của CD.'
+    ]
+  },
+  {
+    title:'Bài 11 — Tứ giác nội tiếp trong hình vuông',
+    badge:'Hình vuông',
+    source:'Cho hình vuông ABCD. Trên các cạnh AB, BC, CD, DA lần lượt lấy M, N, P, Q sao cho AM = BN = CP = DQ. Chứng minh MNPQ là hình vuông.',
+    tasks:[
+      'Chứng minh MNPQ là hình vuông.'
+    ],
+    hints:[
+      'Đặt cạnh hình vuông bằng a và AM = BN = CP = DQ = x. Khi đó MB = NC = PD = QA = a − x.',
+      'Bốn tam giác vuông MBN, NCP, PDQ, QAM có hai cạnh góc vuông tương ứng bằng nhau nên bằng nhau.',
+      'Suy ra MN = NP = PQ = QM. Đồng thời các góc nhọn tương ứng trong các tam giác vuông cho một góc của MNPQ bằng 90°.',
+      'Tứ giác có bốn cạnh bằng nhau và một góc vuông là hình vuông.'
+    ]
   }
 ];
 
@@ -245,6 +331,29 @@ shapes.forEach(function(s){
       '<div class="text-sm leading-6"><div class="font-extrabold mb-1">Định nghĩa</div><p class="text-slate-700">'+s.definition+'</p>'+
       '<div class="font-extrabold mt-3 mb-1">Tính chất cần nhớ</div><ul class="list-disc pl-5 text-slate-700 space-y-1">'+props+'</ul>'+
       '<div class="font-extrabold mt-3 mb-1">Dấu hiệu nhận biết</div><ol class="list-decimal pl-5 text-slate-700 space-y-1">'+signs+'</ol></div>'+
+    '</article>');
+});
+
+const proofGrid = document.getElementById('proof-exercise-grid');
+proofExercises.forEach(function(ex){
+  const taskHtml = ex.tasks.length
+    ? '<ol class="list-[lower-alpha] pl-6 space-y-2 mt-3">'+ex.tasks.map(function(t){ return '<li>'+t.replace(/^[a-d]\)\s*/,'')+'</li>'; }).join('')+'</ol>'
+    : '';
+  const hintHtml = ex.hints.map(function(h){ return '<li>'+h+'</li>'; }).join('');
+  proofGrid.insertAdjacentHTML('beforeend',
+    '<article class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">'+
+      '<div class="p-5 border-b bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">'+
+        '<h3 class="text-lg font-extrabold text-slate-900">'+ex.title+'</h3>'+
+        '<span class="text-xs font-bold rounded-full bg-indigo-100 text-indigo-700 px-3 py-1">'+ex.badge+'</span>'+
+      '</div>'+
+      '<div class="p-5">'+
+        '<div class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Đề bài trong file</div>'+
+        '<p class="leading-7 text-slate-800">'+ex.source+'</p>'+taskHtml+
+        '<details class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50 p-4">'+
+          '<summary class="cursor-pointer font-extrabold text-indigo-900">Mở gợi ý định hướng</summary>'+
+          '<ul class="list-disc pl-5 mt-3 space-y-2 text-sm leading-6 text-indigo-950">'+hintHtml+'</ul>'+
+        '</details>'+
+      '</div>'+
     '</article>');
 });
 
@@ -281,6 +390,31 @@ const flashcards = [
   ['Vì sao không được dùng ngay dấu hiệu “hình bình hành có hai đường chéo bằng nhau”?','Vì phải chứng minh hình ban đầu là hình bình hành trước, rồi mới dùng dấu hiệu nâng cấp lên hình chữ nhật.','Lưu ý']
 ];
 
+const sourceFlashcards = [
+  ['Bài 8a: Ý tưởng ngắn nhất để chứng minh AP = CQ là gì?','Dùng tâm đối xứng O của hình vuông: phép quay 180° quanh O biến A thành C và P thành Q, nên AP = CQ.','Bài tập nguồn'],
+  ['Bài 8b: Vì sao Px ∥ BD?','Px ⟂ AC và BD ⟂ AC nên Px ∥ BD.','Bài tập nguồn'],
+  ['Bài 8b: Vì sao Qy ∥ AC?','Qy ⟂ BD và AC ⟂ BD nên Qy ∥ AC.','Bài tập nguồn'],
+  ['Bài 8b: Tứ giác OFME là hình gì?','Hình chữ nhật.','Bài tập nguồn'],
+  ['Bài 8b: Dấu hiệu cốt lõi để nhận OFME là hình chữ nhật?','Hai cặp cạnh đối song song nên OFME là hình bình hành; lại có một góc vuông nên là hình chữ nhật.','Bài tập nguồn'],
+  ['Bài 9a: Hai cặp đường thẳng song song nào giúp chứng minh BHCK là hình bình hành?','BH ∥ CK và CH ∥ BK.','Bài tập nguồn'],
+  ['Bài 9a: Vì sao BH ∥ CK?','BH ⟂ AC và CK ⟂ AC.','Bài tập nguồn'],
+  ['Bài 9a: Vì sao CH ∥ BK?','CH ⟂ AB và BK ⟂ AB.','Bài tập nguồn'],
+  ['Bài 9b: Vì sao H, M, K thẳng hàng?','BHCK là hình bình hành nên hai đường chéo HK và BC chia đôi nhau; M là trung điểm BC nên M thuộc HK.','Bài tập nguồn'],
+  ['Bài 9c: Từ HG = GI suy ra điều gì?','G là trung điểm của HI; I là ảnh đối xứng của H qua đường thẳng BC.','Bài tập nguồn'],
+  ['Bài 9c: Mục tiêu để chứng minh BIKC là hình thang cân?','Chứng minh IK ∥ BC và BI = CK.','Bài tập nguồn'],
+  ['Bài 9d: Vì sao JM ∥ AK?','Trong tam giác AHK, J là trung điểm AH và M là trung điểm HK nên JM là đường trung bình.','Bài tập nguồn'],
+  ['Bài 9d: Sau khi có JM ∥ AK, bài toán còn quy về điều gì?','Chứng minh AK ⟂ EF.','Bài tập nguồn'],
+  ['Bài 10a: Muốn chứng minh tam giác OAB cân tại O cần chứng minh gì?','OA = OB hoặc hai góc OAB và ABO bằng nhau.','Bài tập nguồn'],
+  ['Bài 10b: Hai cạnh bên của hình thang cân có quan hệ gì?','AD = BC.','Bài tập nguồn'],
+  ['Bài 10c: EC = ED cho biết E nằm trên đường nào?','Đường trung trực của CD.','Bài tập nguồn'],
+  ['Bài 10d: Ý tưởng gọn để chứng minh O, E và trung điểm CD thẳng hàng?','Chứng minh O và E cùng nằm trên đường trung trực của CD.','Bài tập nguồn'],
+  ['Bài 11: Từ AM = BN = CP = DQ suy ra bốn đoạn còn lại trên các cạnh có quan hệ gì?','MB = NC = PD = QA.','Bài tập nguồn'],
+  ['Bài 11: Bốn tam giác vuông nào nên chứng minh bằng nhau?','MBN, NCP, PDQ và QAM.','Bài tập nguồn'],
+  ['Bài 11: Sau khi chứng minh bốn tam giác vuông bằng nhau, suy ra gì về MNPQ?','MN = NP = PQ = QM; kết hợp một góc vuông để kết luận MNPQ là hình vuông.','Bài tập nguồn'],
+  ['Câu 6 trong file TXT hiện tại có đầy đủ đề và bốn phương án không?','Không. File hiện chỉ còn dòng “c. Tứ giác MNPQ là hình chữ nhật”, nên không đủ dữ liệu để phục dựng câu trắc nghiệm gốc.','Bài tập nguồn']
+];
+flashcards.push(...sourceFlashcards);
+
 const shapeOptions = [
   {id:'tugiac', name:'Tứ giác'},
   {id:'thang', name:'Hình thang'},
@@ -307,7 +441,7 @@ function matchesSelectedShapes(itemShapes, selected){
   return itemShapes.some(function(id){ return selected.has(id); });
 }
 
-const flashCategories = ['Tất cả','Định nghĩa','Tính chất','Đường chéo','Nhận biết','Mẹo','Lưu ý','Cơ bản'];
+const flashCategories = ['Tất cả','Định nghĩa','Tính chất','Đường chéo','Nhận biết','Mẹo','Lưu ý','Cơ bản','Bài tập nguồn'];
 let activeFlashCategory = 'Tất cả';
 let selectedFlashShapes = new Set(shapeOptions.map(function(x){ return x.id; }));
 let flashDeck = flashcards.slice();
@@ -437,8 +571,7 @@ const questions = [
   {cat:'Nhận biết',q:'Hình chữ nhật có hai cạnh kề bằng nhau là:',o:['Hình vuông.','Hình thoi nhưng không thể là hình vuông.','Hình thang cân.','Chưa đủ điều kiện.'],a:0,e:'Hình chữ nhật + hai cạnh kề bằng nhau ⇒ hình vuông.'},
   {cat:'Nhận biết',q:'Hình chữ nhật có hai đường chéo vuông góc là:',o:['Hình vuông.','Hình thoi nhưng không thể là hình vuông.','Hình thang cân.','Không có kết luận.'],a:0,e:'Hình chữ nhật có thêm tính chất đường chéo vuông góc thì trở thành hình vuông.'},
   {cat:'Nhận biết',q:'Hình thoi có một góc vuông là:',o:['Hình vuông.','Hình chữ nhật nhưng không phải hình vuông.','Hình thang cân.','Không có kết luận.'],a:0,e:'Hình thoi + một góc vuông ⇒ hình vuông.'},
-  {cat:'Nhận biết',q:'Hình thoi có hai đường chéo bằng nhau là:',o:['Hình vuông.','Hình chữ nhật nhưng không thể là hình vuông.','Hình thang cân.','Không có kết luận.'],a:0,e:'Hình thoi + hai đường chéo bằng nhau ⇒ hình vuông.'},
-  {cat:'Đường chéo',q:'Nếu chỉ biết một hình là hình thang và hai đường chéo bằng nhau, có thể kết luận:',o:['Hình thang cân.','Hình bình hành.','Hình thoi.','Hình vuông.'],a:0,e:'Với điều kiện đã là hình thang, hai đường chéo bằng nhau là dấu hiệu nhận biết hình thang cân.'},
+  {cat:'Nhận biết',q:'Hình thoi có hai đường chéo bằng nhau là:',o:['Hình vuông.','Hình chữ nhật nhưng không thể là hình vuông.','Hình thang cân.','Không có kết luận.'],a:0,e:'Hình thoi + hai đường chéo bằng nhau ⇒ hình vuông.'},  {cat:'Đường chéo',q:'Nếu chỉ biết một hình là hình thang và hai đường chéo bằng nhau, có thể kết luận:',o:['Hình thang cân.','Hình bình hành.','Hình thoi.','Hình vuông.'],a:0,e:'Với điều kiện đã là hình thang, hai đường chéo bằng nhau là dấu hiệu nhận biết hình thang cân.'},
   {cat:'Đường chéo',q:'Từ khóa “hai đường chéo chia đôi nhau” nên gợi đầu tiên đến:',o:['Hình bình hành.','Hình thang cân.','Hình chữ nhật ngay lập tức.','Hình thoi ngay lập tức.'],a:0,e:'Mẹo trong bảng tóm tắt: bắt đầu từ điều kiện “chia đôi nhau” để nhận ra hình bình hành.'},
   {cat:'Đường chéo',q:'Hai đường chéo bằng nhau và chia đôi nhau là dấu hiệu điển hình của:',o:['Hình chữ nhật.','Hình thoi.','Hình thang cân.','Chỉ hình vuông.'],a:0,e:'“Bình hành + chéo bằng” ⇒ hình chữ nhật.'},
   {cat:'Đường chéo',q:'Hai đường chéo vuông góc và chia đôi nhau là dấu hiệu điển hình của:',o:['Hình thoi.','Hình chữ nhật.','Hình thang cân.','Chỉ hình vuông.'],a:0,e:'“Bình hành + chéo vuông” ⇒ hình thoi.'},
@@ -449,7 +582,51 @@ const questions = [
   {cat:'Tổng hợp',q:'Câu nhớ nhanh nào phù hợp nhất với hình chữ nhật?',o:['Bình hành + chéo bằng.','Bình hành + chéo vuông.','Hình thang + cạnh bên bằng.','Tứ giác + một cặp cạnh song song.'],a:0,e:'Trong bảng “Nhìn đường chéo để đoán hình”: hình chữ nhật = bình hành + chéo bằng.'}
 ];
 
-const modes = ['Tất cả','Định nghĩa','Tính chất','Nhận biết','Đường chéo','Lưu ý'];
+const generatedSignQuestions = [];
+shapes.filter(function(s){ return s.id!=='tugiac'; }).forEach(function(s){
+  s.signs.forEach(function(sign){
+    const others = shapes
+      .filter(function(x){ return x.id!=='tugiac' && x.id!==s.id; })
+      .map(function(x){ return x.name; })
+      .slice(0,3);
+    generatedSignQuestions.push({
+      cat:'Nhận biết',
+      q:'Điều kiện sau là một dấu hiệu nhận biết hình nào? “'+sign+'”',
+      o:[s.name].concat(others),
+      a:0,
+      e:'Theo bảng dấu hiệu nhận biết, điều kiện này dùng để kết luận '+s.name+'.'
+    });
+  });
+});
+
+const sourceQuizQuestions = [
+  {cat:'Bài tập nguồn',q:'Trong Bài 8, phép biến hình nào cho ý tưởng nhanh nhất để chứng minh AP = CQ?',o:['Phép quay 180° tâm O.','Phép tịnh tiến theo AB.','Phép vị tự tâm A.','Phép đối xứng trục AC.'],a:0,e:'O là tâm đối xứng của hình vuông. Đường thẳng PQ đi qua O nên P và Q đối xứng tâm O; A và C cũng đối xứng tâm O.'},
+  {cat:'Bài tập nguồn',q:'Trong Bài 8b, từ Px ⟂ AC và BD ⟂ AC suy ra:',o:['Px ∥ BD.','Px ∥ AC.','Px ⟂ BD.','Px trùng BD.'],a:0,e:'Hai đường thẳng cùng vuông góc với AC thì song song với nhau.'},
+  {cat:'Bài tập nguồn',q:'Trong Bài 8b, từ Qy ⟂ BD và AC ⟂ BD suy ra:',o:['Qy ∥ AC.','Qy ∥ BD.','Qy ⟂ AC.','Qy trùng AC.'],a:0,e:'Hai đường thẳng cùng vuông góc với BD thì song song với nhau.'},
+  {cat:'Bài tập nguồn',q:'Trong Bài 8b, tứ giác OFME là:',o:['Hình chữ nhật.','Hình thoi.','Hình thang cân.','Hình vuông trong mọi trường hợp.'],a:0,e:'OF ∥ EM và OE ∥ FM nên OFME là hình bình hành; OE ⟂ OF nên đó là hình chữ nhật.'},
+  {cat:'Bài tập nguồn',q:'Trong Bài 9a, cặp song song đúng là:',o:['BH ∥ CK và CH ∥ BK.','BH ∥ BK và CH ∥ CK.','BH ∥ CH và BK ∥ CK.','BC ∥ HK và BH ∥ CK.'],a:0,e:'BH và CK cùng vuông góc AC; CH và BK cùng vuông góc AB.'},
+  {cat:'Bài tập nguồn',q:'Sau khi chứng minh BHCK là hình bình hành, dữ kiện M là trung điểm BC giúp kết luận:',o:['M thuộc HK.','M thuộc BH.','M thuộc CK.','M là trực tâm tam giác BHK.'],a:0,e:'Hai đường chéo BC và HK của hình bình hành chia đôi nhau.'},
+  {cat:'Bài tập nguồn',q:'Trong Bài 9c, HG = GI và H, G, I thẳng hàng cho biết:',o:['G là trung điểm HI.','H là trung điểm GI.','I là trung điểm HG.','HI ∥ BC.'],a:0,e:'Hai đoạn HG và GI bằng nhau, G nằm giữa H và I.'},
+  {cat:'Bài tập nguồn',q:'Để kết luận BIKC là hình thang cân, cặp mục tiêu phù hợp nhất là:',o:['IK ∥ BC và BI = CK.','BI ∥ CK và IK = BC.','BK ∥ CI và BI = KC.','BI ⟂ CK và IK = BC.'],a:0,e:'Một cách nhận biết thuận lợi: chứng minh một cặp cạnh đối song song để có hình thang, rồi chứng minh hai cạnh bên bằng nhau.'},
+  {cat:'Bài tập nguồn',q:'Trong Bài 9d, vì J là trung điểm AH và M là trung điểm HK nên:',o:['JM ∥ AK.','JM ⟂ AK.','JM = AK.','JM ∥ BC.'],a:0,e:'JM là đường trung bình của tam giác AHK.'},
+  {cat:'Bài tập nguồn',q:'Sau khi có JM ∥ AK ở Bài 9d, để chứng minh JM ⟂ EF chỉ cần chứng minh:',o:['AK ⟂ EF.','AK ∥ EF.','AH ⟂ EF.','HK ∥ EF.'],a:0,e:'Một đường thẳng song song với AK sẽ vuông góc EF nếu AK vuông góc EF.'},
+  {cat:'Bài tập nguồn',q:'Trong Bài 10a, kết luận “tam giác OAB cân tại O” tương đương với:',o:['OA = OB.','OA = AB.','OB = AB.','∠AOB = 90°.'],a:0,e:'Tam giác cân tại O có hai cạnh bên OA và OB bằng nhau.'},
+  {cat:'Bài tập nguồn',q:'Dữ kiện cơ bản của hình thang cân ABCD dùng ở Bài 10b là:',o:['AD = BC và hai góc kề đáy AB bằng nhau.','AC ⟂ BD.','AD ∥ BC.','AB = CD.'],a:0,e:'Hình thang cân có hai cạnh bên bằng nhau và hai góc kề mỗi đáy bằng nhau.'},
+  {cat:'Bài tập nguồn',q:'Nếu EC = ED như Bài 10c thì E nằm trên:',o:['Đường trung trực của CD.','Đường thẳng CD.','Đường tròn tâm C bán kính CD duy nhất.','Đường trung bình của hình thang.'],a:0,e:'Điểm cách đều C và D nằm trên đường trung trực của CD.'},
+  {cat:'Bài tập nguồn',q:'Ý tưởng trực tiếp cho Bài 10d là chứng minh:',o:['O và E cùng thuộc đường trung trực CD.','OE ∥ AB.','OE ⟂ AB nhưng không cần xét CD.','O và E cùng thuộc AC.'],a:0,e:'Đường trung trực CD đi qua trung điểm CD; nếu O và E cùng nằm trên đường này thì ba điểm thẳng hàng.'},
+  {cat:'Bài tập nguồn',q:'Trong Bài 11, nếu cạnh hình vuông bằng a và AM = x thì MB bằng:',o:['a − x.','a + x.','x.','a/2 trong mọi trường hợp.'],a:0,e:'M nằm trên AB nên AM + MB = AB = a.'},
+  {cat:'Bài tập nguồn',q:'Từ AM = BN = CP = DQ trong Bài 11 suy ra:',o:['MB = NC = PD = QA.','MB = BN = CP = DQ.','MN = NP ngay lập tức không cần chứng minh.','AM = NC nhưng không suy ra các đoạn còn lại.'],a:0,e:'Mỗi cạnh của hình vuông có cùng độ dài; lấy cạnh trừ các đoạn bằng nhau thì các đoạn còn lại cũng bằng nhau.'},
+  {cat:'Bài tập nguồn',q:'Bộ bốn tam giác vuông nên xét trong Bài 11 là:',o:['MBN, NCP, PDQ, QAM.','AMN, BNP, CPQ, DQM.','ABC, BCD, CDA, DAB.','MNP, NPQ, PQM, QMN.'],a:0,e:'Mỗi tam giác nằm tại một đỉnh của hình vuông và có hai cạnh góc vuông là một đoạn x và một đoạn a−x.'},
+  {cat:'Bài tập nguồn',q:'Sau khi chứng minh bốn tam giác vuông MBN, NCP, PDQ, QAM bằng nhau, suy ra trước hết:',o:['MN = NP = PQ = QM.','MN ∥ PQ ngay lập tức.','MNPQ có hai đường chéo bằng nhau.','MNPQ là hình chữ nhật ngay lập tức.'],a:0,e:'Các cạnh huyền tương ứng của bốn tam giác bằng nhau.'},
+  {cat:'Bài tập nguồn',q:'Để hoàn tất chứng minh MNPQ là hình vuông sau khi đã có bốn cạnh bằng nhau, chỉ cần thêm:',o:['Một góc vuông.','Hai đường chéo bằng nhau nhưng không cần điều kiện khác.','Một cặp cạnh đối song song duy nhất.','Một góc 60°.'],a:0,e:'Tứ giác có bốn cạnh bằng nhau là hình thoi; hình thoi có một góc vuông là hình vuông.'},
+  {cat:'Bài tập nguồn',q:'Vì sao công cụ không dựng lại đầy đủ Câu 6 từ file TXT?',o:['Vì file hiện chỉ còn phần phương án c, thiếu đề và các phương án còn lại.','Vì Câu 6 không thuộc chương Tứ giác.','Vì không thể hiển thị chữ MNPQ.','Vì công cụ chỉ nhận bài tự luận.'],a:0,e:'Nguồn hiện tại thực tế bắt đầu ở Câu 6 nhưng chỉ còn “c. Tứ giác MNPQ là hình chữ nhật”.'}
+];
+
+questions.push(...generatedSignQuestions, ...sourceQuizQuestions);
+document.getElementById('question-bank-count').textContent = questions.length;
+document.getElementById('flash-bank-count').textContent = flashcards.length;
+
+const modes = ['Tất cả','Định nghĩa','Tính chất','Nhận biết','Đường chéo','Lưu ý','Bài tập nguồn'];
 let quizMode = 'Tất cả';
 let selectedQuizShapes = new Set(shapeOptions.map(function(x){ return x.id; }));
 let deck = [];
