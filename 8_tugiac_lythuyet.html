@@ -32,6 +32,25 @@
     .study-card { transition:transform .18s ease, box-shadow .18s ease; }
     .study-card:hover { transform:translateY(-3px); box-shadow:0 12px 24px rgba(15,23,42,.08); }
     .mini-chip { white-space:nowrap; }
+
+    .theory-lab-card { background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%); }
+    .sim-mode-btn { transition:all .18s ease; }
+    .sim-mode-btn.active { background:#312e81; color:#fff; border-color:#312e81; box-shadow:0 8px 18px rgba(49,46,129,.16); }
+    .shape-pick.active { background:#eef2ff; color:#3730a3; border-color:#818cf8; box-shadow:0 0 0 2px rgba(129,140,248,.14); }
+    .prop-toggle.active { background:#ecfdf5; color:#166534; border-color:#4ade80; box-shadow:0 0 0 2px rgba(74,222,128,.12); }
+    .compare-select, .upgrade-select { appearance:auto; }
+    .svg-shape { transition:all .25s ease; }
+    .svg-overlay { opacity:0; transition:opacity .22s ease; }
+    .svg-overlay.show { opacity:1; }
+    .sim-badge { animation:badgePop .2s ease; }
+    @keyframes badgePop { 50% { transform:scale(1.05); } }
+    .condition-chip { transition:all .18s ease; }
+    .condition-chip.selected { background:#ede9fe; border-color:#8b5cf6; color:#5b21b6; box-shadow:0 0 0 2px rgba(139,92,246,.10); }
+    .upgrade-node { transition:all .18s ease; }
+    .upgrade-node.active { transform:translateY(-2px); box-shadow:0 8px 18px rgba(30,64,175,.14); border-color:#60a5fa; }
+    .tf-choice.active { transform:translateY(-1px); box-shadow:0 6px 14px rgba(15,23,42,.10); }
+    .soft-grid { background-image:linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px); background-size:24px 24px; }
+
   </style>
 </head>
 <body>
@@ -77,6 +96,144 @@
               <p class="text-sm leading-6 text-amber-900">Dấu hiệu dạng <b>“hình bình hành có…”</b> hoặc <b>“hình chữ nhật có…”</b> chỉ được dùng sau khi đã chứng minh hình ban đầu đúng là hình bình hành hoặc hình chữ nhật.</p>
             </div>
           </div>
+
+
+          <section id="theory-lab" class="theory-lab-card rounded-3xl border border-violet-100 shadow-sm overflow-hidden mb-6">
+            <div class="bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 px-5 py-5 md:px-6 border-b border-violet-100">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                  <div class="text-xs font-extrabold uppercase tracking-[.18em] text-violet-600">Phòng thí nghiệm hình học</div>
+                  <h2 class="text-2xl font-extrabold text-slate-900 mt-1">Nhìn – so sánh – nâng cấp – đoán hình</h2>
+                  <p class="text-sm text-slate-600 mt-1">Tương tác trực tiếp với cạnh, góc và đường chéo để ghi nhớ bằng hình ảnh thay vì học thuộc máy móc.</p>
+                </div>
+                <div class="rounded-2xl bg-white/90 border border-violet-100 px-4 py-3 text-sm text-violet-900">
+                  <b>Mã màu thống nhất:</b><br>
+                  <span class="text-blue-600">■ song song</span> ·
+                  <span class="text-green-600">■ bằng nhau</span> ·
+                  <span class="text-orange-600">■ góc</span> ·
+                  <span class="text-purple-600">■ đường chéo</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 md:p-6">
+              <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-5">
+                <button class="sim-mode-btn active rounded-xl border px-3 py-3 font-bold text-sm" data-sim="visual">👀 Xem hình động</button>
+                <button class="sim-mode-btn rounded-xl border px-3 py-3 font-bold text-sm text-slate-700" data-sim="compare">⚖️ So sánh</button>
+                <button class="sim-mode-btn rounded-xl border px-3 py-3 font-bold text-sm text-slate-700" data-sim="upgrade">⬆️ Nâng cấp hình</button>
+                <button class="sim-mode-btn rounded-xl border px-3 py-3 font-bold text-sm text-slate-700" data-sim="guess">🧠 Đoán từ dữ kiện</button>
+                <button class="sim-mode-btn rounded-xl border px-3 py-3 font-bold text-sm text-slate-700 col-span-2 md:col-span-1" data-sim="mistake">⚡ Đúng / Sai / Chưa đủ</button>
+              </div>
+
+              <div id="sim-visual" class="sim-panel">
+                <div class="grid lg:grid-cols-[230px_1fr] gap-5">
+                  <div>
+                    <div class="font-extrabold text-slate-900 mb-2">1. Chọn hình</div>
+                    <div id="visual-shape-picks" class="grid grid-cols-2 lg:grid-cols-1 gap-2"></div>
+                  </div>
+                  <div class="grid xl:grid-cols-[1.05fr_.95fr] gap-5">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-3 soft-grid min-h-[330px]">
+                      <div id="visual-svg-wrap" class="w-full h-full flex items-center justify-center"></div>
+                    </div>
+                    <div>
+                      <div class="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                          <div id="visual-shape-name" class="text-xl font-extrabold text-slate-900"></div>
+                          <div id="visual-memory" class="text-sm text-indigo-700 font-bold mt-1"></div>
+                        </div>
+                        <button id="visual-reset" class="text-xs font-bold text-slate-500 hover:text-red-600 underline">Tắt tất cả</button>
+                      </div>
+                      <div class="text-sm text-slate-600 mb-3">Bấm từng tính chất để làm nó xuất hiện trực tiếp trên hình.</div>
+                      <div id="visual-property-buttons" class="space-y-2"></div>
+                      <div id="visual-note" class="mt-4 rounded-xl bg-indigo-50 border-l-4 border-indigo-500 p-4 text-sm leading-6 text-indigo-950">
+                        Chọn một tính chất để bắt đầu.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="sim-compare" class="sim-panel hidden">
+                <div class="grid md:grid-cols-2 gap-4 mb-5">
+                  <label class="font-bold text-sm text-slate-700">Hình A
+                    <select id="compare-a" class="compare-select mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-semibold"></select>
+                  </label>
+                  <label class="font-bold text-sm text-slate-700">Hình B
+                    <select id="compare-b" class="compare-select mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-semibold"></select>
+                  </label>
+                </div>
+                <div class="grid lg:grid-cols-3 gap-4">
+                  <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                    <div class="font-extrabold text-emerald-900 mb-3">✓ Giống nhau</div>
+                    <div id="compare-common" class="space-y-2 text-sm leading-6"></div>
+                  </div>
+                  <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                    <div id="compare-only-a-title" class="font-extrabold text-blue-900 mb-3"></div>
+                    <div id="compare-only-a" class="space-y-2 text-sm leading-6"></div>
+                  </div>
+                  <div class="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-5">
+                    <div id="compare-only-b-title" class="font-extrabold text-fuchsia-900 mb-3"></div>
+                    <div id="compare-only-b" class="space-y-2 text-sm leading-6"></div>
+                  </div>
+                </div>
+                <div id="compare-tip" class="mt-4 rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm leading-6 text-amber-950"></div>
+              </div>
+
+              <div id="sim-upgrade" class="sim-panel hidden">
+                <div class="grid lg:grid-cols-[260px_1fr] gap-5">
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="font-extrabold text-slate-900 mb-2">Bắt đầu từ</div>
+                    <select id="upgrade-start" class="upgrade-select w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-semibold"></select>
+                    <p class="text-xs text-slate-500 mt-3 leading-5">Chỉ dùng các bước “nâng cấp” có trong bảng dấu hiệu nhận biết của tài liệu.</p>
+                  </div>
+                  <div>
+                    <div id="upgrade-current" class="rounded-2xl border-2 border-indigo-200 bg-indigo-50 p-5 mb-4"></div>
+                    <div class="font-extrabold text-slate-900 mb-3">Thêm điều kiện nào?</div>
+                    <div id="upgrade-options" class="grid md:grid-cols-2 gap-3"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="sim-guess" class="sim-panel hidden">
+                <div class="grid lg:grid-cols-[1fr_360px] gap-5">
+                  <div>
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                      <div>
+                        <div class="font-extrabold text-slate-900">Chọn các dữ kiện đề bài đã cho</div>
+                        <div class="text-xs text-slate-500 mt-1">Có thể chọn nhiều dữ kiện. Hệ thống chỉ kết luận khi đủ điều kiện theo tài liệu.</div>
+                      </div>
+                      <button id="guess-clear" class="text-xs font-bold text-slate-500 hover:text-red-600 underline">Xóa chọn</button>
+                    </div>
+                    <div id="guess-conditions" class="grid sm:grid-cols-2 gap-2"></div>
+                  </div>
+                  <div id="guess-result" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 h-fit"></div>
+                </div>
+              </div>
+
+              <div id="sim-mistake" class="sim-panel hidden">
+                <div class="max-w-3xl mx-auto">
+                  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                    <div class="px-5 py-4 bg-slate-50 border-b flex items-center justify-between">
+                      <div class="font-extrabold text-slate-900">Phân biệt phát biểu dễ nhầm</div>
+                      <div id="mistake-count" class="text-sm font-bold text-slate-500"></div>
+                    </div>
+                    <div class="p-5 md:p-7">
+                      <div id="mistake-statement" class="text-xl md:text-2xl font-extrabold leading-relaxed text-slate-900 mb-6"></div>
+                      <div class="grid sm:grid-cols-3 gap-3">
+                        <button class="tf-choice rounded-xl border-2 border-emerald-200 bg-emerald-50 text-emerald-800 px-4 py-4 font-extrabold" data-choice="true">✓ Đúng</button>
+                        <button class="tf-choice rounded-xl border-2 border-red-200 bg-red-50 text-red-800 px-4 py-4 font-extrabold" data-choice="false">✕ Sai</button>
+                        <button class="tf-choice rounded-xl border-2 border-amber-200 bg-amber-50 text-amber-900 px-4 py-4 font-extrabold" data-choice="insufficient">⚠ Chưa đủ điều kiện</button>
+                      </div>
+                      <div id="mistake-explain" class="hidden mt-5 rounded-xl border-l-4 border-violet-500 bg-violet-50 p-4 text-violet-950 leading-7"></div>
+                      <div class="mt-5 flex justify-end">
+                        <button id="mistake-next" class="hidden rounded-xl bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 font-extrabold">Câu tiếp →</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <div id="study-grid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
 
@@ -356,6 +513,434 @@ proofExercises.forEach(function(ex){
       '</div>'+
     '</article>');
 });
+
+
+const visualFacts = {
+  tugiac: {
+    coords:[[72,55],[255,38],[300,185],[48,205]],
+    properties:[
+      {id:'angle360', label:'Tổng bốn góc bằng 360°', type:'angles_all', note:'Mọi tứ giác lồi đều có tổng số đo bốn góc bằng 360°.'},
+      {id:'diagInside', label:'Hai đường chéo cắt nhau bên trong hình', type:'diagonals', note:'Hai đường chéo nối hai cặp đỉnh đối và cắt nhau tại một điểm nằm giữa mỗi đường.'}
+    ]
+  },
+  thang: {
+    coords:[[100,58],[240,58],[300,205],[42,205]],
+    properties:[
+      {id:'parallel', label:'Một cặp cạnh đối song song', type:'parallel_bases', note:'Hai cạnh song song là hai đáy của hình thang.'},
+      {id:'supplement', label:'Hai góc kề một cạnh bên bù nhau', type:'angles_leg', note:'Mỗi cặp góc trong cùng phía tạo bởi hai đáy song song có tổng 180°.'}
+    ]
+  },
+  thangcan: {
+    coords:[[108,58],[232,58],[292,205],[48,205]],
+    properties:[
+      {id:'parallel', label:'Hai đáy song song', type:'parallel_bases', note:'Hình thang cân trước hết vẫn là một hình thang.'},
+      {id:'baseAngles', label:'Hai góc kề mỗi đáy bằng nhau', type:'angles_base_equal', note:'Đây là tính chất đặc trưng để phân biệt hình thang cân.'},
+      {id:'legsEqual', label:'Hai cạnh bên bằng nhau', type:'legs_equal', note:'Hai cạnh bên của hình thang cân bằng nhau.'},
+      {id:'diagEqual', label:'Hai đường chéo bằng nhau', type:'diagonal_equal', note:'Nếu đã biết là hình thang, hai đường chéo bằng nhau còn là một dấu hiệu nhận biết hình thang cân.'}
+    ]
+  },
+  binhhanh: {
+    coords:[[93,58],[282,58],[235,205],[46,205]],
+    properties:[
+      {id:'parallelOpp', label:'Các cạnh đối song song', type:'parallel_opposite', note:'Hai cặp cạnh đối song song.'},
+      {id:'equalOpp', label:'Các cạnh đối bằng nhau', type:'opposite_equal', note:'Hai cặp cạnh đối bằng nhau.'},
+      {id:'angleOpp', label:'Các góc đối bằng nhau', type:'angles_opposite', note:'Hai cặp góc đối bằng nhau; hai góc kề một cạnh bù nhau.'},
+      {id:'diagBisect', label:'Hai đường chéo chia đôi nhau', type:'diagonal_bisect', note:'Hai đường chéo cắt nhau tại trung điểm của mỗi đường — từ khóa rất quan trọng để nhận ra hình bình hành.'}
+    ]
+  },
+  chunhat: {
+    coords:[[62,48],[282,48],[282,210],[62,210]],
+    properties:[
+      {id:'rightAngles', label:'Bốn góc vuông', type:'right_angles', note:'Hình chữ nhật có bốn góc vuông; để nhận biết từ tứ giác, chỉ cần chứng minh ba góc vuông.'},
+      {id:'parallelOpp', label:'Các cạnh đối song song', type:'parallel_opposite', note:'Hình chữ nhật kế thừa mọi tính chất của hình bình hành.'},
+      {id:'equalOpp', label:'Các cạnh đối bằng nhau', type:'opposite_equal', note:'Các cạnh đối của hình chữ nhật bằng nhau.'},
+      {id:'diagEqualBisect', label:'Hai đường chéo bằng nhau và chia đôi nhau', type:'diagonal_equal_bisect', note:'“Bình hành + chéo bằng” là cách nhớ nhanh để nhận ra hình chữ nhật.'}
+    ]
+  },
+  thoi: {
+    coords:[[170,34],[300,130],[170,226],[40,130]],
+    properties:[
+      {id:'allSides', label:'Bốn cạnh bằng nhau', type:'all_sides_equal', note:'Đây là định nghĩa trực tiếp của hình thoi.'},
+      {id:'diagBisect', label:'Hai đường chéo chia đôi nhau', type:'diagonal_bisect', note:'Hình thoi kế thừa tính chất đường chéo của hình bình hành.'},
+      {id:'diagPerp', label:'Hai đường chéo vuông góc', type:'diagonal_perpendicular', note:'“Bình hành + chéo vuông” là cách nhớ nhanh để nhận ra hình thoi.'},
+      {id:'diagAngle', label:'Đường chéo là phân giác các góc', type:'diagonal_angle_bisector', note:'Mỗi đường chéo của hình thoi là đường phân giác của hai góc đối mà nó đi qua.'}
+    ]
+  },
+  vuong: {
+    coords:[[72,38],[268,38],[268,234],[72,234]],
+    properties:[
+      {id:'allSides', label:'Bốn cạnh bằng nhau', type:'all_sides_equal', note:'Hình vuông có tính chất của hình thoi.'},
+      {id:'rightAngles', label:'Bốn góc vuông', type:'right_angles', note:'Hình vuông có tính chất của hình chữ nhật.'},
+      {id:'diagAll', label:'Đường chéo bằng nhau, vuông góc và chia đôi nhau', type:'diagonal_all', note:'Đây là sự kết hợp tính chất đường chéo của hình chữ nhật và hình thoi.'},
+      {id:'diagAngle', label:'Đường chéo là phân giác các góc', type:'diagonal_angle_bisector', note:'Hai đường chéo phân giác các góc của hình vuông.'}
+    ]
+  }
+};
+
+const factLabels = {
+  angle360:'Tổng bốn góc bằng 360°',
+  oneParallel:'Có một cặp cạnh đối song song',
+  legSupplement:'Hai góc kề một cạnh bên bù nhau',
+  baseAnglesEqual:'Hai góc kề mỗi đáy bằng nhau',
+  legsEqual:'Hai cạnh bên bằng nhau',
+  oppositeParallel:'Các cạnh đối song song',
+  oppositeEqual:'Các cạnh đối bằng nhau',
+  oppositeAnglesEqual:'Các góc đối bằng nhau',
+  adjacentSupplement:'Hai góc kề một cạnh bù nhau',
+  diagBisect:'Hai đường chéo cắt nhau tại trung điểm mỗi đường',
+  allRight:'Bốn góc vuông',
+  diagEqual:'Hai đường chéo bằng nhau',
+  allSides:'Bốn cạnh bằng nhau',
+  diagPerp:'Hai đường chéo vuông góc',
+  diagAngleBisect:'Đường chéo là phân giác các góc'
+};
+
+const shapeFactSets = {
+  tugiac:['angle360'],
+  thang:['angle360','oneParallel','legSupplement'],
+  thangcan:['angle360','oneParallel','legSupplement','baseAnglesEqual','legsEqual','diagEqual'],
+  binhhanh:['angle360','oneParallel','legSupplement','oppositeParallel','oppositeEqual','oppositeAnglesEqual','adjacentSupplement','diagBisect'],
+  chunhat:['angle360','oneParallel','legSupplement','oppositeParallel','oppositeEqual','oppositeAnglesEqual','adjacentSupplement','diagBisect','allRight','diagEqual'],
+  thoi:['angle360','oneParallel','legSupplement','oppositeParallel','oppositeEqual','oppositeAnglesEqual','adjacentSupplement','diagBisect','allSides','diagPerp','diagAngleBisect'],
+  vuong:['angle360','oneParallel','legSupplement','oppositeParallel','oppositeEqual','oppositeAnglesEqual','adjacentSupplement','diagBisect','allRight','diagEqual','allSides','diagPerp','diagAngleBisect']
+};
+
+function shapeNameById(id){
+  const s = shapes.find(function(x){ return x.id===id; });
+  return s ? s.name : id;
+}
+
+function midpoint(a,b){ return [(a[0]+b[0])/2,(a[1]+b[1])/2]; }
+function lineSvg(a,b,cls,extra){
+  return '<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" class="'+cls+'" '+(extra||'')+' />';
+}
+function textSvg(x,y,text,cls){
+  return '<text x="'+x+'" y="'+y+'" text-anchor="middle" class="'+cls+'">'+text+'</text>';
+}
+function circleSvg(x,y,r,cls){
+  return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" class="'+cls+'" />';
+}
+
+function buildShapeSvg(shapeId, activeTypes){
+  const spec = visualFacts[shapeId];
+  const p = spec.coords;
+  const pts = p.map(function(v){ return v.join(','); }).join(' ');
+  let overlays = '';
+  const has = function(t){ return activeTypes.indexOf(t)>=0; };
+
+  if(has('parallel_bases') || has('parallel_opposite')){
+    const m01=midpoint(p[0],p[1]), m23=midpoint(p[2],p[3]);
+    overlays += textSvg(m01[0],m01[1]-8,'⇉','fill-blue-600 text-[25px] font-black');
+    overlays += textSvg(m23[0],m23[1]+22,'⇉','fill-blue-600 text-[25px] font-black');
+    if(has('parallel_opposite')){
+      const m12=midpoint(p[1],p[2]), m30=midpoint(p[3],p[0]);
+      overlays += textSvg(m12[0]+18,m12[1],'⇈','fill-blue-600 text-[22px] font-black');
+      overlays += textSvg(m30[0]-18,m30[1],'⇈','fill-blue-600 text-[22px] font-black');
+    }
+  }
+
+  if(has('opposite_equal') || has('all_sides_equal') || has('legs_equal')){
+    const mids=[midpoint(p[0],p[1]),midpoint(p[1],p[2]),midpoint(p[2],p[3]),midpoint(p[3],p[0])];
+    if(has('all_sides_equal')){
+      mids.forEach(function(m){ overlays += circleSvg(m[0],m[1],5,'fill-green-500 stroke-white stroke-[2]'); });
+    } else if(has('opposite_equal')){
+      overlays += circleSvg(mids[0][0],mids[0][1],5,'fill-green-500 stroke-white stroke-[2]');
+      overlays += circleSvg(mids[2][0],mids[2][1],5,'fill-green-500 stroke-white stroke-[2]');
+      overlays += circleSvg(mids[1][0],mids[1][1],7,'fill-emerald-700 stroke-white stroke-[2]');
+      overlays += circleSvg(mids[3][0],mids[3][1],7,'fill-emerald-700 stroke-white stroke-[2]');
+    } else {
+      overlays += circleSvg(mids[1][0],mids[1][1],6,'fill-green-500 stroke-white stroke-[2]');
+      overlays += circleSvg(mids[3][0],mids[3][1],6,'fill-green-500 stroke-white stroke-[2]');
+    }
+  }
+
+  if(has('angles_base_equal') || has('angles_opposite') || has('angles_all') || has('angles_leg') || has('right_angles')){
+    const colors = ['fill-orange-400','fill-amber-500','fill-orange-400','fill-amber-500'];
+    p.forEach(function(v,i){
+      let show = has('angles_all') || has('right_angles');
+      if(has('angles_base_equal') || has('angles_opposite') || has('angles_leg')) show = true;
+      if(show) overlays += circleSvg(v[0],v[1],10,colors[i]+' opacity-80 stroke-white stroke-[2]');
+    });
+    if(has('right_angles')){
+      p.forEach(function(v){ overlays += textSvg(v[0],v[1]+4,'□','fill-white text-[12px] font-black'); });
+    }
+  }
+
+  const diagRequested = activeTypes.some(function(t){ return t.indexOf('diagonal_')===0 || t==='diagonals'; });
+  if(diagRequested){
+    overlays += lineSvg(p[0],p[2],'stroke-purple-600 stroke-[3]','stroke-dasharray="7 5"');
+    overlays += lineSvg(p[1],p[3],'stroke-purple-600 stroke-[3]','stroke-dasharray="7 5"');
+    const c = midpoint(p[0],p[2]);
+    if(has('diagonal_bisect') || has('diagonal_equal_bisect') || has('diagonal_all')){
+      overlays += circleSvg(c[0],c[1],7,'fill-purple-700 stroke-white stroke-[2]');
+      overlays += textSvg(c[0],c[1]-14,'trung điểm','fill-purple-800 text-[10px] font-bold');
+    }
+    if(has('diagonal_equal') || has('diagonal_equal_bisect') || has('diagonal_all')){
+      overlays += textSvg(c[0]-35,c[1]-12,'=','fill-fuchsia-600 text-[22px] font-black');
+      overlays += textSvg(c[0]+35,c[1]+20,'=','fill-fuchsia-600 text-[22px] font-black');
+    }
+    if(has('diagonal_perpendicular') || has('diagonal_all')){
+      overlays += textSvg(c[0]+13,c[1]-10,'⊥','fill-red-600 text-[20px] font-black');
+    }
+    if(has('diagonal_angle_bisector')){
+      p.forEach(function(v){ overlays += textSvg(v[0],v[1]-14,'½','fill-purple-700 text-[16px] font-black'); });
+    }
+  }
+
+  const labels = ['A','B','C','D'];
+  let vertexLabels = '';
+  p.forEach(function(v,i){
+    const dx = i===0||i===3 ? -14 : 14;
+    const dy = i<2 ? -10 : 18;
+    vertexLabels += textSvg(v[0]+dx,v[1]+dy,labels[i],'fill-slate-700 text-[13px] font-extrabold');
+  });
+
+  return '<svg viewBox="0 0 340 260" class="w-full max-w-[520px]">'+
+    '<polygon points="'+pts+'" class="svg-shape fill-white stroke-slate-700 stroke-[4]" />'+
+    overlays+vertexLabels+
+    '</svg>';
+}
+
+let visualShapeId = 'binhhanh';
+let visualActive = new Set();
+
+function renderVisualShapePicks(){
+  const box=document.getElementById('visual-shape-picks');
+  box.innerHTML='';
+  shapes.forEach(function(s){
+    const b=document.createElement('button');
+    b.className='shape-pick rounded-xl border px-3 py-2 text-sm font-bold text-left '+(s.id===visualShapeId?'active':'bg-white text-slate-700 border-slate-200 hover:bg-slate-50');
+    b.textContent=s.name;
+    b.onclick=function(){ visualShapeId=s.id; visualActive=new Set(); renderVisualShapePicks(); renderVisual(); };
+    box.appendChild(b);
+  });
+}
+function renderVisual(){
+  const s=shapes.find(function(x){return x.id===visualShapeId;});
+  const spec=visualFacts[visualShapeId];
+  document.getElementById('visual-shape-name').textContent=s.name;
+  document.getElementById('visual-memory').textContent=s.memory;
+  document.getElementById('visual-svg-wrap').innerHTML=buildShapeSvg(visualShapeId,Array.from(visualActive));
+  const box=document.getElementById('visual-property-buttons'); box.innerHTML='';
+  spec.properties.forEach(function(p){
+    const active=visualActive.has(p.type);
+    const b=document.createElement('button');
+    b.className='prop-toggle w-full rounded-xl border px-4 py-3 text-left text-sm font-bold '+(active?'active':'bg-white border-slate-200 text-slate-700 hover:bg-slate-50');
+    b.innerHTML=(active?'✓ ':'')+p.label;
+    b.onclick=function(){
+      if(visualActive.has(p.type)) visualActive.delete(p.type); else visualActive.add(p.type);
+      document.getElementById('visual-note').innerHTML='<b>'+p.label+':</b> '+p.note;
+      renderVisual();
+    };
+    box.appendChild(b);
+  });
+}
+document.getElementById('visual-reset').onclick=function(){ visualActive=new Set(); renderVisual(); document.getElementById('visual-note').textContent='Đã tắt toàn bộ lớp minh họa.'; };
+renderVisualShapePicks(); renderVisual();
+
+function fillShapeSelect(sel,selected){
+  sel.innerHTML='';
+  shapes.forEach(function(s){
+    const o=document.createElement('option'); o.value=s.id; o.textContent=s.name; if(s.id===selected)o.selected=true; sel.appendChild(o);
+  });
+}
+const compareA=document.getElementById('compare-a'), compareB=document.getElementById('compare-b');
+fillShapeSelect(compareA,'chunhat'); fillShapeSelect(compareB,'thoi');
+
+function factListHtml(ids,emptyText){
+  if(!ids.length) return '<div class="text-slate-500 italic">'+emptyText+'</div>';
+  return ids.map(function(id){ return '<div class="rounded-lg bg-white/70 border border-white px-3 py-2">• '+factLabels[id]+'</div>'; }).join('');
+}
+function renderCompare(){
+  const a=compareA.value,b=compareB.value;
+  const A=shapeFactSets[a],B=shapeFactSets[b];
+  const common=A.filter(function(x){return B.indexOf(x)>=0;});
+  const onlyA=A.filter(function(x){return B.indexOf(x)<0;});
+  const onlyB=B.filter(function(x){return A.indexOf(x)<0;});
+  document.getElementById('compare-common').innerHTML=factListHtml(common,'Không có tính chất chung trong bộ đang xét.');
+  document.getElementById('compare-only-a-title').textContent='Chỉ '+shapeNameById(a)+' có thêm';
+  document.getElementById('compare-only-b-title').textContent='Chỉ '+shapeNameById(b)+' có thêm';
+  document.getElementById('compare-only-a').innerHTML=factListHtml(onlyA,'Không có tính chất riêng thêm.');
+  document.getElementById('compare-only-b').innerHTML=factListHtml(onlyB,'Không có tính chất riêng thêm.');
+  let tip='Hãy tập trung vào các tính chất nằm ở hai cột bên phải — đó là nơi giúp phân biệt hai hình nhanh nhất.';
+  if((a==='chunhat'&&b==='thoi')||(a==='thoi'&&b==='chunhat')) tip='Mẹo nhớ: hình chữ nhật nổi bật bởi góc vuông + chéo bằng; hình thoi nổi bật bởi bốn cạnh bằng + chéo vuông + phân giác. Có cả hai nhóm tính chất thì nghĩ đến hình vuông.';
+  if((a==='thangcan'&&b==='chunhat')||(a==='chunhat'&&b==='thangcan')) tip='Dễ nhầm vì cả hai đều có hai đường chéo bằng nhau. Nhưng hình chữ nhật còn có hai đường chéo chia đôi nhau và bốn góc vuông; hình thang cân không có các tính chất đó nói chung.';
+  document.getElementById('compare-tip').innerHTML='<b>Mẹo phân biệt:</b> '+tip;
+}
+compareA.onchange=renderCompare; compareB.onchange=renderCompare; renderCompare();
+
+const upgradeRules = {
+  tugiac:[
+    {to:'thang',cond:'Có một cặp cạnh đối song song',why:'Theo định nghĩa: tứ giác có một cặp cạnh đối song song là hình thang.'},
+    {to:'binhhanh',cond:'Các cạnh đối song song',why:'Đây là định nghĩa của hình bình hành.'},
+    {to:'binhhanh',cond:'Các cạnh đối bằng nhau',why:'Đây là một dấu hiệu nhận biết hình bình hành.'},
+    {to:'binhhanh',cond:'Một cặp cạnh đối vừa song song vừa bằng nhau',why:'Đây là một dấu hiệu nhận biết hình bình hành.'},
+    {to:'binhhanh',cond:'Các góc đối bằng nhau',why:'Đây là một dấu hiệu nhận biết hình bình hành.'},
+    {to:'binhhanh',cond:'Hai đường chéo chia đôi nhau',why:'Đây là một dấu hiệu nhận biết hình bình hành.'},
+    {to:'chunhat',cond:'Có ba góc vuông',why:'Tổng bốn góc là 360°, nên góc còn lại cũng vuông.'},
+    {to:'thoi',cond:'Có bốn cạnh bằng nhau',why:'Đây là định nghĩa trực tiếp của hình thoi.'}
+  ],
+  thang:[
+    {to:'thangcan',cond:'Hai góc kề một đáy bằng nhau',why:'Đây là định nghĩa/dấu hiệu nhận biết hình thang cân.'},
+    {to:'thangcan',cond:'Hai đường chéo bằng nhau',why:'Khi đã biết là hình thang, hai đường chéo bằng nhau ⇒ hình thang cân.'}
+  ],
+  binhhanh:[
+    {to:'chunhat',cond:'Có một góc vuông',why:'Hình bình hành có một góc vuông ⇒ hình chữ nhật.'},
+    {to:'chunhat',cond:'Hai đường chéo bằng nhau',why:'Hình bình hành có hai đường chéo bằng nhau ⇒ hình chữ nhật.'},
+    {to:'thoi',cond:'Hai cạnh kề bằng nhau',why:'Hình bình hành có hai cạnh kề bằng nhau ⇒ hình thoi.'},
+    {to:'thoi',cond:'Hai đường chéo vuông góc',why:'Hình bình hành có hai đường chéo vuông góc ⇒ hình thoi.'},
+    {to:'thoi',cond:'Một đường chéo là phân giác một góc',why:'Đây là một dấu hiệu nhận biết hình thoi.'}
+  ],
+  chunhat:[
+    {to:'vuong',cond:'Hai cạnh kề bằng nhau',why:'Hình chữ nhật có hai cạnh kề bằng nhau ⇒ hình vuông.'},
+    {to:'vuong',cond:'Hai đường chéo vuông góc',why:'Hình chữ nhật có hai đường chéo vuông góc ⇒ hình vuông.'},
+    {to:'vuong',cond:'Một đường chéo là phân giác một góc',why:'Hình chữ nhật có một đường chéo là phân giác một góc ⇒ hình vuông.'}
+  ],
+  thoi:[
+    {to:'vuong',cond:'Có một góc vuông',why:'Hình thoi có một góc vuông ⇒ hình vuông.'},
+    {to:'vuong',cond:'Hai đường chéo bằng nhau',why:'Hình thoi có hai đường chéo bằng nhau ⇒ hình vuông.'}
+  ],
+  thangcan:[],
+  vuong:[]
+};
+const upgradeStart=document.getElementById('upgrade-start');
+['tugiac','thang','binhhanh','chunhat','thoi'].forEach(function(id){
+  const o=document.createElement('option'); o.value=id;o.textContent=shapeNameById(id);upgradeStart.appendChild(o);
+});
+upgradeStart.value='binhhanh';
+function renderUpgrade(){
+  const id=upgradeStart.value;
+  document.getElementById('upgrade-current').innerHTML='<div class="text-xs font-extrabold uppercase tracking-wide text-indigo-600">Hình nền đã chứng minh</div><div class="text-2xl font-extrabold text-indigo-950 mt-1">'+shapeNameById(id)+'</div><div class="text-sm text-indigo-800 mt-2">Chỉ sau bước này mới được dùng các dấu hiệu có dạng “'+shapeNameById(id)+' có…”.</div>';
+  const box=document.getElementById('upgrade-options');box.innerHTML='';
+  const rules=upgradeRules[id]||[];
+  if(!rules.length){ box.innerHTML='<div class="md:col-span-2 rounded-xl bg-slate-50 border p-4 text-slate-500 italic">Trong sơ đồ này không còn bước nâng cấp trực tiếp nào từ hình đã chọn.</div>'; return; }
+  rules.forEach(function(r){
+    const b=document.createElement('button');
+    b.className='upgrade-node text-left rounded-2xl border border-slate-200 bg-white p-4 hover:bg-blue-50';
+    b.innerHTML='<div class="text-xs font-bold text-slate-500">THÊM ĐIỀU KIỆN</div><div class="font-extrabold text-slate-900 mt-1">'+r.cond+'</div><div class="mt-3 text-sm text-blue-700 font-bold">⇒ '+shapeNameById(r.to)+'</div>';
+    b.onclick=function(){
+      document.getElementById('upgrade-current').innerHTML='<div class="text-xs font-extrabold uppercase tracking-wide text-emerald-600">Nâng cấp thành công</div><div class="text-2xl font-extrabold text-emerald-950 mt-1">'+shapeNameById(id)+' + '+r.cond+' ⇒ '+shapeNameById(r.to)+'</div><div class="text-sm text-emerald-900 mt-2">'+r.why+'</div>';
+    };
+    box.appendChild(b);
+  });
+}
+upgradeStart.onchange=renderUpgrade;renderUpgrade();
+
+const guessConditions = [
+  {id:'knownTrapezoid',label:'Đã biết là hình thang'},
+  {id:'knownParallelogram',label:'Đã biết là hình bình hành'},
+  {id:'knownRectangle',label:'Đã biết là hình chữ nhật'},
+  {id:'knownRhombus',label:'Đã biết là hình thoi'},
+  {id:'oppParallel',label:'Các cạnh đối song song'},
+  {id:'oppEqual',label:'Các cạnh đối bằng nhau'},
+  {id:'pairParallelEqual',label:'Một cặp cạnh đối vừa song song vừa bằng nhau'},
+  {id:'oppAnglesEqual',label:'Các góc đối bằng nhau'},
+  {id:'diagBisect',label:'Hai đường chéo chia đôi nhau'},
+  {id:'threeRight',label:'Có ba góc vuông'},
+  {id:'oneRight',label:'Có một góc vuông'},
+  {id:'allSidesEqual',label:'Bốn cạnh bằng nhau'},
+  {id:'adjacentEqual',label:'Hai cạnh kề bằng nhau'},
+  {id:'baseAnglesEqual',label:'Hai góc kề một đáy bằng nhau'},
+  {id:'diagEqual',label:'Hai đường chéo bằng nhau'},
+  {id:'diagPerp',label:'Hai đường chéo vuông góc'},
+  {id:'diagAngleBisector',label:'Một đường chéo là phân giác một góc'}
+];
+let guessSelected=new Set();
+function renderGuessConditions(){
+  const box=document.getElementById('guess-conditions');box.innerHTML='';
+  guessConditions.forEach(function(c){
+    const b=document.createElement('button');
+    const active=guessSelected.has(c.id);
+    b.className='condition-chip rounded-xl border px-3 py-3 text-left text-sm font-bold '+(active?'selected':'bg-white text-slate-700 border-slate-200 hover:bg-slate-50');
+    b.textContent=(active?'✓ ':'')+c.label;
+    b.onclick=function(){ if(active)guessSelected.delete(c.id);else guessSelected.add(c.id); renderGuessConditions();renderGuessResult(); };
+    box.appendChild(b);
+  });
+}
+function hasGuess(id){return guessSelected.has(id);}
+function renderGuessResult(){
+  const r=document.getElementById('guess-result');
+  let result=null,reason='';
+  if(hasGuess('knownRectangle')&&(hasGuess('adjacentEqual')||hasGuess('diagPerp')||hasGuess('diagAngleBisector'))){
+    result='vuong'; reason='Đã biết là hình chữ nhật và có thêm một dấu hiệu nhận biết hình vuông.';
+  } else if(hasGuess('knownRhombus')&&(hasGuess('oneRight')||hasGuess('diagEqual'))){
+    result='vuong'; reason='Đã biết là hình thoi và có thêm một dấu hiệu nhận biết hình vuông.';
+  } else if(hasGuess('knownParallelogram')&&(hasGuess('oneRight')||hasGuess('diagEqual'))){
+    result='chunhat'; reason='Đã biết là hình bình hành và có thêm dấu hiệu nhận biết hình chữ nhật.';
+  } else if(hasGuess('knownParallelogram')&&(hasGuess('adjacentEqual')||hasGuess('diagPerp')||hasGuess('diagAngleBisector'))){
+    result='thoi'; reason='Đã biết là hình bình hành và có thêm dấu hiệu nhận biết hình thoi.';
+  } else if(hasGuess('knownTrapezoid')&&(hasGuess('baseAnglesEqual')||hasGuess('diagEqual'))){
+    result='thangcan'; reason='Đã biết là hình thang và có thêm dấu hiệu nhận biết hình thang cân.';
+  } else if(hasGuess('threeRight')){
+    result='chunhat'; reason='Tứ giác có ba góc vuông ⇒ góc còn lại cũng vuông ⇒ hình chữ nhật.';
+  } else if(hasGuess('allSidesEqual')){
+    result='thoi'; reason='Tứ giác có bốn cạnh bằng nhau ⇒ hình thoi.';
+  } else if(hasGuess('oppParallel')||hasGuess('oppEqual')||hasGuess('pairParallelEqual')||hasGuess('oppAnglesEqual')||hasGuess('diagBisect')){
+    result='binhhanh'; reason='Dữ kiện đã chọn là một dấu hiệu nhận biết hình bình hành.';
+  }
+
+  if(result){
+    r.innerHTML='<div class="text-xs font-extrabold uppercase tracking-wide text-emerald-600">Có thể kết luận chắc chắn</div><div class="text-3xl font-extrabold text-emerald-950 mt-2">'+shapeNameById(result)+'</div><div class="mt-3 text-sm leading-6 text-emerald-900">'+reason+'</div>';
+  } else {
+    r.innerHTML='<div class="text-xs font-extrabold uppercase tracking-wide text-amber-600">Chưa đủ điều kiện</div><div class="text-xl font-extrabold text-amber-950 mt-2">Chưa thể kết luận một hình đặc biệt duy nhất</div><div class="mt-3 text-sm leading-6 text-amber-900">Hãy chú ý điều kiện nền. Ví dụ “hai đường chéo bằng nhau” tự nó chưa đủ để kết luận hình chữ nhật; cần biết trước đó là hình bình hành.</div>';
+  }
+}
+document.getElementById('guess-clear').onclick=function(){guessSelected=new Set();renderGuessConditions();renderGuessResult();};
+renderGuessConditions();renderGuessResult();
+
+const mistakeItems = [
+  {s:'Hai đường chéo bằng nhau thì tứ giác đó là hình chữ nhật.',a:'insufficient',e:'Chưa đủ. Muốn dùng dấu hiệu này phải biết trước tứ giác là hình bình hành.'},
+  {s:'Hình thang cân có hai đường chéo bằng nhau.',a:'true',e:'Đúng. Đây vừa là tính chất, vừa là dấu hiệu nhận biết khi đã biết hình đó là hình thang.'},
+  {s:'Hình thoi luôn có hai đường chéo bằng nhau.',a:'false',e:'Sai. Hình thoi có hai đường chéo vuông góc và chia đôi nhau; chỉ khi hai đường chéo còn bằng nhau thì hình thoi trở thành hình vuông.'},
+  {s:'Hình chữ nhật luôn có hai đường chéo vuông góc.',a:'false',e:'Sai. Hình chữ nhật có hai đường chéo bằng nhau và chia đôi nhau; vuông góc chỉ trong trường hợp đặc biệt là hình vuông.'},
+  {s:'Hai đường chéo chia đôi nhau thì tứ giác là hình bình hành.',a:'true',e:'Đúng. Đây là một dấu hiệu nhận biết hình bình hành.'},
+  {s:'Hình bình hành có một góc vuông là hình chữ nhật.',a:'true',e:'Đúng. Đây là một dấu hiệu nhận biết hình chữ nhật.'},
+  {s:'Hình bình hành có hai đường chéo vuông góc là hình thoi.',a:'true',e:'Đúng. Đây là một dấu hiệu nhận biết hình thoi.'},
+  {s:'Tứ giác có hai cạnh kề bằng nhau là hình thoi.',a:'insufficient',e:'Chưa đủ. Dấu hiệu đúng là hình bình hành có hai cạnh kề bằng nhau.'},
+  {s:'Hình thang có hai đường chéo bằng nhau là hình thang cân.',a:'true',e:'Đúng. Điều kiện nền “đã là hình thang” đã có.'},
+  {s:'Hình chữ nhật có hai cạnh kề bằng nhau là hình vuông.',a:'true',e:'Đúng. Đây là một dấu hiệu nhận biết hình vuông.'},
+  {s:'Hình thoi có một góc vuông là hình vuông.',a:'true',e:'Đúng. Đây là một dấu hiệu nhận biết hình vuông.'},
+  {s:'Tứ giác có hai đường chéo vuông góc là hình thoi.',a:'insufficient',e:'Chưa đủ. Muốn dùng dấu hiệu đường chéo vuông góc để kết luận hình thoi, phải biết trước hình đó là hình bình hành.'},
+  {s:'Hình vuông có mọi tính chất của hình chữ nhật và hình thoi.',a:'true',e:'Đúng. Đây là cách nhớ rất mạnh để tránh bỏ sót tính chất.'},
+  {s:'Hình bình hành có hai đường chéo bằng nhau là hình vuông.',a:'false',e:'Sai. Kết luận đúng trước hết là hình chữ nhật; chưa đủ để là hình vuông.'},
+  {s:'Hình thoi có hai đường chéo bằng nhau là hình vuông.',a:'true',e:'Đúng. Đây là một dấu hiệu nhận biết hình vuông từ hình thoi.'}
+];
+let mistakeIndex=0,mistakeAnswered=false;
+function renderMistake(){
+  const item=mistakeItems[mistakeIndex];
+  mistakeAnswered=false;
+  document.getElementById('mistake-count').textContent=(mistakeIndex+1)+' / '+mistakeItems.length;
+  document.getElementById('mistake-statement').textContent=item.s;
+  document.getElementById('mistake-explain').classList.add('hidden');
+  document.getElementById('mistake-next').classList.add('hidden');
+  document.querySelectorAll('.tf-choice').forEach(function(b){b.disabled=false;b.classList.remove('ring-4','ring-violet-200','opacity-50');});
+}
+document.querySelectorAll('.tf-choice').forEach(function(b){
+  b.onclick=function(){
+    if(mistakeAnswered)return;
+    mistakeAnswered=true;
+    const item=mistakeItems[mistakeIndex];
+    const ok=b.dataset.choice===item.a;
+    document.querySelectorAll('.tf-choice').forEach(function(x){x.disabled=true;if(x!==b)x.classList.add('opacity-50');});
+    b.classList.add('ring-4','ring-violet-200');
+    const ex=document.getElementById('mistake-explain');
+    ex.innerHTML='<div class="font-extrabold mb-1">'+(ok?'✅ Chính xác':'❌ Chưa đúng')+'</div><div>'+item.e+'</div>';
+    ex.classList.remove('hidden');
+    document.getElementById('mistake-next').classList.remove('hidden');
+  };
+});
+document.getElementById('mistake-next').onclick=function(){mistakeIndex=(mistakeIndex+1)%mistakeItems.length;renderMistake();};
+renderMistake();
+
+document.querySelectorAll('.sim-mode-btn').forEach(function(btn){
+  btn.onclick=function(){
+    document.querySelectorAll('.sim-mode-btn').forEach(function(x){x.classList.remove('active');});
+    btn.classList.add('active');
+    document.querySelectorAll('.sim-panel').forEach(function(p){p.classList.add('hidden');});
+    document.getElementById('sim-'+btn.dataset.sim).classList.remove('hidden');
+  };
+});
+
 
 const flashcards = [
   ['Tứ giác lồi: tổng bốn góc bằng bao nhiêu?','360°.','Cơ bản'],
