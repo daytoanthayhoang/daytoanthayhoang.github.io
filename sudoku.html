@@ -1,528 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sudoku Master v5.1 (Synchronized)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        /* --- GRID SYSTEM --- */
-        .sudoku-board-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 450px;
-            margin: 0 auto;
-            background-color: #334155;
-            border: 2px solid #334155;
-            padding: 2px;
-            border-radius: 4px;
-        }
-
-        .sudoku-grid {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            gap: 1px;
-            background-color: #334155;
-        }
-
-        .cell {
-            background-color: white;
-            position: relative;
-            padding-bottom: 100%;
-            cursor: pointer;
-            transition: background-color 0.1s;
-        }
-
-        .cell-value {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            /* SỬA LỖI: Bỏ transparent, dùng màu mặc định slate-700 để đồng bộ */
-            color: #334155; 
-            font-weight: 600; /* Mặc định đậm vừa */
-            pointer-events: none;
-        }
-
-        /* --- BORDERS 3x3 --- */
-        .cell:nth-child(3n) { border-right: 2px solid #334155; }
-        .cell:nth-child(9n) { border-right: none; }
-        .cell:nth-child(n+19):nth-child(-n+27),
-        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid #334155; }
-
-        /* --- COLORS & STATES --- */
-        .cell.selected { background-color: #93c5fd !important; }
-        .cell.highlight { background-color: #e0f2fe; }
-        
-        /* Fixed: Đề bài - Sửa lại cho hài hòa, không quá đậm */
-        .cell.fixed .cell-value { 
-            color: #0f172a; /* Slate-900: Đen dịu */
-            font-weight: 700; /* Bold chuẩn, không dùng 800 */
-        }
-        
-        /* User: Người chơi nhập - Giữ nguyên vì bạn thấy tốt */
-        .cell.user .cell-value { 
-            color: #2563eb; /* Blue-600 */
-            font-weight: 600; 
-        }
-        
-        /* Error */
-        .cell.error { background-color: #fee2e2 !important; }
-        .cell.error .cell-value { color: #dc2626; }
-
-        /* --- MODAL --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 50;
-            backdrop-filter: blur(2px);
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.2s;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 320px;
-            transform: scale(0.9);
-            transition: transform 0.2s;
-        }
-        .modal-overlay.active .modal-content { transform: scale(1); }
-
-        @media (max-width: 380px) { .cell-value { font-size: 1rem; } }
-    </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sudoku</title>
+<style>
+:root{--ink:#163a3a;--muted:#56706b;--paper:#f5f3e9;--line:#ccd7cd;--green:#235b4e;--light:#e8f0de;--gold:#eebf56;--red:#b43c3c}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}button,select,textarea{font:inherit}button,select{min-height:42px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);padding:.55rem .8rem}button{cursor:pointer}button:hover{border-color:var(--green);background:#f1f6ea}button:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #d19020;outline-offset:3px}button:disabled{opacity:.45;cursor:default}button.primary{background:var(--green);border-color:var(--green);color:white}button.primary:hover{background:#174638}button[aria-pressed=true]{background:var(--gold);color:#302d18;border-color:#c3942a}a{color:var(--green)}textarea{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:12px;color:var(--ink);background:white;font:16px/1.55 ui-monospace,monospace;letter-spacing:.14em}textarea:focus-visible{outline:3px solid #d19020;outline-offset:2px}.importError{font-size:14px;color:var(--red);min-height:24px;margin:10px 0}.importHelp{font-size:14px;color:var(--muted)}.page{max-width:1250px;margin:auto;padding:28px 32px 32px}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:12px;font-weight:750}.top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}.top h1{font:700 clamp(32px,4vw,48px)/1.1 Georgia,serif;margin:8px 0 10px}.top p{max-width:700px;margin:0;color:var(--muted)}.stamp{border:1px solid var(--green);border-radius:50%;width:79px;height:79px;display:grid;place-content:center;text-align:center;line-height:1.15;flex-shrink:0;font-size:13px;transform:rotate(8deg)}.stamp strong{font-size:22px}.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:24px 0 20px}.modes button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:12px 15px}.modes button small{font-size:12px;opacity:.8}.modes button[aria-pressed=true]{background:var(--green);color:white;border-color:var(--green)}.workspace{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.8fr);gap:24px;align-items:start}.panel{background:#fffdf6;border:1px solid var(--line);border-radius:16px;padding:20px}.boardTop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.boardTop h2{margin:0;font-size:19px}.tag{background:var(--light);border-radius:20px;padding:3px 10px;font-size:12px}.boardShell{display:grid;grid-template-columns:22px minmax(0,1fr);grid-template-rows:23px minmax(0,1fr);max-width:565px;margin:auto;user-select:none}.colCoords{grid-column:2;display:grid;text-align:center;font-size:12px;color:var(--muted)}.rowCoords{grid-row:2;display:grid;align-items:center;text-align:center;font-size:12px;color:var(--muted)}.board{grid-column:2;grid-row:2;display:grid;border:2px solid var(--ink);background:white;box-shadow:0 3px 0 #d7dfd0}.cell{position:relative;min-height:0;min-width:0;padding:0;aspect-ratio:1;border:0;border-right:1px solid #bdcbbf;border-bottom:1px solid #bdcbbf;border-radius:0;display:grid;place-items:center;background:#fff;color:#195f7b;font-size:clamp(19px,2.7vw,32px);line-height:1;font-variant-numeric:tabular-nums}.cell.given{font-weight:750;color:#153b36;background:#f0f2e8}.cell.peer{background:#edf3eb}.cell.same{background:#dcebd6}.cell.hintRegion{background:#fff0c8}.cell.selected{background:#bcd8c9!important;box-shadow:inset 0 0 0 3px var(--green);z-index:1}.cell.error{color:var(--red);background:#ffe8df}.cell.given.error{color:var(--red)}.cell:focus-visible{outline:3px solid #d19020;outline-offset:-3px;z-index:3}.cell .notes{display:grid;grid-template-columns:repeat(3,1fr);width:92%;height:90%;font-size:clamp(8px,1.1vw,12px);line-height:1;color:#45645b;align-items:center;justify-items:center}.cell .notes span{display:block;width:100%;text-align:center}.cell4{font-size:clamp(28px,5vw,48px)}.underBoard{font-size:13px;color:var(--muted);margin:15px 0 0}.toolbar{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:15px}.pad{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin-top:14px}.pad button{padding:0;min-height:44px;font-size:21px;font-weight:650}.pad.four{grid-template-columns:repeat(4,1fr)}.side h2{font-size:20px;margin:0 0 10px}.side p{margin:0 0 12px}.side .panel+.panel{margin-top:15px}.field{display:flex;flex-direction:column;gap:6px;margin:15px 0}.field label{font-weight:650;font-size:14px}.field select{width:100%}.hintBox{border-left:4px solid var(--gold);background:#fff6db;padding:13px 14px;margin-top:14px;border-radius:0 8px 8px 0;min-height:80px}.hintBox p{margin:0}.hintTools{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.hintTools button{font-size:14px;flex:1}.status{padding:12px 14px;border:1px solid #d9e1d3;border-radius:9px;background:#f1f5eb;margin-top:16px;min-height:70px;font-size:14px}.status.errorStatus{background:#fff0e8;border-color:#e6b7a5}.status.success{background:#dcebd6;border-color:#8bb185}details{margin-top:16px;font-size:14px;color:var(--muted)}summary{cursor:pointer;font-weight:650;color:var(--ink)}ol,ul{padding-left:21px;margin:10px 0}li+li{margin-top:5px}.tiny{font-size:12px;color:var(--muted)}footer{display:flex;justify-content:space-between;gap:15px;border-top:1px solid var(--line);margin-top:24px;padding-top:14px;font-size:12px;color:var(--muted)}.teacher .workspace{grid-template-columns:minmax(0,1.8fr) minmax(250px,.65fr)}.teacher .boardShell{max-width:770px}.teacher .cell{font-size:clamp(24px,3.4vw,42px)}.teacher .rowCoords,.teacher .colCoords{font-weight:750;font-size:15px}.teacher .boardShell{grid-template-columns:29px 1fr;grid-template-rows:29px 1fr}.teacher .underBoard{font-size:15px}.teacher .top p,.teacher footer{display:none}.teacher .page{max-width:1480px}.teacher .modes{margin:15px 0}.teacher .top h1{font-size:32px}.teacher .stamp{display:none}dialog{border:1px solid var(--line);border-radius:15px;padding:25px;max-width:440px;width:calc(100% - 36px);color:var(--ink);background:#fffdf6;box-shadow:0 20px 80px #153b3655}dialog::backdrop{background:#153b3677}dialog h2{margin:0;font-size:22px}dialog p{margin:12px 0 20px}dialog .buttons{display:flex;justify-content:flex-end;gap:10px}[hidden]{display:none!important}@media(max-width:780px){.page{padding:20px 14px}.workspace,.teacher .workspace{grid-template-columns:1fr}.workspace{gap:16px}.modes{grid-template-columns:repeat(2,1fr);margin:20px 0 15px}.modes button{padding:10px 12px}.panel{padding:15px}.stamp{width:65px;height:65px}.top p{font-size:14px}.cell{font-size:clamp(20px,5.5vw,32px)}.cell .notes{font-size:clamp(9px,2.35vw,12px)}.teacher .cell{font-size:clamp(22px,6vw,40px)}.side{display:grid;grid-template-columns:1fr;gap:0}.toolbar button{font-size:13px;padding:.5rem .25rem}.pad{gap:4px}.pad button{min-height:43px}.teacher .boardShell{grid-template-columns:23px 1fr;grid-template-rows:25px 1fr}footer{flex-direction:column;gap:3px}.top h1{margin-top:6px}.teacher .top h1{font-size:30px}}@media(prefers-reduced-motion:no-preference){button{transition:background .12s}}@media(min-width:781px){.teacher .boardShell{max-width:min(770px,calc(100vh - 320px))}.teacher .cell{font-size:clamp(22px,4.2vh,42px)}}@media print{body{background:white}.page{max-width:100%;padding:0}.modes,.side,.toolbar,.pad,footer,.top,.underBoard{display:none}.workspace,.teacher .workspace{display:block}.panel{border:0;padding:0}.boardShell{max-width:170mm!important}.cell{color:#111!important;background:white!important;box-shadow:none!important}.hintRegion,.selected,.peer,.same{background:white!important}.rowCoords,.colCoords{color:black}.boardTop{margin-bottom:10mm}.notes{color:#333!important}}
+/* Compact play-first layout; board colors and controls remain unchanged. */
+.page{padding-top:20px}.top h1{font-size:34px;margin:0}.modes{margin:16px 0}.modes button{align-items:center;justify-content:center;padding:10px 12px}.modeHelp{margin-top:0}.modeHelp p{margin:12px 0 0}.status{min-height:0}.hintBox{min-height:0}.underBoard p{margin-bottom:0}.boardTop h2{font-size:18px}.tag{white-space:nowrap}.toolbar #solve{grid-column:span 2}
+@media(max-width:780px){.page{padding-top:16px}.top h1{font-size:30px}.modes{margin:14px 0}.modes button{font-size:14px}.boardTop h2{font-size:16px}.panel{padding:13px}}
+</style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col items-center py-4 font-sans select-none text-slate-800">
+<body>
+<main class="page">
+<header class="top"><h1>Sudoku</h1></header>
+<nav class="modes" aria-label="Chế độ Sudoku">
+<button data-mode="novice" aria-pressed="true"><b>Làm quen 4×4</b></button>
+<button data-mode="guided" aria-pressed="false"><b>Có hướng dẫn</b></button>
+<button data-mode="practice" aria-pressed="false"><b>Tự luyện</b></button>
+<button data-mode="teacher" aria-pressed="false"><b>Bảng lớn</b></button>
+</nav>
+<div class="workspace">
+<section class="panel play"><div class="boardTop"><h2 id="boardTitle">Khởi động 4×4</h2><span class="tag" id="progress">0 ô đã điền</span></div>
+<div class="boardShell"><div class="colCoords" id="colCoords" aria-hidden="true"></div><div class="rowCoords" id="rowCoords" aria-hidden="true"></div><div class="board" id="board" role="grid" aria-label="Bảng Sudoku"></div></div>
+<div id="pad" class="pad four" aria-label="Điền số"></div>
+<div class="toolbar"><button id="erase">Xóa ô</button><button id="notes" aria-pressed="false">Ghi chú: tắt</button><button id="undo" disabled>Hoàn tác</button><button id="check">Kiểm tra</button><button id="reset">Làm lại đề</button><button id="new">Đổi đề</button><button id="import">Nhập đề riêng</button><button id="solve">Giải hết · xem đáp án</button></div>
+<details class="underBoard"><summary>Cách nhập số &amp; phím tắt</summary><p>Chọn ô rồi bấm số hoặc gõ phím. ← ↑ ↓ → để di chuyển · Backspace/Delete để xóa · N bật ghi chú · Ctrl/Cmd+Z hoàn tác. Ô số in đậm là dữ kiện cố định.</p></details>
+</section>
+<aside class="side">
+<section class="panel"><details class="modeHelp"><summary id="modeTitle">Luật chơi 4×4</summary><div id="modeCopy"></div></details>
+<div class="field" id="puzzleField" hidden><label for="puzzleSelect">Chọn đề 9×9</label><select id="puzzleSelect"></select><span class="tiny" id="levelDescription"></span></div>
+<div class="status" id="status" role="status" aria-live="polite">Chọn một ô trống để bắt đầu.</div>
+<div class="hintBox" id="hintBox"><p id="hintText">Gợi ý mở từng bước: vùng cần nhìn → lý do loại trừ → điền một ô.</p></div>
+<div class="hintTools"><button id="hint" class="primary">1 · Nhìn vùng nào?</button><button id="hideHint" hidden>Ẩn gợi ý</button></div>
+<details><summary>Đọc một bước suy luận</summary><ul><li><b>Ô chỉ có một khả năng:</b> loại những số đã có trong cùng hàng, cột và khối.</li><li><b>Số chỉ có một chỗ:</b> trong một hàng, cột hoặc khối, số ấy chỉ còn đặt được ở một ô.</li><li>Đề TB cần thêm ứng viên bị khóa trong hàng/cột của một khối. Đề K còn cần cặp ẩn. Gợi ý tự động ở đây chỉ tìm hai cách đầu; nếu chưa có, em cần tự xét kỹ thuật tiếp theo.</li></ul></details>
+</section>
 
-    <!-- Header -->
-    <div class="w-full max-w-md px-4 flex justify-between items-end mb-3">
-        <div>
-            <h1 class="text-2xl font-bold text-blue-800">Sudoku <span class="text-blue-500">v5.1</span></h1>
-            <div id="status-display" class="text-sm font-semibold text-slate-500">Cấp độ: Dễ</div>
-        </div>
-        <div id="timer" class="text-xl font-mono font-bold text-slate-700 bg-white px-2 py-1 rounded shadow-sm border">00:00</div>
-    </div>
+</aside>
+</div>
 
-    <!-- Main Board -->
-    <div class="sudoku-board-wrapper shadow-xl">
-        <div id="grid" class="sudoku-grid"></div>
-    </div>
-
-    <!-- Controls -->
-    <div class="w-full max-w-md px-2 mt-4 space-y-3">
-        <div class="flex gap-2">
-            <button onclick="showNewGameModal()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 active:scale-95 transition shadow">
-                <i class="fas fa-plus mr-1"></i> Game Mới
-            </button>
-            <button onclick="toggleInputMode()" id="btn-input-mode" class="flex-1 bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 active:scale-95 transition shadow border-2 border-transparent">
-                <i class="fas fa-edit mr-1"></i> Nhập Đề
-            </button>
-        </div>
-
-        <div class="flex gap-2 text-sm">
-            <button onclick="getHint()" class="flex-1 bg-teal-100 text-teal-800 py-2 rounded font-bold hover:bg-teal-200 border border-teal-200 transition">
-                <i class="fas fa-lightbulb"></i> Gợi ý
-            </button>
-            <button onclick="checkErrors()" class="flex-1 bg-amber-100 text-amber-800 py-2 rounded font-bold hover:bg-amber-200 border border-amber-200 transition">
-                <i class="fas fa-check"></i> Kiểm tra
-            </button>
-            <button onclick="solveGame()" class="flex-1 bg-rose-100 text-rose-800 py-2 rounded font-bold hover:bg-rose-200 border border-rose-200 transition">
-                <i class="fas fa-magic"></i> Giải Hết
-            </button>
-        </div>
-
-        <!-- Numpad -->
-        <div class="grid grid-cols-5 gap-2 mt-2">
-            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(1)">1</button>
-            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(2)">2</button>
-            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(3)">3</button>
-            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(4)">4</button>
-            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(5)">5</button>
-            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(6)">6</button>
-            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(7)">7</button>
-            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(8)">8</button>
-            <button class="h-12 bg-white rounded-lg shadow border-b-4 border-slate-200 active:translate-y-1 transition font-bold text-xl text-slate-700" onclick="inputNumber(9)">9</button>
-            <button class="h-12 bg-red-50 rounded-lg shadow border-b-4 border-red-200 active:translate-y-1 transition font-bold text-xl text-red-500" onclick="inputNumber(0)">
-                <i class="fas fa-eraser"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- MODAL: New Game -->
-    <div id="modal-new-game" class="modal-overlay">
-        <div class="modal-content text-center">
-            <h3 class="text-xl font-bold text-slate-800 mb-4">Chọn Độ Khó</h3>
-            <div class="space-y-2">
-                <button onclick="startGameDirectly('easy')" class="w-full py-3 bg-green-100 text-green-700 font-bold rounded-lg hover:bg-green-200 transition">
-                    Dễ <span class="text-sm font-normal text-green-600">(~42 ô)</span>
-                </button>
-                <button onclick="startGameDirectly('medium')" class="w-full py-3 bg-yellow-100 text-yellow-700 font-bold rounded-lg hover:bg-yellow-200 transition">
-                    Trung Bình <span class="text-sm font-normal text-yellow-600">(~34 ô)</span>
-                </button>
-                <button onclick="startGameDirectly('hard')" class="w-full py-3 bg-red-100 text-red-700 font-bold rounded-lg hover:bg-red-200 transition">
-                    Khó <span class="text-sm font-normal text-red-600">(~28 ô)</span>
-                </button>
-            </div>
-            <button onclick="closeModal('modal-new-game')" class="mt-4 text-slate-400 font-semibold text-sm hover:text-slate-600">Hủy bỏ</button>
-        </div>
-    </div>
-
-    <!-- MODAL: Alert -->
-    <div id="modal-alert" class="modal-overlay">
-        <div class="modal-content text-center">
-            <div id="alert-icon" class="text-4xl mb-2"></div>
-            <h3 id="alert-title" class="text-xl font-bold mb-2">Thông báo</h3>
-            <p id="alert-msg" class="text-slate-600 mb-6 text-sm">Nội dung</p>
-            <button onclick="closeModal('modal-alert')" class="w-full py-2 bg-slate-800 text-white rounded-lg font-bold">Đóng</button>
-        </div>
-    </div>
-
-    <script>
-        // --- BASE DATA ---
-        const BASE_STRING = "534678912672195348198342567859761423426853791713924856961537284287419635345286179";
-        
-        let board = Array(81).fill(0);
-        let solution = Array(81).fill(0);
-        let fixedMask = Array(81).fill(false);
-        let selectedIdx = -1;
-        let isInputMode = false;
-        let timer = 0;
-        let timerInterval;
-
-        const gridEl = document.getElementById('grid');
-        const timerEl = document.getElementById('timer');
-        const statusEl = document.getElementById('status-display');
-        const btnInputMode = document.getElementById('btn-input-mode');
-
-        // --- INIT ---
-        function init() {
-            renderGridStructure();
-            startGameDirectly('easy'); 
-        }
-
-        function renderGridStructure() {
-            gridEl.innerHTML = '';
-            for (let i = 0; i < 81; i++) {
-                let cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.onclick = () => selectCell(i);
-                
-                let valSpan = document.createElement('span');
-                valSpan.className = 'cell-value';
-                valSpan.id = `cell-${i}`;
-                
-                cell.appendChild(valSpan);
-                gridEl.appendChild(cell);
-            }
-        }
-
-        function startGameDirectly(difficulty) {
-            closeModal('modal-new-game');
-            isInputMode = false;
-            btnInputMode.classList.remove('ring', 'ring-purple-300', 'bg-purple-700');
-            
-            updateStatus(difficulty === 'easy' ? 'Dễ' : difficulty === 'medium' ? 'Trung Bình' : 'Khó');
-
-            let fullBoard = BASE_STRING.split('').map(Number);
-            shuffleBoard(fullBoard);
-
-            solution = [...fullBoard];
-            board = [...fullBoard];
-
-            let targetClues = difficulty === 'easy' ? 42 : difficulty === 'medium' ? 34 : 28;
-            removeNumbers(board, targetClues);
-            
-            fixedMask = board.map(n => n !== 0);
-            selectedIdx = -1;
-            
-            updateView();
-            resetTimer();
-        }
-
-        function shuffleBoard(b) {
-            let nums = [1,2,3,4,5,6,7,8,9];
-            for (let i = nums.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [nums[i], nums[j]] = [nums[j], nums[i]];
-            }
-            let map = [0, ...nums]; 
-            for(let i=0; i<81; i++) b[i] = map[b[i]];
-
-            for(let block=0; block<9; block+=3) {
-                if(Math.random() > 0.5) swapRows(b, block, block+1);
-                if(Math.random() > 0.5) swapRows(b, block, block+2);
-                if(Math.random() > 0.5) swapRows(b, block+1, block+2);
-            }
-
-            for(let block=0; block<9; block+=3) {
-                if(Math.random() > 0.5) swapCols(b, block, block+1);
-                if(Math.random() > 0.5) swapCols(b, block, block+2);
-                if(Math.random() > 0.5) swapCols(b, block+1, block+2);
-            }
-        }
-
-        function swapRows(b, r1, r2) {
-            for(let c=0; c<9; c++) {
-                let temp = b[r1*9 + c];
-                b[r1*9 + c] = b[r2*9 + c];
-                b[r2*9 + c] = temp;
-            }
-        }
-
-        function swapCols(b, c1, c2) {
-            for(let r=0; r<9; r++) {
-                let temp = b[r*9 + c1];
-                b[r*9 + c1] = b[r*9 + c2];
-                b[r*9 + c2] = temp;
-            }
-        }
-
-        function removeNumbers(grid, targetClues) {
-            let indices = Array.from({length: 81}, (_, i) => i);
-            for (let i = indices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [indices[i], indices[j]] = [indices[j], indices[i]];
-            }
-
-            let clues = 81;
-            for(let i=0; i<81; i++) {
-                if(clues <= targetClues) break;
-                if(grid[indices[i]] !== 0) {
-                    grid[indices[i]] = 0;
-                    clues--;
-                }
-            }
-        }
-
-        // --- SOLVER ---
-        function solveHelper(b) {
-            for (let i = 0; i < 81; i++) {
-                if (b[i] === 0) {
-                    for (let n = 1; n <= 9; n++) {
-                        if (isValid(b, i, n)) {
-                            b[i] = n;
-                            if (solveHelper(b)) return true;
-                            b[i] = 0;
-                        }
-                    }
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        function isValid(b, idx, num) {
-            let row = Math.floor(idx / 9);
-            let col = idx % 9;
-            for (let k = 0; k < 9; k++) {
-                if (b[row*9 + k] === num && (row*9+k) !== idx) return false;
-                if (b[k*9 + col] === num && (k*9+col) !== idx) return false;
-            }
-            let startR = row - row % 3;
-            let startC = col - col % 3;
-            for (let r = 0; r < 3; r++) {
-                for (let c = 0; c < 3; c++) {
-                    let curIdx = (startR+r)*9 + (startC+c);
-                    if (b[curIdx] === num && curIdx !== idx) return false;
-                }
-            }
-            return true;
-        }
-
-        // --- INTERACTION ---
-        function selectCell(idx) {
-            selectedIdx = idx;
-            updateView();
-        }
-
-        function inputNumber(num) {
-            if (selectedIdx === -1) return;
-            if (!isInputMode && fixedMask[selectedIdx]) return;
-
-            board[selectedIdx] = num;
-            let cell = document.getElementById(`cell-${selectedIdx}`).parentElement;
-            cell.classList.remove('error');
-            
-            updateView();
-            checkWin();
-        }
-
-        function toggleInputMode() {
-            isInputMode = !isInputMode;
-            if (isInputMode) {
-                stopTimer();
-                timerEl.innerText = "--:--";
-                updateStatus("Chế độ: Tự Nhập Đề", "text-purple-600");
-                btnInputMode.classList.add('ring', 'ring-purple-300');
-                
-                board.fill(0);
-                solution.fill(0);
-                fixedMask.fill(false);
-                selectedIdx = -1;
-                showAlert('info', 'Nhập Đề', 'Hãy nhập các số vào bảng. Máy sẽ tự tính toán đáp án.');
-            } else {
-                if (!validateCurrentBoard()) {
-                    isInputMode = true; 
-                    return;
-                }
-                fixedMask = board.map(n => n !== 0);
-                let tempBoard = [...board];
-                if (solveHelper(tempBoard)) {
-                    solution = tempBoard;
-                    updateStatus("Đang chơi (Đề tự nhập)");
-                    btnInputMode.classList.remove('ring', 'ring-purple-300');
-                    startTimer();
-                } else {
-                    showAlert('error', 'Lỗi', 'Đề bài này không có đáp án hợp lệ!');
-                    isInputMode = true;
-                }
-            }
-            updateView();
-        }
-
-        function validateCurrentBoard() {
-            for (let i = 0; i < 81; i++) {
-                if (board[i] !== 0) {
-                    if (!isValid(board, i, board[i])) {
-                        showAlert('error', 'Sai luật', 'Đề bài bạn nhập có số bị trùng lặp quy tắc Sudoku.');
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        // --- FEATURES ---
-        function getHint() {
-            if (isInputMode) {
-                let temp = [...board];
-                if(!solveHelper(temp)) { showAlert('error', 'Lỗi', 'Đề bài hiện tại không giải được.'); return; }
-                solution = temp;
-            }
-            let empties = board.map((n, i) => n === 0 ? i : -1).filter(i => i !== -1);
-            if (empties.length === 0) return;
-            let rand = empties[Math.floor(Math.random() * empties.length)];
-            board[rand] = solution[rand];
-            selectedIdx = rand;
-            updateView();
-        }
-
-        function checkErrors() {
-            if (isInputMode) {
-                if(validateCurrentBoard()) showAlert('success', 'Ổn', 'Các số nhập vào hợp lệ.');
-                return;
-            }
-            let errors = 0;
-            let cells = document.getElementsByClassName('cell');
-            for (let i = 0; i < 81; i++) {
-                if (board[i] !== 0 && board[i] !== solution[i]) {
-                    cells[i].classList.add('error');
-                    errors++;
-                }
-            }
-            if (errors > 0) showAlert('error', 'Kết quả', `Có ${errors} ô bị sai (màu đỏ).`);
-            else showAlert('success', 'Tuyệt vời', 'Tất cả các số đã điền đều đúng!');
-        }
-
-        function solveGame() {
-            if (isInputMode) {
-                if(!validateCurrentBoard()) return;
-                fixedMask = board.map(n => n !== 0);
-                isInputMode = false;
-                btnInputMode.classList.remove('ring', 'ring-purple-300');
-            }
-            let temp = board.map((n, i) => fixedMask[i] ? n : 0);
-            if (solveHelper(temp)) {
-                board = temp;
-                solution = [...temp];
-                updateView();
-                updateStatus("Đã giải xong");
-                stopTimer();
-            } else {
-                showAlert('error', 'Thất bại', 'Không tìm thấy lời giải cho bài này.');
-            }
-        }
-
-        function checkWin() {
-            if (isInputMode) return;
-            if (board.includes(0)) return;
-            for (let i = 0; i < 81; i++) if (board[i] !== solution[i]) return;
-            stopTimer();
-            showAlert('success', 'CHIẾN THẮNG!', `Bạn đã hoàn thành trong thời gian ${timerEl.innerText}`);
-        }
-
-        function updateView() {
-            let cells = document.getElementsByClassName('cell');
-            let selectedVal = selectedIdx !== -1 ? board[selectedIdx] : 0;
-            
-            for (let i = 0; i < 81; i++) {
-                let cell = cells[i];
-                let span = cell.firstChild;
-                let val = board[i];
-                
-                cell.className = 'cell';
-                
-                // Text update
-                span.innerText = val === 0 ? '' : val;
-                
-                if (fixedMask[i]) cell.classList.add('fixed');
-                else if (val !== 0) cell.classList.add('user');
-                
-                if (i === selectedIdx) cell.classList.add('selected');
-                else if (selectedVal !== 0 && val === selectedVal) cell.classList.add('highlight');
-            }
-        }
-
-        function updateStatus(text, colorClass = "text-slate-500") {
-            statusEl.innerText = text;
-            statusEl.className = "text-sm font-semibold " + colorClass;
-        }
-
-        function startTimer() {
-            stopTimer(); timer = 0;
-            timerInterval = setInterval(() => {
-                timer++;
-                let m = Math.floor(timer / 60).toString().padStart(2, '0');
-                let s = (timer % 60).toString().padStart(2, '0');
-                timerEl.innerText = `${m}:${s}`;
-            }, 1000);
-        }
-        function stopTimer() { clearInterval(timerInterval); }
-        function resetTimer() { stopTimer(); timerEl.innerText = "00:00"; startTimer(); }
-
-        function showNewGameModal() { document.getElementById('modal-new-game').classList.add('active'); }
-        function showAlert(type, title, msg) {
-            let el = document.getElementById('modal-alert');
-            let icon = document.getElementById('alert-icon');
-            document.getElementById('alert-title').innerText = title;
-            document.getElementById('alert-msg').innerText = msg;
-            if (type === 'error') icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
-            else if (type === 'success') icon.innerHTML = '<i class="fas fa-trophy text-yellow-500"></i>';
-            else icon.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i>';
-            el.classList.add('active');
-        }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-        document.addEventListener('keydown', (e) => {
-            if (selectedIdx === -1) return;
-            if (e.key >= '1' && e.key <= '9') inputNumber(parseInt(e.key));
-            if (e.key === '0' || e.key === 'Backspace' || e.key === 'Delete') inputNumber(0);
-            let r = Math.floor(selectedIdx / 9), c = selectedIdx % 9;
-            if (e.key === 'ArrowUp') r = (r - 1 + 9) % 9;
-            if (e.key === 'ArrowDown') r = (r + 1) % 9;
-            if (e.key === 'ArrowLeft') c = (c - 1 + 9) % 9;
-            if (e.key === 'ArrowRight') c = (c + 1) % 9;
-            if (e.key.startsWith('Arrow')) { selectCell(r * 9 + c); e.preventDefault(); }
-        });
-
-        init();
-    </script>
+</main>
+<dialog id="confirmDialog" aria-labelledby="dialogTitle"><h2 id="dialogTitle">Bắt đầu lại?</h2><p id="dialogCopy"></p><form method="dialog"><div class="buttons"><button value="cancel">Giữ bài đang làm</button><button value="confirm" class="primary">Đồng ý</button></div></form></dialog>
+<dialog id="importDialog" aria-labelledby="importTitle"><h2 id="importTitle">Nhập đề Sudoku 9×9</h2><p class="importHelp">Dán đúng 81 vị trí, mỗi ô là số 1–9; dùng 0 hoặc dấu chấm cho ô trống. Có thể xuống dòng sau mỗi hàng. Chỉ nạp đề có đúng một nghiệm.</p><label for="importText" class="eyebrow">Nội dung đề</label><textarea id="importText" rows="9" spellcheck="false" autocomplete="off" aria-describedby="importError" placeholder="000000000&#10;000000000&#10;…"></textarea><div class="importError" id="importError" role="status" aria-live="polite"></div><div class="buttons"><button id="importCancel" type="button">Hủy</button><button id="importValidate" class="primary" type="button">Kiểm định và nạp đề</button></div></dialog>
+<script>
+'use strict';
+const BANK=[{"id":"D1","label":"Dễ","difficulty":"easy","puzzle":"000006030700941820000007490000509000200060000057410000800030000000000065000700200","solution":"194286537735941826628357491386579142241863759957412683812635974479128365563794218","techniques_used":["naked_single","hidden_single"],"required_level":1},{"id":"D2","label":"Dễ","difficulty":"easy","puzzle":"087031000000060350010000000056300200000080109003000800500000000000000083062000900","solution":"687531492429768351315942678856319247274685139193427865538194726941276583762853914","techniques_used":["naked_single","hidden_single"],"required_level":1},{"id":"TB1","label":"Trung bình","difficulty":"medium","puzzle":"000001095008002000300090060000000500000900010600085700004870002000006400000050078","solution":"762341895598762143341598267927613584485927316613485729154879632879236451236154978","techniques_used":["hidden_single","locked_candidates","naked_single"],"required_level":2},{"id":"TB2","label":"Trung bình","difficulty":"medium","puzzle":"000200010030000000005600408080000607109000805000040000000985120900000000002400500","solution":"847259316631874952295613478584192637129736845763548291476985123958321764312467589","techniques_used":["hidden_single","locked_candidates","naked_single"],"required_level":2},{"id":"K1","label":"Khó","difficulty":"hard","puzzle":"008000007790000000500020060006731040003002000040000001000000016900050000000200480","solution":"468315297792684135531927864856731942173492658249568371327849516984156723615273489","techniques_used":["hidden_single","locked_candidates","naked_single","hidden_pair","naked_pair"],"required_level":3},{"id":"K2","label":"Khó","difficulty":"hard","puzzle":"001075000000000000003000861009600080007053006040000000000517900000009008300040000","solution":"681375294924168573753492861539624187817953426246781359468517932175239648392846715","techniques_used":["naked_single","hidden_single","locked_candidates","hidden_pair"],"required_level":3}];
+const FOUR={id:'N4',label:'Khởi động 4×4',size:4,box:2,puzzle:'1004041001034020',solution:'1234341221434321'};
+const $=id=>document.getElementById(id);
+let mode='novice',puzzle=FOUR,values=[],notes=[],selected=0,noteMode=false,history=[],hintStep=null,hintPhase=0,hintsVisible=true,assisted=false,errors=new Set(),pending=null;
+let last9='D1',customPuzzle=null;
+function getPuzzle(id){return customPuzzle&&id===customPuzzle.id?customPuzzle:BANK.find(p=>p.id===id);}
+function dialogsOpen(){return $('confirmDialog').open||$('importDialog').open;}
+function units(n,b){let u=[];for(let r=0;r<n;r++)u.push({name:'hàng '+(r+1),kind:'row',index:r,cells:Array.from({length:n},(_,c)=>r*n+c)});for(let c=0;c<n;c++)u.push({name:'cột '+(c+1),kind:'col',index:c,cells:Array.from({length:n},(_,r)=>r*n+c)});for(let br=0;br<b;br++)for(let bc=0;bc<b;bc++){let cells=[];for(let dr=0;dr<b;dr++)for(let dc=0;dc<b;dc++)cells.push((br*b+dr)*n+bc*b+dc);u.push({name:'khối '+(br*b+bc+1),kind:'box',index:br*b+bc,cells});}return u;}
+function candidates(grid,i,n,b){if(grid[i])return [];let r=Math.floor(i/n),c=i%n,used=new Set();for(let k=0;k<n;k++){used.add(grid[r*n+k]);used.add(grid[k*n+c]);}let br=Math.floor(r/b)*b,bc=Math.floor(c/b)*b;for(let dr=0;dr<b;dr++)for(let dc=0;dc<b;dc++)used.add(grid[(br+dr)*n+bc+dc]);return Array.from({length:n},(_,k)=>k+1).filter(x=>!used.has(x));}
+function conflicts(grid,n,b){let bad=new Set();for(const u of units(n,b)){let seen=new Map();for(const i of u.cells)if(grid[i]){if(seen.has(grid[i])){bad.add(i);bad.add(seen.get(grid[i]));}else seen.set(grid[i],i);}}return bad;}
+function validComplete(grid,n,b){return grid.length===n*n&&grid.every(v=>Number.isInteger(v)&&v>=1&&v<=n)&&conflicts(grid,n,b).size===0;}
+function findSingle(grid,n,b){const cs=grid.map((v,i)=>candidates(grid,i,n,b));for(let i=0;i<grid.length;i++)if(!grid[i]&&cs[i].length===1){const r=Math.floor(i/n),c=i%n;return {i,value:cs[i][0],type:'naked',region:units(n,b).find(u=>u.kind==='box'&&u.cells.includes(i)),candidates:cs[i],r,c};}for(const u of units(n,b))for(let v=1;v<=n;v++){if(u.cells.some(i=>grid[i]===v))continue;let possible=u.cells.filter(i=>!grid[i]&&cs[i].includes(v));if(possible.length===1){let i=possible[0];return {i,value:v,type:'hidden',region:u,candidates:cs[i],r:Math.floor(i/n),c:i%n};}}return null;}
+function countSolutions(input,n=9,b=3,limit=2,maxNodes=100000,maxMs=500){
+ const grid=[...input],started=Date.now();let count=0,solution=null,nodes=0,complete=true;
+ if(grid.length!==n*n||grid.some(v=>!Number.isInteger(v)||v<0||v>n)||conflicts(grid,n,b).size)return {count:0,solution:null,nodes:0,complete:true,invalid:true};
+ function search(){if(count>=limit||!complete)return;if(++nodes>maxNodes||Date.now()-started>maxMs){complete=false;return;}let target=-1,possibilities=null;for(let i=0;i<grid.length;i++)if(!grid[i]){const cs=candidates(grid,i,n,b);if(!cs.length)return;if(possibilities===null||cs.length<possibilities.length){target=i;possibilities=cs;if(cs.length===1)break;}}if(target<0){count++;if(!solution)solution=grid.join('');return;}for(const v of possibilities){grid[target]=v;search();grid[target]=0;if(count>=limit||!complete)return;}}
+ search();return {count,solution,nodes,complete,invalid:false};
+}
+function parseImport(text){const compact=text.replace(/\s/g,'');if(!/^[0-9.]+$/.test(compact))return {error:'Chỉ dùng các số 0–9, dấu chấm và khoảng trắng.'};if(compact.length!==81)return {error:'Cần đúng 81 vị trí; hiện có '+compact.length+'.'};return {puzzle:compact.replace(/\./g,'0')};}
+function snapshot(){return {values:[...values],notes:notes.map(x=>[...x]),assisted};}
+function push(){history.push(snapshot());if(history.length>300)history.shift();}
+function resetHint(){hintStep=null;hintPhase=0;}
+function setStatus(text,type=''){const el=$('status');el.textContent=text;el.className='status'+(type?' '+type:'');}
+function size(){return puzzle.size||9;}function box(){return puzzle.box||3;}
+function given(i){return puzzle.puzzle[i]!=='0';}function progressed(){return values.some((v,i)=>v!==Number(puzzle.puzzle[i]))||notes.some(n=>n.length);}
+function syncSelect(){document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));$('puzzleSelect').value=last9;}
+function loadPuzzle(p,announce=true){puzzle=p;values=[...p.puzzle].map(Number);notes=values.map(()=>[]);history=[];selected=values.findIndex(v=>!v);if(selected<0)selected=0;noteMode=false;assisted=false;errors.clear();hintsVisible=true;resetHint();render();if(announce)setStatus('Đề đã sẵn sàng. Chọn ô rồi điền số; em có thể hoàn tác bất cứ lúc nào.');}
+function confirmAction(action,text,title='Thay bài đang làm?'){if(dialogsOpen())return;pending=action;$('dialogTitle').textContent=title;$('dialogCopy').textContent=text;$('confirmDialog').returnValue='cancel';$('confirmDialog').showModal();}
+function ask(action,text){if(dialogsOpen())return;if(!progressed()){action();return;}confirmAction(action,text);}
+function requestMode(next){if(dialogsOpen()||next===mode)return;const action=()=>{const was4=mode==='novice';mode=next;if(next!=='teacher')hintsVisible=true;if(next==='novice'){loadPuzzle(FOUR);}else if(was4){loadPuzzle(getPuzzle(last9));}else {resetHint();render();setStatus('Đã đổi cách xem. Các số và ghi chú em đang làm được giữ lại.');}};if((mode==='novice')!==(next==='novice'))ask(action,'Đổi giữa bảng 4×4 và 9×9 sẽ xóa tiến độ trên bảng hiện tại.');else action();syncSelect();}
+function changePuzzle(id){if(dialogsOpen())return;const p=getPuzzle(id);if(!p||p.id===puzzle.id){syncSelect();return;}ask(()=>{last9=id;loadPuzzle(p);},'Đổi đề sẽ xóa các số và ghi chú đang làm trên đề này.');syncSelect();}
+function render(){const boardHadFocus=!!document.activeElement?.closest('#board');const n=size(),b=box();document.body.classList.toggle('teacher',mode==='teacher');syncSelect();$('puzzleField').hidden=n===4;$('boardTitle').textContent=(n===9?puzzle.id+' · ':'')+puzzle.label;$('progress').textContent=values.filter(Boolean).length+'/'+(n*n)+' ô có số';$('notes').setAttribute('aria-pressed',String(noteMode));$('notes').textContent='Ghi chú: '+(noteMode?'bật':'tắt');$('undo').disabled=!history.length;$('erase').disabled=given(selected);$('levelDescription').textContent=puzzle.id==='RIENG'?'Đề riêng · đã kiểm đúng một nghiệm; chưa phân mức kỹ thuật':puzzle.difficulty==='easy'?'Dễ · ô đơn và số đơn':puzzle.difficulty==='medium'?'Trung bình · cần thêm ứng viên khóa':'Khó · cần thêm cặp ẩn; dành thời gian để lập luận';
+const copies={novice:['Luật chơi 4×4','<p>Điền các số <b>1–4</b>, không lặp trong mỗi hàng, cột và khối <b>2×2</b>.</p>'],guided:['Luật chơi & gợi ý','<p>Điền các số <b>1–9</b>, không lặp trong mỗi hàng, cột và khối <b>3×3</b>. Gợi ý mở từng bước: vùng cần nhìn, lý do, rồi điền một ô.</p>'],practice:['Luật chơi & ghi chú','<p>Điền các số <b>1–9</b>, không lặp trong mỗi hàng, cột và khối <b>3×3</b>. Bật <b>Ghi chú</b> để ghi số có thể điền; bấm lại số đó để bỏ. <b>Kiểm tra</b> không tự điền đáp án.</p>'],teacher:['Cách dùng bảng lớn','<p>Tọa độ giúp xác định hàng và cột. Dùng <b>Ẩn gợi ý</b> hoặc <b>Hiện gợi ý</b> để đổi cách xem.</p>']};$('modeTitle').textContent=copies[mode][0];$('modeCopy').innerHTML=copies[mode][1];
+$('colCoords').style.gridTemplateColumns='repeat('+n+',1fr)';$('colCoords').replaceChildren(...Array.from({length:n},(_,i)=>{const el=document.createElement('span');el.textContent=i+1;return el;}));$('rowCoords').style.gridTemplateRows='repeat('+n+',1fr)';$('rowCoords').replaceChildren(...Array.from({length:n},(_,i)=>{const el=document.createElement('span');el.textContent=i+1;return el;}));const board=$('board');board.style.gridTemplateColumns='repeat('+n+',minmax(0,1fr))';board.setAttribute('aria-rowcount',n);board.setAttribute('aria-colcount',n);let conflict=conflicts(values,n,b);let sr=Math.floor(selected/n),sc=selected%n;const cells=[];for(let i=0;i<n*n;i++){const r=Math.floor(i/n),c=i%n,el=document.createElement('button');el.type='button';el.className='cell'+(n===4?' cell4':'');el.dataset.index=i;el.setAttribute('role','gridcell');el.setAttribute('aria-rowindex',r+1);el.setAttribute('aria-colindex',c+1);el.setAttribute('aria-selected',String(i===selected));el.tabIndex=i===selected?0:-1;el.classList.toggle('given',given(i));el.classList.toggle('peer',r===sr||c===sc||Math.floor(r/b)===Math.floor(sr/b)&&Math.floor(c/b)===Math.floor(sc/b));el.classList.toggle('same',!!values[i]&&values[i]===values[selected]);el.classList.toggle('hintRegion',hintsVisible&&hintStep&&hintStep.region.cells.includes(i));el.classList.toggle('selected',i===selected);el.classList.toggle('error',conflict.has(i)||errors.has(i));if((c+1)%b===0&&c<n-1)el.style.borderRight='2px solid var(--ink)';if((r+1)%b===0&&r<n-1)el.style.borderBottom='2px solid var(--ink)';if(c===n-1)el.style.borderRight='0';if(r===n-1)el.style.borderBottom='0';if(values[i])el.textContent=values[i];else if(notes[i].length){let ns=document.createElement('span');ns.className='notes';for(let k=1;k<=n;k++){let sp=document.createElement('span');sp.textContent=notes[i].includes(k)?k:'';ns.append(sp);}el.append(ns);}el.setAttribute('aria-label','Hàng '+(r+1)+', cột '+(c+1)+', '+(values[i]?'số '+values[i]+(given(i)?', dữ kiện cố định':''):notes[i].length?'ghi chú '+notes[i].join(', '):'ô trống'));el.addEventListener('click',()=>select(i,true));cells.push(el);}board.replaceChildren(...cells);const pad=$('pad');pad.classList.toggle('four',n===4);pad.replaceChildren(...Array.from({length:n},(_,i)=>{let el=document.createElement('button');el.textContent=i+1;el.type='button';el.setAttribute('aria-label',(noteMode?'Ghi chú ':'Điền số ')+(i+1));el.addEventListener('click',()=>enter(i+1));return el;}));renderHint();if(boardHadFocus)$('board').querySelector('[data-index="'+selected+'"]').focus();}
+function renderHint(){$('hintBox').hidden=!hintsVisible;$('hideHint').hidden=mode!=='teacher';$('hideHint').textContent=hintsVisible?'Ẩn gợi ý':'Hiện gợi ý';$('hint').textContent=hintPhase===0?'1 · Nhìn vùng nào?':hintPhase===1?'2 · Vì sao điền được?':'3 · Điền ô gợi ý';if(!hintStep){$('hintText').textContent='Gợi ý mở từng bước: vùng cần nhìn → lý do loại trừ → điền một ô.';return;}const h=hintStep;if(hintPhase===1)$('hintText').textContent='Hãy xem '+h.region.name+' đang được tô màu. Tìm ô còn rất ít khả năng; đối chiếu cả hàng, cột và khối.';else if(hintPhase===2){$('hintText').textContent=h.type==='naked'?'Ô hàng '+(h.r+1)+', cột '+(h.c+1)+': các số '+Array.from({length:size()},(_,i)=>i+1).filter(v=>v!==h.value).join(', ')+' đã bị loại vì xuất hiện trong hàng, cột hoặc khối. Chỉ còn số '+h.value+'.':'Trong '+h.region.name+', số '+h.value+' chỉ còn đặt được ở hàng '+(h.r+1)+', cột '+(h.c+1)+'. Các vị trí khác đã bị chặn bởi hàng, cột hoặc khối.';}}
+function select(i,focus=false){if(dialogsOpen())return;selected=i;render();if(given(i))setStatus('Hàng '+(Math.floor(i/size())+1)+', cột '+(i%size()+1)+': dữ kiện cố định, em không thể sửa ô này.');else setStatus('Đang chọn hàng '+(Math.floor(i/size())+1)+', cột '+(i%size()+1)+(noteMode?'. Chế độ ghi chú đang bật.':'. Điền một số hoặc bật ghi chú.'));if(focus)$('board').querySelector('[data-index="'+i+'"]').focus();}
+function prunePeerNotes(index,v){const n=size(),b=box(),r=Math.floor(index/n),c=index%n;for(let i=0;i<values.length;i++)if(Math.floor(i/n)===r||i%n===c||Math.floor(Math.floor(i/n)/b)===Math.floor(r/b)&&Math.floor((i%n)/b)===Math.floor(c/b))notes[i]=notes[i].filter(x=>x!==v);}
+function enter(v){if(dialogsOpen()||v<1||v>size())return;if(given(selected)){setStatus('Đây là dữ kiện cố định. Hãy chọn một ô trống.');return;}if(noteMode){if(values[selected]){setStatus('Xóa số đang điền trước khi thêm ghi chú vào ô này.');return;}push();let s=new Set(notes[selected]);s.has(v)?s.delete(v):s.add(v);notes[selected]=[...s].sort((a,b)=>a-b);errors.clear();resetHint();render();setStatus('Đã cập nhật ghi chú ở hàng '+(Math.floor(selected/size())+1)+', cột '+(selected%size()+1)+'.');return;}if(values[selected]===v)return;push();values[selected]=v;notes[selected]=[];const n=size(),b=box();prunePeerNotes(selected,v);errors.clear();resetHint();render();if(validComplete(values,n,b)){setStatus('Em đã hoàn thành một bảng hợp lệ.'+(assisted?' Có dùng hỗ trợ; hãy giải thích lại một bước em hiểu.':' Hãy chọn một ô và kể lại lý do em điền.'),'success');}else if(conflicts(values,n,b).size)setStatus('Có số bị lặp trong một hàng, cột hoặc khối. Các ô liên quan được tô đỏ; em có thể sửa hoặc hoàn tác.','errorStatus');else setStatus('Đã điền số '+v+'. Mỗi lựa chọn nên có một lý do.');}
+function erase(){if(dialogsOpen()||given(selected)||!values[selected]&&!notes[selected].length)return;push();values[selected]=0;notes[selected]=[];errors.clear();resetHint();render();setStatus('Đã xóa ô đang chọn.');}
+function undo(){if(dialogsOpen()||!history.length)return;const old=history.pop();values=old.values;notes=old.notes;assisted=old.assisted;errors.clear();resetHint();render();setStatus('Đã hoàn tác một thao tác.');}
+function toggleNotes(){if(dialogsOpen())return;noteMode=!noteMode;render();setStatus(noteMode?'Ghi chú đã bật: các số bấm vào là ý nháp nhỏ trong ô.':'Ghi chú đã tắt: các số bấm vào sẽ được điền vào ô.');}
+function check(){if(dialogsOpen())return;errors.clear();for(let i=0;i<values.length;i++)if(values[i]&&!given(i)&&values[i]!==Number(puzzle.solution[i]))errors.add(i);render();if(validComplete(values,size(),box()))setStatus('Bảng hoàn thành hợp lệ.'+(assisted?' Em đã có dùng hỗ trợ.':'')+' Hãy chia sẻ một bước suy luận.','success');else if(errors.size)setStatus('Có '+errors.size+' ô tự điền chưa khớp nghiệm duy nhất, được tô đỏ. Kiểm tra lại lập luận ở các ô ấy.','errorStatus');else setStatus('Các số em đã điền đều đúng. Còn '+values.filter(x=>!x).length+' ô trống; tiếp tục từng bước.');}
+function hint(){if(dialogsOpen())return;hintsVisible=true;if(validComplete(values,size(),box())){setStatus('Bảng đã đủ và hợp lệ. Hãy dùng Kiểm tra để xem lại.');render();return;}if(values.some((v,i)=>v&&v!==Number(puzzle.solution[i]))){setStatus('Có ô tự điền chưa đúng; gợi ý không suy luận tiếp từ bảng sai. Bấm Kiểm tra rồi sửa hoặc hoàn tác.','errorStatus');renderHint();return;}if(!hintStep){hintStep=findSingle(values,size(),box());if(!hintStep){setStatus('Chưa tìm thấy ô đơn hoặc số đơn. Đề này cần xét thêm ứng viên khóa hoặc cặp; em có thể ghi chú, tự suy luận tiếp hoặc chọn bài D. Không có số nào được điền.');renderHint();return;}hintPhase=1;render();setStatus('Bước 1: quan sát vùng tô vàng; chưa mở đáp án.');return;}if(hintPhase===1){hintPhase=2;render();setStatus('Bước 2: đọc lý do và tự thử điền trước khi mở số.');return;}push();selected=hintStep.i;values[selected]=hintStep.value;notes[selected]=[];prunePeerNotes(selected,hintStep.value);assisted=true;errors.clear();resetHint();render();setStatus(validComplete(values,size(),box())?'Gợi ý đã điền ô cuối. Bấm Kiểm tra để xem kết quả; hãy nói lại lý do của bước này.':'Đã điền một ô theo gợi ý. Em hãy tiếp tục với một ô khác.');}
+function openImport(){if(dialogsOpen())return;$('importError').textContent='';$('importDialog').showModal();$('importText').focus();}
+function acceptImport(){
+ const parsed=parseImport($('importText').value);if(parsed.error){$('importError').textContent=parsed.error;return;}
+ const grid=[...parsed.puzzle].map(Number);if(conflicts(grid,9,3).size){$('importError').textContent='Dữ kiện bị lặp trong hàng, cột hoặc khối. Đề chưa được nạp.';return;}
+ const result=countSolutions(grid);if(!result.complete){$('importError').textContent='Chưa kiểm định xong trong giới hạn xử lý của bản offline. Hãy thử một đề khác; bài hiện tại được giữ nguyên.';return;}
+ if(result.count===0){$('importError').textContent='Đề này không có nghiệm. Hãy kiểm tra lại dữ kiện.';return;}
+ if(result.count>1){$('importError').textContent='Đề có ít nhất hai nghiệm. Hãy thêm hoặc kiểm tra dữ kiện để có đúng một nghiệm.';return;}
+ const draft={id:'RIENG',label:'Đề riêng 9×9',size:9,box:3,puzzle:parsed.puzzle,solution:result.solution,difficulty:'custom'};
+ $('importDialog').close();ask(()=>{customPuzzle=draft;last9='RIENG';mode='practice';let option=$('puzzleSelect').querySelector('option[value="RIENG"]');if(!option){option=document.createElement('option');option.value='RIENG';$('puzzleSelect').append(option);}option.textContent='RIENG · Đề riêng 9×9';loadPuzzle(customPuzzle);setStatus('Đã nạp đề riêng có đúng một nghiệm. Mức độ chưa được phân loại; em có thể tự luyện với ghi chú.');},'Đề riêng có đúng một nghiệm. Nạp đề sẽ xóa số và ghi chú đang làm trên bảng hiện tại.');
+}
+function revealSolution(){if(dialogsOpen())return;confirmAction(()=>{push();values=[...puzzle.solution].map(Number);notes=values.map(()=>[]);assisted=true;errors.clear();resetHint();render();setStatus('Đang xem toàn bộ đáp án · có hỗ trợ. Bấm Hoàn tác để trở lại bài đang làm và tiếp tục tự giải.');},'Hiện toàn bộ đáp án của đề '+puzzle.id+'? Em có thể Hoàn tác để quay lại trạng thái trước khi xem.','Xem toàn bộ đáp án?');}
+document.querySelectorAll('[data-mode]').forEach(el=>el.addEventListener('click',()=>requestMode(el.dataset.mode)));for(const p of BANK){const o=document.createElement('option');o.value=p.id;o.textContent=p.id+' · '+p.label;$('puzzleSelect').append(o);}$('puzzleSelect').addEventListener('change',e=>changePuzzle(e.target.value));$('import').onclick=openImport;$('importCancel').onclick=()=>$('importDialog').close();$('importValidate').onclick=acceptImport;$('solve').onclick=revealSolution;$('erase').onclick=erase;$('notes').onclick=toggleNotes;$('undo').onclick=undo;$('check').onclick=check;$('hint').onclick=hint;$('hideHint').onclick=()=>{hintsVisible=!hintsVisible;render();};$('reset').onclick=()=>ask(()=>loadPuzzle(puzzle),'Làm lại sẽ xóa toàn bộ số tự điền và ghi chú của đề hiện tại.');$('new').onclick=()=>{if(mode==='novice'){ask(()=>loadPuzzle(FOUR),'Bắt đầu lại bảng 4×4 sẽ xóa các số và ghi chú đang làm.');return;}const ix=BANK.findIndex(p=>p.id===puzzle.id);changePuzzle(BANK[(ix+1)%BANK.length].id);};
+$('confirmDialog').addEventListener('close',()=>{const action=pending;pending=null;if($('confirmDialog').returnValue==='confirm'&&action)action();else{syncSelect();setStatus('Đã giữ nguyên bài đang làm.');}});$('confirmDialog').addEventListener('cancel',()=>{$('confirmDialog').returnValue='cancel';});
+document.addEventListener('keydown',e=>{if(dialogsOpen())return;if(e.target.closest('input,textarea,select,[contenteditable=true]'))return;if(e.ctrlKey||e.metaKey){if(e.key.toLowerCase()==='z'&&!e.shiftKey){e.preventDefault();undo();}return;}if(e.altKey)return;const n=size();if(/^[1-9]$/.test(e.key)){if(Number(e.key)<=n){e.preventDefault();enter(Number(e.key));}}else if(['Backspace','Delete','0'].includes(e.key)){e.preventDefault();erase();}else if(e.key.toLowerCase()==='n'){e.preventDefault();toggleNotes();}else if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();let r=Math.floor(selected/n),c=selected%n;if(e.key==='ArrowLeft')c=Math.max(0,c-1);if(e.key==='ArrowRight')c=Math.min(n-1,c+1);if(e.key==='ArrowUp')r=Math.max(0,r-1);if(e.key==='ArrowDown')r=Math.min(n-1,r+1);select(r*n+c,true);}});
+window.SudokuApp=Object.freeze({bank:BANK.map(p=>({...p})),four:{...FOUR},candidates,conflicts,validComplete,findSingle,countSolutions,parseImport,getState:()=>({mode,puzzleId:puzzle.id,values:[...values],notes:notes.map(x=>[...x]),selected,noteMode,historyLength:history.length,hintPhase,assisted,dialogOpen:dialogsOpen(),importOpen:$('importDialog').open}),select,enter,erase,undo,check,hint,requestMode,changePuzzle,openImport,acceptImport,revealSolution});
+loadPuzzle(FOUR,false);
+</script>
 </body>
 </html>
