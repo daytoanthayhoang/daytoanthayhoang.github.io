@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild source/app.js --bundle --minify --format=esm --outfile=app.bundle.js --legal-comments=linked && esbuild pyraminx/app.js --bundle --minify --format=esm --outfile=pyraminx/app.bundle.js --legal-comments=linked && esbuild skewb/app.js --bundle --minify --format=esm --outfile=skewb/app.bundle.js --legal-comments=linked && esbuild megaminx/app.js --bundle --minify --format=esm --outfile=megaminx/app.bundle.js --legal-comments=linked"
+  },
+  "dependencies": {
+    "three": "0.187.0",
+    "esbuild": "0.25.12"
+  }
+}

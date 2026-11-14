@@ -18,3 +18,7 @@
 .temporary-note{background:#fff0d2;color:#785325;border-left:3px solid #b98432;padding:10px;font-weight:600}
 
 .repeat-check{font-size:.85rem;border-left:3px solid #d7ddd7;padding:.4rem .65rem;margin:.35rem 0;color:#53655e}.repeat-check.passed{border-color:#3b8675}.repeat-check.active{background:#e3f4e9;color:#153d32;font-weight:650}
+
+.mirror-note{padding:12px 20px;background:#edf2f6;color:#344d5b;font-size:12px;border-top:1px solid #d1dce5}
+
+.extra-books{font-size:11px;border-top:1px solid #cbd7bd;padding-top:8px}.extra-books summary{padding:4px}.extra-books a{margin-top:8px}.puzzle-card{text-decoration:none;color:inherit}.puzzle-card.ready:hover{border-color:#3b8675}
