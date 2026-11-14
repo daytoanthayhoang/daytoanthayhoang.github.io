@@ -125,6 +125,9 @@
 
 	
 	
+<link rel="stylesheet" href="assets/clb/catalog.css">
+<script defer src="assets/clb/sessions.js"></script>
+<script defer src="assets/clb/catalog.js"></script>
 </head>
 <body class="relative">
 
@@ -163,19 +166,16 @@
         <div class="text-center mb-12 max-w-4xl mx-auto">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Sân Chơi Trí Tuệ Số</h2>
             <p class="text-slate-400 text-lg">
-                Khám phá kho tàng kiến thức và công cụ toán học trực quan. Chọn một <span class="text-cyan-400 font-semibold">Module</span> để bắt đầu.
+                Khám phá kho tàng kiến thức và công cụ toán học trực quan. Chọn buổi sinh hoạt bên dưới hoặc mở một công cụ trong kho để bắt đầu.
             </p>
         </div>
 
-        <section class="glass-panel p-6 rounded-2xl mb-10" aria-labelledby="session-title">
-            <p class="text-cyan-300 text-sm mb-2">SINH HOẠT · 14/11/2026</p>
-            <h3 id="session-title" class="text-2xl font-bold text-white mb-3">Thám tử toán học: cùng nghĩ, cùng giải</h3>
-            <p class="text-slate-300 mb-5">Ba phần theo thứ tự: khám phá · trò chơi chung · đấu trường suy luận. Có gợi ý từng nấc và thử thách nâng cao ở nấc 4–5.</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-<button class="tool-trigger tool-card bg-slate-800 border border-cyan-600 text-white p-5 rounded-xl text-left" data-src="./clb-tham-tu-14112026.html#1089"><h4 class="font-bold text-lg">01 · Bí mật 1089</h4><p class="text-sm text-slate-300">Thử nghiệm và tìm lời giải thích</p></button>
-<button class="tool-trigger tool-card bg-slate-800 border border-cyan-600 text-white p-5 rounded-xl text-left" data-src="./clb-tham-tu-14112026.html#matma"><h4 class="font-bold text-lg">02 · Phá mật mã</h4><p class="text-sm text-slate-300">Ba chữ số, kiểm chứng từng dữ kiện</p></button>
-<button class="tool-trigger tool-card bg-slate-800 border border-cyan-600 text-white p-5 rounded-xl text-left" data-src="./clb-tham-tu-14112026.html#logic"><h4 class="font-bold text-lg">03 · Đấu trường logic</h4><p class="text-sm text-slate-300">5 thử thách, từ trực giác đến phản biện</p></button>
-            </div><a class="inline-block mt-5 text-cyan-300 underline" href="./clb-tham-tu-14112026.html">Mở bộ sinh hoạt riêng để trình chiếu trên TV ↗</a>
+        <section class="club-library" aria-labelledby="club-heading">
+          <div class="club-topline"><div><p class="club-kicker">LỊCH SINH HOẠT & KHO HOẠT ĐỘNG</p><h3 id="club-heading">Chọn buổi, mở hoạt động, cùng khám phá</h3></div><a href="#tool-list">Kho công cụ cũ ↓</a></div>
+          <p>Mỗi buổi có khởi động và ba phần: khám phá một ý tưởng · trò chơi chung · thử thách suy luận.</p>
+          <div class="club-filters"><label>Tìm buổi / nội dung <input id="club-search" type="search" placeholder="Sudoku, 1089, logic…"></label><label>Hiển thị <select id="club-kind"><option value="all">Tất cả</option><option value="session">Buổi theo ngày</option><option value="collection">Bộ hoạt động xem lại</option></select></label></div>
+          <p id="club-count" role="status"></p><div id="club-sessions"></div>
+          <noscript><p><a href="clb-tham-tu-14112026.html#khoidong">14/11/2026 · Sudoku khởi động và Thám tử toán học</a></p><p><a href="sudoku.html">Sudoku</a> · <a href="nghichlyngaysinh.html">Nghịch lý ngày sinh</a></p></noscript>
         </section>
         <!-- DANH SÁCH CÔNG CỤ (GRID) -->
         <section id="tool-list" class="mb-16">
@@ -597,18 +597,18 @@
             const fullscreenBtn = document.getElementById('fullscreen-btn');
             const exitFullscreenBtn = document.getElementById('exit-fullscreen-btn');
             const frameContainer = document.getElementById('frame-container');
-            const toolButtons = document.querySelectorAll('.tool-trigger');
             let currentActiveButton = null;
 
             // Xử lý click chọn công cụ
-            toolButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const toolSrc = this.dataset.src;
+            document.addEventListener('click', function(event) {
+                    const button = event.target.closest('.tool-trigger');
+                    if (!button) return;
+                    const toolSrc = button.dataset.src;
                     
                     // Hiệu ứng active cho nút
                     if (currentActiveButton) currentActiveButton.classList.remove('active');
-                    this.classList.add('active');
-                    currentActiveButton = this;
+                    button.classList.add('active');
+                    currentActiveButton = button;
                     
                     // Ẩn placeholder, hiện iframe
                     placeholder.classList.add('hidden');
@@ -625,7 +625,6 @@
                     setTimeout(() => { 
                         iframeSection.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
                     }, 100);
-                });
             });
 
             // Chế độ toàn màn hình
