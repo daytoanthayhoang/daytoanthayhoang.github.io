@@ -16,9 +16,11 @@ Standalone GitHub Pages tool at `/clb_rubik/`. It intentionally adds no link to 
 `cases.json` and `walkthrough4.json` store immutable sticker colors/home identities and compact position/normal/tangent arrays. Numeric ID is the fixed array index. Apply moves from the exact supplied initial state; do not substitute a generic inverse-algorithm case. Frame strings use URFDLB order. Source SHA256 values preserve provenance.
 
 ## Verified
-26 automated tests: moves/inverses, all canonical and compact frames, real solver replay, stage predicates, selected-piece locations, source hashes. Browser interaction checks covered play/pause, step/group/seek, prepared state loading, checkpoint comparison, final solve, and a 375px content viewport.
+30 automated tests: moves/inverses, all canonical and compact frames, real solver replay, stage predicates, selected-piece locations, source hashes. Browser interaction checks covered play/pause, step/group/seek, prepared state loading, checkpoint comparison, final solve, and a 375px content viewport.
 
 ## Limits
 Cloud-browser WebGL was unavailable, so observed rendering used Three.js SVG fallback. Physical touchscreen/TV and GPU WebGL still require device testing. No arbitrary sticker-color import, camera recognition, general 4×4 solver, WCA random-state scrambler, or complete support for non-cubic puzzles. A first load needs network access; this is not a guaranteed offline PWA.
 
 MIT licenses for Three.js and cube.js are retained in vendor/.
+
+The matching 88-page PDF and self-contained LaTeX source are in `tai-lieu/`. External algorithms must use explicit `2R/2U` (inner) or `Rw/Uw` (wide); ambiguous lowercase r/u input is rejected. The last-two-edge mechanism panel is linked to exact B4-6 and W4-10 states, not inferred from colors in an unrelated photograph.
