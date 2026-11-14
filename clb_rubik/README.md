@@ -10,7 +10,7 @@ Standalone GitHub Pages tool at `/clb_rubik/`. It intentionally adds no link to 
 - Keyboard/buttons, orbit/pinch camera, timeline/groups, local progress and target comparison.
 
 ## Rebuild UI
-`npm install && npm run build` from this `clb_rubik` directory. Dependencies are pinned. The readable engine and reduction predicates are in the parent directory. No build is required for GitHub Pages.
+`npm install && npm run build` from this `clb_rubik` directory. Dependencies are pinned. The readable engine and reduction predicates are in this directory. No build is required for GitHub Pages.
 
 ## Data
 `cases.json` and `walkthrough4.json` store immutable sticker colors/home identities and compact position/normal/tangent arrays. Numeric ID is the fixed array index. Apply moves from the exact supplied initial state; do not substitute a generic inverse-algorithm case. Frame strings use URFDLB order. Source SHA256 values preserve provenance.
@@ -33,3 +33,6 @@ Catalog `journeys.json` selects verified 2×2/3×3/4×4/5×5 timelines. New 2/3 
 `pyraminx/` is a true tetrahedral model with tips and 120-degree turns. `skewb/` is a true corner-turning cube with explicitly labeled local axes. Each has an exact prepared continuous route and its own notation/parser. Mirror 2/3 use nonuniform physical boxes from `mirror-geometry.js`; complete animation endpoints and final physical shape are checked, not only colors. Megaminx has a deliberately prepared 102-move route, beginning with 4/5 white edges already correct. Ghost shell geometry is not yet validated.
 
 New print downloads retain the earlier 88-page guide and add 74 pages for 3×3/2×2 and 48 pages for 5×5, with reproducible LaTeX packages.
+
+## 5×5 branch practice
+`branches5.json` holds nine independent prepared examples. Each has a continuous timeline, explicit recognition conditions, decision and checks. The existing 176-move walkthrough remains unchanged. Identity-matched wings are not counted as fully paired if their orientation differs from the midge; T does not fix that residual. New browser tests cover selecting another branch, seeking and restarting the continuous journey.

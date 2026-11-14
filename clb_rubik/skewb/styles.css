@@ -6,3 +6,5 @@
 
 /* Locked home palette: U yellow,D white,F green,R orange,L red,B blue. */
 .color-legend .yellow{background:#F4D846}.color-legend .white{background:#F7F7F3}.color-legend .green{background:#38A878}.color-legend .orange{background:#F4A546}.color-legend .red{background:#E65E58}.color-legend .blue{background:#548DC4}
+
+.book-links{margin:0 0 20px;line-height:1.8;font-weight:650}.book-links a{color:var(--accent,#155d6d)}

@@ -6,3 +6,5 @@
 .frame-map{font-size:.79rem;color:#556977;line-height:1.6;background:#eef4f6;padding:.65rem .8rem;border-radius:.6rem}.local-alg{font-size:.8rem;line-height:1.6;margin-bottom:.6rem}.face-maps{grid-template-columns:repeat(4,minmax(0,1fr))}.face-map span{font-size:.68rem}.axis-label{font-size:.73rem;padding:2px 5px;min-width:22px;transform:translate(-50%,-50%);border-radius:4px}.view-hint{line-height:1.45}.checkpoint-row{flex-wrap:wrap}.viewport{min-height:400px}.guidance dd{overflow-wrap:anywhere}@media(max-width:600px){.face-maps{grid-template-columns:repeat(3,minmax(0,1fr))}.viewport{min-height:330px}.axis-label{font-size:.66rem}.frame-map{font-size:.72rem}.route-badge{width:auto}}
 
 .axis-label[hidden]{display:none!important}.axis-label{width:auto;min-width:26px;height:25px;padding:1px 5px}
+
+.book-links{margin:0 0 20px;line-height:1.8;font-weight:650}.book-links a{color:var(--accent,#155d6d)}
