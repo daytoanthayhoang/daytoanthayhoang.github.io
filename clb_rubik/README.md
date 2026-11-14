@@ -24,3 +24,7 @@ Cloud-browser WebGL was unavailable, so observed rendering used Three.js SVG fal
 MIT licenses for Three.js and cube.js are retained in vendor/.
 
 The matching 88-page PDF and self-contained LaTeX source are in `tai-lieu/`. External algorithms must use explicit `2R/2U` (inner) or `Rw/Uw` (wide); ambiguous lowercase r/u input is rejected. The last-two-edge mechanism panel is linked to exact B4-6 and W4-10 states, not inferred from colors in an unrelated photograph.
+
+
+## Continuous journey expansion
+Catalog `journeys.json` selects verified 2×2/3×3/4×4/5×5 timelines. New 2/3 manifests are checked frame by frame in JS including stable IDs, tangents, labels and independent metrics. Bound narrative explains repeated S cycles and all four D transfers. 5×5 retains exact independent Python/JS verification from its source. Cubic counts: 9/19/15/16 stages and 84/148/125/176 moves. Other puzzle cards show their actual availability, not implied implementation.

@@ -12,3 +12,9 @@
 .mechanism-panel{padding:16px 22px;background:#fff7e8;border-top:1px solid #f0dfc5}.mechanism-panel h2{font-size:15px;margin:0 0 6px}.mechanism-panel p{font-size:11px}.mechanism-panel summary{font-size:11px;color:#6a613f}.mechanism-panel .eyebrow{color:#8c7544;font-size:9px}
 
 .tour-entry{display:flex;flex-direction:column;gap:8px;min-width:245px}.document-link{display:block;text-align:center;font-size:11px;font-weight:600;text-decoration:none;color:#214e40;border:1px solid #bacbb0;border-radius:8px;padding:12px;background:#f8fbf1;min-height:44px}.document-link:hover{background:#fff}.source-link{font-size:10px;color:#5c7355;text-align:center;padding:4px}
+
+#journeySelect{width:100%;font-size:12px;min-height:44px}.puzzle-coverage{margin-top:30px}#puzzleCoverage{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:15px}.puzzle-card{border:1px solid #dce4d4;border-radius:12px;background:#f3f5ee;padding:16px;text-align:left;color:#3e544b}.puzzle-card.ready{background:#fff;border-color:#567c67;cursor:pointer}.puzzle-card h3{font-size:16px;margin:0 0 8px}.puzzle-card p{font-size:11px;color:#65766b;line-height:1.6;margin-top:10px}.availability{display:inline-block;font-size:9px;border-radius:5px;padding:4px 6px;background:#e4eadd}.ready .availability{background:#dcebd7;color:#315b3c}.building .availability{background:#f4e8cd;color:#786033}@media(max-width:1000px){#puzzleCoverage{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){#puzzleCoverage{grid-template-columns:repeat(2,1fr);gap:8px}.puzzle-card{padding:13px}.puzzle-card h3{font-size:14px}.tour-entry{width:100%}}
+
+.temporary-note{background:#fff0d2;color:#785325;border-left:3px solid #b98432;padding:10px;font-weight:600}
+
+.repeat-check{font-size:.85rem;border-left:3px solid #d7ddd7;padding:.4rem .65rem;margin:.35rem 0;color:#53655e}.repeat-check.passed{border-color:#3b8675}.repeat-check.active{background:#e3f4e9;color:#153d32;font-weight:650}
