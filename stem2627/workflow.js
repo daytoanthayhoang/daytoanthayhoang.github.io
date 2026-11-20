@@ -34,7 +34,8 @@
       button.textContent = done ? '✓ Đã xong · Bấm để bỏ dấu' : 'Đánh dấu đã xong';
     });
     launch.href = '#buoc-' + getNext();
-    launch.textContent = count === 4 ? 'Xem lại lộ trình' : count === 0 ? 'Bắt đầu: Chọn câu chuyện' : 'Tiếp tục: Bước ' + getNext();
+    const names = ['Chọn câu chuyện', 'Làm sân khấu', 'Thử A/B', 'Mang đến lớp'];
+    launch.textContent = count === 4 ? 'Xem lại lộ trình' : count === 0 ? 'Bắt đầu: Chọn câu chuyện' : 'Tiếp tục: ' + names[getNext() - 1];
   }
   function navigate(step, scroll, setHash) {
     if (!Number.isInteger(step) || step < 1 || step > 4) return;
@@ -60,7 +61,13 @@
     toggleButtons.push(toggle);
     container.append(toggle);
     if (n > 1) container.append(makeButton('← Bước trước', () => navigate(n - 1, true, true)));
-    if (n < 4) container.append(makeButton('Bước tiếp theo →', () => navigate(n + 1, true, true)));
+    if (n < 4) {
+      container.append(makeButton('Xong bước này → Sang bước ' + (n + 1), () => {
+        if (!state.completed.includes(n)) state.completed.push(n);
+        navigate(n + 1, true, true);
+      }, 'data-stem-next'));
+      container.append(makeButton('Xem bước sau, chưa đánh dấu', () => navigate(n + 1, true, true), 'data-stem-skip'));
+    }
   });
   steps.forEach((a,i) => a.addEventListener('click', event => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
