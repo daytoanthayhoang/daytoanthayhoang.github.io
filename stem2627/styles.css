@@ -7,3 +7,5 @@
 #thu-vien .caption-note{display:block;font-size:.82rem;line-height:1.45;margin-top:.25rem;color:var(--muted);overflow-wrap:anywhere}
 #thu-vien #album-t{border-style:dashed}
 @media(max-width:420px){#thu-vien .tiles{grid-template-columns:1fr}#thu-vien .tiles img{object-fit:contain}}
+
+.student-nav{margin:1.15rem 0 clamp(1rem,3vw,1.65rem)}.student-nav a{display:inline-block}.day-label{font-weight:750;color:#a6502c;font-size:.85rem}.help-note{border-inline-start:4px solid #4b8a78;padding:.9rem 1rem;background:#edf8f0;border-radius:10px;margin-top:1rem}.file-list{display:grid;gap:.6rem;padding-left:1.2rem;margin:0}.file-list li{margin:0}.tile-link{display:block}.tiles figcaption small{display:block;color:var(--muted)}.gallery-lead{max-width:65ch}.legacy-note{font-size:.87rem;color:var(--muted)}.card h4{margin-bottom:.45rem}.compact{margin-bottom:.5rem}
