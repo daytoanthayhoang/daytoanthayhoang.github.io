@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img">
+<style>text{font-family:'Segoe UI',Arial,sans-serif;fill:#183843}.heading{font-size:44px;font-weight:700}.sub{font-size:23px;fill:#446269}.cap{font-size:25px;font-weight:650}.txt{font-size:21px}.tiny{font-size:17px;fill:#446269}.axis{stroke:#244d58;stroke-width:3}.red{stroke:#ad392e;stroke-width:4}.guide{stroke:#577d86;stroke-width:2;stroke-dasharray:7 7}</style>
+<rect width="100%" height="100%" fill="#f9f5eb"/><title>Ba trường hợp đánh giá khoảng đo mép bóng</title><desc>Hai đường đỏ xác định cùng một khung ở mọi ô. Ô một cả hai khoảng nằm trong khung. Ô hai khoảng dưới nằm hẳn dưới khung. Ô ba khoảng trên vắt qua vạch.</desc>
+<text x="65" y="75" class="heading" text-anchor="start">Ba trường hợp nhận định</text><text x="65" y="117" class="sub" text-anchor="start">Hai đường đỏ là vạch khung. Dải xám biểu diễn khoảng cao độ của mỗi mép.</text>
+<rect x="50" y="174" width="352" height="562" rx="21" fill="#fffdfa" stroke="#cbded9" stroke-width="2"/>
+<text x="226" y="226" text-anchor="middle" style="font-size:30px;font-weight:750;fill:#21715a">VỪA</text>
+<text x="226" y="266" class="tiny" text-anchor="middle">Cả hai khoảng trong khung</text>
+<rect x="134" y="294" width="190" height="400" fill="#fff" stroke="#b5c8c7" stroke-width="2"/>
+<rect x="135" y="340" width="188" height="274" fill="#eef7f4"/>
+<line x1="124" y1="340" x2="334" y2="340" class="red"/><line x1="124" y1="614" x2="334" y2="614" class="red"/>
+<rect x="165" y="371" width="130" height="46" rx="6" fill="#6d777d" fill-opacity=".92"/>
+<rect x="165" y="554" width="130" height="42" rx="6" fill="#6d777d" fill-opacity=".92"/>
+
+<rect x="424" y="174" width="352" height="562" rx="21" fill="#fffdfa" stroke="#cbded9" stroke-width="2"/>
+<text x="600" y="226" text-anchor="middle" style="font-size:30px;font-weight:750;fill:#9c3929">KHÔNG VỪA</text>
+<text x="600" y="266" class="tiny" text-anchor="middle">Khoảng dưới nằm hẳn ngoài</text>
+<rect x="508" y="294" width="190" height="400" fill="#fff" stroke="#b5c8c7" stroke-width="2"/>
+<rect x="509" y="340" width="188" height="274" fill="#eef7f4"/>
+<line x1="498" y1="340" x2="708" y2="340" class="red"/><line x1="498" y1="614" x2="708" y2="614" class="red"/>
+<rect x="539" y="371" width="130" height="46" rx="6" fill="#6d777d" fill-opacity=".92"/>
+<rect x="539" y="644" width="130" height="42" rx="6" fill="#6d777d" fill-opacity=".92"/>
+
+<rect x="798" y="174" width="352" height="562" rx="21" fill="#fffdfa" stroke="#cbded9" stroke-width="2"/>
+<text x="974" y="226" text-anchor="middle" style="font-size:30px;font-weight:750;fill:#815b19">CHƯA RÕ</text>
+<text x="974" y="266" class="tiny" text-anchor="middle">Khoảng trên vắt qua vạch</text>
+<rect x="882" y="294" width="190" height="400" fill="#fff" stroke="#b5c8c7" stroke-width="2"/>
+<rect x="883" y="340" width="188" height="274" fill="#eef7f4"/>
+<line x1="872" y1="340" x2="1082" y2="340" class="red"/><line x1="872" y1="614" x2="1082" y2="614" class="red"/>
+<rect x="913" y="307" width="130" height="46" rx="6" fill="#6d777d" fill-opacity=".92"/>
+<rect x="913" y="554" width="130" height="42" rx="6" fill="#6d777d" fill-opacity=".92"/>
+<line x1="914" y1="340" x2="1042" y2="340" class="red" stroke-dasharray="5 4"/>
+
+<text x="60" y="775" class="tiny" text-anchor="start">Sơ đồ quy tắc phân loại · Các khoảng minh họa, không phải số đo thực nghiệm.</text></svg>
