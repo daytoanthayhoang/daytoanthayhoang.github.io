@@ -1,0 +1,14 @@
+html.stem-lb-lock{overflow:hidden}
+button.stem-lb-trigger{display:block;width:100%;border:0;padding:0;background:none;color:inherit;text-align:inherit;font:inherit;border-radius:inherit}
+.stem-lb-trigger{cursor:zoom-in}
+.stem-lb-trigger:focus-visible{outline:3px solid #0a7767;outline-offset:4px}
+.stem-lb{box-sizing:border-box;width:min(94vw,64rem);max-width:none;max-height:94dvh;overflow:auto;overscroll-behavior:contain;padding:0;border:1px solid #476461;border-radius:16px;background:#112724;color:#fff;box-shadow:0 16px 64px #0008}
+.stem-lb::backdrop{background:#071311e6}
+.stem-lb-body{padding:clamp(.5rem,2vw,1rem)}
+.stem-lb-top,.stem-lb-nav{display:flex;gap:.65rem;align-items:center;justify-content:space-between}
+.stem-lb-nav[hidden]{display:none!important}
+.stem-lb figure{margin:.5rem 0}
+.stem-lb img{display:block;width:100%;height:auto;max-height:calc(85dvh - 9rem);object-fit:contain;touch-action:pan-y}
+.stem-lb figcaption{color:#fff;text-align:center;margin:.55rem 0;font-size:.96rem;line-height:1.35}
+.stem-lb button{border:1px solid #8cb1a8;border-radius:.5rem;background:#234641;color:#fff;font:inherit;font-weight:650;padding:.5rem .75rem;min-height:44px;cursor:pointer}
+.stem-lb button:focus-visible{outline:3px solid #d6eac0;outline-offset:2px}

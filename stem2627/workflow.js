@@ -3,6 +3,7 @@
   if (!main) return;
   const panels = Array.from(main.querySelectorAll('[data-stem-panel]'));
   const steps = Array.from(main.querySelectorAll('[data-stem-step]'));
+  const topSteps = [...document.querySelectorAll('[data-timeline-step]')];
   const controls = Array.from(main.querySelectorAll('[data-stem-control]'));
   const launch = document.querySelector('[data-stem-launch]');
   const key = 'stem2627-shadow-stage-progress-v1';
@@ -27,6 +28,11 @@
       if (i + 1 === state.step) a.setAttribute('aria-current', 'step');
       else a.removeAttribute('aria-current');
       a.querySelector('[data-stem-status]').textContent = state.completed.includes(i + 1) ? '✓ Xong' : '';
+    });
+    topSteps.forEach((a,i) => {
+      if (i + 1 === state.step) a.setAttribute('aria-current','step');
+      else a.removeAttribute('aria-current');
+      a.classList.toggle('is-done',state.completed.includes(i + 1));
     });
     toggleButtons.forEach((button, i) => {
       const done = state.completed.includes(i + 1);
@@ -69,19 +75,35 @@
       container.append(makeButton('Xem bước sau, chưa đánh dấu', () => navigate(n + 1, true, true), 'data-stem-skip'));
     }
   });
-  steps.forEach((a,i) => a.addEventListener('click', event => {
+  [...steps, ...topSteps].forEach((a,i) => a.addEventListener('click', event => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    event.preventDefault(); navigate(i + 1, true, true);
+    event.preventDefault(); navigate(Number(a.dataset.stemStep || a.dataset.timelineStep), true, true);
   }));
   launch.addEventListener('click', event => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); navigate(getNext(), true, true);
   });
+  function followHash() {
+    const hash = location.hash.slice(1);
+    const node = document.getElementById(hash);
+    if (hash === 'minh-chung') {
+      navigate(2, false, false);
+      requestAnimationFrame(() => node.scrollIntoView({block:'start'}));
+      return true;
+    }
+    const album = node && (node.matches('details.album') ? node : node.closest('details.album,.wf-archive'));
+    if (album) {
+      album.open = true;
+      requestAnimationFrame(() => node.scrollIntoView({block:'start'}));
+    }
+    return false;
+  }
   window.addEventListener('hashchange', () => {
+    if (followHash()) return;
     const step = hashStep(); if (step) navigate(step, true, false);
   });
   controls.forEach(control => control.hidden = false);
   const initial = hashStep();
   if (initial) {navigate(initial, false, false); requestAnimationFrame(() => panels[initial - 1].scrollIntoView({block:'start'}));}
-  else render();
+  else {render(); followHash();}
 })();
