@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640">
+<rect width="960" height="640" fill="#f9f5ec"/><rect width="960" height="105" fill="#24464b"/>
+<g font-family="Arial"><text x="42" y="51" font-size="35" fill="white" font-weight="bold">T11 · Kiểm tra trạm sau khi lắp</text><text x="42" y="84" font-size="21" fill="#d6eeee">Dùng thẻ thử. Đặt lại nếu lệch; ghi điều thực sự quan sát được.</text>
+<g fill="#e6f4ee" stroke="#9eb9b4" stroke-width="2"><rect x="47" y="145" width="268" height="185" rx="15"/><rect x="346" y="145" width="268" height="185" rx="15"/><rect x="645" y="145" width="268" height="185" rx="15"/></g>
+<g fill="#147c74"><circle cx="180" cy="207" r="38"/><circle cx="479" cy="207" r="38"/><circle cx="778" cy="207" r="38"/></g>
+<g text-anchor="middle" fill="white" font-size="32" font-weight="bold"><text x="180" y="218">1</text><text x="479" y="218">2</text><text x="778" y="218">3</text></g>
+<g text-anchor="middle" fill="#24464b" font-size="23" font-weight="bold"><text x="180" y="293">Kiểm mốc và giá</text><text x="479" y="293">Thử chiếu</text><text x="778" y="293">Đọc hai mép</text></g>
+<rect x="47" y="378" width="866" height="152" rx="12" fill="white" stroke="#9eb9b4" stroke-width="2"/><path d="M47 433H913 M311 378V530 M609 378V530" fill="none" stroke="#9eb9b4" stroke-width="2"/>
+<g text-anchor="middle" fill="#24464b" font-size="22" font-weight="bold"><text x="180" y="411">Điều đã kiểm</text><text x="460" y="411">Quan sát</text><text x="760" y="411">Điều cần sửa</text></g>
+<text x="480" y="585" text-anchor="middle" fill="#b65739" font-size="22" font-weight="bold">Thử thiết bị, không thay cho dự đoán và đo trong tiết học.</text></g></svg>
