@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 800 410" width="800" height="410">
+<title id="title">Khe sáng nhìn chính diện</title><desc id="desc">Mở một khe chữ nhật nằm ngang dài 20 mm, cao 3 mm, vạch chỉ tâm nằm ngang ở nửa chiều cao khe.</desc>
+<rect x="1" y="1" width="798" height="408" rx="16" fill="#fbfaf6" stroke="#d5dbd4" stroke-width="2"/>
+<style>text{font-family:Arial,sans-serif;fill:#203b3d} .h{font-size:24px;font-weight:bold}.t{font-size:18px}.s{font-size:16px}.b{font-weight:bold}.teal{fill:#086e66}.amber{fill:#8d4c0c}</style>
+<text x="35" y="43" class="h" text-anchor="start">Khe sáng 3 × 20 mm</text>
+<text x="765" y="43" class="s" text-anchor="end">Nhìn chính diện · Hình phóng to</text>
+<rect x="148" y="120" width="447" height="188" rx="4" fill="#344147"/>
+<rect x="230" y="190" width="280" height="42" fill="#fff6d6"/>
+<line x1="230" y1="100" x2="510" y2="100" stroke="#276b64" stroke-width="2" />
+<line x1="230" y1="92" x2="230" y2="108" stroke="#44535c" stroke-width="2" />
+<line x1="510" y1="92" x2="510" y2="108" stroke="#44535c" stroke-width="2" />
+<text x="370" y="87" class="t teal b" text-anchor="middle">20 mm</text>
+<line x1="510" y1="190" x2="650" y2="190" stroke="#987e50" stroke-width="1" stroke-dasharray="4 4"/>
+<line x1="510" y1="232" x2="650" y2="232" stroke="#987e50" stroke-width="1" stroke-dasharray="4 4"/>
+<line x1="641" y1="190" x2="641" y2="232" stroke="#276b64" stroke-width="2" />
+<line x1="633" y1="190" x2="649" y2="190" stroke="#44535c" stroke-width="2" />
+<line x1="633" y1="232" x2="649" y2="232" stroke="#44535c" stroke-width="2" />
+<text x="657" y="218" class="t teal b" text-anchor="start">3 mm</text>
+<line x1="148" y1="211" x2="230" y2="211" stroke="#e45c47" stroke-width="3" />
+<line x1="510" y1="211" x2="595" y2="211" stroke="#e45c47" stroke-width="3" />
+<text x="370" y="279" style="font-size:16px;fill:white" text-anchor="middle">Băng keo đen</text>
+<text x="35" y="359" class="t" text-anchor="start">Vạch chỉ tâm ở giữa chiều cao khe. Kéo vạch ra hai bên trên phần bìa.</text>
+<text x="35" y="385" class="s" text-anchor="start">Khi đọc s, lấy cao độ của tâm khe từ mặt đế.</text></svg>
