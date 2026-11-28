@@ -24,8 +24,7 @@
 .mdk-present .mdk-left,.mdk-present .mdk-right{grid-column:span 1;min-width:0;gap:.5rem}
 .mdk-present .mdk-left>div:first-child,.mdk-present .mdk-board-panel,.mdk-present .mdk-clue-panel{padding:.625rem}
 .mdk-present #bossNoteBox,.mdk-present #caseSubtitle,.mdk-present .mdk-duplicate{display:none!important}
-.mdk-present .mdk-board-wrap{max-width:clamp(330px, calc(100vh - 259px), 760px)}
-.mdk-present .mdk-warm .mdk-board-wrap{max-width:clamp(330px, calc(100vh - 288px), 760px)}
+.mdk-present .mdk-board-wrap{max-width:min(790px,var(--mdk-fit,calc(100vh - 330px)))}
 .mdk-present .mdk-clue-panel h3,.mdk-present #caseTitle{font-size:clamp(1.125rem,1.6vw,1.65rem)}
 .mdk-present #clueCardsList,.mdk-present #cluesList{grid-template-columns:1fr}
 .mdk-present #clueCardsList :is(p,button,.text-xs,.text-sm),.mdk-present #cluesList :is(p,button,.text-xs,.text-sm){font-size:clamp(1rem,1.13vw,1.35rem)}

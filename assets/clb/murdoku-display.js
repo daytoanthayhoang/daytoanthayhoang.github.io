@@ -40,10 +40,16 @@
   const key='nak-murdoku-projector', wide=matchMedia('(min-width: 1024px)');
   let wanted=false;
   try{wanted=sessionStorage.getItem(key)==='on';}catch{}
+  function fit(){
+    if(!document.body.classList.contains('mdk-present'))return;
+    const boardTop=board.getBoundingClientRect().top-nav.getBoundingClientRect().top;
+    wrap.style.setProperty('--mdk-fit',Math.max(260,Math.floor(window.innerHeight-boardTop-42))+'px');
+  }
   function render(){
     const on=wanted&&wide.matches;
     document.body.classList.toggle('mdk-present',on);
     toggle.setAttribute('aria-pressed',String(on));
+    fit();
     toggle.textContent=on?'Thoát trình chiếu':'Trình chiếu TV';
   }
   toggle.addEventListener('click',()=>{
@@ -53,5 +59,10 @@
   });
   if(wide.addEventListener)wide.addEventListener('change',render);
   else if(wide.addListener)wide.addListener(render);
+  window.addEventListener('resize',fit);
+  if(typeof ResizeObserver==='function'){
+    const observer=new ResizeObserver(fit);
+    [nav,left.firstElementChild,wrap.previousElementSibling].filter(Boolean).forEach(el=>observer.observe(el));
+  }
   render();
 })();
