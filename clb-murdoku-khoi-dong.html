@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Murdoku — CLB Toán Học THCS Nguyễn An Khương</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Be Vietnam Pro (tối ưu dấu tiếng Việt) & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <script>
+    if (typeof tailwind !== "undefined") tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            parchment: '#f6f3ec',
+            ink: '#1e293b',
+            crimson: {
+              50: '#fef2f2',
+              100: '#fee2e2',
+              600: '#dc2626',
+              700: '#b91c1c',
+              800: '#991b1b',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Tùy chỉnh nền giấy trinh thám và hiệu ứng mượt mà */
+    body {
+      background-color: #f6f3ec;
+      background-image: radial-gradient(rgba(30, 41, 59, 0.055) 1px, transparent 1px);
+      background-size: 20px 20px;
+      color: #1e293b;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Hiệu ứng ô lưới khi di chuột và đặt nhân vật */
+    .grid-cell {
+      transition: filter 0.14s ease, transform 0.12s ease, background-color 0.15s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .grid-cell.playable:hover {
+      filter: brightness(0.95);
+    }
+    .grid-cell.playable:active {
+      transform: scale(0.97);
+    }
+
+    /* Hiệu ứng cảnh báo trùng hàng/cột */
+    @keyframes conflictPulse {
+      0%, 100% { box-shadow: inset 0 0 0 3px rgba(220, 38, 38, 0.85); }
+      50% { box-shadow: inset 0 0 0 4px rgba(220, 38, 38, 0.4); }
+    }
+    .cell-conflict {
+      animation: conflictPulse 1.4s infinite ease-in-out;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(220, 38, 38, 0.09),
+        rgba(220, 38, 38, 0.09) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+    }
+
+    /* Hiệu ứng xuất hiện quân cờ nhân vật */
+    @keyframes tokenPop {
+      0% { transform: scale(0.65); opacity: 0.4; }
+      70% { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .token-pop {
+      animation: tokenPop 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Thanh cuộn tinh gọn cho danh sách manh mối và bảng xếp hạng */
+    .thin-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .thin-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .thin-scroll::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.35);
+      border-radius: 9999px;
+    }
+    .thin-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.55);
+    }
+
+    /* Hiệu ứng thông báo Toast */
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .toast-enter {
+      animation: toastIn 0.22s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased flex flex-col">
+
+  <!-- ==================== THANH TIÊU ĐỀ TRÊN CÙNG (HEADER) ==================== -->
+  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-700/80 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2.5">
+      <!-- Thương hiệu CLB -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-crimson-600 to-rose-800 flex items-center justify-center shadow-inner shrink-0 border border-rose-400/30">
+          <!-- Biểu tượng kính lúp suy luận -->
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-base font-extrabold tracking-tight leading-tight truncate">
+            <span class="text-rose-400">MURDOKU</span>
+            <span class="text-slate-400 font-normal mx-1">·</span>
+            <span class="text-slate-100">CLB Toán Học THCS Nguyễn An Khương</span>
+          </h1>
+          <div class="flex items-center gap-2 text-[11px] text-slate-300 mt-0.5">
+            <span id="connectionDot" class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
+            <span id="connectionLabel" class="truncate">Đang khởi tạo chế độ chơi...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Các nút điều hướng & Chọn ván -->
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Dropdown chọn ván -->
+        <div class="relative">
+          <label for="caseSelect" class="sr-only">Chọn ván chơi</label>
+          <select id="caseSelect" class="appearance-none bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs sm:text-sm font-semibold pl-3 pr-8 py-2 rounded-xl border border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer max-w-[200px] sm:max-w-[260px] truncate">
+            <!-- Điền động từ CASE_BANK -->
+          </select>
+          <svg class="w-4 h-4 text-slate-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+
+        <!-- Nút Luật chơi -->
+        <button id="btnRules" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs sm:text-sm font-semibold border border-slate-700 transition cursor-pointer">
+          <span>📖</span>
+          <span class="hidden sm:inline">Luật chơi</span>
+        </button>
+
+        <!-- Nút Phòng Chơi Chung -->
+        <button id="btnRoomPanel" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-sm transition cursor-pointer">
+          <span>👥</span>
+          <span>Phòng Chơi Chung</span>
+          <span id="roomCountBadge" class="hidden ml-0.5 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-white/20 text-white">0</span>
+        </button>
+
+        <!-- Nút Thêm ván mới (Giáo viên / JSON) -->
+        <button id="btnAddCase" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs sm:text-sm font-semibold border border-amber-400/30 transition cursor-pointer">
+          <span>➕</span>
+          <span class="hidden md:inline">Thêm ván mới</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== BANNER PHÒNG CHƠI CHUNG (KHI ĐÃ THAM GIA) ==================== -->
+  <div id="activeRoomStrip" class="hidden bg-indigo-950 text-indigo-100 border-b border-indigo-800/70">
+    <div class="max-w-7xl mx-auto px-3 sm:px-5 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="inline-flex items-center gap-1 font-bold text-emerald-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Đang trong phòng:
+        </span>
+        <span id="stripRoomCode" class="font-mono font-bold bg-indigo-800/80 px-2 py-0.5 rounded-md text-white">CLB-TOAN</span>
+        <span class="text-indigo-300">|</span>
+        <span>Học sinh: <strong id="stripPlayerName" class="text-white"></strong></span>
+        <span id="stripHostBadge" class="hidden px-2 py-0.5 rounded-full bg-amber-500/25 text-amber-200 font-bold border border-amber-400/30">🎓 Giáo viên</span>
+      </div>
+      <button id="btnOpenRoomFromStrip" type="button" class="underline hover:text-white font-semibold cursor-pointer">
+        Xem Bảng Xếp Hạng →
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== NỘI DUNG CHÍNH ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-5 py-4 sm:py-6">
+  <nav id="murdoku-navigation" aria-label="Chọn đợt và ván Murdoku" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 mb-4 shadow-sm flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+    <a href="caulacbo.html" class="px-2 py-2 font-bold text-teal-800 hover:underline">‹ CLB Toán</a>
+    <label for="murdoku-batch" class="font-extrabold text-slate-800">Đợt</label>
+    <select id="murdoku-batch" class="max-w-full rounded-lg border border-slate-300 bg-amber-50 px-2 py-2 text-slate-900" aria-label="Chọn đợt"></select>
+    <label for="murdoku-case" class="font-extrabold text-slate-800">Ván</label>
+    <select id="murdoku-case" class="max-w-full rounded-lg border border-slate-300 bg-teal-50 px-2 py-2 text-slate-900" aria-label="Chọn ván"></select>
+    <a id="murdoku-print" href="assets/clb/murdoku-2026-11-28.pdf" class="px-3 py-2 rounded-lg border border-amber-300 bg-amber-100 text-amber-900 font-bold">Tải phiếu A4</a>
+    <a href="#suy-luan" class="px-2 py-2 font-bold text-teal-800 hover:underline">Câu đố suy luận ↓</a>
+  </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+      <!-- ===== CỘT TRÁI (7/12): THÔNG TIN VÁN, BẢNG NHÂN VẬT & SƠ ĐỒ LƯỚI ===== -->
+      <section class="lg:col-span-7 flex flex-col gap-4">
+
+        <!-- Thẻ thông tin ván + Đồng hồ + Nút điều khiển -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-3.5 sm:p-4">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <span id="caseDifficultyBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Dễ</span>
+                <span id="caseSizeBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 font-mono">5×5</span>
+                <span id="caseSolvedPill" class="hidden px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white">✓ Đã phá án</span>
+              </div>
+              <h2 id="caseTitle" class="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug">Đang tải ván chơi...</h2>
+            </div>
+
+            <!-- Đồng hồ và nút Hoàn tác / Làm lại -->
+            <div class="flex items-center gap-2 self-center sm:self-start">
+              <div class="flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl font-mono text-sm font-bold text-slate-800" title="Thời gian giải">
+                <span class="text-indigo-600">⏱</span>
+                <span id="timerDisplay">00:00</span>
+              </div>
+              <button id="btnUndo" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 text-xs sm:text-sm font-semibold border border-slate-200 transition cursor-pointer" title="Hoàn tác nước đi gần nhất">
+                <span>↩️</span>
+                <span class="hidden sm:inline">Hoàn tác</span>
+              </button>
+              <button id="btnReset" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs sm:text-sm font-semibold border border-rose-200 transition cursor-pointer" title="Xóa toàn bộ lưới">
+                <span>🔄</span>
+                <span class="hidden sm:inline">Làm lại</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bảng chọn nhân vật & Công cụ loại trừ -->
+          <div class="mt-3.5 pt-3.5 border-t border-slate-100">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">1. Chọn nhân vật hoặc công cụ rồi chạm ô trên sơ đồ</span>
+              <span id="placedProgressText" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg">0/5 đã đặt</span>
+            </div>
+
+            <div id="paletteContainer" class="flex flex-wrap gap-2">
+              <!-- Các nút nhân vật & công cụ X được render bằng JS -->
+            </div>
+
+            <!-- Công tắc hỗ trợ tư duy -->
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-600">
+              <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input id="toggleConflict" type="checkbox" checked class="w-4 h-4 rounded accent-rose-600 cursor-pointer" />
+                <span class="font-medium">Cảnh báo trùng hàng/cột</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input id="toggleAutoX" type="checkbox" class="w-4 h-4 rounded accent-indigo-600 cursor-pointer" />
+                <span class="font-medium">Tự đánh ✕ hàng/cột</span>
+              </label>
+              <span class="hidden sm:inline text-slate-400 ml-auto">💡 Chuột phải vào ô trống để đánh dấu ✕ nhanh</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thẻ Sơ đồ phòng (Floorplan Grid) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-3 sm:p-5">
+          <div class="max-w-[540px] w-full mx-auto">
+            <!-- Hàng nhãn cột A, B, C... -->
+            <div class="flex items-center mb-1.5">
+              <div class="w-7 sm:w-8 shrink-0"></div>
+              <div id="colHeaders" class="flex-1 grid text-center font-mono text-xs sm:text-sm font-bold text-slate-500">
+                <!-- Nhãn cột render động -->
+              </div>
+            </div>
+
+            <!-- Khung chứa nhãn hàng (1, 2, 3...) + Lưới phòng -->
+            <div class="flex items-stretch">
+              <div id="rowHeaders" class="w-7 sm:w-8 shrink-0 grid font-mono text-xs sm:text-sm font-bold text-slate-500 pr-1.5">
+                <!-- Nhãn hàng render động -->
+              </div>
+
+              <!-- Khung lưới chính có viền ngoài dày 3px -->
+              <div id="boardFrame" class="flex-1 rounded-xl overflow-hidden border-[3px] border-slate-800 shadow-sm bg-white">
+                <div id="boardGrid" class="grid w-full">
+                  <!-- Các ô lưới render động -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Chú giải màu phòng (Room Legend) -->
+            <div id="roomLegend" class="mt-3.5 flex flex-wrap items-center justify-center gap-2 text-xs">
+              <!-- Render động -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CỘT PHẢI (5/12): CHIẾN THẮNG, MANH MỐI & KẾT LUẬN THỦ PHẠM ===== -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <!-- Banner chúc mừng phá án thành công -->
+        <div id="victoryBanner" class="hidden bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl shadow-lg p-4 sm:p-5 border border-emerald-400/40">
+          <div class="flex items-start gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0">🏆</div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg font-extrabold tracking-tight">Phá án xuất sắc!</h3>
+              <p id="victoryStats" class="text-emerald-100 text-xs sm:text-sm font-medium mt-0.5"></p>
+              <div class="mt-3 bg-black/15 rounded-xl p-3 text-xs sm:text-sm leading-relaxed text-emerald-50 border border-white/15">
+                <strong class="text-white">Giải thích logic:</strong>
+                <span id="victoryExplanation"></span>
+              </div>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button id="btnNextCase" type="button" class="px-3.5 py-2 rounded-xl bg-white text-emerald-800 hover:bg-emerald-50 text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer">
+                  Chuyển sang ván tiếp theo →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng Manh mối tương tác -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-4">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-sm">🔎</span>
+              <span>Manh mối điều tra</span>
+            </h3>
+            <span id="cluesCounter" class="text-xs font-semibold text-slate-500">0/0 đã đánh dấu</span>
+          </div>
+          <p class="text-xs text-slate-500 mb-3">Chạm vào từng manh mối để gạch ngang khi bạn đã sử dụng xong.</p>
+          <ul id="cluesList" class="space-y-2">
+            <!-- Danh sách manh mối render động -->
+          </ul>
+        </div>
+
+        <!-- Khung Kết luận Thủ phạm & Kiểm tra kết quả -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-4">
+          <h3 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2 mb-1">
+            <span class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center text-sm">🕵️</span>
+            <span>2. Kết luận: Ai là Thủ phạm?</span>
+          </h3>
+          <p class="text-xs text-slate-500 mb-3">
+            Thủ phạm là <strong>người duy nhất ở chung phòng với Nạn nhân</strong> sau khi xếp đủ sơ đồ.
+          </p>
+
+          <!-- Danh sách chọn nghi phạm -->
+          <div id="suspectChoices" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2 mb-4">
+            <!-- Render động -->
+          </div>
+
+          <!-- Nút kiểm tra kết quả -->
+          <button id="btnCheckSolution" type="button" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-crimson-600 to-rose-700 hover:from-crimson-700 hover:to-rose-800 text-white font-bold text-sm sm:text-base shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>✅</span>
+            <span>Kiểm tra kết quả</span>
+          </button>
+
+          <!-- Hộp phản hồi kết quả (không dùng alert) -->
+          <div id="feedbackBox" class="hidden mt-3.5 rounded-xl p-3.5 text-xs sm:text-sm font-medium leading-relaxed border"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+<section id="suy-luan" class="max-w-7xl mx-3 sm:mx-auto w-auto sm:w-full px-4 py-4 mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm scroll-mt-24"><div class="text-xs font-extrabold tracking-widest text-teal-700">THẢO LUẬN CẢ CLB</div><h2 class="text-2xl font-extrabold my-2 text-slate-900">Năm câu đố suy luận</h2><details class="border-t border-slate-200 py-2"><summary class="cursor-pointer text-slate-800"><strong>1. Chiếc cúp ở đâu?</strong></summary><p class="mt-1 text-slate-700">Một chiếc cúp nằm trong đúng một trong ba tủ A, B, C. A ghi “Cúp ở tủ B”; B ghi “Cúp không ở tủ C”; C ghi “Cúp không ở tủ B”. Chỉ một nhãn đúng. Cúp ở đâu?</p></details>
+<details class="border-t border-slate-200 py-2"><summary class="cursor-pointer text-slate-800"><strong>2. Chưa ai chỉ còn một chỗ</strong></summary><p class="mt-1 text-slate-700">Bảng 4×4 có đúng một dấu • mỗi hàng và mỗi cột. Các ô cho phép: hàng 1 và hàng 2 đều cột A hoặc C; hàng 3 cột A, C hoặc D; hàng 4 cột B hoặc D. Hai dấu nào xác định được ngay? Có bao nhiêu cách xếp đủ?</p></details>
+<details class="border-t border-slate-200 py-2"><summary class="cursor-pointer text-slate-800"><strong>3. Ba câu hỏi có/không</strong></summary><p class="mt-1 text-slate-700">Thẻ ẩn ở một trong tám ngăn. Tìm chắc chắn sau nhiều nhất ba câu hỏi có/không thế nào? Nếu thêm ngăn thứ chín thì ba câu còn đủ không?</p></details>
+<details class="border-t border-slate-200 py-2"><summary class="cursor-pointer text-slate-800"><strong>4. Đồng xu nặng hơn</strong></summary><p class="mt-1 text-slate-700">Chín đồng xu nhìn giống hệt nhau, tám đồng cùng khối lượng và một đồng nặng hơn. Có thể xác định đồng nặng bằng cân hai đĩa sau hai lần cân không?</p></details>
+<details class="border-t border-slate-200 py-2"><summary class="cursor-pointer text-slate-800"><strong>5. Mảnh ghép đánh lạc hướng</strong></summary><p class="mt-1 text-slate-700">Đúng một trong ba bạn đã giấu thẻ. An nói Bình giấu; Bình nói Chi giấu; Chi nói Bình nói sai. Chỉ một lời đúng. Hãy tìm hai kịch bản khớp dữ kiện và đặt một câu hỏi có/không để phân biệt.</p></details></section>
+
+  <!-- ==================== CHÂN TRANG ==================== -->
+  <footer class="py-3 px-4 text-center text-xs text-slate-500 border-t border-slate-200/70 bg-white/50">
+    Murdoku — Ứng dụng suy luận logic dành cho <strong>CLB Toán Học THCS Nguyễn An Khương</strong> · Hỗ trợ học trực tuyến & nhúng GitHub Pages
+  </footer>
+
+  <!-- ==================== NGĂN KÉO PHÒNG CHƠI CHUNG (SLIDE-OVER DRAWER) ==================== -->
+  <div id="roomDrawerBackdrop" class="hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-[2px] transition-opacity"></div>
+  <aside id="roomDrawer" class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-2xl border-l border-slate-200 transform translate-x-full transition-transform duration-250 ease-out flex flex-col">
+    <!-- Đầu ngăn kéo -->
+    <div class="px-4 py-3.5 bg-slate-900 text-white flex items-center justify-between">
+      <div>
+        <h3 class="font-extrabold text-base flex items-center gap-2">
+          <span>👥</span>
+          <span>Phòng Chơi Chung CLB</span>
+        </h3>
+        <p id="drawerConnectionStatus" class="text-[11px] text-slate-300 mt-0.5">Kiểm tra kết nối trực tuyến...</p>
+      </div>
+      <button id="btnCloseRoomDrawer" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-lg cursor-pointer" aria-label="Đóng">✕</button>
+    </div>
+
+    <!-- Thân ngăn kéo -->
+    <div class="flex-1 overflow-y-auto thin-scroll p-4 space-y-4">
+
+      <!-- Cảnh báo chế độ ngoại tuyến (nếu chưa cấu hình Firebase) -->
+      <div id="offlineNotice" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-3.5 text-xs text-amber-900 leading-relaxed">
+        <p class="font-bold mb-1">📡 Đang chạy ở Chế độ Chơi Đơn (Ngoại tuyến)</p>
+        <p>Hệ thống chưa kết nối máy chủ đồng bộ trực tuyến. Học sinh vẫn có thể giải toàn bộ các ván bình thường. Giáo viên có thể dán cấu hình Firebase Web vào biến <code class="font-mono bg-amber-100 px-1 rounded">USER_FIREBASE_CONFIG</code> trong tệp HTML này khi đưa lên GitHub Pages để bật Bảng Xếp Hạng thời gian thực.</p>
+      </div>
+
+      <!-- Form tham gia phòng -->
+      <div id="joinRoomSection" class="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-3">
+        <h4 class="text-sm font-extrabold text-slate-800">Tham gia Phòng thi đấu CLB</h4>
+        <div>
+          <label for="inputPlayerName" class="block text-xs font-bold text-slate-600 mb-1">Tên hiển thị (VD: Minh Anh 8A1)</label>
+          <input id="inputPlayerName" type="text" maxlength="32" placeholder="Nhập họ tên và lớp..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white" />
+        </div>
+        <div>
+          <label for="inputRoomCode" class="block text-xs font-bold text-slate-600 mb-1">Mã phòng chơi chung</label>
+          <input id="inputRoomCode" type="text" maxlength="20" value="CLB-TOAN" placeholder="VD: CLB-TOAN" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white" />
+        </div>
+        <button id="btnJoinRoom" type="button" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition cursor-pointer">
+          🚀 Vào Phòng Chơi Chung
+        </button>
+      </div>
+
+      <!-- Khu vực thông tin phòng đang tham gia -->
+      <div id="inRoomSection" class="hidden space-y-4">
+        <!-- Thẻ thông tin mã phòng -->
+        <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Mã phòng hiện tại</span>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span id="drawerRoomCode" class="font-mono text-lg font-extrabold text-indigo-950">CLB-TOAN</span>
+                <button id="btnCopyRoomCode" type="button" class="px-2 py-1 rounded-lg bg-white hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200 transition cursor-pointer">
+                  📋 Sao chép
+                </button>
+              </div>
+            </div>
+            <button id="btnLeaveRoom" type="button" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200 transition cursor-pointer">
+              Rời phòng
+            </button>
+          </div>
+          <div class="mt-2 pt-2 border-t border-indigo-200/70 text-[11px] text-indigo-800 space-y-0.5">
+            <div>Người chơi: <strong id="drawerPlayerName"></strong></div>
+            <div id="drawerSyncedCaseInfo" class="text-indigo-700">Ván đang mở: <strong id="drawerActiveCaseTitle"></strong></div>
+            <div class="text-[10px] text-indigo-600/80 break-all font-mono">ID định danh: <span id="drawerUserId">—</span></div>
+          </div>
+        </div>
+
+        <!-- Bảng Xếp Hạng Trực Tiếp -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+              <span>🏆</span>
+              <span>Bảng Xếp Hạng Trực Tiếp</span>
+            </h4>
+            <span id="leaderboardCount" class="text-xs font-semibold text-slate-500">0 thành viên</span>
+          </div>
+          <div id="leaderboardList" class="space-y-2">
+            <!-- Render động từ Firestore -->
+          </div>
+        </div>
+
+        <!-- Khu vực Chế độ Giáo viên (Host) -->
+        <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+              <span>🎓</span>
+              <span>Chế độ Giáo viên (Host)</span>
+            </h4>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-bold text-amber-900">
+              <input id="toggleHostMode" type="checkbox" class="w-4 h-4 accent-amber-600 cursor-pointer" />
+              <span>Bật Host</span>
+            </label>
+          </div>
+
+          <!-- Khung nhập PIN giáo viên -->
+          <div id="hostPinBox" class="hidden space-y-2">
+            <p class="text-[11px] text-amber-800">Nhập mã PIN giáo viên để điều khiển phòng (mặc định: <code class="font-mono font-bold bg-amber-100 px-1 rounded">2026</code>):</p>
+            <div class="flex gap-2">
+              <input id="inputHostPin" type="password" placeholder="Mã PIN..." class="flex-1 px-3 py-1.5 rounded-xl border border-amber-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-500" />
+              <button id="btnVerifyHostPin" type="button" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer">Mở khóa</button>
+            </div>
+          </div>
+
+          <!-- Các nút điều khiển Host sau khi mở khóa -->
+          <div id="hostControlsBox" class="hidden space-y-2 pt-1">
+            <p class="text-[11px] text-amber-800">Đẩy ván đang chọn trên màn hình của bạn tới tất cả học sinh trong phòng:</p>
+            <button id="btnHostPushCase" type="button" class="w-full py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition cursor-pointer">
+              📢 Đồng bộ ván này cho cả phòng
+            </button>
+            <button id="btnHostResetBoard" type="button" class="w-full py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200 transition cursor-pointer">
+              🧹 Làm mới bảng điểm phòng (Vòng mới)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MODAL LUẬT CHƠI ==================== -->
+  <div id="rulesModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-[2px]">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="font-extrabold text-base flex items-center gap-2">
+          <span>📖</span>
+          <span>Luật chơi Murdoku</span>
+        </h3>
+        <button data-close-modal="rulesModal" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center cursor-pointer">✕</button>
+      </div>
+      <div class="p-5 overflow-y-auto thin-scroll space-y-4 text-sm text-slate-700 leading-relaxed">
+        <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5 text-rose-900">
+          <strong class="block text-rose-800 mb-1">🎯 Mục tiêu phá án:</strong>
+          Xác định chính xác vị trí của tất cả nhân vật trên sơ đồ dựa theo các manh mối logic, từ đó tìm ra <strong>Thủ phạm</strong>.
+        </div>
+
+        <ol class="space-y-2.5 list-decimal pl-5">
+          <li><strong>Chỉ đứng ở ô trống:</strong> Đặt tất cả nhân vật (bao gồm cả <em>Nạn nhân</em>) vào các ô trống. Không ai có thể đứng lên các ô chứa đồ vật/chướng ngại vật (kệ sách, bàn, đàn piano, chậu cây...).</li>
+          <li><strong>Quy tắc Sudoku hàng & cột:</strong> Mỗi <strong>hàng ngang</strong> và mỗi <strong>cột dọc</strong> chỉ có <strong>ĐÚNG 1 nhân vật</strong>.</li>
+          <li><strong>Tuân thủ manh mối:</strong> Đọc kỹ từng manh mối (vị trí phòng, liền kề Đông/Tây/Nam/Bắc, số người trong phòng...). Chạm vào manh mối để gạch ngang khi đã xử lý xong.</li>
+          <li><strong>Quy tắc tìm Thủ phạm:</strong> Khi xếp xong toàn bộ sơ đồ, <strong>Thủ phạm là người duy nhất ở chung phòng với Nạn nhân</strong> (tức là căn phòng có Nạn nhân chỉ chứa đúng 2 người: Nạn nhân và Thủ phạm).</li>
+        </ol>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 space-y-1.5">
+          <div class="font-bold text-slate-800">⚡ Mẹo thao tác nhanh:</div>
+          <div>• Chọn nhân vật ở thanh trên rồi chạm ô trống để đặt hoặc di chuyển nhân vật đó.</div>
+          <div>• Chọn công cụ <strong>✕ Loại trừ</strong> (hoặc <strong>nhấp chuột phải</strong> trên máy tính) để đánh dấu các ô chắc chắn không có người.</div>
+          <div>• Nhấn lại vào ô đang chứa cùng nhân vật để gỡ nhân vật ra khỏi sơ đồ.</div>
+        </div>
+      </div>
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button data-close-modal="rulesModal" type="button" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold cursor-pointer">Đã hiểu, bắt đầu điều tra!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL THÊM VÁN MỚI (JSON PREVIEW / LOADER) ==================== -->
+  <div id="addCaseModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-[2px]">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+      <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="font-extrabold text-base flex items-center gap-2">
+          <span>➕</span>
+          <span>Cấu trúc thêm ván mới (JSON cho Giáo viên)</span>
+        </h3>
+        <button data-close-modal="addCaseModal" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto thin-scroll space-y-4 text-xs sm:text-sm text-slate-700">
+        <p class="leading-relaxed">
+          Mỗi ván chơi được lưu dạng đối tượng JSON trong mảng <code class="font-mono bg-slate-100 px-1.5 py-0.5 rounded font-bold">CASE_BANK</code> ở đầu mã nguồn. Thầy/Cô có thể thêm dần từng ván từ bộ 80 ván Murdoku vào mã nguồn hoặc dán nhanh JSON bên dưới để <strong>chạy thử và đẩy ngay lên Phòng Chơi Chung</strong>!
+        </p>
+
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="font-bold text-slate-800">Dán JSON ván mới hoặc dùng mẫu tham khảo:</span>
+          <div class="flex gap-2">
+            <button id="btnLoadJsonTemplate" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 cursor-pointer">
+              📄 Điền mẫu chuẩn
+            </button>
+            <button id="btnCopyJsonTemplate" type="button" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200 cursor-pointer">
+              📋 Sao chép mẫu
+            </button>
+          </div>
+        </div>
+
+        <textarea id="customCaseTextarea" rows="12" spellcheck="false" placeholder='Dán JSON ván chơi tại đây...' class="w-full font-mono text-xs p-3 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed"></textarea>
+
+        <div id="customCaseStatus" class="hidden rounded-xl p-3 text-xs font-semibold border"></div>
+      </div>
+
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-end gap-2">
+        <button data-close-modal="addCaseModal" type="button" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-sm font-bold border border-slate-300 cursor-pointer">Đóng</button>
+        <button id="btnImportCustomCase" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-sm cursor-pointer">
+          ⚡ Kiểm tra & Nạp ván ngay
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL XÁC NHẬN LÀM LẠI LƯỚI ==================== -->
+  <div id="confirmResetModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-[2px]">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-sm w-full p-5 space-y-4">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0">🔄</div>
+        <div>
+          <h4 class="font-extrabold text-slate-900">Làm mới sơ đồ hiện tại?</h4>
+          <p class="text-xs text-slate-600 mt-1 leading-relaxed">Toàn bộ nhân vật đã đặt, dấu ✕ loại trừ và các manh mối đã gạch ngang của ván này sẽ được xóa để bạn giải lại từ đầu.</p>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button data-close-modal="confirmResetModal" type="button" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer">Hủy</button>
+        <button id="btnConfirmResetYes" type="button" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold cursor-pointer">Xóa và làm lại</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VÙNG HIỂN THỊ TOAST THÔNG BÁO ==================== -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none"></div>
+
+  <!-- ==================== MÃ JAVASCRIPT CHÍNH (MODULE) ==================== -->
+  <script>
+    let initializeApp,getAuth,signInAnonymously,signInWithCustomToken,getFirestore,doc,setDoc,onSnapshot,collection;
+
+
+
+
+    /* =========================================================================
+     * 1. CẤU HÌNH FIREBASE CHO GITHUB PAGES (TÙY CHỌN CHO GIÁO VIÊN)
+     *    - Khi chạy trong môi trường Canvas/Preview, hệ thống tự dùng cấu hình có sẵn.
+     *    - Khi đưa lên GitHub Pages (daytoanthayhoang.github.io/caulacbo),
+     *      Thầy/Cô chỉ cần thay `null` bằng object firebaseConfig miễn phí của mình
+     *      để bật Phòng Chơi Chung trực tuyến cho học sinh toàn trường!
+     * ========================================================================= */
+    const USER_FIREBASE_CONFIG = null;
+    /* Ví dụ khi triển khai lên GitHub Pages:
+    const USER_FIREBASE_CONFIG = {
+      apiKey: "AIzaSy...",
+      authDomain: "clb-toan-nak.firebaseapp.com",
+      projectId: "clb-toan-nak",
+      storageBucket: "clb-toan-nak.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef"
+    };
+    */
+
+    /* =========================================================================
+     * 2. NGÂN HÀNG VÁN CHƠI (CASE_BANK) — DỄ DÀNG MỞ RỘNG TỪNG VÁN MỘT
+     *    Mỗi ván gồm:
+     *    - id, title, difficulty, size (kích thước lưới N×N)
+     *    - rooms: danh sách phòng với tên, màu nền pastel (bg), màu chữ nhãn (badge), tọa độ [row, col]
+     *    - obstacles: map "row,col" -> { icon, label }
+     *    - characters: mảng nhân vật { code, name, color, isVictim? }
+     *    - clues: mảng câu manh mối tiếng Việt
+     *    - solution: map code -> [row, col] (đã kiểm chứng duy nhất)
+     *    - culprit: mã nhân vật là Thủ phạm
+     *    - explanation: giải thích ngắn gọn khi phá án thành công
+     * ========================================================================= */
+    const CASE_BANK = [
+      {
+        id: "van-01",
+        title: "Ván #1: Bí Ẩn Phòng Thí Nghiệm (Khởi động 5×5)",
+        difficulty: "Dễ",
+        size: 5,
+        rooms: {
+          L: {
+            name: "Thư viện",
+            bg: "#dbeafe",
+            badgeBg: "#bfdbfe",
+            badgeText: "#1e40af",
+            cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]]
+          },
+          T: {
+            name: "Phòng Thí Nghiệm",
+            bg: "#fef3c7",
+            badgeBg: "#fde68a",
+            badgeText: "#92400e",
+            cells: [[0,3],[0,4],[1,3],[1,4],[2,3],[2,4]]
+          },
+          H: {
+            name: "Hành Lang",
+            bg: "#e2e8f0",
+            badgeBg: "#cbd5e1",
+            badgeText: "#334155",
+            cells: [[2,0],[2,1],[2,2],[3,0],[3,1]]
+          },
+          C: {
+            name: "Phòng CLB",
+            bg: "#d1fae5",
+            badgeBg: "#a7f3d0",
+            badgeText: "#065f46",
+            cells: [[3,2],[3,3],[3,4],[4,0],[4,1],[4,2],[4,3],[4,4]]
+          }
+        },
+        obstacles: {
+          "0,1": { icon: "📚", label: "Kệ sách" },
+          "1,3": { icon: "🧪", label: "Bàn TN" },
+          "3,1": { icon: "🪴", label: "Chậu cây" },
+          "4,3": { icon: "🖍️", label: "Bảng đen" }
+        },
+        characters: [
+          { code: "V", name: "Nạn nhân", isVictim: true, color: "#dc2626" },
+          { code: "A", name: "An", color: "#2563eb" },
+          { code: "B", name: "Bình", color: "#7c3aed" },
+          { code: "C", name: "Chi", color: "#059669" },
+          { code: "D", name: "Dũng", color: "#d97706" }
+        ],
+        clues: [
+          "Nạn nhân (V) ở Hàng 2, bên trong Phòng Thí Nghiệm.",
+          "Không có bất kỳ ai đứng ở Hành Lang.",
+          "Bình (B) đang ở trong Phòng Thí Nghiệm.",
+          "An (A) đang ở trong Thư viện.",
+          "Dũng (D) đứng ngay phía dưới (ô liền kề bên dưới) Chậu cây."
+        ],
+        solution: {
+          A: [0,0],
+          V: [1,4],
+          B: [2,3],
+          C: [3,2],
+          D: [4,1]
+        },
+        culprit: "B",
+        explanation: "Nạn nhân (E2) và Bình (D3) là 2 người duy nhất trong Phòng Thí Nghiệm, nên Bình là thủ phạm."
+      },
+      {
+        id: "van-02",
+        title: "Ván #2: Bí Ẩn Phòng Nhạc (Trung bình 6×6)",
+        difficulty: "Trung bình",
+        size: 6,
+        rooms: {
+          S: {
+            name: "Sảnh Chính",
+            bg: "#e0e7ff",
+            badgeBg: "#c7d2fe",
+            badgeText: "#3730a3",
+            cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]]
+          },
+          P: {
+            name: "Phòng Nhạc",
+            bg: "#f3e8ff",
+            badgeBg: "#e9d5ff",
+            badgeText: "#6b21a8",
+            cells: [[0,3],[0,4],[0,5],[1,3],[1,4],[1,5]]
+          },
+          T: {
+            name: "Thư Viện",
+            bg: "#e0f2fe",
+            badgeBg: "#bae6fd",
+            badgeText: "#075985",
+            cells: [[2,0],[2,1],[3,0],[3,1],[4,0],[4,1]]
+          },
+          A: {
+            name: "Phòng Ăn",
+            bg: "#fef3c7",
+            badgeBg: "#fde68a",
+            badgeText: "#92400e",
+            cells: [[2,2],[2,3],[2,4],[2,5],[3,2],[3,3],[3,4],[3,5]]
+          },
+          G: {
+            name: "Sân Vườn",
+            bg: "#d1fae5",
+            badgeBg: "#a7f3d0",
+            badgeText: "#065f46",
+            cells: [[4,2],[4,3],[4,4],[4,5],[5,0],[5,1],[5,2],[5,3],[5,4],[5,5]]
+          }
+        },
+        obstacles: {
+          "0,1": { icon: "🛎️", label: "Lễ tân" },
+          "1,4": { icon: "🎹", label: "Đàn Piano" },
+          "2,3": { icon: "🍽️", label: "Bàn dài" },
+          "3,0": { icon: "📚", label: "Kệ sách" },
+          "4,4": { icon: "⛲", label: "Đài nước" },
+          "5,2": { icon: "🪑", label: "Ghế đá" }
+        },
+        characters: [
+          { code: "V", name: "Nạn nhân", isVictim: true, color: "#dc2626" },
+          { code: "H", name: "Huy", color: "#2563eb" },
+          { code: "K", name: "Khánh", color: "#0891b2" },
+          { code: "L", name: "Lan", color: "#9333ea" },
+          { code: "M", name: "Minh", color: "#d97706" },
+          { code: "N", name: "Nga", color: "#059669" }
+        ],
+        clues: [
+          "Lan (L) đứng ngay bên phải (liền kề phía Đông) Đàn Piano.",
+          "Phòng Nhạc chỉ có đúng 1 người.",
+          "Huy (H) ở Sảnh Chính, nhưng không đứng ở Cột A.",
+          "Khánh (K) đứng ngay phía dưới (liền kề phía Nam) Kệ sách.",
+          "Nga (N) đứng ngay bên trái (liền kề phía Tây) Ghế đá.",
+          "Nạn nhân (V) đứng ở hàng cao hơn (số hàng nhỏ hơn) Minh (M)."
+        ],
+        solution: {
+          H: [0,2],
+          L: [1,5],
+          V: [2,4],
+          M: [3,3],
+          K: [4,0],
+          N: [5,1]
+        },
+        culprit: "M",
+        explanation: "Nạn nhân (E3) và Minh (D4) là 2 người duy nhất trong Phòng Ăn, nên Minh là thủ phạm."
+      }
+    ];
+
+    /* =========================================================================
+     * 3. TRẠNG THÁI ỨNG DỤNG (IN-MEMORY STATE)
+     * ========================================================================= */
+    const state = {
+      currentCaseIndex: 0,
+      selectedTool: null,        // Mã nhân vật (vd "V", "A") hoặc "X"
+      placements: {},            // { charCode: [r, c] }
+      manualX: new Set(),        // Set các chuỗi "r,c" đã đánh dấu X thủ công
+      struckClues: new Set(),    // Set chỉ số manh mối đã gạch ngang
+      selectedCulprit: null,     // Mã nghi phạm đang chọn
+      undoStack: [],             // Lịch sử các bước để Hoàn tác
+      showConflicts: true,       // Cảnh báo trùng hàng/cột (mặc định BẬT)
+      autoMarkX: false,          // Tự đánh X hàng/cột (mặc định TẮT)
+      elapsedSeconds: 0,
+      timerInterval: null,
+      wrongAttempts: 0,
+      isSolved: false,
+      // Trạng thái Phòng Chơi Chung (Firebase)
+      firebaseReady: false,
+      db: null,
+      auth: null,
+      appId: typeof __app_id !== "undefined" ? __app_id : "murdoku-clb-toan-nak",
+      currentUser: null,
+      inRoom: false,
+      roomCode: "",
+      playerName: "",
+      isHostUnlocked: false,
+      currentRoundId: 1,
+      lastSyncedRoundId: null,
+      lastSyncedCaseId: null,
+      roomUnsub: null,
+      playersUnsub: null,
+      leaderboardPlayers: []
+    };
+
+    /* =========================================================================
+     * 4. CÁC HÀM TIỆN ÍCH CHUNG (COORDS, AUDIO, TOAST, CLIPBOARD)
+     * ========================================================================= */
+    const COL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    function currentCase() {
+      return CASE_BANK[state.currentCaseIndex];
+    }
+
+    function cellKey(r, c) {
+      return `${r},${c}`;
+    }
+
+    function coordLabel(r, c) {
+      return `${COL_LETTERS[c] || "?"}${r + 1}`;
+    }
+
+    function formatTime(totalSec) {
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    /** Tạo bản đồ tra cứu nhanh phòng của từng ô và ô nhãn đầu tiên của mỗi phòng */
+    function buildRoomMaps(caseData) {
+      const cellToRoom = {};
+      const roomLabelCell = {};
+      for (const [roomKey, roomInfo] of Object.entries(caseData.rooms)) {
+        let minScore = Infinity;
+        let topLeftKey = null;
+        for (const [r, c] of roomInfo.cells) {
+          const k = cellKey(r, c);
+          cellToRoom[k] = roomKey;
+          const score = r * caseData.size + c;
+          if (score < minScore) {
+            minScore = score;
+            topLeftKey = k;
+          }
+        }
+        if (topLeftKey) {
+          roomLabelCell[topLeftKey] = { key: roomKey, ...roomInfo };
+        }
+      }
+      return { cellToRoom, roomLabelCell };
+    }
+
+    /** Tìm nhân vật đang đứng tại ô (r, c) nếu có */
+    function getCharAt(r, c) {
+      for (const [code, pos] of Object.entries(state.placements)) {
+        if (pos[0] === r && pos[1] === c) return code;
+      }
+      return null;
+    }
+
+    /** Tính toán tập các ô bị trùng hàng hoặc trùng cột */
+    function getConflictCells() {
+      const rowCounts = {};
+      const colCounts = {};
+      for (const [r, c] of Object.values(state.placements)) {
+        rowCounts[r] = (rowCounts[r] || 0) + 1;
+        colCounts[c] = (colCounts[c] || 0) + 1;
+      }
+      const conflictKeys = new Set();
+      for (const [r, c] of Object.values(state.placements)) {
+        if (rowCounts[r] > 1 || colCounts[c] > 1) {
+          conflictKeys.add(cellKey(r, c));
+        }
+      }
+      return conflictKeys;
+    }
+
+    /** Tính toán tập các ô tự động đánh X theo hàng/cột của các nhân vật đã đặt */
+    function getAutoXCells() {
+      const autoX = new Set();
+      if (!state.autoMarkX) return autoX;
+      const size = currentCase().size;
+      for (const [r, c] of Object.values(state.placements)) {
+        for (let i = 0; i < size; i++) {
+          autoX.add(cellKey(r, i));
+          autoX.add(cellKey(i, c));
+        }
+      }
+      return autoX;
+    }
+
+    /** Hiển thị thông báo nhỏ (Toast) — không dùng alert() */
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toastContainer");
+      const el = document.createElement("div");
+      const styles = {
+        info: "bg-slate-900 text-white border-slate-700",
+        success: "bg-emerald-700 text-white border-emerald-500",
+        warn: "bg-amber-600 text-white border-amber-400",
+        error: "bg-rose-700 text-white border-rose-500"
+      };
+      el.className = `toast-enter pointer-events-auto px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold shadow-lg border ${styles[type] || styles.info}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transition = "opacity 0.25s ease";
+        setTimeout(() => el.remove(), 260);
+      }, 3200);
+    }
+
+    /** Sao chép văn bản an toàn trong iframe (dùng document.execCommand) */
+    function copyTextSafe(text) {
+      try {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.focus();
+        temp.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(temp);
+        return ok;
+      } catch (err) {
+        return false;
+      }
+    }
+
+    /** Âm thanh chúc mừng nhẹ nhàng bằng Web Audio API (không cần URL âm thanh ngoài) */
+    function playVictoryChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 - E5 - G5 - C6
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.001, ctx.currentTime + idx * 0.11);
+          gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + idx * 0.11 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.11 + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.11);
+          osc.stop(ctx.currentTime + idx * 0.11 + 0.38);
+        });
+      } catch (_) {
+        // Bỏ qua nếu trình duyệt chặn tự phát âm thanh
+      }
+    }
+
+    /* =========================================================================
+     * 5. QUẢN LÝ ĐỒNG HỒ & LỊCH SỬ HOÀN TÁC (UNDO)
+     * ========================================================================= */
+    function startTimer() {
+      stopTimer();
+      state.timerInterval = setInterval(() => {
+        if (!state.isSolved) {
+          state.elapsedSeconds += 1;
+          document.getElementById("timerDisplay").textContent = formatTime(state.elapsedSeconds);
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    function pushUndoSnapshot() {
+      state.undoStack.push({
+        placements: JSON.parse(JSON.stringify(state.placements)),
+        manualX: Array.from(state.manualX)
+      });
+      if (state.undoStack.length > 60) state.undoStack.shift();
+      updateUndoButton();
+    }
+
+    function performUndo() {
+      if (state.undoStack.length === 0 || state.isSolved) return;
+      const snap = state.undoStack.pop();
+      state.placements = snap.placements;
+      state.manualX = new Set(snap.manualX);
+      hideFeedback();
+      renderAllGameplay();
+      syncPlayerProgressToRoom();
+    }
+
+    function updateUndoButton() {
+      const btn = document.getElementById("btnUndo");
+      btn.disabled = state.undoStack.length === 0 || state.isSolved;
+    }
+
+    /* =========================================================================
+     * 6. TẢI VÁN CHƠI & HIỂN THỊ GIAO DIỆN CHƠI
+     * ========================================================================= */
+    function populateCaseDropdown() {
+      const sel = document.getElementById("caseSelect");
+      sel.innerHTML = "";
+      CASE_BANK.forEach((c, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = c.title;
+        if (idx === state.currentCaseIndex) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+
+    function loadCase(index, silent = false) {
+      if (index < 0 || index >= CASE_BANK.length) return;
+      state.currentCaseIndex = index;
+      window.dispatchEvent(new CustomEvent("murdoku:case",{detail:CASE_BANK[index].id}));
+      const c = currentCase();
+
+      state.placements = {};
+      state.manualX = new Set();
+      state.struckClues = new Set();
+      state.selectedCulprit = null;
+      state.undoStack = [];
+      state.elapsedSeconds = 0;
+      state.wrongAttempts = 0;
+      state.isSolved = false;
+      // Mặc định chọn sẵn Nạn nhân hoặc nhân vật đầu tiên
+      state.selectedTool = c.characters[0]?.code || "X";
+
+      // Cập nhật dropdown và tiêu đề
+      populateCaseDropdown();
+      document.getElementById("caseTitle").textContent = c.title;
+      document.getElementById("caseSizeBadge").textContent = `${c.size}×${c.size}`;
+      document.getElementById("timerDisplay").textContent = "00:00";
+      document.getElementById("caseSolvedPill").classList.add("hidden");
+      document.getElementById("victoryBanner").classList.add("hidden");
+      document.getElementById("drawerActiveCaseTitle").textContent = c.title;
+
+      const diffEl = document.getElementById("caseDifficultyBadge");
+      diffEl.textContent = c.difficulty || "Cơ bản";
+      if (c.difficulty === "Dễ") {
+        diffEl.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
+      } else if (c.difficulty === "Khó") {
+        diffEl.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800";
+      } else {
+        diffEl.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800";
+      }
+
+      hideFeedback();
+      renderAllGameplay();
+      startTimer();
+      syncPlayerProgressToRoom();
+
+      if (!silent) {
+        showToast(`Đã mở ${c.title}`, "info");
+      }
+    }
+
+    function renderAllGameplay() {
+      renderPalette();
+      renderBoard();
+      renderClues();
+      renderSuspectChoices();
+      updateUndoButton();
+    }
+
+    /** Vẽ thanh chọn nhân vật và công cụ ✕ Loại trừ */
+    function renderPalette() {
+      const c = currentCase();
+      const container = document.getElementById("paletteContainer");
+      container.innerHTML = "";
+
+      const placedCount = Object.keys(state.placements).length;
+      document.getElementById("placedProgressText").textContent = `${placedCount}/${c.characters.length} đã đặt`;
+
+      c.characters.forEach((ch) => {
+        const isSelected = state.selectedTool === ch.code;
+        const pos = state.placements[ch.code];
+        const isPlaced = Boolean(pos);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = [
+          "inline-flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold border-2 transition cursor-pointer select-none",
+          isSelected
+            ? "bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02]"
+            : ch.isVictim
+              ? "bg-rose-50 hover:bg-rose-100 text-rose-900 border-rose-300"
+              : "bg-white hover:bg-slate-50 text-slate-800 border-slate-200"
+        ].join(" ");
+
+        btn.innerHTML = `
+          <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-extrabold text-white shadow-sm shrink-0" style="background-color:${ch.color}">
+            ${ch.code}
+          </span>
+          <span class="whitespace-nowrap">${ch.name}${ch.isVictim ? " 🩸" : ""}</span>
+          ${isPlaced
+            ? `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-mono ${isSelected ? "bg-emerald-500/30 text-emerald-200" : "bg-emerald-100 text-emerald-800"}">✓ ${coordLabel(pos[0], pos[1])}</span>`
+            : ""}
+        `;
+
+        btn.addEventListener("click", () => {
+          state.selectedTool = ch.code;
+          renderPalette();
+        });
+
+        container.appendChild(btn);
+      });
+
+      // Nút công cụ "✕ Loại trừ"
+      const xBtn = document.createElement("button");
+      xBtn.type = "button";
+      const xSelected = state.selectedTool === "X";
+      xBtn.className = [
+        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border-2 transition cursor-pointer select-none",
+        xSelected
+          ? "bg-rose-700 text-white border-rose-700 shadow-md scale-[1.02]"
+          : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300 border-dashed"
+      ].join(" ");
+      xBtn.innerHTML = `<span class="font-extrabold">✕</span><span>Loại trừ</span>`;
+      xBtn.addEventListener("click", () => {
+        state.selectedTool = "X";
+        renderPalette();
+      });
+      container.appendChild(xBtn);
+    }
+
+    /** Vẽ lưới sơ đồ phòng với viền phân phòng dày 3px và nhãn phòng sắc nét */
+    function renderBoard() {
+      const c = currentCase();
+      const size = c.size;
+      const { cellToRoom, roomLabelCell } = buildRoomMaps(c);
+      const conflictCells = state.showConflicts ? getConflictCells() : new Set();
+      const autoXCells = getAutoXCells();
+
+      // 1. Nhãn cột A, B, C...
+      const colHeaders = document.getElementById("colHeaders");
+      colHeaders.style.gridTemplateColumns = `repeat(${size}, minmax(0, 1fr))`;
+      colHeaders.innerHTML = "";
+      for (let col = 0; col < size; col++) {
+        const div = document.createElement("div");
+        div.textContent = COL_LETTERS[col];
+        colHeaders.appendChild(div);
+      }
+
+      // 2. Nhãn hàng 1, 2, 3...
+      const rowHeaders = document.getElementById("rowHeaders");
+      rowHeaders.style.gridTemplateRows = `repeat(${size}, minmax(0, 1fr))`;
+      rowHeaders.innerHTML = "";
+      for (let row = 0; row < size; row++) {
+        const div = document.createElement("div");
+        div.className = "flex items-center justify-end";
+        div.textContent = row + 1;
+        rowHeaders.appendChild(div);
+      }
+
+      // 3. Lưới các ô
+      const boardGrid = document.getElementById("boardGrid");
+      boardGrid.style.gridTemplateColumns = `repeat(${size}, minmax(0, 1fr))`;
+      boardGrid.innerHTML = "";
+
+      for (let r = 0; r < size; r++) {
+        for (let col = 0; col < size; col++) {
+          const key = cellKey(r, col);
+          const roomKey = cellToRoom[key];
+          const roomInfo = c.rooms[roomKey] || { bg: "#ffffff", name: "", badgeBg: "#e2e8f0", badgeText: "#334155" };
+          const obstacle = c.obstacles[key];
+          const placedCode = getCharAt(r, col);
+          const placedChar = placedCode ? c.characters.find((x) => x.code === placedCode) : null;
+          const labelInfo = roomLabelCell[key];
+          const hasManualX = state.manualX.has(key);
+          const hasAutoX = !placedChar && !obstacle && autoXCells.has(key);
+          const isConflict = conflictCells.has(key);
+
+          // Tính viền phải và viền dưới: 3px đặc giữa 2 phòng khác nhau, 1px nét đứt trong cùng phòng
+          const borderStyles = [];
+          if (col < size - 1) {
+            const rightRoom = cellToRoom[cellKey(r, col + 1)];
+            borderStyles.push(
+              rightRoom !== roomKey
+                ? "border-right: 3px solid #1e293b;"
+                : "border-right: 1px dashed rgba(30, 41, 59, 0.24);"
+            );
+          }
+          if (r < size - 1) {
+            const bottomRoom = cellToRoom[cellKey(r + 1, col)];
+            borderStyles.push(
+              bottomRoom !== roomKey
+                ? "border-bottom: 3px solid #1e293b;"
+                : "border-bottom: 1px dashed rgba(30, 41, 59, 0.24);"
+            );
+          }
+
+          const cell = document.createElement("div");
+          cell.className = [
+            "grid-cell aspect-square relative flex flex-col items-center justify-center p-1 overflow-hidden",
+            obstacle ? "cursor-not-allowed" : "playable cursor-pointer",
+            isConflict ? "cell-conflict" : ""
+          ].join(" ");
+          cell.style.cssText = `background-color: ${roomInfo.bg}; ${borderStyles.join(" ")}`;
+          cell.setAttribute("data-row", r);
+          cell.setAttribute("data-col", col);
+          cell.title = `${coordLabel(r, col)} · ${roomInfo.name}${obstacle ? ` (${obstacle.label})` : ""}`;
+
+          // Nhãn tên phòng ở ô trên cùng bên trái của mỗi phòng
+          if (labelInfo) {
+            const tag = document.createElement("div");
+            tag.className = "absolute top-0 left-0 z-10 max-w-[96%] truncate px-1.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-tight rounded-br-md pointer-events-none shadow-[0_1px_1px_rgba(0,0,0,0.08)]";
+            tag.style.backgroundColor = labelInfo.badgeBg;
+            tag.style.color = labelInfo.badgeText;
+            tag.textContent = labelInfo.name;
+            cell.appendChild(tag);
+          }
+
+          // Nội dung bên trong ô (Đồ vật / Nhân vật / Dấu X)
+          const inner = document.createElement("div");
+          inner.className = `flex flex-col items-center justify-center w-full h-full ${labelInfo ? "pt-3 sm:pt-3.5" : ""}`;
+
+          if (obstacle) {
+            inner.innerHTML = `
+              <span class="text-lg sm:text-2xl leading-none select-none">${obstacle.icon}</span>
+              <span class="mt-0.5 text-[9px] sm:text-[10px] font-bold text-slate-700/90 text-center leading-tight px-0.5 truncate max-w-full">${obstacle.label}</span>
+            `;
+          } else if (placedChar) {
+            inner.innerHTML = `
+              <div class="token-pop flex flex-col items-center justify-center">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-extrabold text-sm sm:text-base shadow-md border-2 ${placedChar.isVictim ? "border-rose-200 ring-2 ring-rose-500/60" : "border-white"}" style="background-color:${placedChar.color}">
+                  ${placedChar.code}
+                </div>
+                <span class="mt-0.5 px-1 rounded bg-white/85 text-[9px] sm:text-[10px] font-extrabold text-slate-800 leading-tight max-w-full truncate shadow-xs">
+                  ${placedChar.name}
+                </span>
+              </div>
+            `;
+          } else if (hasManualX) {
+            inner.innerHTML = `<span class="text-xl sm:text-2xl font-extrabold text-slate-500/80 select-none">✕</span>`;
+          } else if (hasAutoX) {
+            inner.innerHTML = `<span class="text-base sm:text-xl font-bold text-slate-400/55 select-none">✕</span>`;
+          }
+
+          cell.appendChild(inner);
+
+          // Sự kiện nhấn chuột trái / chạm trên ô
+          if (!obstacle) {
+            cell.addEventListener("click", () => handleCellClick(r, col));
+            // Nhấp chuột phải để bật/tắt nhanh dấu ✕ trên máy tính
+            cell.addEventListener("contextmenu", (e) => {
+              e.preventDefault();
+              handleCellRightClick(r, col);
+            });
+          }
+
+          boardGrid.appendChild(cell);
+        }
+      }
+
+      // 4. Chú giải các phòng phía dưới lưới
+      const legend = document.getElementById("roomLegend");
+      legend.innerHTML = "";
+      for (const roomInfo of Object.values(c.rooms)) {
+        const pill = document.createElement("span");
+        pill.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-300/80 text-slate-700 font-semibold";
+        pill.style.backgroundColor = roomInfo.bg;
+        pill.innerHTML = `<span class="w-2.5 h-2.5 rounded-full border border-slate-500/40" style="background-color:${roomInfo.badgeBg}"></span><span>${roomInfo.name}</span>`;
+        legend.appendChild(pill);
+      }
+    }
+
+    /** Xử lý nhấp chuột trái / chạm vào một ô trống hợp lệ */
+    function handleCellClick(r, col) {
+      if (state.isSolved) return;
+      const key = cellKey(r, col);
+      const existingCode = getCharAt(r, col);
+
+      if (state.selectedTool === "X") {
+        pushUndoSnapshot();
+        if (existingCode) {
+          delete state.placements[existingCode];
+        } else if (state.manualX.has(key)) {
+          state.manualX.delete(key);
+        } else {
+          state.manualX.add(key);
+        }
+      } else if (state.selectedTool) {
+        pushUndoSnapshot();
+        if (existingCode === state.selectedTool) {
+          // Chạm lại chính nhân vật đó -> gỡ khỏi lưới
+          delete state.placements[existingCode];
+        } else {
+          // Nếu ô đã có người khác -> gỡ người đó ra khỏi ô
+          if (existingCode) {
+            delete state.placements[existingCode];
+          }
+          // Đặt/di chuyển nhân vật đang chọn vào ô này và xóa dấu X thủ công (nếu có)
+          state.placements[state.selectedTool] = [r, col];
+          state.manualX.delete(key);
+
+          // Tự chuyển sang nhân vật kế tiếp chưa được đặt để thao tác cực mượt
+          const nextUnplaced = currentCase().characters.find((ch) => !state.placements[ch.code]);
+          if (nextUnplaced) {
+            state.selectedTool = nextUnplaced.code;
+          }
+        }
+      }
+
+      hideFeedback();
+      renderAllGameplay();
+      syncPlayerProgressToRoom();
+    }
+
+    /** Xử lý nhấp chuột phải để bật/tắt nhanh dấu ✕ hoặc gỡ nhân vật */
+    function handleCellRightClick(r, col) {
+      if (state.isSolved) return;
+      const key = cellKey(r, col);
+      const existingCode = getCharAt(r, col);
+      pushUndoSnapshot();
+      if (existingCode) {
+        delete state.placements[existingCode];
+      } else if (state.manualX.has(key)) {
+        state.manualX.delete(key);
+      } else {
+        state.manualX.add(key);
+      }
+      hideFeedback();
+      renderAllGameplay();
+      syncPlayerProgressToRoom();
+    }
+
+    /** Vẽ danh sách manh mối (chạm để gạch ngang) */
+    function renderClues() {
+      const c = currentCase();
+      const list = document.getElementById("cluesList");
+      list.innerHTML = "";
+      document.getElementById("cluesCounter").textContent = `${state.struckClues.size}/${c.clues.length} đã đánh dấu`;
+
+      c.clues.forEach((clueText, idx) => {
+        const isStruck = state.struckClues.has(idx);
+        const li = document.createElement("li");
+        li.className = [
+          "flex items-start gap-2.5 p-2.5 rounded-xl border text-xs sm:text-sm cursor-pointer transition select-none",
+          isStruck
+            ? "bg-slate-50 border-slate-200 text-slate-400 line-through"
+            : "bg-amber-50/45 hover:bg-amber-50 border-amber-200/80 text-slate-800"
+        ].join(" ");
+
+        li.innerHTML = `
+          <span class="w-5 h-5 rounded-md flex items-center justify-center text-[11px] font-extrabold shrink-0 mt-0.5 ${isStruck ? "bg-emerald-100 text-emerald-700" : "bg-slate-800 text-white"}">
+            ${isStruck ? "✓" : idx + 1}
+          </span>
+          <span class="leading-relaxed">${clueText}</span>
+        `;
+
+        li.addEventListener("click", () => {
+          if (state.struckClues.has(idx)) {
+            state.struckClues.delete(idx);
+          } else {
+            state.struckClues.add(idx);
+          }
+          renderClues();
+        });
+
+        list.appendChild(li);
+      });
+    }
+
+    /** Vẽ danh sách lựa chọn Thủ phạm (loại trừ Nạn nhân) */
+    function renderSuspectChoices() {
+      const c = currentCase();
+      const container = document.getElementById("suspectChoices");
+      container.innerHTML = "";
+
+      c.characters
+        .filter((ch) => !ch.isVictim)
+        .forEach((ch) => {
+          const isChosen = state.selectedCulprit === ch.code;
+          const label = document.createElement("label");
+          label.className = [
+            "flex items-center gap-2.5 p-2.5 rounded-xl border-2 cursor-pointer transition select-none",
+            isChosen
+              ? "bg-rose-50 border-rose-600 shadow-xs"
+              : "bg-white hover:bg-slate-50 border-slate-200"
+          ].join(" ");
+
+          label.innerHTML = `
+            <input type="radio" name="culpritRadio" value="${ch.code}" ${isChosen ? "checked" : ""} class="w-4 h-4 accent-rose-600 cursor-pointer" />
+            <span class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-extrabold shrink-0" style="background-color:${ch.color}">${ch.code}</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-800 truncate">${ch.name}</span>
+          `;
+
+          label.addEventListener("click", () => {
+            if (state.isSolved) return;
+            state.selectedCulprit = ch.code;
+            hideFeedback();
+            renderSuspectChoices();
+          });
+
+          container.appendChild(label);
+        });
+    }
+
+    /* =========================================================================
+     * 7. KIỂM TRA KẾT QUẢ & PHẢN HỒI SƯ PHẠM (KHÔNG TIẾT LỘ ĐÁP ÁN)
+     * ========================================================================= */
+    function showFeedback(message, type) {
+      const box = document.getElementById("feedbackBox");
+      const styles = {
+        warn: "bg-amber-50 border-amber-300 text-amber-900",
+        error: "bg-rose-50 border-rose-300 text-rose-900",
+        success: "bg-emerald-50 border-emerald-300 text-emerald-900"
+      };
+      box.className = `mt-3.5 rounded-xl p-3.5 text-xs sm:text-sm font-medium leading-relaxed border ${styles[type] || styles.warn}`;
+      box.textContent = message;
+      box.classList.remove("hidden");
+    }
+
+    function hideFeedback() {
+      document.getElementById("feedbackBox").classList.add("hidden");
+    }
+
+    function checkSolution() {
+      if (state.isSolved) return;
+      const c = currentCase();
+      const totalChars = c.characters.length;
+      const placedChars = Object.keys(state.placements).length;
+
+      // 1. Kiểm tra đã đặt đủ nhân vật chưa
+      if (placedChars < totalChars) {
+        showFeedback(
+          `Bạn mới đặt ${placedChars}/${totalChars} nhân vật lên sơ đồ. Hãy sắp xếp đủ tất cả mọi người trước khi kết luận nhé!`,
+          "warn"
+        );
+        return;
+      }
+
+      // 2. Kiểm tra quy tắc trùng hàng/cột
+      const conflicts = getConflictCells();
+      if (conflicts.size > 0) {
+        state.wrongAttempts += 1;
+        showFeedback(
+          "Chú ý quy tắc hàng và cột: Hiện có ít nhất hai nhân vật đang đứng cùng một hàng hoặc cùng một cột. Hãy kiểm tra lại sơ đồ nhé!",
+          "error"
+        );
+        syncPlayerProgressToRoom();
+        return;
+      }
+
+      // 3. Kiểm tra đã chọn nghi phạm chưa
+      if (!state.selectedCulprit) {
+        showFeedback(
+          "Bạn chưa chọn nghi phạm trong mục 'Ai là Thủ phạm?'. Hãy xem ai đang ở chung phòng với Nạn nhân và chọn nhé!",
+          "warn"
+        );
+        return;
+      }
+
+      // 4. So sánh vị trí với đáp án chuẩn
+      let mismatchCount = 0;
+      for (const [code, solPos] of Object.entries(c.solution)) {
+        const userPos = state.placements[code];
+        if (!userPos || userPos[0] !== solPos[0] || userPos[1] !== solPos[1]) {
+          mismatchCount += 1;
+        }
+      }
+
+      if (mismatchCount > 0) {
+        state.wrongAttempts += 1;
+        showFeedback(
+          `Sơ đồ hiện chưa khớp hoàn toàn với tất cả manh mối (còn ${mismatchCount} nhân vật chưa đúng vị trí). Đừng nản chí, hãy rà soát lại từng manh mối thật kỹ nhé!`,
+          "error"
+        );
+        syncPlayerProgressToRoom();
+        return;
+      }
+
+      // 5. Vị trí đã đúng hết -> kiểm tra lựa chọn Thủ phạm
+      if (state.selectedCulprit !== c.culprit) {
+        state.wrongAttempts += 1;
+        showFeedback(
+          "Tuyệt vời! Bạn đã xếp đúng toàn bộ sơ đồ phòng, nhưng lựa chọn Thủ phạm lại chưa chính xác. Hãy quan sát thật kỹ xem ai là người duy nhất ở cùng phòng với Nạn nhân nhé!",
+          "warn"
+        );
+        syncPlayerProgressToRoom();
+        return;
+      }
+
+      // 6. PHÁ ÁN THÀNH CÔNG!
+      state.isSolved = true;
+      stopTimer();
+      hideFeedback();
+      playVictoryChime();
+
+      document.getElementById("caseSolvedPill").classList.remove("hidden");
+      document.getElementById("victoryStats").textContent =
+        `Thời gian: ${formatTime(state.elapsedSeconds)} · Số lần thử sai: ${state.wrongAttempts}`;
+      document.getElementById("victoryExplanation").textContent = c.explanation;
+      document.getElementById("victoryBanner").classList.remove("hidden");
+
+      const nextBtn = document.getElementById("btnNextCase");
+      if (state.currentCaseIndex < CASE_BANK.length - 1) {
+        nextBtn.classList.remove("hidden");
+      } else {
+        nextBtn.classList.add("hidden");
+      }
+
+      updateUndoButton();
+      showToast("🎉 Chúc mừng bạn đã phá án thành công!", "success");
+      syncPlayerProgressToRoom();
+    }
+
+    /* =========================================================================
+     * 8. PHÒNG CHƠI CHUNG TRỰC TUYẾN (FIREBASE FIRESTORE)
+     *    Tuân thủ nghiêm ngặt 3 quy tắc bắt buộc:
+     *    - RULE 1: Đường dẫn /artifacts/{appId}/public/data/{collectionName}
+     *    - RULE 2: Không dùng orderBy/where phức tạp -> lọc & sắp xếp trong JS
+     *    - RULE 3: Đăng nhập (CustomToken hoặc Anonymous) xong mới truy vấn
+     * ========================================================================= */
+    async function initFirebase() {
+      const dot = document.getElementById("connectionDot");
+      const label = document.getElementById("connectionLabel");
+      const drawerStatus = document.getElementById("drawerConnectionStatus");
+
+      let firebaseConfig = null;
+      try {
+        if (typeof __firebase_config !== "undefined" && __firebase_config) {
+          firebaseConfig = JSON.parse(__firebase_config);
+        } else if (USER_FIREBASE_CONFIG) {
+          firebaseConfig = USER_FIREBASE_CONFIG;
+        }
+      } catch (err) {
+        console.error("Lỗi đọc cấu hình Firebase:", err);
+      }
+
+      if (!firebaseConfig) {
+        dot.className = "inline-block w-2 h-2 rounded-full bg-amber-400";
+        label.textContent = "Chế độ Ngoại tuyến · Chơi đơn";
+        drawerStatus.textContent = "Chế độ Ngoại tuyến (chưa kết nối máy chủ phòng)";
+        document.getElementById("offlineNotice").classList.remove("hidden");
+        return;
+      }
+
+      try {
+        const [appSDK, authSDK, dbSDK] = await Promise.all([
+          import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"),
+          import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"),
+          import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js")
+        ]);
+        ({initializeApp}=appSDK);
+        ({getAuth,signInAnonymously,signInWithCustomToken}=authSDK);
+        ({getFirestore,doc,setDoc,onSnapshot,collection}=dbSDK);
+        const app = initializeApp(firebaseConfig);
+        state.auth = getAuth(app);
+        state.db = getFirestore(app);
+
+        // RULE 3: Ưu tiên signInWithCustomToken trước khi dùng signInAnonymously
+        if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+          const cred = await signInWithCustomToken(state.auth, __initial_auth_token);
+          state.currentUser = cred.user;
+        } else {
+          const cred = await signInAnonymously(state.auth);
+          state.currentUser = cred.user;
+        }
+
+        state.firebaseReady = true;
+        dot.className = "inline-block w-2 h-2 rounded-full bg-emerald-400";
+        label.textContent = "Sẵn sàng Phòng Chơi Chung trực tuyến";
+        drawerStatus.textContent = "Đã kết nối trực tuyến · Đồng bộ thời gian thực";
+        document.getElementById("drawerUserId").textContent = state.currentUser.uid;
+      } catch (err) {
+        console.error("Không thể kết nối Firebase:", err);
+        dot.className = "inline-block w-2 h-2 rounded-full bg-amber-400";
+        label.textContent = "Chế độ Ngoại tuyến · Chơi đơn";
+        drawerStatus.textContent = "Không thể kết nối máy chủ — đang chạy chế độ chơi đơn";
+        document.getElementById("offlineNotice").classList.remove("hidden");
+      }
+    }
+
+    function sanitizeRoomCode(raw) {
+      return (raw || "CLB-TOAN")
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9\-_]/g, "")
+        .slice(0, 20) || "CLB-TOAN";
+    }
+
+    async function joinRoom() {
+      const nameInput = document.getElementById("inputPlayerName");
+      const codeInput = document.getElementById("inputRoomCode");
+      const displayName = nameInput.value.trim();
+      const roomCode = sanitizeRoomCode(codeInput.value);
+
+      if (!displayName) {
+        showToast("Vui lòng nhập Tên hiển thị của bạn trước khi vào phòng!", "warn");
+        nameInput.focus();
+        return;
+      }
+
+      state.playerName = displayName;
+      state.roomCode = roomCode;
+      state.inRoom = true;
+      codeInput.value = roomCode;
+
+      // Cập nhật giao diện khi vào phòng
+      document.getElementById("joinRoomSection").classList.add("hidden");
+      document.getElementById("inRoomSection").classList.remove("hidden");
+      document.getElementById("activeRoomStrip").classList.remove("hidden");
+      document.getElementById("drawerRoomCode").textContent = roomCode;
+      document.getElementById("drawerPlayerName").textContent = displayName;
+      document.getElementById("stripRoomCode").textContent = roomCode;
+      document.getElementById("stripPlayerName").textContent = displayName;
+      document.getElementById("drawerActiveCaseTitle").textContent = currentCase().title;
+      document.getElementById("roomCountBadge").classList.remove("hidden");
+
+      if (!state.firebaseReady || !state.currentUser) {
+        // Chế độ offline fallback: vẫn hiển thị bảng điểm cá nhân cục bộ
+        document.getElementById("drawerUserId").textContent = "chế-độ-ngoại-tuyến";
+        renderLeaderboard();
+        showToast(`Đã tạo phiên cục bộ tại phòng ${roomCode} (Ngoại tuyến)`, "info");
+        return;
+      }
+
+      subscribeToRoom(roomCode);
+      await syncPlayerProgressToRoom();
+      showToast(`Đã tham gia Phòng ${roomCode}!`, "success");
+    }
+
+    function leaveRoom() {
+      if (state.roomUnsub) { state.roomUnsub(); state.roomUnsub = null; }
+      if (state.playersUnsub) { state.playersUnsub(); state.playersUnsub = null; }
+
+      state.inRoom = false;
+      state.roomCode = "";
+      state.leaderboardPlayers = [];
+      state.lastSyncedRoundId = null;
+      state.lastSyncedCaseId = null;
+
+      document.getElementById("joinRoomSection").classList.remove("hidden");
+      document.getElementById("inRoomSection").classList.add("hidden");
+      document.getElementById("activeRoomStrip").classList.add("hidden");
+      document.getElementById("roomCountBadge").classList.add("hidden");
+      showToast("Đã rời khỏi phòng chơi chung.", "info");
+    }
+
+    /** Lắng nghe dữ liệu phòng và danh sách người chơi theo thời gian thực */
+    function subscribeToRoom(roomCode) {
+      if (!state.firebaseReady || !state.currentUser) return;
+      if (state.roomUnsub) state.roomUnsub();
+      if (state.playersUnsub) state.playersUnsub();
+
+      // 1. Lắng nghe metadata phòng (ván đồng bộ, vòng mới)
+      const roomDocRef = doc(state.db, "artifacts", state.appId, "public", "data", "murdoku_rooms", roomCode);
+      state.roomUnsub = onSnapshot(
+        roomDocRef,
+        (snap) => {
+          if (!snap.exists()) return;
+          const data = snap.data();
+
+          // Nếu giáo viên đồng bộ ván mới (kể cả ván JSON tùy chỉnh)
+          if (data.customCaseJson) {
+            try {
+              const parsed = JSON.parse(data.customCaseJson);
+              if (parsed && parsed.id && !CASE_BANK.some((c) => c.id === parsed.id)) {
+                CASE_BANK.push(parsed);
+                populateCaseDropdown();
+              }
+            } catch (_) {}
+          }
+
+          const incomingRound = data.roundId || 1;
+          const incomingCaseId = data.activeCaseId;
+
+          const roundChanged = state.lastSyncedRoundId !== null && incomingRound !== state.lastSyncedRoundId;
+          const caseChanged = incomingCaseId && incomingCaseId !== state.lastSyncedCaseId;
+
+          state.currentRoundId = incomingRound;
+          state.lastSyncedRoundId = incomingRound;
+          state.lastSyncedCaseId = incomingCaseId || currentCase().id;
+
+          if (caseChanged || roundChanged) {
+            const idx = CASE_BANK.findIndex((c) => c.id === incomingCaseId);
+            if (idx !== -1 && (idx !== state.currentCaseIndex || roundChanged)) {
+              loadCase(idx, true);
+              showToast(
+                roundChanged
+                  ? `📢 Giáo viên đã bắt đầu vòng mới: ${CASE_BANK[idx].title}`
+                  : `📢 Giáo viên đã đồng bộ ván: ${CASE_BANK[idx].title}`,
+                "info"
+              );
+            } else if (roundChanged) {
+              loadCase(state.currentCaseIndex, true);
+              showToast("🧹 Giáo viên đã làm mới bảng điểm cho vòng mới!", "info");
+            }
+          }
+
+          renderLeaderboard();
+        },
+        (err) => {
+          console.error("Lỗi lắng nghe phòng:", err);
+        }
+      );
+
+      // 2. Lắng nghe toàn bộ collection người chơi và lọc trong JS (RULE 2)
+      const playersColRef = collection(state.db, "artifacts", state.appId, "public", "data", "murdoku_room_players");
+      state.playersUnsub = onSnapshot(
+        playersColRef,
+        (snapshot) => {
+          const list = [];
+          snapshot.forEach((docSnap) => {
+            const p = docSnap.data();
+            if (p && p.roomCode === state.roomCode) {
+              list.push(p);
+            }
+          });
+          state.leaderboardPlayers = list;
+          renderLeaderboard();
+        },
+        (err) => {
+          console.error("Lỗi lắng nghe bảng xếp hạng:", err);
+        }
+      );
+    }
+
+    /** Đẩy tiến độ giải hiện tại của học sinh lên Firestore */
+    async function syncPlayerProgressToRoom() {
+      if (!state.inRoom) return;
+      const c = currentCase();
+
+      if (!state.firebaseReady || !state.currentUser) {
+        renderLeaderboard();
+        return;
+      }
+
+      try {
+        const uid = state.currentUser.uid;
+        const playerDocId = `${state.roomCode}__${uid}`;
+        const playerDocRef = doc(state.db, "artifacts", state.appId, "public", "data", "murdoku_room_players", playerDocId);
+
+        await setDoc(playerDocRef, {
+          roomCode: state.roomCode,
+          userId: uid,
+          displayName: state.playerName,
+          caseId: c.id,
+          caseTitle: c.title,
+          roundId: state.currentRoundId,
+          placedCount: Object.keys(state.placements).length,
+          totalCount: c.characters.length,
+          solved: state.isSolved,
+          solveTimeSec: state.elapsedSeconds,
+          wrongAttempts: state.wrongAttempts,
+          updatedAt: Date.now()
+        });
+      } catch (err) {
+        console.error("Lỗi cập nhật tiến độ lên phòng:", err);
+      }
+    }
+
+    /** Vẽ Bảng Xếp Hạng Trực Tiếp */
+    function renderLeaderboard() {
+      const listEl = document.getElementById("leaderboardList");
+      const countEl = document.getElementById("leaderboardCount");
+      const badgeEl = document.getElementById("roomCountBadge");
+      const c = currentCase();
+
+      let players = [];
+      if (state.firebaseReady && state.currentUser) {
+        // Lọc theo vòng hiện tại và ván hiện tại
+        players = state.leaderboardPlayers.filter(
+          (p) => (p.roundId || 1) === state.currentRoundId && p.caseId === c.id
+        );
+      } else if (state.inRoom) {
+        // Dữ liệu cục bộ nếu chạy ngoại tuyến
+        players = [{
+          userId: "local",
+          displayName: state.playerName,
+          placedCount: Object.keys(state.placements).length,
+          totalCount: c.characters.length,
+          solved: state.isSolved,
+          solveTimeSec: state.elapsedSeconds,
+          wrongAttempts: state.wrongAttempts,
+          updatedAt: Date.now()
+        }];
+      }
+
+      // Sắp xếp: Đã phá án trước (nhanh nhất -> ít sai nhất), sau đó đang giải (nhiều nhân vật hơn -> mới cập nhật hơn)
+      players.sort((a, b) => {
+        if (a.solved !== b.solved) return a.solved ? -1 : 1;
+        if (a.solved && b.solved) {
+          if (a.solveTimeSec !== b.solveTimeSec) return a.solveTimeSec - b.solveTimeSec;
+          return (a.wrongAttempts || 0) - (b.wrongAttempts || 0);
+        }
+        if ((b.placedCount || 0) !== (a.placedCount || 0)) {
+          return (b.placedCount || 0) - (a.placedCount || 0);
+        }
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
+      });
+
+      countEl.textContent = `${players.length} thành viên`;
+      badgeEl.textContent = players.length;
+
+      if (players.length === 0) {
+        listEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">Chưa có dữ liệu tiến độ cho ván này. Hãy bắt đầu đặt nhân vật!</div>`;
+        return;
+      }
+
+      const myUid = state.currentUser ? state.currentUser.uid : "local";
+      const medals = ["🥇", "🥈", "🥉"];
+      listEl.innerHTML = "";
+
+      players.forEach((p, idx) => {
+        const isMe = p.userId === myUid;
+        const pct = Math.min(100, Math.round(((p.placedCount || 0) / (p.totalCount || 1)) * 100));
+        const rankDisplay = p.solved && idx < 3 ? medals[idx] : `#${idx + 1}`;
+
+        const row = document.createElement("div");
+        row.className = [
+          "p-2.5 rounded-xl border transition",
+          isMe ? "bg-indigo-50/70 border-indigo-300" : "bg-white border-slate-200"
+        ].join(" ");
+
+        row.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-6 text-center text-sm font-extrabold shrink-0">${rankDisplay}</span>
+              <span class="text-xs sm:text-sm font-bold text-slate-800 truncate">
+                ${escapeHtml(p.displayName)}${isMe ? ' <span class="text-[10px] text-indigo-600 font-semibold">(Bạn)</span>' : ""}
+              </span>
+            </div>
+            ${p.solved
+              ? `<span class="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 font-mono">✓ ${formatTime(p.solveTimeSec)}${p.wrongAttempts > 0 ? ` · ${p.wrongAttempts} sai` : ""}</span>`
+              : `<span class="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">Đang giải · ${p.placedCount || 0}/${p.totalCount || c.characters.length}</span>`
+            }
+          </div>
+          ${!p.solved ? `
+            <div class="mt-1.5 ml-8 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full bg-indigo-500 rounded-full transition-all duration-300" style="width:${pct}%"></div>
+            </div>
+          ` : ""}
+        `;
+
+        listEl.appendChild(row);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /** Chức năng Giáo viên (Host): Đồng bộ ván hiện tại cho cả phòng */
+    async function hostPushCurrentCase() {
+      if (!state.inRoom || !state.isHostUnlocked) return;
+      if (!state.firebaseReady || !state.currentUser) {
+        showToast("Cần kết nối trực tuyến để đồng bộ ván tới các học sinh khác.", "warn");
+        return;
+      }
+      try {
+        const c = currentCase();
+        const isBuiltIn = c.id === "van-01" || c.id === "van-02";
+        const roomDocRef = doc(state.db, "artifacts", state.appId, "public", "data", "murdoku_rooms", state.roomCode);
+        await setDoc(roomDocRef, {
+          roomCode: state.roomCode,
+          activeCaseId: c.id,
+          customCaseJson: isBuiltIn ? "" : JSON.stringify(c),
+          roundId: state.currentRoundId,
+          hostName: state.playerName,
+          updatedAt: Date.now()
+        });
+        showToast(`📢 Đã đồng bộ "${c.title}" tới cả phòng ${state.roomCode}!`, "success");
+      } catch (err) {
+        console.error("Lỗi đồng bộ ván:", err);
+        showToast("Không thể đồng bộ ván lúc này. Vui lòng thử lại!", "error");
+      }
+    }
+
+    /** Chức năng Giáo viên (Host): Làm mới bảng điểm phòng cho vòng mới */
+    async function hostResetLeaderboard() {
+      if (!state.inRoom || !state.isHostUnlocked) return;
+      if (!state.firebaseReady || !state.currentUser) {
+        loadCase(state.currentCaseIndex, true);
+        showToast("Đã làm mới phiên chơi cục bộ!", "info");
+        return;
+      }
+      try {
+        const c = currentCase();
+        const isBuiltIn = c.id === "van-01" || c.id === "van-02";
+        const nextRound = (state.currentRoundId || 1) + 1;
+        const roomDocRef = doc(state.db, "artifacts", state.appId, "public", "data", "murdoku_rooms", state.roomCode);
+        await setDoc(roomDocRef, {
+          roomCode: state.roomCode,
+          activeCaseId: c.id,
+          customCaseJson: isBuiltIn ? "" : JSON.stringify(c),
+          roundId: nextRound,
+          hostName: state.playerName,
+          updatedAt: Date.now()
+        });
+        showToast("🧹 Đã làm mới bảng điểm phòng cho vòng thi mới!", "success");
+      } catch (err) {
+        console.error("Lỗi làm mới bảng điểm:", err);
+        showToast("Không thể làm mới bảng điểm lúc này.", "error");
+      }
+    }
+
+    /* =========================================================================
+     * 9. MODAL NHẬP VÁN MỚI BẰNG JSON (DÀNH CHO GIÁO VIÊN)
+     * ========================================================================= */
+    function getSampleCaseJsonString() {
+      const sample = {
+        id: `van-0${CASE_BANK.length + 1}`,
+        title: `Ván #${CASE_BANK.length + 1}: Ván Tự Soạn (4×4)`,
+        difficulty: "Dễ",
+        size: 4,
+        rooms: {
+          P1: {
+            name: "Phòng Khách",
+            bg: "#dbeafe",
+            badgeBg: "#bfdbfe",
+            badgeText: "#1e40af",
+            cells: [[0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2],[1,3]]
+          },
+          P2: {
+            name: "Phòng Ngủ",
+            bg: "#fef3c7",
+            badgeBg: "#fde68a",
+            badgeText: "#92400e",
+            cells: [[2,0],[2,1],[2,2],[2,3],[3,0],[3,1],[3,2],[3,3]]
+          }
+        },
+        obstacles: {
+          "0,2": { icon: "🪑", label: "Bàn" },
+          "1,0": { icon: "📺", label: "Tivi" },
+          "3,3": { icon: "🪴", label: "Cây" }
+        },
+        characters: [
+          { code: "V", name: "Nạn nhân", isVictim: true, color: "#dc2626" },
+          { code: "A", name: "Anh", color: "#2563eb" },
+          { code: "B", name: "Bảo", color: "#059669" },
+          { code: "C", name: "Châu", color: "#7c3aed" }
+        ],
+        clues: [
+          "Châu (C) ở ô D3 (Hàng 3, Cột D).",
+          "Bảo (B) ở Phòng Ngủ, Cột B.",
+          "Anh (A) đứng ngay bên trái (phía Tây) cái Bàn."
+        ],
+        solution: { A: [0,1], V: [1,2], C: [2,3], B: [3,0] },
+        culprit: "A",
+        explanation: "Nạn nhân (C2) và Anh (B1) là 2 người duy nhất trong Phòng Khách."
+      };
+      return JSON.stringify(sample, null, 2);
+    }
+
+    function importCustomCaseFromTextarea() {
+      const raw = document.getElementById("customCaseTextarea").value.trim();
+      const statusEl = document.getElementById("customCaseStatus");
+
+      function showImportStatus(msg, isError) {
+        statusEl.textContent = msg;
+        statusEl.className = isError
+          ? "rounded-xl p-3 text-xs font-semibold border bg-rose-50 border-rose-300 text-rose-800"
+          : "rounded-xl p-3 text-xs font-semibold border bg-emerald-50 border-emerald-300 text-emerald-800";
+        statusEl.classList.remove("hidden");
+      }
+
+      if (!raw) {
+        showImportStatus("Vui lòng dán mã JSON của ván chơi hoặc bấm 'Điền mẫu chuẩn'.", true);
+        return;
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (err) {
+        showImportStatus(`Lỗi cú pháp JSON: ${err.message}`, true);
+        return;
+      }
+
+      // Kiểm tra các trường bắt buộc
+      if (!parsed.id || !parsed.title || !parsed.size || !parsed.rooms || !Array.isArray(parsed.characters) || !parsed.solution || !parsed.culprit) {
+        showImportStatus("Thiếu trường dữ liệu bắt buộc (cần có: id, title, size, rooms, characters, clues, solution, culprit).", true);
+        return;
+      }
+      if (parsed.size < 3 || parsed.size > 12) {
+        showImportStatus("Kích thước lưới (size) nên nằm trong khoảng từ 3 đến 12.", true);
+        return;
+      }
+      if (!parsed.obstacles) parsed.obstacles = {};
+      if (!Array.isArray(parsed.clues)) parsed.clues = [];
+      if (!parsed.explanation) parsed.explanation = "Chúc mừng bạn đã tìm ra chính xác thủ phạm!";
+
+      // Đảm bảo mã ván không bị trùng lặp
+      const existingIdx = CASE_BANK.findIndex((c) => c.id === parsed.id);
+      let targetIdx;
+      if (existingIdx !== -1) {
+        CASE_BANK[existingIdx] = parsed;
+        targetIdx = existingIdx;
+      } else {
+        CASE_BANK.push(parsed);
+        targetIdx = CASE_BANK.length - 1;
+      }
+
+      populateCaseDropdown();
+      loadCase(targetIdx, true);
+      showImportStatus(`✓ Đã nạp thành công "${parsed.title}"! Đang mở ván mới...`, false);
+      showToast(`Đã nạp ván mới: ${parsed.title}`, "success");
+
+      setTimeout(() => {
+        closeModal("addCaseModal");
+        statusEl.classList.add("hidden");
+      }, 650);
+    }
+
+    /* =========================================================================
+     * 10. ĐIỀU KHIỂN MODAL & NGĂN KÉO PHÒNG CHƠI CHUNG
+     * ========================================================================= */
+    function openModal(id) {
+      document.getElementById(id).classList.remove("hidden");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+    function openRoomDrawer() {
+      document.getElementById("roomDrawerBackdrop").classList.remove("hidden");
+      document.getElementById("roomDrawer").classList.remove("translate-x-full");
+    }
+
+    function closeRoomDrawer() {
+      document.getElementById("roomDrawerBackdrop").classList.add("hidden");
+      document.getElementById("roomDrawer").classList.add("translate-x-full");
+    }
+
+    /* =========================================================================
+     * 11. GẮN SỰ KIỆN & KHỞI CHẠY ỨNG DỤNG
+     * ========================================================================= */
+    function bindEvents() {
+      // Chọn ván từ dropdown
+      document.getElementById("caseSelect").addEventListener("change", (e) => {
+        loadCase(Number(e.target.value));
+      });
+
+      // Các nút điều khiển lưới
+      document.getElementById("btnUndo").addEventListener("click", performUndo);
+      document.getElementById("btnReset").addEventListener("click", () => openModal("confirmResetModal"));
+      document.getElementById("btnConfirmResetYes").addEventListener("click", () => {
+        closeModal("confirmResetModal");
+        loadCase(state.currentCaseIndex, true);
+        showToast("Đã làm mới sơ đồ ván hiện tại.", "info");
+      });
+
+      // Công tắc hỗ trợ
+      document.getElementById("toggleConflict").addEventListener("change", (e) => {
+        state.showConflicts = e.target.checked;
+        renderBoard();
+      });
+      document.getElementById("toggleAutoX").addEventListener("change", (e) => {
+        state.autoMarkX = e.target.checked;
+        renderBoard();
+      });
+
+      // Kiểm tra kết quả & Chuyển ván tiếp theo
+      document.getElementById("btnCheckSolution").addEventListener("click", checkSolution);
+      document.getElementById("btnNextCase").addEventListener("click", () => {
+        if (state.currentCaseIndex < CASE_BANK.length - 1) {
+          loadCase(state.currentCaseIndex + 1);
+        }
+      });
+
+      // Modal Luật chơi & Thêm ván mới
+      document.getElementById("btnRules").addEventListener("click", () => openModal("rulesModal"));
+      document.getElementById("btnAddCase").addEventListener("click", () => {
+        const ta = document.getElementById("customCaseTextarea");
+        if (!ta.value.trim()) ta.value = getSampleCaseJsonString();
+        document.getElementById("customCaseStatus").classList.add("hidden");
+        openModal("addCaseModal");
+      });
+      document.getElementById("btnLoadJsonTemplate").addEventListener("click", () => {
+        document.getElementById("customCaseTextarea").value = getSampleCaseJsonString();
+        showToast("Đã điền mẫu JSON ván chuẩn.", "info");
+      });
+      document.getElementById("btnCopyJsonTemplate").addEventListener("click", () => {
+        const txt = document.getElementById("customCaseTextarea").value || getSampleCaseJsonString();
+        if (copyTextSafe(txt)) {
+          showToast("Đã sao chép mẫu JSON vào bộ nhớ tạm!", "success");
+        } else {
+          showToast("Không thể tự sao chép — bạn hãy bôi đen và Ctrl+C nhé.", "warn");
+        }
+      });
+      document.getElementById("btnImportCustomCase").addEventListener("click", importCustomCaseFromTextarea);
+
+      // Đóng các modal bằng nút data-close-modal hoặc click nền mờ
+      document.querySelectorAll("[data-close-modal]").forEach((btn) => {
+        btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close-modal")));
+      });
+      ["rulesModal", "addCaseModal", "confirmResetModal"].forEach((id) => {
+        document.getElementById(id).addEventListener("click", (e) => {
+          if (e.target.id === id) closeModal(id);
+        });
+      });
+
+      // Ngăn kéo Phòng Chơi Chung
+      document.getElementById("btnRoomPanel").addEventListener("click", openRoomDrawer);
+      document.getElementById("btnOpenRoomFromStrip").addEventListener("click", openRoomDrawer);
+      document.getElementById("btnCloseRoomDrawer").addEventListener("click", closeRoomDrawer);
+      document.getElementById("roomDrawerBackdrop").addEventListener("click", closeRoomDrawer);
+
+      document.getElementById("btnJoinRoom").addEventListener("click", joinRoom);
+      document.getElementById("inputPlayerName").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") joinRoom();
+      });
+      document.getElementById("btnLeaveRoom").addEventListener("click", leaveRoom);
+      document.getElementById("btnCopyRoomCode").addEventListener("click", () => {
+        if (copyTextSafe(state.roomCode)) {
+          showToast(`Đã sao chép mã phòng: ${state.roomCode}`, "success");
+        }
+      });
+
+      // Chế độ Giáo viên (Host) với PIN mặc định 2026
+      document.getElementById("toggleHostMode").addEventListener("change", (e) => {
+        if (e.target.checked) {
+          if (state.isHostUnlocked) {
+            document.getElementById("hostControlsBox").classList.remove("hidden");
+            document.getElementById("stripHostBadge").classList.remove("hidden");
+          } else {
+            document.getElementById("hostPinBox").classList.remove("hidden");
+            document.getElementById("inputHostPin").focus();
+          }
+        } else {
+          document.getElementById("hostPinBox").classList.add("hidden");
+          document.getElementById("hostControlsBox").classList.add("hidden");
+          document.getElementById("stripHostBadge").classList.add("hidden");
+        }
+      });
+
+      document.getElementById("btnVerifyHostPin").addEventListener("click", () => {
+        const pin = document.getElementById("inputHostPin").value.trim();
+        if (pin === "2026") {
+          state.isHostUnlocked = true;
+          document.getElementById("hostPinBox").classList.add("hidden");
+          document.getElementById("hostControlsBox").classList.remove("hidden");
+          document.getElementById("stripHostBadge").classList.remove("hidden");
+          showToast("🎓 Đã kích hoạt Chế độ Giáo viên (Host)!", "success");
+        } else {
+          showToast("Mã PIN chưa chính xác (mặc định là 2026).", "error");
+        }
+      });
+
+      document.getElementById("btnHostPushCase").addEventListener("click", hostPushCurrentCase);
+      document.getElementById("btnHostResetBoard").addEventListener("click", hostResetLeaderboard);
+    }
+
+    // Khởi tạo toàn bộ ứng dụng khi trang sẵn sàng
+    window.addEventListener("DOMContentLoaded", () => {
+      bindEvents();
+      window.murdokuSelectEmbeddedCase = (id) => {
+        const index=CASE_BANK.findIndex(c=>c.id===id);
+        if(index<0)return false;
+        if(index!==state.currentCaseIndex)loadCase(index);
+        return true;
+      };
+      const id=new URLSearchParams(location.search).get("van");
+      const initial=CASE_BANK.findIndex(c=>c.id===id);
+      loadCase(initial<0?0:initial, true);
+      initFirebase();
+    });
+  </script>
+  <script src="assets/clb/murdoku-navigation.js?v=20261128-2"></script>
+</body>
+</html>
