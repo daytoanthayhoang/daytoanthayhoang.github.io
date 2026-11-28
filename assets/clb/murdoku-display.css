@@ -1,0 +1,34 @@
+/* Giao diện gốc giữ nguyên; chỉ mở rộng thao tác chạm và trình chiếu. */
+.mdk-button{min-height:44px;padding:.5rem .75rem;border:1px solid #0f766e;border-radius:.75rem;background:#ecfdf5;color:#134e4a;font-weight:750;touch-action:manipulation}
+.mdk-button:focus-visible{outline:3px solid #0e7490;outline-offset:2px}
+.mdk-board-panel,.mdk-clue-panel{scroll-margin-top:8.5rem}
+.mdk-palette button,#boardGrid,#toolXBtn,#toolPencilBtn,#toolEraserBtn{touch-action:manipulation}
+.mdk-jumps,.mdk-tv{display:none}
+@media(max-width:1023px){
+  .mdk-ready{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  .mdk-jumps{position:fixed;z-index:25;display:flex;gap:.5rem;left:50%;bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(calc(100% - 24px),420px);padding:.375rem;background:#fff;border:1px solid #cbd5e1;border-radius:1rem;box-shadow:0 5px 20px #0f172a26}
+  .mdk-jumps button{flex:1;font-size:1rem}
+  .mdk-palette button,#toolXBtn,#toolPencilBtn,#toolEraserBtn,#murdoku-navigation select{min-height:44px}
+  .mdk-left,.mdk-right{min-width:0}
+  .mdk-jumps button:last-child{background:#fff7e6;border-color:#b45309;color:#78350f}
+}
+@media(max-width:639px){
+  .mdk-board-panel{padding-left:.5rem!important;padding-right:.5rem!important}
+  .mdk-board-panel,.mdk-clue-panel{scroll-margin-top:11rem}
+}
+@media(min-width:1024px){.mdk-tv{display:inline-flex;align-items:center;margin-left:auto}}
+.mdk-present .mdk-main{max-width:1720px;padding-top:.5rem}
+.mdk-present > header,.mdk-present #activeRoomStrip,.mdk-present #roomActiveBanner{display:none!important}
+.mdk-present #murdoku-navigation{margin-bottom:.5rem;scroll-margin-top:.25rem}
+.mdk-present .mdk-columns{grid-template-columns:minmax(0,1.18fr) minmax(0,1fr);gap:.75rem}
+.mdk-present .mdk-left,.mdk-present .mdk-right{grid-column:span 1;min-width:0;gap:.5rem}
+.mdk-present .mdk-left>div:first-child,.mdk-present .mdk-board-panel,.mdk-present .mdk-clue-panel{padding:.625rem}
+.mdk-present #bossNoteBox,.mdk-present #caseSubtitle,.mdk-present .mdk-duplicate{display:none!important}
+.mdk-present .mdk-board-wrap{max-width:clamp(330px, calc(100vh - 259px), 760px)}
+.mdk-present .mdk-warm .mdk-board-wrap{max-width:clamp(330px, calc(100vh - 288px), 760px)}
+.mdk-present .mdk-clue-panel h3,.mdk-present #caseTitle{font-size:clamp(1.125rem,1.6vw,1.65rem)}
+.mdk-present #clueCardsList,.mdk-present #cluesList{grid-template-columns:1fr}
+.mdk-present #clueCardsList :is(p,button,.text-xs,.text-sm),.mdk-present #cluesList :is(p,button,.text-xs,.text-sm){font-size:clamp(1rem,1.13vw,1.35rem)}
+.mdk-present .mdk-palette button,.mdk-present :is(#toolXBtn,#toolPencilBtn,#toolEraserBtn,#btnUndo,#btnReset,#murdoku-navigation select){min-height:44px;font-size:.93rem}
+.mdk-present .mdk-tv{background:#0f766e;color:#fff}
+@media print{.mdk-jumps,.mdk-tv{display:none!important}}
