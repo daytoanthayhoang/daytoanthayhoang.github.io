@@ -37,10 +37,11 @@
         allow.map((row,r)=>'<b>'+(r+1)+'</b>'+Array.from('ABCD',col=>{const cell=col+(r+1);return row.includes(col)?button(cell,'pick:'+cell,s.chosen.includes(cell),false,true):'<span class="mdq-closed" aria-label="'+cell+' bị chặn">—</span>';}).join('')).join('')+
         '</div><div class="mdq-controls">'+button('Kiểm tra cách xếp','check')+button('Xóa ô đang chọn','clear')+'</div>'+text('Số cách khác nhau đã tìm: <strong>'+s.ok.length+'</strong>');
     } else if(active===2){
-      const mid=Math.floor((s.min+s.max)/2);
       const ns=Array.from({length:8},(_,i)=>i+1);
       ui='<div class="mdq-controls">'+ns.map(k=>'<span class="mdq-slot '+(k<s.min||k>s.max?'mdq-out':'')+'">'+k+'</span>').join('')+'</div>';
-      ui+=s.min<s.max?button('Hỏi: Thẻ có ở ngăn '+s.min+' đến '+mid+' không?','split'):text('<strong>Đã xác định: ngăn '+s.min+' sau '+s.turn+' câu hỏi.</strong>');
+      if(s.min===s.max)ui+=text('<strong>Đã xác định: ngăn '+s.min+' sau '+s.turn+' câu hỏi.</strong>');
+      else if(s.turn===3)ui+=text('<strong>Đã hết ba lượt, vẫn còn '+(s.max-s.min+1)+' ngăn có thể. Chơi lại và thử cách chia khác.</strong>');
+      else ui+=text('Chọn một mốc để hỏi: “Có phải thẻ nằm từ ngăn '+s.min+' đến mốc này không?”')+'<div class="mdq-controls">'+Array.from({length:s.max-s.min},(_,i)=>button('Đến ngăn '+(i+s.min),'split:'+(i+s.min))).join('')+'</div>';
       ui+=s.min===s.max?'<div class="mdq-controls">'+button('Thử thêm ngăn thứ chín','nine')+'</div>':'';
     } else if(active===3){
       const pool=s.turn===0?[1,2,3]:s.group;
@@ -77,8 +78,9 @@
       return;
     }
     if(action==='split'){
-      if(s.min>=s.max)return;
-      const prev=s.min, mid=Math.floor((s.min+s.max)/2), yes=s.secret<=mid;
+      const mid=Number(k);
+      if(s.turn>=3 || mid<s.min || mid>=s.max)return;
+      const prev=s.min, yes=s.secret<=mid;
       s.turn++;
       if(yes)s.max=mid;else s.min=mid+1;
       s.notes.push('Câu '+s.turn+': Trong ngăn '+prev+'–'+mid+'? <strong>'+(yes?'Có':'Không')+'</strong>.');
