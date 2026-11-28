@@ -1,0 +1,126 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Murdoku · CLB Toán Nguyễn An Khương</title>
+<style>
+:root{--ink:#183044;--muted:#445d6d;--accent:#14695a;--line:#d3ddd8;--paper:#fffef9;--pale:#edf5ef;color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#eef3ed;color:var(--ink);font:16px/1.5 system-ui,sans-serif}main{max-width:1250px;margin:auto;padding:18px 24px 55px}a{color:#116050}a:hover{text-decoration:none}.hero{position:relative;isolation:isolate;overflow:hidden;margin:12px 0 15px;padding:24px clamp(16px,4vw,42px);border-radius:24px;background:#173947;color:white}.hero h1{margin:4px 0 5px;font-size:clamp(32px,6vw,58px);line-height:1.04;letter-spacing:-.04em}.hero p{margin:0;color:#e3f3e9}.hero .eyebrow{color:#b7e3cd;font-weight:800;letter-spacing:.12em;font-size:.75rem}.hero:after{content:"";position:absolute;z-index:-1;right:-8px;top:12px;width:170px;height:170px;border:24px double #67a88f;border-radius:50%;opacity:.32}.actions,.tools,.rooms{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.actions{margin:13px 0}.actions label{font-weight:700}.btn,button,select,summary{font:inherit}button,select,.btn{padding:7px 11px;border:1px solid #a8bbb2;background:white;color:var(--ink);border-radius:9px;text-decoration:none;min-height:39px}button,.btn,select,summary{cursor:pointer}button:hover,.btn:hover{border-color:#126d5d}button:disabled{cursor:default;opacity:.55}button[aria-pressed=true],.primary{background:#156456;color:white;border-color:#156456}button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #b75517;outline-offset:3px}.layout{display:grid;grid-template-columns:minmax(0,1.13fr) minmax(0,1fr);gap:14px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:19px;padding:15px 19px;min-width:0}.tag{font-size:.85rem;font-weight:800;letter-spacing:.035em;color:var(--accent)}h2{line-height:1.2;margin:3px 0 12px}h3{margin:9px 0 7px;font-size:1.02rem}.muted{color:var(--muted)}.toolbar{margin:8px 0 10px}.tools button{padding:3px 8px;min-height:36px}.tool-code{font-weight:900}.tool-name{font-size:.85rem}.board{margin:10px auto;max-width:530px;display:grid;grid-template-columns:1.46rem repeat(var(--n),minmax(0,1fr));grid-template-rows:1.46rem repeat(var(--n),auto);box-sizing:border-box}.coord{display:grid;place-items:center;font-weight:800;color:#334f61;font-size:.85rem}.cell{position:relative;display:grid;place-items:center;aspect-ratio:1;border-radius:0;border:0 solid #203b50;border-top-width:var(--t);border-left-width:var(--l);border-right-width:var(--r);border-bottom-width:var(--b);background:var(--room);padding:0;width:100%;height:auto;min-height:0;outline-offset:-3px;cursor:pointer}.cell:hover{border-color:#203b50;box-shadow:inset 0 0 0 2px #187160}.cell.conflict{box-shadow:inset 0 0 0 3px #b72a2a}.cell[data-blocked=true]{cursor:default}.cell[data-blocked=true]:before{position:absolute;top:0;left:0;border-top:10px solid #263e4c;border-right:10px solid transparent;content:""}.cell svg{width:63%;height:63%;position:absolute;top:6%;pointer-events:none}.cell[data-seat=true] svg{width:54%;height:54%;top:9%}.object-label{position:absolute;z-index:1;bottom:3%;left:0;right:0;color:#1e3b4b;font-size:clamp(.45rem,1.35vw,.74rem);font-weight:800;line-height:1.08;pointer-events:none}.bed-art{pointer-events:none;position:absolute;z-index:1;display:flex;inset:2% auto auto 12%;width:76%;height:197%;flex-direction:column;opacity:.83}.bed-art.h{flex-direction:row;inset:11% auto auto 3%;width:194%;height:62%}.cell .bed-art svg,.cell[data-seat=true] .bed-art svg{width:100%;height:50%;position:static;flex:none}.cell[data-seat=true] .bed-art.h svg{width:50%;height:100%}.bed-art .object-label{bottom:6%;background:#ffffffd9;border-radius:5px;width:max-content;margin:auto;padding:2px 4px}.cell .person,.cell .mark{z-index:2}.cell .room-label{position:absolute;top:0;right:3px;color:#203b50;font-size:.65rem;font-weight:800}.cell .person{position:relative;z-index:1;color:white;background:var(--person);text-shadow:0 1px 2px #000;font-size:clamp(.75rem,2.5vw,1.3rem);font-weight:900;width:55%;aspect-ratio:1;display:grid;place-items:center;border:2px solid white;border-radius:50%;line-height:1}.cell .mark{position:relative;z-index:1;color:#213846;font-weight:900;font-size:clamp(.85rem,2.5vw,1.6rem)}.window{position:absolute;z-index:1;background:#f8fffc;border:2px solid #146970;border-radius:5px}.window.top,.window.bottom{width:48%;height:6px;left:26%}.window.top{top:-4px}.window.bottom{bottom:-4px}.window.left,.window.right{width:6px;height:48%;top:26%}.window.left{left:-4px}.window.right{right:-4px}.clues{list-style:none;margin:0;padding:0;display:grid;gap:6px}.clues button{padding:8px 10px;width:100%;text-align:left;line-height:1.34;background:#f1f6f2}.clues button[aria-pressed=true]{text-decoration:line-through;color:#3a5c50;background:#e7efe8}.rooms span{font-size:.77rem;padding:2px 6px;border:1px solid #9baeb0;border-radius:6px}.feedback{padding:8px 11px;min-height:45px;margin-top:8px;border-radius:8px;background:#eef4ef;color:#203c3a}.feedback.fail{background:#fff2e9;color:#792b1d}.feedback.win{background:#e4f4e8;font-weight:700}.help{margin:13px 0}.help p{margin:7px 0 0}.riddles{margin-top:16px}.riddles details{border-top:1px solid var(--line);padding:10px 0}.riddles details p{margin:6px 0 0}.linkbar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.project .hero{padding:11px 20px}.project .hero h1{font-size:26px}.project .hero p,.project .help,.project .riddles,.project .linkbar{display:none}.project .clues button{font-size:1.15rem}.project main{max-width:1450px;min-width:0}.project .board{max-width:min(590px,54vh)}.project .actions{margin:7px 0}
+@media(max-width:760px){main{padding:12px 12px 35px}.layout{grid-template-columns:minmax(0,1fr);gap:10px}.panel{padding:12px}.hero{border-radius:16px;padding:15px}.hero:after{opacity:.16}.tools{gap:5px}.actions select{max-width:100%}.clues button{font-size:1rem}.project .board{max-width:100%}}
+@media(prefers-reduced-motion:no-preference){button,.btn{transition:box-shadow .12s ease}}
+</style></head><body><main>
+<nav class="linkbar"><a href="caulacbo.html">‹ Câu lạc bộ Toán</a><a class="btn" href="assets/clb/murdoku-2026-11-28.pdf" id="print">Tải phiếu A4</a></nav>
+<header class="hero"><div class="eyebrow">CLB TOÁN · THCS NGUYỄN AN KHƯƠNG</div><h1>Hồ sơ Murdoku</h1><p>Đọc manh mối, loại từng ô, rồi chỉ ra vì sao chỉ còn một cách xếp.</p></header>
+<div class="actions"><label for="batch">Đợt</label><select id="batch"></select><label for="round">Ván</label><select id="round"></select><button id="project" aria-pressed="false">Chế độ chiếu</button><a href="#suy-luan" id="reasonLink">Câu đố suy luận ↓</a></div>
+<details class="panel help"><summary><strong>Luật chơi và cách thao tác</strong></summary><p>Mỗi hàng và mỗi cột có đúng một nhân vật. Ô có tam giác đen bị chặn; ghế, thảm và giường không có tam giác vẫn đặt người được. “Cạnh” là chung một cạnh trong cùng phòng, không tính đường chéo. Thủ phạm là người duy nhất ở cùng phòng với nạn nhân.</p><p>Chọn nhân vật rồi bấm một ô. Dùng <strong>×</strong> để đánh dấu ô loại, <strong>Tẩy</strong> để xóa, và bấm vào manh mối để gạch khi đã dùng. Bấm <strong>Kiểm tra</strong> sau khi xếp đủ và chọn thủ phạm. Không cần tài khoản.</p></details>
+<div class="layout" id="game">
+<section class="panel"><div class="tag" id="caseTag"></div><h2 id="caseTitle">Chọn một vụ án</h2><div class="tools toolbar" id="tools" aria-label="Nhân vật và công cụ"></div><div class="board" id="board" aria-label="Sơ đồ vụ án"></div><div class="rooms" id="rooms"></div><div class="actions"><button id="undo" disabled>Hoàn tác</button><button id="reset">Làm lại</button><label><input id="auto" type="checkbox"> Tô hàng/cột đã dùng</label></div></section>
+<section class="panel"><h2>Manh mối</h2><p class="muted">Đến lượt em: nêu một ô đặt được hoặc một ô loại được, kèm lý do.</p><ol class="clues" id="clues"></ol><div class="actions"><button id="hint">Gợi ý nhỏ</button></div><h3><label for="suspect">Ai là thủ phạm?</label></h3><div class="actions"><select id="suspect"></select><button class="primary" id="verify">Kiểm tra</button></div><div id="feedback" class="feedback" role="status" aria-live="polite">Xếp nhân vật lên sơ đồ để bắt đầu.</div></section>
+</div>
+<section id="suy-luan" class="panel riddles"><div class="tag">THẢO LUẬN CẢ CLB</div><h2>Năm câu đố suy luận</h2><details><summary><strong>1. Chiếc cúp ở đâu?</strong></summary><p>Một chiếc cúp nằm trong đúng một trong ba tủ A, B, C. A ghi “Cúp ở tủ B”; B ghi “Cúp không ở tủ C”; C ghi “Cúp không ở tủ B”. Chỉ một nhãn đúng. Cúp ở đâu?</p></details>
+<details><summary><strong>2. Chưa ai chỉ còn một chỗ</strong></summary><p>Bảng 4×4 có đúng một dấu • mỗi hàng và mỗi cột. Các ô cho phép: hàng 1 và hàng 2 đều cột A hoặc C; hàng 3 cột A, C hoặc D; hàng 4 cột B hoặc D. Hai dấu nào xác định được ngay? Có bao nhiêu cách xếp đủ?</p></details>
+<details><summary><strong>3. Ba câu hỏi có/không</strong></summary><p>Thẻ ẩn ở một trong tám ngăn. Tìm chắc chắn sau nhiều nhất ba câu hỏi có/không thế nào? Nếu thêm ngăn thứ chín thì ba câu còn đủ không?</p></details>
+<details><summary><strong>4. Đồng xu nặng hơn</strong></summary><p>Chín đồng xu nhìn giống hệt nhau, tám đồng cùng khối lượng và một đồng nặng hơn. Có thể xác định đồng nặng bằng cân hai đĩa sau hai lần cân không?</p></details>
+<details><summary><strong>5. Mảnh ghép đánh lạc hướng</strong></summary><p>Đúng một trong ba bạn đã giấu thẻ. An nói Bình giấu; Bình nói Chi giấu; Chi nói Bình nói sai. Chỉ một lời đúng. Hãy tìm hai kịch bản khớp dữ kiện và đặt một câu hỏi có/không để phân biệt.</p></details></section>
+<noscript><p>Cần bật JavaScript để chơi; vẫn có thể tải phiếu A4.</p></noscript>
+</main>
+<script src="assets/clb/murdoku-data.js?v=20261128-1"></script>
+<script>
+'use strict';
+const data=window.MURDOKU_DATA, $=id=>document.getElementById(id), key=(r,c)=>r+','+c, coord=(r,c)=>String.fromCharCode(65+c)+(r+1);
+if(!data){$('feedback').textContent='Chưa tải được ngân hàng ván. Hãy tải lại trang hoặc dùng phiếu A4.';throw new Error('Missing Murdoku data');}
+const batches=data.batches, cases=new Map(batches.flatMap(b=>b.cases.map(c=>[c.id,[b,c]])));
+let current, batch, rooms, furniture, st, solved=new Set();
+function option(value,label){return new Option(label,value);}
+function tell(message,type=''){const x=$('feedback');x.textContent=message;x.className='feedback'+(type?' '+type:'');}
+function saveSnapshot(){st.history.push([new Map(st.people),new Set(st.cross)]);$('undo').disabled=false;}
+function toolButton(code,label,text,active,action,holder){const b=document.createElement('button');b.type='button';b.textContent=text;b.setAttribute('aria-label',label);b.setAttribute('aria-pressed',active);b.dataset.tool=code;b.addEventListener('click',action);holder.append(b);}
+function open(id,{route=true}={}){
+ if(!cases.has(id))id=batches[0].cases[0].id;
+ [batch,current]=cases.get(id);
+ rooms=new Map();furniture=new Map();
+ for(const [id,room] of Object.entries(current.rooms))for(const [r,c] of room.cells)rooms.set(key(r,c),[id,room]);
+ for(const o of current.furniture)o.cells.forEach(([r,c],i)=>{
+  const icon=o.type==='bed'?'bed'+(o.orientation==='horizontal'?'H':'V')+i:o.type;
+  furniture.set(key(r,c),{...o,icon,part:i});
+ });
+ st={people:new Map(),cross:new Set(),doneClues:new Set(),history:[],tool:current.people[0].code};
+ $('print').hidden=!batch.print;if(batch.print)$('print').href=batch.print;
+ $('batch').value=batch.id;$('round').replaceChildren(...batch.cases.map(c=>option(c.id,(solved.has(c.id)?'✓ ':'')+c.label+' · '+c.title)));$('round').value=current.id;
+ $('caseTag').textContent=current.label+' · '+current.size+' × '+current.size;$('caseTitle').textContent=current.title;
+ $('suspect').replaceChildren(option('','Chọn một người'),...current.people.filter(p=>!p.isVictim).map(p=>option(p.code,p.name)));
+ $('rooms').replaceChildren(...Object.values(current.rooms).map(r=>{const s=document.createElement('span');s.style.background=r.bg||r.color;s.textContent=(r.label||'')+' · '+r.name;return s;}));
+ $('clues').replaceChildren(...current.clues.map((m,i)=>{const li=document.createElement('li');toolButton(String(i),'Manh mối '+(i+1)+': '+m,(i+1)+'. '+m,false,e=>{const b=e.currentTarget;const done=b.getAttribute('aria-pressed')==='true';b.setAttribute('aria-pressed',!done);},li);return li;}));
+ $('undo').disabled=true;tell('Xếp nhân vật lên sơ đồ để bắt đầu.');renderTools();renderBoard();
+ if(route&&location.protocol!=='file:'){const u=new URL(location.href);u.searchParams.set('van',current.id);history.replaceState(null,'',u);}
+}
+function renderTools(){
+ const bar=$('tools');bar.replaceChildren();
+ const choices=[...current.people.map(p=>[p.code,p.name,p.code+' · '+p.name]),['X','Đánh dấu ô loại','×'],['erase','Tẩy','Tẩy']];
+ for(const [code,n,t] of choices)toolButton(code,n,t,st.tool===code,()=>{
+  st.tool=code;
+  bar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tool===code));
+ },bar);
+}
+function renderBoard(focus){
+ const n=current.size,b=$('board'),occupied=new Map([...st.people].map(([c,k])=>[k,c])),grid=[];
+ const auto=$('auto').checked, rowCount=Array(n).fill(0),colCount=Array(n).fill(0);
+ for(const k of occupied.keys()){const [r,c]=k.split(',').map(Number);rowCount[r]++;colCount[c]++;}
+ const cell=(t)=>{const s=document.createElement('span');s.className='coord';s.textContent=t;return s;};
+ grid.push(cell(''));
+ for(let i=0;i<n;i++)grid.push(cell(String.fromCharCode(65+i)));
+ for(let r=0;r<n;r++){grid.push(cell(String(r+1)));for(let c=0;c<n;c++){
+  const k=key(r,c),q=document.createElement('button'),[roomId,room]=rooms.get(k),o=furniture.get(k);
+  const p=current.people.find(p=>p.code===occupied.get(k)),blocked=!!o&&!o.occupiable;
+  q.type='button';q.className='cell'+(p&&(rowCount[r]>1||colCount[c]>1)?' conflict':'');q.dataset.cell=k;
+  q.dataset.blocked=blocked;q.dataset.seat=!!o&&o.occupiable;q.style.setProperty('--room',room.bg||room.color);
+  q.style.setProperty('--t',rooms.get(key(r-1,c))?.[0]===roomId?'1px':'3px');
+  q.style.setProperty('--l',rooms.get(key(r,c-1))?.[0]===roomId?'1px':'3px');
+  q.style.setProperty('--b',r===n-1?'3px':'0px');q.style.setProperty('--r',c===n-1?'3px':'0px');
+  const label=[coord(r,c),room.name,o?.name,p?.name,blocked?'bị chặn':null,st.cross.has(k)?'đã đánh dấu loại':null].filter(Boolean).join(' · ');
+  q.setAttribute('aria-label',label);q.title=label;
+  if(o){
+   const art=document.createElement('span'), name=document.createElement('span');name.className='object-label';
+   name.textContent=({'Đàn Piano':'Piano','Cây cảnh':'Chậu cây'})[o.name]||o.name;
+   name.setAttribute('aria-hidden','true');
+   if(o.type==='bed'){
+    if(o.part===0){const orient=o.orientation==='horizontal'?'H':'V';art.className='bed-art'+(orient==='H'?' h':'');
+    art.insertAdjacentHTML('afterbegin',data.icons['bed'+orient+'0']+data.icons['bed'+orient+'1']);art.append(name);art.setAttribute('aria-hidden','true');q.append(art);}
+   }else{q.insertAdjacentHTML('afterbegin',data.icons[o.icon]||data.icons.block);q.firstElementChild.setAttribute('aria-hidden','true');q.append(name);}
+  }
+  const roomBadge=document.createElement('span');roomBadge.className='room-label';roomBadge.textContent=room.label||'';roomBadge.setAttribute('aria-hidden','true');q.append(roomBadge);
+  const w=current.windows.find(w=>w.r===r&&w.c===c);
+  if(w){const x=document.createElement('span');x.className='window '+w.side;x.setAttribute('aria-hidden','true');q.append(x);q.setAttribute('aria-label',label+' · cửa sổ');}
+  if(p||(!blocked&&(st.cross.has(k)||(auto&&(rowCount[r]||colCount[c]))))){
+   const s=document.createElement('span');s.className=p?'person':'mark';s.textContent=p?p.code:'×';if(p)s.style.setProperty('--person',p.color);q.append(s);
+  }
+  q.addEventListener('click',()=>{
+   if(blocked){tell('Ô '+coord(r,c)+' có '+o.name.toLowerCase()+', không đặt nhân vật.','fail');return;}
+   saveSnapshot();
+   if(st.tool==='erase'){if(p)st.people.delete(p.code);st.cross.delete(k);}
+   else if(st.tool==='X'){if(p){tell('Ô này đang có người. Hãy tẩy nhân vật trước.','fail');st.history.pop();$('undo').disabled=!st.history.length;return;}st.cross.has(k)?st.cross.delete(k):st.cross.add(k);}
+   else {if(p)st.people.delete(p.code);if(p?.code!==st.tool){st.people.set(st.tool,k);st.cross.delete(k);}}
+   tell('Đã đặt '+st.people.size+'/'+n+' nhân vật.');renderBoard(k);
+  });
+  grid.push(q);
+ }}
+ b.style.setProperty('--n',n);b.replaceChildren(...grid);
+ if(focus)b.querySelector('[data-cell="'+focus+'"]')?.focus({preventScroll:true});
+}
+$('batch').replaceChildren(...batches.map(b=>option(b.id,b.title)));
+$('batch').addEventListener('change',()=>open(batches.find(b=>b.id===$('batch').value).cases[0].id));
+$('round').addEventListener('change',()=>open($('round').value));
+$('reset').addEventListener('click',()=>open(current.id,{route:false}));
+$('undo').addEventListener('click',()=>{const a=st.history.pop();if(a)[st.people,st.cross]=a;$('undo').disabled=!st.history.length;tell('Đã hoàn tác.');renderBoard();});
+$('auto').addEventListener('change',()=>renderBoard());
+$('hint').addEventListener('click',()=>tell(current.hint||'Thử tìm một hàng hoặc cột chỉ có một ô chưa bị loại.'));
+$('project').addEventListener('click',e=>{const on=document.body.classList.toggle('project');e.currentTarget.setAttribute('aria-pressed',on);e.currentTarget.textContent=on?'Thoát chế độ chiếu':'Chế độ chiếu';$('reasonLink').hidden=on;});
+$('verify').addEventListener('click',()=>{
+ const count=st.people.size,pick=$('suspect').value;
+ if(count!==current.size){tell('Em còn '+(current.size-count)+' nhân vật chưa đặt.','fail');return;}
+ if(!pick){tell('Em chưa chọn thủ phạm.','fail');return;}
+ const pairs=[...st.people.values()].map(k=>k.split(','));
+ if(new Set(pairs.map(p=>p[0])).size!==count||new Set(pairs.map(p=>p[1])).size!==count){tell('Có hai nhân vật trùng hàng hoặc cột. Xem các ô viền đỏ.','fail');return;}
+ if(!Object.entries(current.solution).every(([c,p])=>st.people.get(c)===key(...p))){tell('Vẫn còn vị trí chưa khớp manh mối. Kiểm từng người rồi thử lại.','fail');return;}
+ if(pick!==current.culprit){tell('Sơ đồ đúng rồi. Hãy nhìn lại người ở cùng phòng với nạn nhân.','fail');return;}
+ const name=current.people.find(p=>p.code===pick).name;
+ solved.add(current.id);$('round').selectedOptions[0].textContent='✓ '+current.label+' · '+current.title;
+ tell('Đã phá án! '+name+' là người duy nhất ở cùng phòng với nạn nhân.','win');
+});
+const initial=new URLSearchParams(location.search).get('van');open(initial,{route:false});
+</script></body></html>
