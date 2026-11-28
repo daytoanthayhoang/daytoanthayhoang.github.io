@@ -27,6 +27,22 @@ const registry={
           "page": "clb-murdoku.html"
         }
       ]
+    },
+    {
+      "id": "ho-so-03-04",
+      "title": "Đợt 02 · Hồ sơ 03–04",
+      "rounds": [
+        {
+          "id": "case-03",
+          "title": "Hồ sơ 03 · Bữa sáng kiểu Anh",
+          "page": "clb-murdoku.html"
+        },
+        {
+          "id": "case-04",
+          "title": "Hồ sơ 04 · Bốn cửa sổ",
+          "page": "clb-murdoku.html"
+        }
+      ]
     }
   ]
 };

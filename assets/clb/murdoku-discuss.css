@@ -1,0 +1,22 @@
+#suy-luan{scroll-margin-top:8rem;padding:clamp(14px,2vw,30px);margin-bottom:36px}
+#suy-luan h2{font-size:clamp(1.45rem,3vw,2.25rem);font-weight:800;line-height:1.2;margin:.35rem 0 .9rem;color:#0f172a}
+#suy-luan h3{font-size:clamp(1.22rem,2.2vw,1.7rem);font-weight:800;color:#134e4a}
+.mdq-kicker{font-size:.76rem;letter-spacing:.14em;font-weight:800;color:#0e766c}
+.mdq-controls{display:flex;flex-wrap:wrap;gap:.5rem;margin:.65rem 0}
+.mdq-card{border:1px solid #accfc7;border-radius:1rem;background:#f5fbf9;padding:clamp(12px,2vw,24px)}
+.mdq-card p{margin:.55rem 0}
+#suy-luan button,#suy-luan .mdq-footer a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:.55rem .85rem;border:1px solid #639b91;border-radius:.7rem;background:#fff;color:#134e4a;font-weight:700;touch-action:manipulation}
+#suy-luan button[aria-pressed=true]{background:#115e59;color:#fff;border-color:#115e59}
+#suy-luan button:focus-visible,#suy-luan a:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+.mdq-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));max-width:22rem;gap:.27rem;align-items:center;text-align:center;margin-top:.75rem}
+#suy-luan .mdq-grid button{padding:.15rem;width:100%}
+.mdq-closed,.mdq-slot{height:46px;display:grid;place-items:center;background:#e4e9ef;color:#475569;border-radius:.6rem;min-width:44px;font-weight:700}
+.mdq-closed{min-width:0}
+.mdq-slot{background:#fde68a;color:#78350f}
+.mdq-out{background:#e4e9ef;color:#475569;text-decoration:line-through}
+.mdq-feedback:not(:empty),.mdq-answer{margin:.7rem 0;padding:.75rem .85rem;border-left:4px solid #0f766e;color:#134e4a;background:#e1f3ee;border-radius:.4rem}
+.mdq-answer{border-color:#b45309;background:#fff4d4;color:#78350f}
+.mdq-log{list-style:disc;padding-left:1.45rem;margin:.65rem 0;color:#334155}
+.mdq-footer{border-top:1px solid #accfc7;padding-top:.6rem}
+.mdk-present #suy-luan{max-width:1440px;scroll-margin-top:.5rem;font-size:clamp(1rem,1.35vw,1.45rem)}
+@media(max-width:639px){#suy-luan{scroll-margin-top:12rem}#suy-luan nav button{flex:1 0 42%}}

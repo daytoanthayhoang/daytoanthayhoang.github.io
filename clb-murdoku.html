@@ -137,8 +137,10 @@
     .thin-scroll::-webkit-scrollbar-thumb:hover {
       background: rgba(100, 116, 139, 0.55);
     }
+    .pattern-planks-h{background-image:repeating-linear-gradient(0deg,transparent 0 13px,rgba(30,41,59,.065) 13px 14px)}
   </style>
   <link rel="stylesheet" href="assets/clb/murdoku-display.css?v=20261128-4">
+  <link rel="stylesheet" href="assets/clb/murdoku-discuss.css?v=20261128-5">
 </head>
 <body class="min-h-screen flex flex-col font-sans antialiased">
 
@@ -213,7 +215,7 @@
     <label for="murdoku-case" class="font-extrabold text-slate-800">Ván</label>
     <select id="murdoku-case" class="max-w-full rounded-lg border border-slate-300 bg-teal-50 px-2 py-2 text-slate-900" aria-label="Chọn ván"></select>
     <a id="murdoku-print" href="assets/clb/murdoku-2026-11-28.pdf" class="px-3 py-2 rounded-lg border border-amber-300 bg-amber-100 text-amber-900 font-bold">Tải phiếu A4</a>
-    <a href="#suy-luan" class="px-2 py-2 font-bold text-teal-800 hover:underline">Câu đố suy luận ↓</a>
+    <a href="#suy-luan" class="px-2 py-2 font-bold text-teal-800 hover:underline">Thử thách tương tác ↓</a>
   </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -922,7 +924,860 @@
           ]
         }
       }
-      // ===================== DÁN VÁN 3–4, 5–6... TẠI ĐÂY =====================
+      ,
+      {
+        "id": "case-03",
+        "number": 3,
+        "title": "Bữa sáng kiểu Anh",
+        "difficulty": "Trung bình ★★☆",
+        "subtitle": "Có vẻ đủ ấm cúng đấy, nhưng giờ chúng ta biết có điều gì đó đang sôi sục...",
+        "bossNote": "Mẹo nhỏ: Hãy chú ý đường tường đen dày tạo hình chữ L của Phòng Khách (Phụ) và Phòng Khách nhé!",
+        "rows": 6,
+        "cols": 6,
+        "rooms": {
+          "pkp": {
+            "name": "PHÒNG KHÁCH (PHỤ)",
+            "color": "#ede9fe",
+            "pattern": "planks",
+            "cells": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                3,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                5,
+                0
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          "nt": {
+            "name": "NHÀ TẮM",
+            "color": "#e2e8f0",
+            "pattern": "planks",
+            "cells": [
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                3
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                3
+              ]
+            ]
+          },
+          "nb": {
+            "name": "NHÀ BẾP",
+            "color": "#fce7f3",
+            "pattern": "diamond",
+            "cells": [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                5
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                1,
+                5
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                5
+              ]
+            ]
+          },
+          "pnc": {
+            "name": "PHÒNG NGỦ CHÍNH",
+            "color": "#ccfbf1",
+            "pattern": "planks",
+            "cells": [
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                3
+              ]
+            ]
+          },
+          "pk": {
+            "name": "PHÒNG KHÁCH",
+            "color": "#fef9c3",
+            "pattern": "planks",
+            "cells": [
+              [
+                3,
+                4
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                5
+              ],
+              [
+                5,
+                2
+              ],
+              [
+                5,
+                3
+              ],
+              [
+                5,
+                4
+              ],
+              [
+                5,
+                5
+              ]
+            ]
+          }
+        },
+        "windows": [
+          {
+            "r": 3,
+            "c": 5,
+            "side": "right"
+          }
+        ],
+        "furniture": [
+          {
+            "type": "bed",
+            "orientation": "vertical",
+            "cells": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ],
+            "occupiable": true,
+            "name": "Giường"
+          },
+          {
+            "type": "rug-2v-top",
+            "cells": [
+              [
+                2,
+                0
+              ]
+            ],
+            "occupiable": true,
+            "name": "Thảm dài"
+          },
+          {
+            "type": "rug-2v-bottom",
+            "cells": [
+              [
+                3,
+                0
+              ]
+            ],
+            "occupiable": true,
+            "name": "Thảm dài"
+          },
+          {
+            "type": "chair",
+            "cells": [
+              [
+                1,
+                3
+              ]
+            ],
+            "occupiable": true,
+            "name": "Ghế"
+          },
+          {
+            "type": "table-2h-left",
+            "cells": [
+              [
+                0,
+                4
+              ]
+            ],
+            "occupiable": false,
+            "name": "Bàn dài"
+          },
+          {
+            "type": "table-2h-right",
+            "cells": [
+              [
+                0,
+                5
+              ]
+            ],
+            "occupiable": false,
+            "name": "Bàn dài"
+          },
+          {
+            "type": "plant",
+            "cells": [
+              [
+                2,
+                4
+              ]
+            ],
+            "occupiable": false,
+            "name": "Cây cảnh"
+          },
+          {
+            "type": "table",
+            "cells": [
+              [
+                2,
+                3
+              ]
+            ],
+            "occupiable": false,
+            "name": "Bàn"
+          },
+          {
+            "type": "bed",
+            "orientation": "horizontal",
+            "cells": [
+              [
+                3,
+                1
+              ],
+              [
+                3,
+                2
+              ]
+            ],
+            "occupiable": true,
+            "name": "Giường"
+          },
+          {
+            "type": "rug",
+            "cells": [
+              [
+                3,
+                3
+              ]
+            ],
+            "occupiable": true,
+            "name": "Thảm"
+          },
+          {
+            "type": "plant",
+            "cells": [
+              [
+                3,
+                4
+              ]
+            ],
+            "occupiable": false,
+            "name": "Cây cảnh"
+          },
+          {
+            "type": "chair",
+            "cells": [
+              [
+                4,
+                2
+              ]
+            ],
+            "occupiable": true,
+            "name": "Ghế"
+          },
+          {
+            "type": "tv",
+            "cells": [
+              [
+                5,
+                2
+              ]
+            ],
+            "occupiable": false,
+            "name": "Tivi"
+          }
+        ],
+        "characters": [
+          {
+            "code": "A",
+            "name": "Alexander",
+            "color": "#b45309",
+            "clue": "Đã ở trên giường.",
+            "isVictim": false
+          },
+          {
+            "code": "B",
+            "name": "Briggs",
+            "color": "#15803d",
+            "clue": "Đã ở trong Nhà bếp.",
+            "isVictim": false
+          },
+          {
+            "code": "C",
+            "name": "Carissa",
+            "color": "#0f766e",
+            "clue": "Đã ở bên cạnh một chiếc bàn.",
+            "isVictim": false
+          },
+          {
+            "code": "D",
+            "name": "Diana",
+            "color": "#1d4ed8",
+            "clue": "Đã ở bên cạnh chiếc tivi.",
+            "isVictim": false
+          },
+          {
+            "code": "E",
+            "name": "Elsa",
+            "color": "#6d28d9",
+            "clue": "Đã ở phía trước cửa sổ.",
+            "isVictim": false
+          },
+          {
+            "code": "V",
+            "name": "Vin",
+            "color": "#991b1b",
+            "clue": "NẠN NHÂN — Đã ở ô còn lại cuối cùng.",
+            "isVictim": true
+          }
+        ],
+        "solution": {
+          "positions": {
+            "A": [
+              0,
+              0
+            ],
+            "B": [
+              1,
+              4
+            ],
+            "C": [
+              2,
+              2
+            ],
+            "D": [
+              5,
+              3
+            ],
+            "E": [
+              3,
+              5
+            ],
+            "V": [
+              4,
+              1
+            ]
+          },
+          "killer": "A",
+          "killerRoom": "PHÒNG KHÁCH (PHỤ)",
+          "steps": [
+            "Elsa (E) phải đứng trước ô cửa sổ duy nhất tại (L4, C6). Chặn hàng L4 và cột C6.",
+            "Trong Nhà bếp, hàng L1 có bàn dài, cột C6 đã bị chặn, ô (L3, C5) là cây cảnh — vậy Briggs (B) bị cô lập ở ô duy nhất còn lại là (L2, C5).",
+            "Chiếc giường ngang ở hàng L4 đã bị E chặn, ô chân giường (L2, C1) đã bị B chặn, nên Alexander (A) bị cô lập trên ô đầu giường ở (L1, C1).",
+            "Xét các ô bên cạnh bàn cho Carissa (C): cạnh bàn Nhà bếp không còn ô trống hợp lệ; cạnh bàn Phòng Ngủ Chính ở (L3, C4) có ô bên dưới thuộc hàng L4 bị chặn, nên C bị cô lập tại (L3, C3).",
+            "Tivi tại (L6, C3): ô bên trái khác phòng, ô phía trên bị chặn bởi cột C3. Diana (D) buộc ở bên phải tivi, tại (L6, C4).",
+            "Ô trống cuối cùng cho nạn nhân Vin (V) là (L5, C2) thuộc Phòng Khách (Phụ) — ở một mình với Alexander (A). Alexander chính là hung thủ!"
+          ]
+        }
+      },
+      {
+        "id": "case-04",
+        "number": 4,
+        "title": "Bốn cửa sổ",
+        "difficulty": "Thử thách ★★★",
+        "subtitle": "Bất chấp tất cả ánh sáng mặt trời, những hoạt động mờ ám vẫn diễn ra ở đây.",
+        "bossNote": "Từ khóa Góc: Ô nằm ở nơi hai bức tường của cùng một phòng gặp nhau (tiếp giáp ít nhất 2 tường đen của phòng đó).",
+        "rows": 6,
+        "cols": 6,
+        "rooms": {
+          "pk": {
+            "name": "PHÒNG KHÁCH",
+            "color": "#ffedd5",
+            "pattern": "planks",
+            "cells": [
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          },
+          "pnc": {
+            "name": "PHÒNG NGỦ CHÍNH",
+            "color": "#fef9c3",
+            "pattern": "planks",
+            "cells": [
+              [
+                0,
+                3
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                5
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                1,
+                5
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                5
+              ]
+            ]
+          },
+          "nt": {
+            "name": "NHÀ TẮM",
+            "color": "#fef08a",
+            "pattern": "planks-h",
+            "cells": [
+              [
+                3,
+                0
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                5,
+                0
+              ],
+              [
+                5,
+                1
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          },
+          "pkp": {
+            "name": "PHÒNG KHÁCH (PHỤ)",
+            "color": "#fde68a",
+            "pattern": "checker",
+            "cells": [
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                5
+              ],
+              [
+                5,
+                3
+              ],
+              [
+                5,
+                4
+              ],
+              [
+                5,
+                5
+              ]
+            ]
+          }
+        },
+        "windows": [
+          {
+            "r": 0,
+            "c": 0,
+            "side": "left"
+          },
+          {
+            "r": 0,
+            "c": 5,
+            "side": "right"
+          },
+          {
+            "r": 5,
+            "c": 0,
+            "side": "left"
+          },
+          {
+            "r": 5,
+            "c": 5,
+            "side": "right"
+          }
+        ],
+        "furniture": [
+          {
+            "type": "chair",
+            "cells": [
+              [
+                1,
+                0
+              ]
+            ],
+            "occupiable": true,
+            "name": "Ghế"
+          },
+          {
+            "type": "tv",
+            "cells": [
+              [
+                1,
+                1
+              ]
+            ],
+            "occupiable": false,
+            "name": "Tivi"
+          },
+          {
+            "type": "table",
+            "cells": [
+              [
+                2,
+                2
+              ]
+            ],
+            "occupiable": false,
+            "name": "Bàn"
+          },
+          {
+            "type": "bed",
+            "orientation": "horizontal",
+            "cells": [
+              [
+                1,
+                3
+              ],
+              [
+                1,
+                4
+              ]
+            ],
+            "occupiable": true,
+            "name": "Giường"
+          },
+          {
+            "type": "chair",
+            "cells": [
+              [
+                1,
+                5
+              ]
+            ],
+            "occupiable": true,
+            "name": "Ghế"
+          },
+          {
+            "type": "table-2h-left",
+            "cells": [
+              [
+                4,
+                0
+              ]
+            ],
+            "occupiable": false,
+            "name": "Bàn dài"
+          },
+          {
+            "type": "table-2h-right",
+            "cells": [
+              [
+                4,
+                1
+              ]
+            ],
+            "occupiable": false,
+            "name": "Bàn dài"
+          },
+          {
+            "type": "table",
+            "cells": [
+              [
+                5,
+                2
+              ]
+            ],
+            "occupiable": false,
+            "name": "Bàn"
+          },
+          {
+            "type": "plant",
+            "cells": [
+              [
+                3,
+                4
+              ]
+            ],
+            "occupiable": false,
+            "name": "Cây cảnh"
+          },
+          {
+            "type": "plant",
+            "cells": [
+              [
+                4,
+                4
+              ]
+            ],
+            "occupiable": false,
+            "name": "Cây cảnh"
+          },
+          {
+            "type": "chair",
+            "cells": [
+              [
+                4,
+                5
+              ]
+            ],
+            "occupiable": true,
+            "name": "Ghế"
+          }
+        ],
+        "characters": [
+          {
+            "code": "A",
+            "name": "Antonio",
+            "color": "#b45309",
+            "clue": "Đã ở trong góc.",
+            "isVictim": false
+          },
+          {
+            "code": "B",
+            "name": "Ben",
+            "color": "#15803d",
+            "clue": "Đã ngồi trên một chiếc ghế.",
+            "isVictim": false
+          },
+          {
+            "code": "C",
+            "name": "Chelsea",
+            "color": "#0f766e",
+            "clue": "Đã ở phía trước một cửa sổ.",
+            "isVictim": false
+          },
+          {
+            "code": "D",
+            "name": "Dahlia",
+            "color": "#1d4ed8",
+            "clue": "Đã không ở cạnh một bức tường.",
+            "isVictim": false
+          },
+          {
+            "code": "E",
+            "name": "Emmy",
+            "color": "#6d28d9",
+            "clue": "Đã ở bên cạnh một cây cảnh.",
+            "isVictim": false
+          },
+          {
+            "code": "V",
+            "name": "Valeria",
+            "color": "#991b1b",
+            "clue": "NẠN NHÂN — Đã ở ô còn lại cuối cùng.",
+            "isVictim": true
+          }
+        ],
+        "solution": {
+          "positions": {
+            "A": [
+              0,
+              2
+            ],
+            "B": [
+              4,
+              5
+            ],
+            "C": [
+              5,
+              0
+            ],
+            "D": [
+              1,
+              4
+            ],
+            "E": [
+              3,
+              3
+            ],
+            "V": [
+              2,
+              1
+            ]
+          },
+          "killer": "A",
+          "killerRoom": "PHÒNG KHÁCH",
+          "steps": [
+            "Chỉ có 4 ô trung tâm không giáp bức tường nào: (L2, C2) là tivi, (L5, C2) là bàn dài, (L5, C5) là cây cảnh — cả ba không thể ở. Do đó Dahlia (D) phải ở ô còn lại: (L2, C5).",
+            "Hàng L2 đã bị chặn bởi D (loại 2 chiếc ghế ở L2), cô lập Ben (B) tại chiếc ghế cuối cùng ở (L5, C6).",
+            "Các ô bên cạnh 2 cây cảnh ở Phòng Khách Phụ: hàng L5, cột C5 và C6 đều đã bị chặn, nên Emmy (E) bị cô lập tại (L4, C4).",
+            "Hai cửa sổ ở cột C6 đã bị B chặn, nên Chelsea (C) chắc chắn phải ở cột C1 (trước 1 trong 2 cửa sổ). Chặn phần còn lại của cột C1.",
+            "Các góc trống: cột C1, C4, C6 và hàng L4, L5 đều đã bị chặn; góc (L3, C3) và (L6, C3) đều có bàn. Antonio (A) bị cô lập ở góc trống cuối cùng là (L1, C3).",
+            "A chiếm hàng L1 nên loại cửa sổ (L1, C1), cô lập Chelsea (C) tại cửa sổ (L6, C1).",
+            "Ô trống cuối cùng cho nạn nhân Valeria (V) là (L3, C2) trong Phòng Khách — ở một mình với Antonio (A). Antonio chính là hung thủ!"
+          ]
+        }
+      }
+
     ];
 
     /* =========================================================================
@@ -986,6 +1841,44 @@
               <!-- Tay vịn trái & phải -->
               <rect x="12" y="38" width="14" height="46" rx="6" fill="#fef9c3" stroke="#1e293b" stroke-width="4"/>
               <rect x="74" y="38" width="14" height="46" rx="6" fill="#fef9c3" stroke="#1e293b" stroke-width="4"/>
+            </svg>`;
+        case "rug-2v-top":
+          return `
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full pointer-events-none select-none">
+              <rect x="14" y="10" width="72" height="94" rx="5" fill="#bae6fd" stroke="#1e293b" stroke-width="4"/>
+              <rect x="16" y="92" width="68" height="12" fill="#bae6fd"/>
+              <path d="M24 102 L24 22 L76 22 L76 102" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="6 4"/>
+            </svg>`;
+        case "rug-2v-bottom":
+          return `
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full pointer-events-none select-none">
+              <rect x="14" y="-4" width="72" height="94" rx="5" fill="#bae6fd" stroke="#1e293b" stroke-width="4"/>
+              <rect x="16" y="-6" width="68" height="12" fill="#bae6fd"/>
+              <path d="M24 -2 L24 78 L76 78 L76 -2" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="6 4"/>
+            </svg>`;
+        case "table-2h-left":
+          return `
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full pointer-events-none select-none">
+              <!-- Chân bàn bên trái -->
+              <rect x="14" y="72" width="12" height="18" rx="2" fill="#475569" stroke="#1e293b" stroke-width="3"/>
+              <!-- Mặt bàn kéo liền sang mép phải -->
+              <rect x="8" y="14" width="96" height="62" rx="6" fill="#a8a29e" stroke="#1e293b" stroke-width="4"/>
+              <rect x="92" y="16" width="12" height="58" fill="#a8a29e"/>
+              <rect x="15" y="21" width="89" height="43" rx="3" fill="#d6d3d1" stroke="#78716c" stroke-width="2"/>
+              <rect x="8" y="68" width="96" height="9" fill="#78716c" stroke="#1e293b" stroke-width="3"/>
+              <rect x="94" y="70" width="10" height="5" fill="#78716c"/>
+            </svg>`;
+        case "table-2h-right":
+          return `
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full pointer-events-none select-none">
+              <!-- Chân bàn bên phải -->
+              <rect x="74" y="72" width="12" height="18" rx="2" fill="#475569" stroke="#1e293b" stroke-width="3"/>
+              <!-- Mặt bàn nối liền từ mép trái -->
+              <rect x="-4" y="14" width="96" height="62" rx="6" fill="#a8a29e" stroke="#1e293b" stroke-width="4"/>
+              <rect x="-6" y="16" width="12" height="58" fill="#a8a29e"/>
+              <rect x="-4" y="21" width="89" height="43" rx="3" fill="#d6d3d1" stroke="#78716c" stroke-width="2"/>
+              <rect x="-4" y="68" width="96" height="9" fill="#78716c" stroke="#1e293b" stroke-width="3"/>
+              <rect x="-6" y="70" width="10" height="5" fill="#78716c"/>
             </svg>`;
         case "bed": {
           const { orientation = "vertical", partIndex = 0 } = partInfo;
@@ -1118,7 +2011,9 @@
           if (col < minC) minC = col;
           if (col > maxC) maxC = col;
         }
-        roomBounds[rKey] = { minR, maxR, minC, maxC, name: room.name };
+        const bottomCols = room.cells.filter(([r]) => r === maxR).map(([,col]) => col);
+        const labelCol = c.number >= 3 ? (Math.min(...bottomCols)+Math.max(...bottomCols)+1)/2 : (minC+maxC+1)/2;
+        roomBounds[rKey] = { minR, maxR, minC, maxC, labelCol, name: room.name };
       }
 
       const cellToFurniture = {};
@@ -1595,7 +2490,7 @@
 
       // Nhãn phòng đặt chuẩn mép dưới từng phòng
       for (const b of Object.values(roomBounds)) {
-        const centerColPct = ((b.minC + b.maxC + 1) / 2 / c.cols) * 100;
+        const centerColPct = (b.labelCol / c.cols) * 100;
         const bottomRowPct = ((b.maxR + 1) / c.rows) * 100;
         const badge = document.createElement("div");
         badge.className = "absolute bg-white/95 text-slate-900 border-2 border-slate-800 rounded-full px-2 sm:px-2.5 py-[1px] text-[8px] sm:text-[10px] font-extrabold tracking-tight uppercase whitespace-nowrap shadow-xs";
@@ -2649,7 +3544,8 @@
       initFirebase();
     });
   </script>
-  <script src="assets/clb/murdoku-navigation.js?v=20261128-2"></script>
+  <script src="assets/clb/murdoku-navigation.js?v=20261128-5"></script>
   <script src="assets/clb/murdoku-display.js?v=20261128-4"></script>
+  <script src="assets/clb/murdoku-discuss.js?v=20261128-5"></script>
 </body>
 </html>
